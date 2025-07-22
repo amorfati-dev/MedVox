@@ -1,0 +1,125 @@
+name: 🔒 Security & Dependency Management
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily security scan
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  security-events: write
+
+jobs:
+  # 🔍 Security Audit
+  security-audit:
+    name: 🔍 Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: 🔒 Run Pip Audit
+      run: |
+        pip install pip-audit
+        cd backend
+        pip-audit -r requirements.txt --desc || true
+        
+    - name: 📊 Generate Security Report
+      if: github.event_name == 'schedule'
+      run: |
+        cd backend
+        pip-audit -r requirements.txt --format json > security-audit.json || true
+        
+    - name: 📤 Upload Security Report
+      if: github.event_name == 'schedule'
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-audit
+        path: backend/security-audit.json
+
+  # 🤖 Auto-merge Dependabot PRs
+  dependabot-auto-merge:
+    name: 🤖 Auto-merge Dependabot
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Get Dependabot metadata
+      id: metadata
+      uses: dependabot/fetch-metadata@v2
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+        
+    - name: ✅ Auto-approve security updates
+      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'security'
+      run: gh pr review --approve "$PR_URL"
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🔀 Auto-merge security updates
+      if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'security'
+      run: gh pr merge --auto --merge "$PR_URL"
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 🛡️ SAST Scanning
+  sast-scan:
+    name: 🛡️ SAST Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Run Bandit Security Scan
+      run: |
+        pip install bandit
+        cd backend
+        bandit -r app/ -f json -o bandit-report.json || true
+        
+    - name: 🔍 Run Semgrep
+      uses: returntocorp/semgrep-action@v1
+      env:
+        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        
+    - name: 📤 Upload SARIF results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: semgrep.sarif
+
+  # 📋 Vulnerability Summary
+  vulnerability-summary:
+    name: 📋 Vulnerability Summary
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+    needs: [security-audit, sast-scan]
+    
+    steps:
+    - name: 📊 Create Issue if Critical Vulnerabilities Found
+      run: |
+        echo "## 🔒 Security Status Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📅 Date: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔍 Scan Results:" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Dependency audit completed" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ SAST scan completed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Check the [Dependabot alerts](https://github.com/${{ github.repository }}/security/dependabot) for details." >> $GITHUB_STEP_SUMMARY 

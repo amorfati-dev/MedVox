@@ -1,0 +1,57 @@
+# Dependabot configuration for MedVox
+# Automatically creates PRs for security updates
+
+version: 2
+updates:
+  # Python dependencies (Backend)
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 10
+    # Group updates to reduce PR noise
+    groups:
+      python-security:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+      python-patches:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      python-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+    # Auto-merge security updates
+    allow:
+      - dependency-type: "all"
+    commit-message:
+      prefix: "🔒 security"
+      prefix-development: "🔧 dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "backend"
+    
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "🔧 ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "ci" 
