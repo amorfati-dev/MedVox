@@ -1,0 +1,316 @@
+{
+  "meta": {
+    "version": "2024.1",
+    "last_updated": "2024-07-22",
+    "bema_point_value": 1.1271,
+    "goz_point_value": 0.0582873,
+    "source": "KZBV/BZÄK Official Sources"
+  },
+  "bema_codes": {
+    "01": {
+      "code": "BEMA 01",
+      "description": "Eingehende Untersuchung",
+      "points": 8,
+      "category": "Diagnostik",
+      "keywords": ["untersuchung", "befund", "kontrolle", "diagnose"]
+    },
+    "13a": {
+      "code": "BEMA 13a", 
+      "description": "Füllung einflächig",
+      "points": 8,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung einflächig", "komposit", "amalgam"]
+    },
+    "13b": {
+      "code": "BEMA 13b",
+      "description": "Füllung zweiflächig", 
+      "points": 9,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung zweiflächig"]
+    },
+    "13c": {
+      "code": "BEMA 13c",
+      "description": "Füllung dreiflächig",
+      "points": 11,
+      "category": "Füllungstherapie", 
+      "keywords": ["füllung dreiflächig"]
+    },
+    "13d": {
+      "code": "BEMA 13d",
+      "description": "Füllung vierflächig",
+      "points": 14,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung vierflächig"]
+    },
+    "28a": {
+      "code": "BEMA 28a",
+      "description": "Wurzelkanalbehandlung einwurzeliger Zahn",
+      "points": 40,
+      "category": "Endodontie",
+      "keywords": ["wurzelkanal", "endodontie", "wurzelbehandlung"]
+    },
+    "28b": {
+      "code": "BEMA 28b", 
+      "description": "Wurzelkanalbehandlung mehrwurzeliger Zahn",
+      "points": 51,
+      "category": "Endodontie",
+      "keywords": ["wurzelkanal mehrwurzelig", "molar"]
+    },
+    "41": {
+      "code": "BEMA 41",
+      "description": "Infiltrationsanästhesie", 
+      "points": 3,
+      "category": "Anästhesie",
+      "keywords": ["lokalanästhesie", "infiltration", "betäubung"]
+    },
+    "42": {
+      "code": "BEMA 42",
+      "description": "Leitungsanästhesie",
+      "points": 5,
+      "category": "Anästhesie", 
+      "keywords": ["leitungsanästhesie", "nervenblockade"]
+    },
+    "43": {
+      "code": "BEMA 43",
+      "description": "Extraktion einwurzeliger Zahn",
+      "points": 7,
+      "category": "Chirurgie",
+      "keywords": ["extraktion einwurzelig", "ziehen"]
+    },
+    "44": {
+      "code": "BEMA 44",
+      "description": "Extraktion mehrwurzeliger Zahn", 
+      "points": 12,
+      "category": "Chirurgie",
+      "keywords": ["extraktion mehrwurzelig", "molar ziehen"]
+    },
+    "IP1": {
+      "code": "BEMA IP1",
+      "description": "Aufklärung und Motivation",
+      "points": 4,
+      "category": "Prophylaxe",
+      "keywords": ["prophylaxe", "aufklärung", "motivation"]
+    },
+    "IP2": {
+      "code": "BEMA IP2", 
+      "description": "Kontrolle Mundhygienezustand",
+      "points": 2,
+      "category": "Prophylaxe",
+      "keywords": ["mundhygiene", "kontrolle"]
+    },
+    "IP4": {
+      "code": "BEMA IP4",
+      "description": "Professionelle Zahnreinigung",
+      "points": 4,
+      "category": "Prophylaxe",
+      "keywords": ["professionelle zahnreinigung", "pzr", "scaling"]
+    }
+  },
+  "goz_codes": {
+    "0010": {
+      "code": "GOZ 0010",
+      "description": "Eingehende Untersuchung",
+      "points": 60,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Diagnostik",
+      "keywords": ["untersuchung", "befund", "diagnose"]
+    },
+    "0040": {
+      "code": "GOZ 0040",
+      "description": "Befunderhebung Parodontium",
+      "points": 53,
+      "factor_range": [1.0, 3.5], 
+      "standard_factor": 2.3,
+      "category": "Parodontologie",
+      "keywords": ["parodontium", "zahnfleisch", "parodontitis"]
+    },
+    "0080": {
+      "code": "GOZ 0080",
+      "description": "Infiltrationsanästhesie",
+      "points": 48,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3, 
+      "category": "Anästhesie",
+      "keywords": ["lokalanästhesie", "infiltration", "betäubung"]
+    },
+    "0090": {
+      "code": "GOZ 0090",
+      "description": "Leitungsanästhesie",
+      "points": 64,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Anästhesie",
+      "keywords": ["leitungsanästhesie", "nervenblockade"]
+    },
+    "2030": {
+      "code": "GOZ 2030",
+      "description": "Adhäsive Befestigung",
+      "points": 43,
+      "factor_range": [1.0, 3.5], 
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "keywords": ["adhäsiv", "bonding"]
+    },
+    "2080": {
+      "code": "GOZ 2080",
+      "description": "Füllung einflächig",
+      "points": 48,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie", 
+      "keywords": ["füllung einflächig", "komposit einflächig"]
+    },
+    "2090": {
+      "code": "GOZ 2090",
+      "description": "Füllung zweiflächig",
+      "points": 62,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung zweiflächig", "komposit zweiflächig"]
+    },
+    "2100": {
+      "code": "GOZ 2100", 
+      "description": "Füllung dreiflächig",
+      "points": 79,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung dreiflächig", "komposit dreiflächig"]
+    },
+    "2110": {
+      "code": "GOZ 2110",
+      "description": "Füllung vierflächig",
+      "points": 95,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "keywords": ["füllung vierflächig", "komposit vierflächig"]
+    },
+    "2130": {
+      "code": "GOZ 2130",
+      "description": "Inlay, Onlay einflächig",
+      "points": 126,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Prothetik",
+      "keywords": ["inlay", "onlay", "einflächig"]
+    },
+    "2140": {
+      "code": "GOZ 2140",
+      "description": "Vollkrone",
+      "points": 155,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Prothetik",
+      "keywords": ["krone", "vollkrone", "überkronung"]
+    },
+    "2360": {
+      "code": "GOZ 2360",
+      "description": "Trepanation eines Zahnes",
+      "points": 87,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Endodontie",
+      "keywords": ["trepanation", "eröffnung", "zugang"]
+    },
+    "2380": {
+      "code": "GOZ 2380",
+      "description": "Wurzelkanalbehandlung je Kanal",
+      "points": 154,
+      "factor_range": [1.0, 3.5], 
+      "standard_factor": 2.3,
+      "category": "Endodontie",
+      "keywords": ["wurzelkanal", "endodontie", "wurzelbehandlung"]
+    },
+    "3000": {
+      "code": "GOZ 3000",
+      "description": "Extraktion eines Zahnes",
+      "points": 48,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Chirurgie",
+      "keywords": ["extraktion", "ziehen", "entfernung"]
+    },
+    "4050": {
+      "code": "GOZ 4050",
+      "description": "Professionelle Zahnreinigung",
+      "points": 120,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Prophylaxe",
+      "keywords": ["professionelle zahnreinigung", "pzr", "scaling", "politur"]
+    },
+    "5000": {
+      "code": "GOZ 5000",
+      "description": "Intraorale Röntgenaufnahme",
+      "points": 35,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Röntgen",
+      "keywords": ["röntgen", "röntgenbild", "aufnahme"]
+    },
+    "5004": {
+      "code": "GOZ 5004", 
+      "description": "Bissflügelaufnahme",
+      "points": 31,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Röntgen",
+      "keywords": ["bissflügel", "bitewing"]
+    }
+  },
+  "procedure_mappings": {
+    "füllung": {
+      "bema_default": "13a",
+      "goz_default": "2080",
+      "surface_mapping": {
+        "einflächig": {"bema": "13a", "goz": "2080"},
+        "zweiflächig": {"bema": "13b", "goz": "2090"},
+        "dreiflächig": {"bema": "13c", "goz": "2100"},
+        "vierflächig": {"bema": "13d", "goz": "2110"}
+      }
+    },
+    "lokalanästhesie": {
+      "bema_default": "41",
+      "goz_default": "0080"
+    },
+    "leitungsanästhesie": {
+      "bema_default": "42", 
+      "goz_default": "0090"
+    },
+    "extraktion": {
+      "bema_default": "43",
+      "goz_default": "3000",
+      "tooth_mapping": {
+        "einwurzelig": {"bema": "43"},
+        "mehrwurzelig": {"bema": "44"}
+      }
+    },
+    "wurzelkanalbehandlung": {
+      "bema_default": "28a",
+      "goz_default": "2380",
+      "tooth_mapping": {
+        "einwurzelig": {"bema": "28a"},
+        "mehrwurzelig": {"bema": "28b"}
+      }
+    },
+    "krone": {
+      "goz_default": "2140"
+    },
+    "inlay": {
+      "goz_default": "2130" 
+    },
+    "professionelle zahnreinigung": {
+      "bema_default": "IP4",
+      "goz_default": "4050"
+    },
+    "röntgenbild": {
+      "goz_default": "5000"
+    },
+    "trepanation": {
+      "goz_default": "2360"
+    }
+  }
+} 

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MedVox">
+    <title>MedVox - Dental Voice Documentation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🦷 MedVox</h1>
+                <div class="status-indicators">
+                    <span class="status-badge" id="connection-status">⚫ Offline</span>
+                    <span class="status-badge" id="api-status">🔑 Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Interface -->
+        <main class="main-content">
+            <!-- Patient Info -->
+            <section class="patient-section">
+                <div class="input-group">
+                    <label for="patient-id">Patient ID</label>
+                    <input type="text" id="patient-id" placeholder="z.B. P-2024-001" class="touch-input">
+                </div>
+                <div class="input-group">
+                    <label for="dentist-id">Zahnarzt</label>
+                    <input type="text" id="dentist-id" value="Dr. Martin" class="touch-input">
+                </div>
+            </section>
+
+            <!-- Recording Interface -->
+            <section class="recording-section" id="recording-section">
+                <div class="recording-controls">
+                    <button id="record-btn" class="record-button" disabled>
+                        <span class="record-icon">🎤</span>
+                        <span class="record-text">Aufnahme starten</span>
+                    </button>
+                    
+                    <div class="recording-status hidden" id="recording-status">
+                        <div class="recording-indicator">
+                            <div class="pulse-dot"></div>
+                            <span>Aufnahme läuft...</span>
+                        </div>
+                        <div class="recording-time" id="recording-time">00:00</div>
+                    </div>
+                </div>
+
+                <!-- Audio Visualizer -->
+                <div class="audio-visualizer hidden" id="audio-visualizer">
+                    <canvas id="visualizer-canvas"></canvas>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn" id="pause-btn" disabled>⏸️ Pause</button>
+                    <button class="action-btn" id="stop-btn" disabled>⏹️ Stopp</button>
+                    <button class="action-btn" id="playback-btn" disabled>▶️ Anhören</button>
+                </div>
+            </section>
+
+            <!-- Processing Status -->
+            <section class="processing-section hidden" id="processing-section">
+                <div class="processing-indicator">
+                    <div class="spinner"></div>
+                    <p>Verarbeitung läuft...</p>
+                    <small id="processing-status">Transkription wird erstellt</small>
+                </div>
+            </section>
+
+            <!-- Results Display -->
+            <section class="results-section hidden" id="results-section">
+                <div class="results-header">
+                    <h2>📋 Dokumentation</h2>
+                    <button class="btn-secondary" id="edit-btn">✏️ Bearbeiten</button>
+                </div>
+
+                <!-- Transcription -->
+                <div class="result-card">
+                    <h3>🎤 Transkription</h3>
+                    <div class="transcription-text" id="transcription-text"></div>
+                    <div class="confidence-info">
+                        <span>Vertrauen: <span id="confidence-score"></span>%</span>
+                        <span>Sprache: <span id="detected-language"></span></span>
+                    </div>
+                </div>
+
+                <!-- Procedures -->
+                <div class="result-card">
+                    <h3>🔧 Durchgeführte Maßnahmen</h3>
+                    <div class="procedures-list" id="procedures-list"></div>
+                </div>
+
+                <!-- Billing Codes -->
+                <div class="result-card">
+                    <h3>💰 Abrechnungsziffern</h3>
+                    <div class="billing-codes" id="billing-codes"></div>
+                    <div class="total-fee">
+                        <strong>Gesamt: <span id="total-fee">€0.00</span></strong>
+                    </div>
+                </div>
+
+                <!-- Clinical Notes -->
+                <div class="result-card">
+                    <h3>📝 Klinische Notizen</h3>
+                    <textarea id="clinical-notes" class="notes-textarea" rows="4"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-primary" id="save-btn">💾 Speichern</button>
+                    <button class="btn-secondary" id="export-btn">📤 Export</button>
+                    <button class="btn-secondary" id="new-recording-btn">🎤 Neue Aufnahme</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Settings Panel -->
+        <aside class="settings-panel" id="settings-panel">
+            <div class="settings-content">
+                <h3>⚙️ Einstellungen</h3>
+                
+                <!-- Settings Tabs -->
+                <div class="settings-tabs">
+                    <button class="tab-button active" data-tab="general">Allgemein</button>
+                    <button class="tab-button" data-tab="audio">Audio</button>
+                    <button class="tab-button" data-tab="practice">Praxis</button>
+                    <button class="tab-button" data-tab="billing">Abrechnung</button>
+                    <button class="tab-button" data-tab="integration">Integration</button>
+                </div>
+
+                <!-- General Settings Tab -->
+                <div class="tab-content active" id="general-tab">
+                    <div class="setting-group">
+                        <label for="language-select">Sprache:</label>
+                        <select id="language-select" class="touch-input">
+                            <option value="de">Deutsch</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-start" checked>
+                            Auto-Start nach Spracheingabe
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="voice-commands" checked>
+                            Sprachbefehle aktivieren ("Start", "Stopp")
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-save" checked>
+                            Dokumentation automatisch speichern
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="theme-select">Design:</label>
+                        <select id="theme-select" class="touch-input">
+                            <option value="auto">System</option>
+                            <option value="light">Hell</option>
+                            <option value="dark">Dunkel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Audio Settings Tab -->
+                <div class="tab-content" id="audio-tab">
+                    <div class="setting-group">
+                        <label for="microphone-select">Mikrofon:</label>
+                        <select id="microphone-select" class="touch-input">
+                            <option value="default">Standard-Mikrofon</option>
+                        </select>
+                        <button class="btn-small" id="refresh-microphones">🔄 Aktualisieren</button>
+                    </div>
+                    <div class="setting-group">
+                        <label for="audio-quality">Audioqualität:</label>
+                        <select id="audio-quality" class="touch-input">
+                            <option value="standard">Standard (16kHz)</option>
+                            <option value="high" selected>Hoch (44.1kHz)</option>
+                            <option value="ultra">Ultra (48kHz)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="noise-reduction" checked>
+                            Hintergrundgeräusche reduzieren
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-gain" checked>
+                            Automatische Lautstärkeanpassung
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="whisper-model">Whisper Modell:</label>
+                        <select id="whisper-model" class="touch-input">
+                            <option value="whisper-1">OpenAI Whisper-1 (Cloud)</option>
+                            <option value="local-base">Lokal: Base</option>
+                            <option value="local-large">Lokal: Large (Empfohlen)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Practice Settings Tab -->
+                <div class="tab-content" id="practice-tab">
+                    <div class="setting-group">
+                        <label for="practice-name">Praxisname:</label>
+                        <input type="text" id="practice-name" placeholder="z.B. Zahnarztpraxis Dr. Martin" class="touch-input">
+                    </div>
+                    <div class="setting-group">
+                        <label for="default-dentist">Standard-Zahnarzt:</label>
+                        <input type="text" id="default-dentist" value="Dr. Martin" class="touch-input">
+                    </div>
+                    <div class="setting-group">
+                        <label for="patient-id-format">Patienten-ID Format:</label>
+                        <select id="patient-id-format" class="touch-input">
+                            <option value="free">Freie Eingabe</option>
+                            <option value="numeric">Nur Zahlen</option>
+                            <option value="prefix">P-YYYY-### (z.B. P-2024-001)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="require-patient-consent">
+                            Patienteneinverständnis für KI-Transkription erforderlich
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="data-retention">Datenaufbewahrung:</label>
+                        <select id="data-retention" class="touch-input">
+                            <option value="session">Nur während der Sitzung</option>
+                            <option value="30days">30 Tage</option>
+                            <option value="1year">1 Jahr</option>
+                            <option value="permanent">Dauerhaft (bis manuell gelöscht)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Billing Settings Tab -->
+                <div class="tab-content" id="billing-tab">
+                    <div class="setting-group">
+                        <label for="default-billing-system">Standard-Abrechnungssystem:</label>
+                        <select id="default-billing-system" class="touch-input">
+                            <option value="both">BEMA + GOZ anzeigen</option>
+                            <option value="bema">Nur BEMA (Kassenpatienten)</option>
+                            <option value="goz">Nur GOZ (Privatpatienten)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="goz-factor">Standard GOZ-Steigerungsfaktor:</label>
+                        <select id="goz-factor" class="touch-input">
+                            <option value="1.0">1,0x (Mindestsatz)</option>
+                            <option value="2.3" selected>2,3x (Regelsatz)</option>
+                            <option value="3.5">3,5x (Höchstsatz)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="show-billing-warnings" checked>
+                            Warnungen bei unvollständigen Abrechnungsdaten
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-billing-codes" checked>
+                            Automatische Zuordnung von Abrechnungsziffern
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="billing-review-threshold">Prüfung erforderlich ab Betrag:</label>
+                        <input type="number" id="billing-review-threshold" value="100" min="0" step="10" class="touch-input">
+                        <span>Euro</span>
+                    </div>
+                </div>
+
+                <!-- Integration Settings Tab -->
+                <div class="tab-content" id="integration-tab">
+                    <div class="setting-group">
+                        <label for="api-endpoint">MedVox API:</label>
+                        <input type="text" id="api-endpoint" value="http://localhost:8000" class="touch-input">
+                        <div class="api-status" id="api-status">🔴 Offline</div>
+                    </div>
+                    <div class="setting-group">
+                        <label for="evident-url">Evident PMS URL:</label>
+                        <input type="text" id="evident-url" placeholder="https://ihre-praxis.evident.de" class="touch-input">
+                    </div>
+                    <div class="setting-group">
+                        <label for="evident-api-key">Evident API-Schlüssel:</label>
+                        <input type="password" id="evident-api-key" placeholder="Evident API-Key eingeben" class="touch-input">
+                        <button class="btn-small" id="test-evident">🧪 Verbindung testen</button>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="auto-export-evident">
+                            Automatisch zu Evident exportieren
+                        </label>
+                    </div>
+                    <div class="setting-group">
+                        <label for="export-format">Export-Format:</label>
+                        <select id="export-format" class="touch-input">
+                            <option value="json">JSON (Standard)</option>
+                            <option value="pdf">PDF-Dokumentation</option>
+                            <option value="csv">CSV-Tabelle</option>
+                            <option value="xml">XML (HL7)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="backup-enabled" checked>
+                            Lokale Backup-Kopien erstellen
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="settings-actions">
+                    <button class="btn-primary" id="save-settings">💾 Einstellungen speichern</button>
+                    <button class="btn-secondary" id="reset-settings">🔄 Zurücksetzen</button>
+                    <button class="btn-secondary" id="close-settings">❌ Schließen</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Settings Toggle -->
+        <button class="settings-toggle" id="settings-toggle">⚙️</button>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

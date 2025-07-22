@@ -35,10 +35,10 @@ logger = structlog.get_logger()
 
 # Create FastAPI application
 app = FastAPI(
-    title=settings.app.PROJECT_NAME,
+    title=settings.PROJECT_NAME,
     description="AI-powered voice documentation tool for dental practices",
     version="0.1.0",
-    openapi_url=f"{settings.app.API_V1_STR}/openapi.json",
+    openapi_url="/api/v1/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -46,7 +46,7 @@ app = FastAPI(
 # Add CORS middleware with restricted origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.app.ALLOWED_HOSTS,
+    allow_origins=settings.allowed_hosts_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -65,14 +65,14 @@ async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
     
     # Security headers
-    response.headers["X-Frame-Options"] = settings.security.X_FRAME_OPTIONS
+    response.headers["X-Frame-Options"] = settings.X_FRAME_OPTIONS
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     
     # HSTS header (only in production)
     if settings.is_production:
-        response.headers["Strict-Transport-Security"] = f"max-age={settings.security.HSTS_MAX_AGE}; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = f"max-age={settings.HSTS_MAX_AGE}; includeSubDomains"
     
     return response
 
@@ -109,7 +109,7 @@ async def log_requests(request: Request, call_next):
 from app.api.v1.api import api_router
 
 # Include API router
-app.include_router(api_router, prefix=settings.app.API_V1_STR)
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -117,7 +117,7 @@ async def root():
     """Root endpoint"""
     logger.info("Root endpoint accessed")
     return {
-        "message": f"Welcome to {settings.app.PROJECT_NAME} API",
+        "message": f"Welcome to {settings.PROJECT_NAME} API",
         "version": "0.1.0",
         "docs": "/docs",
         "health": "/health",
@@ -152,7 +152,7 @@ async def readiness_check():
         "database": "ok",  # TODO: implement actual check
         "openai": "ok",    # TODO: implement actual check
         "whisper": "ok",   # TODO: implement actual check
-        "evident": "ok" if settings.evident.EVIDENT_API_URL else "not_configured"
+        "evident": "ok" if settings.EVIDENT_API_URL else "not_configured"
     }
     
     all_healthy = all(status == "ok" for status in checks.values())
@@ -190,12 +190,12 @@ if __name__ == "__main__":
     
     logger.info("Starting MedVox API server", 
                 debug=settings.is_development,
-                allowed_hosts=settings.app.ALLOWED_HOSTS)
+                allowed_hosts=settings.allowed_hosts_list)
     
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
         reload=settings.is_development,
-        log_level=settings.app.LOG_LEVEL.lower(),
+        log_level=settings.LOG_LEVEL.lower(),
     ) 

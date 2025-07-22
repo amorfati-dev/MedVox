@@ -1,0 +1,30 @@
+{
+  "name": "MedVox - Dental Voice Documentation",
+  "short_name": "MedVox",
+  "description": "AI-powered voice documentation for dental practices",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "landscape-primary",
+  "categories": ["medical", "productivity", "business"],
+  "lang": "de",
+  "scope": "/",
+  "icons": [],
+  "screenshots": [],
+  "features": [
+    "Real-time audio recording",
+    "German dental speech recognition", 
+    "BEMA/GOZ billing code generation",
+    "Touch-optimized for iPad",
+    "Offline capability",
+    "Voice commands"
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+} 
