@@ -1,15 +1,16 @@
 """
-LLM-Enhanced Procedure Extraction Service
-Uses OpenAI GPT-4 to intelligently extract dental procedures and map them to BEMA/GOZ codes
+Enhanced LLM Processor Service
+Uses OpenAI's advanced models for intelligent procedure and billing code extraction
 """
 
 import json
 import time
-from typing import List, Dict, Optional, Any
+from typing import Dict, Any, List, Optional
 import structlog
 
 from app.core.config import settings
 from app.schemas.dental_documentation import DentalFinding, BillingCode, BillingSystem, ConfidenceLevel
+from app.utils.llm_logger import llm_logger
 
 logger = structlog.get_logger()
 
@@ -20,13 +21,13 @@ class LLMExtractionError(Exception):
 
 
 class LLMProcedureExtractor:
-    """OpenAI o3/GPT-4 based procedure extraction with configurable models"""
+    """Extract dental procedures and billing codes using GPT-4o for proven accuracy"""
     
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
-        self.model = settings.LLM_MODEL  # Configurable: o3-mini, o3, gpt-4o, etc.
+        self.model = settings.LLM_MODEL or "gpt-4o-2024-11-20"  # Default to stable GPT-4o
         self.temperature = settings.LLM_TEMPERATURE
-        self.max_tokens = settings.LLM_MAX_TOKENS
+        self.max_completion_tokens = settings.LLM_MAX_TOKENS  # Updated for newer models
         
         # Validate model availability
         self._validate_model_selection()
@@ -105,10 +106,10 @@ class LLMProcedureExtractor:
                        text_length=len(text),
                        model=self.model)
             
-            # Call LLM with structured output
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # Prepare API call parameters
+            api_params = {
+                "model": self.model,
+                "messages": [
                     {
                         "role": "system",
                         "content": self._get_system_prompt()
@@ -118,10 +119,16 @@ class LLMProcedureExtractor:
                         "content": prompt
                     }
                 ],
-                temperature=self.temperature,
-                response_format={"type": "json_object"},  # Force JSON output
-                max_tokens=self.max_tokens
-            )
+                "response_format": {"type": "json_object"},  # Force JSON output
+                "max_completion_tokens": self.max_completion_tokens
+            }
+            
+            # Only add temperature for models that support it (exclude O3 models)
+            if not self.model.startswith("o3"):
+                api_params["temperature"] = self.temperature
+            
+            # Call LLM with structured output
+            response = client.chat.completions.create(**api_params)
             
             processing_time = int((time.time() - start_time) * 1000)
             
@@ -147,89 +154,88 @@ class LLMProcedureExtractor:
             raise LLMExtractionError(f"LLM processing error: {str(e)}")
     
     def _get_system_prompt(self) -> str:
-        """System prompt for the dental procedure extraction AI"""
-        return """Du bist ein Experte für deutsche Zahnmedizin und Abrechnung mit fortgeschrittenen Reasoning-Fähigkeiten. 
+        """O3-optimized system prompt for German dental billing extraction"""
+        return """Du bist ein hochspezialisierter deutscher Zahnarzt-Abrechnungsexperte mit umfassendem Wissen über BEMA und GOZ.
 
-Deine Aufgabe:
-1. Analysiere deutschen zahnärztlichen Text mit tiefem Verständnis
-2. Erkenne alle durchgeführten Behandlungen/Prozeduren durch kontextuelle Analyse
-3. Ordne passende BEMA/GOZ-Abrechnungsziffern zu basierend auf komplexem medizinischen Reasoning
-4. Berücksichtige medizinische Zusammenhänge, Synonyme und komplexe klinische Beschreibungen
+AUFGABE: Analysiere Behandlungsdokumentationen und erstelle präzise BEMA/GOZ-Abrechnungen.
 
-Erweiterte Fähigkeiten:
-- Erkenne implizite Behandlungen (z.B. "Schmerzen gelindert" → Anästhesie wahrscheinlich)
-- Verstehe kausale Ketten ("starke Karies → Schmerzen → Anästhesie → Entfernung → Versorgung")
-- Berücksichtige anatomische Details (Zahntyp, Wurzelanzahl, Schwierigkeit)
-- Bewerte Behandlungskomplexität für akkurate Faktor-Auswahl bei GOZ
+WICHTIGE ABRECHNUNGSLOGIK:
 
-Wichtige Regeln:
-- Erkenne auch umgangssprachliche Formulierungen ("Zahn ziehen" = Extraktion)
-- Berücksichtige Flächenanzahl bei Füllungen (1-4 Flächen)
-- Unterscheide zwischen einwurzeligen und mehrwurzeligen Zähnen
-- Priorisiere GOZ bei privaten Leistungen, BEMA bei Kassenleistungen
-- Gib Konfidenzwerte für jede Zuordnung an (0.0-1.0)
-- Begründe komplexe Entscheidungen ausführlich
+🏥 BEMA-PATIENT (Kassenpatient):
+- PRIMÄR: BEMA-Leistungen abrechnen (Kassensachleistungen)  
+- ZUSÄTZLICH: GOZ-Leistungen mit Mehrkostenvereinbarung (MKV) möglich
+- Bei GOZ-Leistungen: "note": "MKV" hinzufügen
 
-Antworte IMMER im folgenden JSON-Format:
+💰 GOZ-PATIENT (Privatpatient):
+- NUR GOZ-Leistungen abrechnen
+- KEINE BEMA-Leistungen
+
+HÄUFIGE DEUTSCHE ZAHNMEDIZINISCHE BEGRIFFE:
+- Karies → BEMA 13a/b/c (je nach Flächen) oder GOZ 2080-2100
+- Lokalanästhesie → BEMA L1 oder GOZ 0080
+- Röntgen → BEMA Ä 925a oder GOZ Rö2
+- Untersuchung → BEMA 01 oder GOZ I
+- Füllung → BEMA 13 oder GOZ 2080-2197
+- Extraktion → BEMA X1/X2 oder GOZ 3000
+
+AUSGABEFORMAT (JSON):
 {
-    "procedures": [
-        {
-            "name": "Genaue Bezeichnung der Prozedur",
-            "description": "Detaillierte Beschreibung",
-            "tooth_numbers": ["16", "17"],
-            "surfaces": ["okklusal", "mesial"],
-            "confidence": 0.95,
-            "reasoning": "Begründung basierend auf Textanalyse"
-        }
-    ],
-    "billing_codes": [
-        {
-            "code": "BEMA 13a",
-            "system": "bema",
-            "description": "Füllung einflächig",
-            "procedure_match": "Kompositfüllung",
-            "confidence": 0.9,
-            "reasoning": "Einflächige Füllung erkannt durch Kontext-Analyse"
-        }
-    ],
-    "reasoning": "Gesamtbegründung der medizinischen Interpretationen",
-    "confidence_overall": 0.85
-}"""
-    
-    def _create_extraction_prompt(self, text: str, bema_goz_catalog: dict, findings_context: str) -> str:
-        """Create the extraction prompt with context"""
-        
-        # Extract key BEMA/GOZ codes for the prompt (to avoid token limit)
-        key_codes = self._get_key_codes_for_prompt(bema_goz_catalog)
-        
-        prompt = f"""
-ZAHNÄRZTLICHER DOKUMENTATIONSTEXT:
-"{text}"
+  "procedures": ["Lokalanästhesie", "Kompositfüllung", "Röntgenaufnahme"],
+  "billing_codes": [
+    {
+      "code": "BEMA_01",
+      "description": "Untersuchung", 
+      "type": "bema",
+      "points": 18,
+      "fee": "23.61 €"
+    },
+    {
+      "code": "GOZ_2197",
+      "description": "Adhäsive Technik",
+      "type": "goz", 
+      "points": 130,
+      "fee": "22.73 €",
+      "note": "MKV"
+    }
+  ],
+  "confidence_overall": 0.9
+}
 
-BEFUNDE (falls vorhanden):
+QUALITÄTSANFORDERUNGEN:
+- Extrahiere ALLE relevanten Behandlungen
+- Verwende korrekte deutsche BEMA/GOZ-Codes  
+- Berechne realistische Honorare
+- Berücksichtige Versicherungstyp (BEMA vs GOZ)"""
+    
+    def _create_extraction_prompt(self, text: str, bema_goz_catalog: dict, findings_context: str, insurance_type: str = "bema") -> str:
+        """Create extraction prompt with insurance type context"""
+        
+        # Insurance-specific instruction
+        if insurance_type.lower() == "bema":
+            insurance_instruction = """
+🏥 KASSENPATIENT (BEMA):
+- Rechne PRIMÄR alle Standard-Leistungen nach BEMA ab
+- Hochwertige Zusatzleistungen (Komposit, Adhäsive, etc.) als GOZ mit MKV
+- Beispiel: BEMA 13c + GOZ 2197 (MKV - Adhäsive Technik)"""
+        else:
+            insurance_instruction = """
+💰 PRIVATPATIENT (GOZ):
+- Rechne ALLE Leistungen ausschließlich nach GOZ ab
+- KEINE BEMA-Codes verwenden
+- Vollständige Privatabrechnung"""
+        
+        return f"""
+BEHANDLUNGSTEXT:
+{text}
+
+BEFUNDE:
 {findings_context}
 
-VERFÜGBARE BEMA/GOZ ABRECHNUNGSZIFFERN (Auswahl):
-{json.dumps(key_codes, indent=2, ensure_ascii=False)}
+VERSICHERUNGSTYP: {insurance_type.upper()}
+{insurance_instruction}
 
-AUFGABE:
-Analysiere den Text und erkenne alle durchgeführten zahnärztlichen Behandlungen.
-Ordne jedem Verfahren die passenden BEMA/GOZ-Codes zu.
-
-Achte besonders auf:
-- Zahnbezeichnungen (FDI-Schema: 11-48)
-- Flächenangaben (okklusal, mesial, distal, vestibulär, palatinal/lingual)
-- Anästhesie-Arten (Infiltration, Leitung)
-- Materialien (Komposit, Amalgam, etc.)
-- Komplexität der Behandlung
-
-Beispiele für Interpretationen:
-- "Füllung gelegt" → Prüfe Flächenanzahl → BEMA 13a-13d oder GOZ 2080-2110
-- "Zahn entfernt" → Prüfe Wurzelanzahl → BEMA 43/44 oder GOZ 3000
-- "Lokalanästhesie" → BEMA 41 oder GOZ 0080
-"""
-        
-        return prompt
+Analysiere den Text und erstelle eine vollständige Abrechnung nach den oben genannten Regeln.
+Antworte im JSON-Format wie im System-Prompt beschrieben."""
     
     def _get_key_codes_for_prompt(self, bema_goz_catalog: dict) -> dict:
         """Extract the most important BEMA/GOZ codes for the prompt"""
@@ -341,44 +347,157 @@ class EnhancedDocumentationProcessor:
     async def extract_procedures_intelligent(
         self, 
         text: str, 
-        bema_goz_catalog: dict,
-        findings: List[DentalFinding] = None,
-        fallback_to_traditional: bool = True
+        bema_goz_catalog: dict, 
+        findings: List = None,
+        insurance_type: str = "bema",
+        patient_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Intelligent procedure extraction using LLM with traditional fallback
-        
-        Args:
-            text: Dental documentation text
-            bema_goz_catalog: BEMA/GOZ code database
-            findings: Extracted findings for context
-            fallback_to_traditional: Whether to use traditional method as fallback
-            
-        Returns:
-            Dict with procedures and billing codes
+        Extract procedures and billing codes using O3 with insurance type awareness
         """
         
-        if self.use_llm:
-            try:
-                logger.info("Using LLM-based procedure extraction")
-                result = await self.llm_extractor.extract_procedures_and_codes(
-                    text, bema_goz_catalog, findings
-                )
-                
-                # Enhance with confidence scoring
-                result["extraction_method"] = "llm_primary"
-                return result
-                
-            except LLMExtractionError as e:
-                logger.warning("LLM extraction failed, falling back to traditional method", 
-                             error=str(e))
-                
-                if not fallback_to_traditional:
-                    raise
+        if not self.use_llm or not self.llm_extractor:
+            raise LLMExtractionError("LLM extraction not enabled or configured")
         
-        # Fallback to traditional method
-        logger.info("Using traditional keyword-based extraction")
-        return self._traditional_extraction(text, bema_goz_catalog)
+        start_time = time.time()
+        
+        try:
+            import openai
+            client = openai.OpenAI(api_key=self.llm_extractor.api_key)
+            
+            # Create findings context
+            findings_context = "Keine spezifischen Befunde dokumentiert"
+            if findings:
+                findings_list = []
+                for finding in findings:
+                    if hasattr(finding, 'diagnosis'):
+                        tooth_info = f"Zahn {finding.tooth_number}" if hasattr(finding, 'tooth_number') and finding.tooth_number else ""
+                        surface_info = f" {finding.surface}" if hasattr(finding, 'surface') and finding.surface else ""
+                        findings_list.append(f"{tooth_info}{surface_info}: {finding.diagnosis}")
+                    else:
+                        findings_list.append(str(finding))
+                findings_context = "\n".join(findings_list)
+            
+            logger.info(f"LLM extraction starting with O3-mini, insurance_type: {insurance_type}")
+            
+            # Create extraction query with insurance type
+            query = self.llm_extractor._create_extraction_prompt(text, bema_goz_catalog, findings_context, insurance_type)
+            system_prompt = self.llm_extractor._get_system_prompt()
+            
+            logger.info(f"Sending prompt to O3-mini (model: {self.llm_extractor.model})")
+            
+            # Prepare API call parameters
+            api_params = {
+                "model": self.llm_extractor.model,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_prompt
+                    },
+                    {
+                        "role": "user", 
+                        "content": query
+                    }
+                ],
+                "response_format": {"type": "json_object"},  # Force JSON output
+                "max_completion_tokens": self.llm_extractor.max_completion_tokens
+            }
+            
+            # Only add temperature for models that support it (exclude O3 models)
+            if not self.llm_extractor.model.startswith("o3"):
+                api_params["temperature"] = self.llm_extractor.temperature
+            
+            # Call O3-mini for dental analysis
+            response = client.chat.completions.create(**api_params)
+            
+            processing_time = int((time.time() - start_time) * 1000)
+            
+            # Parse the response
+            result_text = response.choices[0].message.content
+            
+            # Log the complete LLM interaction
+            llm_logger.log_interaction(
+                model=self.llm_extractor.model,
+                system_prompt=system_prompt,
+                user_prompt=query,
+                response=result_text,
+                insurance_type=insurance_type,
+                patient_id=patient_id,
+                processing_time_ms=processing_time,
+                metadata={
+                    "temperature": self.llm_extractor.temperature,
+                    "max_completion_tokens": self.llm_extractor.max_completion_tokens,
+                    "findings_count": len(findings) if findings else 0,
+                    "text_length": len(text)
+                }
+            )
+            
+            # Parse and validate JSON response
+            try:
+                logger.info(f"Parsing O3 response (length: {len(result_text)})")
+                logger.info(f"Raw O3 response: {result_text[:500]}...")  # First 500 chars
+                
+                result = json.loads(result_text)
+                logger.info(f"JSON parsing successful, type: {type(result)}")
+                logger.info(f"Result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
+                
+                # Validate that result is a dictionary
+                if not isinstance(result, dict):
+                    logger.error(f"Expected dict but got {type(result)}: {result}")
+                    raise ValueError(f"LLM returned {type(result)} instead of dict")
+                
+                # Check for required fields
+                if "billing_codes" in result:
+                    billing_codes = result["billing_codes"]
+                    logger.info(f"Found billing_codes: {type(billing_codes)} with {len(billing_codes) if isinstance(billing_codes, list) else 'not a list'} items")
+                    if isinstance(billing_codes, list) and billing_codes:
+                        logger.info(f"First billing code: {type(billing_codes[0])} = {billing_codes[0]}")
+                else:
+                    logger.warning("No 'billing_codes' field in O3 response")
+                    
+                if "procedures" in result:
+                    procedures = result["procedures"]
+                    logger.info(f"Found procedures: {type(procedures)} = {procedures}")
+                else:
+                    logger.warning("No 'procedures' field in O3 response")
+                
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON parsing failed: {e}")
+                logger.error(f"Raw response: {result_text}")
+                # Return a safe fallback
+                result = {
+                    "procedures": [],
+                    "billing_codes": [],
+                    "confidence_overall": 0.0,
+                    "error": f"JSON parsing failed: {str(e)}"
+                }
+            except Exception as e:
+                logger.error(f"Response processing failed: {e}")
+                logger.error(f"Raw response: {result_text}")
+                # Return a safe fallback
+                result = {
+                    "procedures": [],
+                    "billing_codes": [],
+                    "confidence_overall": 0.0,
+                    "error": f"Response processing failed: {str(e)}"
+                }
+            
+            # Validate and enhance the result
+            validated_result = self._validate_and_enhance_result(result, bema_goz_catalog)
+            
+            logger.info("LLM procedure extraction completed",
+                       procedures_found=len(validated_result.get("procedures", [])),
+                       billing_codes_found=len(validated_result.get("billing_codes", [])),
+                       processing_time_ms=processing_time)
+            
+            return validated_result
+            
+        except json.JSONDecodeError as e:
+            logger.error("Failed to parse LLM JSON response", error=str(e))
+            raise LLMExtractionError(f"Invalid JSON response from LLM: {str(e)}")
+        except Exception as e:
+            logger.error("LLM procedure extraction failed", error=str(e))
+            raise LLMExtractionError(f"LLM processing error: {str(e)}")
     
     def _traditional_extraction(self, text: str, bema_goz_catalog: dict) -> Dict[str, Any]:
         """Traditional keyword-based extraction as fallback"""
@@ -405,3 +524,88 @@ class EnhancedDocumentationProcessor:
             "extraction_method": "traditional_fallback",
             "llm_processing": False
         } 
+
+    def _validate_and_enhance_result(self, result: Dict[str, Any], bema_goz_catalog: dict) -> Dict[str, Any]:
+        """Validate and enhance the LLM result"""
+        
+        logger.info(f"Validating LLM result: {type(result)}")
+        
+        # Handle case where result might not be a dict
+        if not isinstance(result, dict):
+            logger.error(f"Expected dict but got {type(result)}: {result}")
+            return {
+                "procedures": [],
+                "billing_codes": [],
+                "confidence_overall": 0.0,
+                "extraction_method": "o3_direct",
+                "error": f"Invalid result type: {type(result)}"
+            }
+        
+        # Ensure required fields exist with safe access
+        try:
+            procedures = result.get("procedures", [])
+            billing_codes = result.get("billing_codes", [])
+            confidence = result.get("confidence_overall", 0.8)
+            
+            logger.info(f"Raw procedures: {type(procedures)} = {procedures}")
+            logger.info(f"Raw billing_codes: {type(billing_codes)} = {billing_codes}")
+            
+            # Ensure procedures is a list
+            if not isinstance(procedures, list):
+                logger.warning(f"Procedures is not a list: {type(procedures)}")
+                procedures = []
+            
+            # Ensure billing_codes is a list
+            if not isinstance(billing_codes, list):
+                logger.warning(f"Billing codes is not a list: {type(billing_codes)}")
+                billing_codes = []
+            
+            validated_result = {
+                "procedures": procedures,
+                "billing_codes": billing_codes,
+                "confidence_overall": confidence,
+                "extraction_method": "o3_direct"
+            }
+            
+            # Validate billing codes format safely
+            validated_codes = []
+            for i, code in enumerate(billing_codes):
+                try:
+                    logger.info(f"Validating billing code {i}: {type(code)}")
+                    
+                    if isinstance(code, dict) and "code" in code:
+                        # Ensure required fields with safe defaults
+                        validated_code = {
+                            "code": code.get("code", ""),
+                            "description": code.get("description", ""),
+                            "type": code.get("type", "unknown"),
+                            "points": code.get("points", 0),
+                            "fee": code.get("fee", "0.00 €"),
+                            "note": code.get("note", ""),
+                            "factor": code.get("factor", 1.0)
+                        }
+                        validated_codes.append(validated_code)
+                        logger.info(f"Successfully validated billing code {i}")
+                    else:
+                        logger.warning(f"Invalid billing code {i}: {type(code)} = {code}")
+                        
+                except Exception as e:
+                    logger.error(f"Error validating billing code {i}: {e}")
+                    logger.error(f"Code data: {code}")
+                    continue
+            
+            validated_result["billing_codes"] = validated_codes
+            logger.info(f"Validation complete: {len(validated_codes)} billing codes validated")
+            
+            return validated_result
+            
+        except Exception as e:
+            logger.error(f"Error in validation process: {e}")
+            logger.error(f"Input result: {result}")
+            return {
+                "procedures": [],
+                "billing_codes": [],
+                "confidence_overall": 0.0,
+                "extraction_method": "o3_direct",
+                "error": f"Validation failed: {str(e)}"
+            } 

@@ -77,10 +77,32 @@ class OpenAIWhisperService:
             confidence = getattr(response, 'confidence', 0.9)  # Default confidence
             segments = getattr(response, 'segments', None)
             
+            # Convert TranscriptionSegment objects to dictionaries for new OpenAI library
+            if segments:
+                converted_segments = []
+                for segment in segments:
+                    if hasattr(segment, '__dict__'):
+                        # Convert TranscriptionSegment object to dictionary
+                        segment_dict = {
+                            'id': getattr(segment, 'id', 0),
+                            'start': getattr(segment, 'start', 0.0),
+                            'end': getattr(segment, 'end', 0.0),
+                            'text': getattr(segment, 'text', ''),
+                            'avg_logprob': getattr(segment, 'avg_logprob', -0.5),
+                            'compression_ratio': getattr(segment, 'compression_ratio', 1.0),
+                            'no_speech_prob': getattr(segment, 'no_speech_prob', 0.0),
+                            'temperature': getattr(segment, 'temperature', 0.0)
+                        }
+                        converted_segments.append(segment_dict)
+                    else:
+                        # Already a dictionary
+                        converted_segments.append(segment)
+                segments = converted_segments
+            
             # Calculate average confidence from segments if available
-            if segments and hasattr(segments[0], 'avg_logprob'):
+            if segments and len(segments) > 0:
                 # Convert log probability to confidence (approximate)
-                avg_logprob = sum(seg.avg_logprob for seg in segments) / len(segments)
+                avg_logprob = sum(seg.get('avg_logprob', -0.5) for seg in segments) / len(segments)
                 confidence = min(1.0, max(0.0, (avg_logprob + 1.0)))  # Normalize to 0-1
             
             logger.info("OpenAI Whisper transcription completed",

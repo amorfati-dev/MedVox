@@ -48,16 +48,26 @@ class Settings(BaseSettings):
     DENTAL_TERMINOLOGY_BOOST: bool = True  # Enable dental terminology enhancement
     
     # LLM Configuration for Intelligent Procedure Extraction
-    LLM_MODEL: str = "gpt-4o"  # Available: gpt-4o, gpt-4-turbo, o3-mini (limited access), o3 (research preview)
+    LLM_MODEL: str = "o3-mini"  # Direct O3-mini for best German dental accuracy
     LLM_TEMPERATURE: float = 0.1  # Lower for consistent medical interpretation
     LLM_MAX_TOKENS: int = 2000
     USE_LLM_EXTRACTION: bool = True  # Enable LLM-based procedure extraction
     
+    # Advanced models for complex cases
+    ADVANCED_LLM_MODEL: str = "gpt-4o-2024-11-20"  # Stable GPT-4o for complex billing cases
+    BILLING_LLM_MODEL: str = "gpt-4o-2024-11-20"  # Reliable GPT-4o for BEMA/GOZ
+    
     # Multi-Stage Pipeline Configuration
-    USE_MULTI_STAGE_PIPELINE: bool = True  # Enable advanced multi-model pipeline
-    PIPELINE_NORMALIZATION_MODEL: str = "gpt-4o-mini"  # Cost-effective text cleanup
-    PIPELINE_BILLING_MODEL: str = "gpt-4o"  # Intelligent code mapping
-    PIPELINE_AUDIT_MODEL: str = "o3-mini"  # Superior reasoning for plausibility checks
+    USE_MULTI_STAGE_PIPELINE: bool = False  # Simplified: Use direct O3 approach
+    PIPELINE_NORMALIZATION_ENABLED: bool = False
+    PIPELINE_BILLING_MAPPING_ENABLED: bool = False
+    PIPELINE_ADVANCED_BILLING_ENABLED: bool = False
+    PIPELINE_PLAUSIBILITY_CHECK_ENABLED: bool = False
+    
+    # Pipeline Model Settings (for compatibility, even if disabled)
+    PIPELINE_NORMALIZATION_MODEL: str = "gpt-4o-mini"
+    PIPELINE_BILLING_MODEL: str = "gpt-4o"
+    PIPELINE_AUDIT_MODEL: str = "gpt-4o"
     
     # Advanced o3 Configuration
     USE_O3_FOR_COMPLEX_CASES: bool = True  # Use full o3 for complex/high-value cases

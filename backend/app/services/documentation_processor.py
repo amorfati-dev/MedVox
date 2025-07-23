@@ -276,14 +276,23 @@ class DocumentationProcessor:
         self.terminology = GermanDentalTerminology()
         self.billing_mapper = BEMAGOZMapper()
         self.llm_processor = EnhancedDocumentationProcessor()
-        self.pipeline_processor = ProcessingPipeline()
+        
+        # Only initialize pipeline processor if multi-stage pipeline is enabled
+        if settings.USE_MULTI_STAGE_PIPELINE:
+            self.pipeline_processor = ProcessingPipeline()
+        else:
+            self.pipeline_processor = None
+            
         self.use_llm_extraction = settings.OPENAI_API_KEY is not None
         self.use_multi_stage_pipeline = settings.USE_MULTI_STAGE_PIPELINE and settings.OPENAI_API_KEY is not None
         
     async def process_transcription(
         self, 
         transcription_result: TranscriptionResult, 
-        audio_metadata: AudioMetadata
+        audio_metadata: AudioMetadata,
+        insurance_type: str = "bema",
+        patient_id: Optional[str] = None,
+        dentist_id: Optional[str] = None
     ) -> DentalDocumentation:
         """
         Process transcription result into structured dental documentation
@@ -306,14 +315,24 @@ class DocumentationProcessor:
             
             # Choose processing method based on configuration
             if self.use_multi_stage_pipeline:
+                logger.info("Using sophisticated multi-stage pipeline")
                 try:
-                    logger.info("🚀 Using multi-stage AI pipeline for enhanced processing")
-                    
                     # Run the sophisticated multi-stage pipeline
+                    logger.info(f"Starting pipeline with insurance_type: {insurance_type}")
                     pipeline_result = await self.pipeline_processor.process_complete(
                         normalized_text, 
-                        findings
+                        findings,
+                        insurance_type=insurance_type,
+                        patient_id=patient_id,
+                        dentist_id=dentist_id
                     )
+                    logger.info(f"Pipeline completed successfully: {bool(pipeline_result)}")
+                    logger.info(f"Pipeline result keys: {list(pipeline_result.keys()) if pipeline_result else 'None'}")
+                    
+                    if pipeline_result and 'billing_codes' in pipeline_result:
+                        logger.info(f"Billing codes in pipeline result: {len(pipeline_result['billing_codes'])}")
+                    else:
+                        logger.warning("No billing codes found in pipeline result")
                     
                     final_output = pipeline_result.get("final_output", {})
                     
@@ -348,40 +367,95 @@ class DocumentationProcessor:
                     
                 except Exception as e:
                     logger.warning("🚨 Multi-stage pipeline failed, falling back to simple LLM", error=str(e))
-                    # Fallback to simple LLM method
+                    # Fallback to simple LLM method with error handling
                     if self.use_llm_extraction:
-                        llm_result = await self.llm_processor.extract_procedures_intelligent(
-                            normalized_text, bema_goz_catalog, findings
-                        )
-                        procedures = [proc["name"] for proc in llm_result.get("procedures", [])]
-                        billing_codes = self._convert_llm_billing_codes(llm_result.get("billing_codes", []))
+                        try:
+                            logger.info("🔄 Pipeline fallback: attempting LLM extraction")
+                            llm_result = await self.llm_processor.extract_procedures_intelligent(
+                                normalized_text, bema_goz_catalog, findings
+                            )
+                            logger.info(f"🔄 Pipeline fallback LLM result type: {type(llm_result)}")
+                            logger.info(f"🔄 Pipeline fallback LLM result: {llm_result}")
+                            
+                            # Ensure llm_result is a dict before processing
+                            if isinstance(llm_result, dict):
+                                procedures_raw = llm_result.get("procedures", [])
+                                billing_codes_raw = llm_result.get("billing_codes", [])
+                                
+                                logger.info(f"🔄 Pipeline fallback procedures (raw): {procedures_raw}")
+                                logger.info(f"🔄 Pipeline fallback billing codes (raw): {billing_codes_raw}")
+                                
+                                procedures = [proc["name"] if isinstance(proc, dict) else str(proc) for proc in procedures_raw]
+                                billing_codes = self._convert_llm_billing_codes(billing_codes_raw)
+                                
+                                logger.info(f"🔄 Pipeline fallback procedures (processed): {procedures}")
+                                logger.info(f"🔄 Pipeline fallback billing codes (processed): {len(billing_codes)} codes")
+                            else:
+                                logger.error(f"🔄 Pipeline fallback: LLM returned non-dict result: {type(llm_result)} = {llm_result}")
+                                procedures = self._extract_procedures(normalized_text)
+                                billing_codes = self._generate_billing_codes(procedures, findings)
+                        except Exception as llm_error:
+                            logger.error(f"🔄 Pipeline fallback: LLM extraction also failed: {llm_error}")
+                            logger.error(f"🔄 Pipeline fallback: Exception type: {type(llm_error).__name__}")
+                            procedures = self._extract_procedures(normalized_text)
+                            billing_codes = self._generate_billing_codes(procedures, findings)
                     else:
                         procedures = self._extract_procedures(normalized_text)
                         billing_codes = self._generate_billing_codes(procedures, findings)
                         
             elif self.use_llm_extraction:
                 try:
-                    logger.info("🧠 Using simple LLM extraction")
+                    logger.info("🧠 Using O3-mini direct extraction")
                     llm_result = await self.llm_processor.extract_procedures_intelligent(
                         normalized_text, 
                         bema_goz_catalog, 
-                        findings
+                        findings,
+                        insurance_type=insurance_type,
+                        patient_id=patient_id
                     )
                     
-                    # Convert LLM result to our format
-                    procedures = [proc["name"] for proc in llm_result.get("procedures", [])]
-                    billing_codes = self._convert_llm_billing_codes(llm_result.get("billing_codes", []))
+                    # Ensure llm_result is a dict before processing
+                    if not isinstance(llm_result, dict):
+                        logger.error(f"LLM returned non-dict result: {type(llm_result)} = {llm_result}")
+                        raise ValueError(f"LLM returned {type(llm_result)} instead of dict")
                     
-                    logger.info("LLM procedure extraction completed",
+                    # Convert LLM result to our format
+                    procedures_raw = llm_result.get("procedures", [])
+                    logger.info(f"🧠 LLM procedures extracted (raw): {procedures_raw}")
+                    
+                    # Handle both string and dict formats for procedures
+                    procedures = [proc["name"] if isinstance(proc, dict) else str(proc) for proc in procedures_raw]
+                    logger.info(f"🧠 LLM procedures processed: {procedures}")
+                    
+                    llm_billing_codes_raw = llm_result.get("billing_codes", [])
+                    logger.info(f"🧠 LLM billing codes (raw): {llm_billing_codes_raw}")
+                    
+                    billing_codes = self._convert_llm_billing_codes(llm_billing_codes_raw)
+                    logger.info(f"🧠 Converted billing codes: {[{
+                        'code': bc.code, 
+                        'system': bc.system, 
+                        'description': bc.description,
+                        'fee_euros': bc.fee_euros
+                    } for bc in billing_codes]}")
+                    
+                    logger.info("O3-mini extraction completed",
                                procedures_found=len(procedures),
                                billing_codes=len(billing_codes),
                                overall_confidence=llm_result.get("confidence_overall", 0))
                     
                 except Exception as e:
-                    logger.warning("LLM extraction failed, falling back to traditional method", error=str(e))
+                    logger.error(f"🚨 O3-mini extraction failed, falling back to traditional method", error=str(e))
+                    logger.error(f"🚨 Exception details: {type(e).__name__}: {str(e)}")
+                    logger.error(f"🚨 LLM result that caused failure: {llm_result if 'llm_result' in locals() else 'Not available'}")
                     # Fallback to traditional method
+                    logger.warning("📝 Using fallback: traditional keyword extraction")
                     procedures = self._extract_procedures(normalized_text)
+                    logger.warning(f"📝 Fallback procedures: {procedures}")
                     billing_codes = self._generate_billing_codes(procedures, findings)
+                    logger.warning(f"📝 Fallback billing codes: {[{
+                        'code': bc.code, 
+                        'description': bc.description
+                    } for bc in billing_codes]}")
             else:
                 # Traditional extraction method
                 logger.info("📝 Using traditional keyword-based extraction")
@@ -697,19 +771,79 @@ class DocumentationProcessor:
         """Convert LLM billing codes format to BillingCode objects"""
         billing_codes = []
         
-        for code_data in llm_billing_codes:
-            billing_code = BillingCode(
-                code=code_data["code"],
-                system=BillingSystem.BEMA if code_data["system"] == "bema" else BillingSystem.GOZ,
-                description=code_data["description"],
-                factor=code_data.get("factor"),
-                points=code_data.get("points"),
-                fee_euros=code_data.get("fee_euros"),
-                confidence=ConfidenceLevel.HIGH if code_data.get("confidence", 0) > 0.8 else ConfidenceLevel.MEDIUM
-            )
-            billing_codes.append(billing_code)
+        logger.info(f"Converting LLM billing codes: {type(llm_billing_codes)}")
+        logger.info(f"LLM billing codes content: {llm_billing_codes}")
         
+        # Handle case where llm_billing_codes might be a string or None
+        if not llm_billing_codes:
+            logger.warning("No billing codes provided to convert")
+            return billing_codes
+            
+        if isinstance(llm_billing_codes, str):
+            logger.error(f"Expected list but got string: {llm_billing_codes}")
+            return billing_codes
+            
+        if not isinstance(llm_billing_codes, list):
+            logger.error(f"Expected list but got {type(llm_billing_codes)}: {llm_billing_codes}")
+            return billing_codes
+        
+        for i, code_data in enumerate(llm_billing_codes):
+            try:
+                logger.info(f"Processing billing code {i}: {type(code_data)} = {code_data}")
+                
+                # Handle case where code_data might be a string
+                if isinstance(code_data, str):
+                    logger.warning(f"Billing code {i} is a string, skipping: {code_data}")
+                    continue
+                    
+                if not isinstance(code_data, dict):
+                    logger.warning(f"Billing code {i} is not a dict, skipping: {code_data}")
+                    continue
+                
+                # Extract type from the format used by O3
+                code_type = code_data.get("type", "unknown")
+                if code_type == "unknown":
+                    # Try to infer from code prefix
+                    code = code_data.get("code", "")
+                    if "BEMA" in code or "bema" in code.lower():
+                        code_type = "bema"
+                    elif "GOZ" in code or "goz" in code.lower():
+                        code_type = "goz"
+                
+                billing_code = BillingCode(
+                    code=code_data.get("code", ""),
+                    system=BillingSystem.BEMA if code_type == "bema" else BillingSystem.GOZ,
+                    description=code_data.get("description", ""),
+                    factor=code_data.get("factor"),
+                    points=code_data.get("points", 0),
+                    fee_euros=self._parse_fee_amount(code_data.get("fee", "0.00")),
+                    confidence=ConfidenceLevel.HIGH if code_data.get("confidence", 0) > 0.8 else ConfidenceLevel.MEDIUM
+                )
+                billing_codes.append(billing_code)
+                
+            except Exception as e:
+                logger.error(f"Error converting billing code {i}: {e}")
+                logger.error(f"Code data: {code_data}")
+                continue
+        
+        logger.info(f"Successfully converted {len(billing_codes)} billing codes")
         return billing_codes
+    
+    def _parse_fee_amount(self, fee_string: str) -> float:
+        """Parse fee amount from string like '23.61 €' to float"""
+        if isinstance(fee_string, (int, float)):
+            return float(fee_string)
+        
+        if isinstance(fee_string, str):
+            # Remove currency symbols and spaces
+            cleaned = fee_string.replace('€', '').replace(' ', '').replace(',', '.')
+            try:
+                return float(cleaned)
+            except ValueError:
+                logger.warning(f"Could not parse fee amount: {fee_string}")
+                return 0.0
+        
+        return 0.0
     
     def _calculate_goz_fee(self, points: int, factor: float = 2.3) -> float:
         """Calculate GOZ fee based on points and factor using current point values"""

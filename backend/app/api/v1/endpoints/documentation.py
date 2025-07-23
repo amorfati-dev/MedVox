@@ -30,6 +30,7 @@ async def process_audio_documentation(
     audio_file: UploadFile = File(..., description="Audio file (WAV, MP3, M4A)"),
     patient_id: Optional[str] = Form(None, description="Patient ID from Evident"),
     dentist_id: str = Form(..., description="Dentist identifier"),
+    insurance_type: str = Form("bema", description="Insurance type: 'bema' or 'goz'"),
     treatment_context: Optional[str] = Form(None, description="Treatment context/notes"),
     use_mock: bool = Form(False, description="Use mock transcription for testing")
 ):
@@ -80,10 +81,22 @@ async def process_audio_documentation(
         
         # Process transcription (extract dental information)
         logger.info("Starting documentation processing")
+        logger.info(f"Insurance type: {insurance_type}")
+        logger.info(f"Patient ID: {patient_id}")
+        logger.info(f"Dentist ID: {dentist_id}")
+        logger.info(f"Transcription text: {transcription_result.text[:100]}...")
+        
         documentation = await doc_processor.process_transcription(
             transcription_result=transcription_result,
-            audio_metadata=audio_metadata
+            audio_metadata=audio_metadata,
+            insurance_type=insurance_type,
+            patient_id=patient_id,
+            dentist_id=dentist_id
         )
+        
+        logger.info(f"Documentation result: {documentation}")
+        logger.info(f"Procedures found: {len(documentation.procedures_performed) if documentation.procedures_performed else 0}")
+        logger.info(f"Billing codes found: {len(documentation.billing_codes) if documentation.billing_codes else 0}")
         
         processing_time = int((time.time() - start_time) * 1000)
         
