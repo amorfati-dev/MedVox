@@ -46,7 +46,7 @@ class GeminiLLMProcedureExtractor:
         logger.info(f"🌐 Gemini API URL: {self.api_url}")
         # logger.info(f"🔍 RAG retriever initialized with {self.rag_retriever.get_catalog_info()}")
 
-    async def extract_procedures_and_codes(self, text: str, bema_goz_catalog: dict, findings: list = None) -> dict:
+    async def extract_procedures_and_codes(self, text: str, bema_goz_catalog: dict, findings: list = None, insurance_type: str = "bema") -> dict:
         """
         Use Gemini to extract procedures and suggest BEMA/GOZ codes
         """
@@ -62,9 +62,16 @@ class GeminiLLMProcedureExtractor:
         headers = {
             "Content-Type": "application/json",
         }
+        # Create insurance-specific prompt
+        insurance_instruction = ""
+        if insurance_type.lower() == "bema":
+            insurance_instruction = "WICHTIG: Der Patient ist ein BEMA-Patient (gesetzlich versichert). Bitte ausschließlich BEMA-Abrechnungsziffern verwenden und Kassenabrechnung anwenden. Bei Zusatzleistungen entsprechend kennzeichnen."
+        else:
+            insurance_instruction = "WICHTIG: Der Patient ist ein GOZ-Patient (Privatpatient). Bitte ausschließlich GOZ-Abrechnungsziffern verwenden."
+            
         body = {
             "contents": [
-                {"role": "user", "parts": [{"text": f"Bitte erstelle mir eine bema abrechnung für meine zahnmedizinische dokumentation:: {prompt}\n\nErstelle JSON mit procedures und billing_codes (GOZ/BEMA, je nachdem wie der Patient versichert ist)."}]}
+                {"role": "user", "parts": [{"text": f"{insurance_instruction}\n\nBitte erstelle mir eine {insurance_type.upper()}-Abrechnung für meine zahnmedizinische Dokumentation: {prompt}\n\nErstelle JSON mit procedures und billing_codes ({insurance_type.upper()}-Abrechnungsziffern)."}]}
             ],
             "generationConfig": {
                 "temperature": 0.7,
@@ -140,7 +147,16 @@ class GeminiLLMProcedureExtractor:
             try:
                 print(f"🔍 ATTEMPTING JSON PARSE...")
                 result = pyjson.loads(result_text)
-                print(f"🔍 JSON PARSE SUCCESS: {list(result.keys())}")
+                
+                # Handle both object and array responses from Gemini
+                if isinstance(result, list):
+                    print(f"🔍 JSON PARSE SUCCESS: Array with {len(result)} items")
+                    # Convert array to object format for normalization
+                    result = {"procedures": result}
+                elif isinstance(result, dict):
+                    print(f"🔍 JSON PARSE SUCCESS: Object with keys {list(result.keys())}")
+                else:
+                    print(f"🔍 JSON PARSE SUCCESS: {type(result).__name__}")
                 
                 # 🔧 FIX: Convert Gemini's field names to our expected format
                 normalized_result = self._normalize_gemini_response(result)
@@ -161,15 +177,175 @@ class GeminiLLMProcedureExtractor:
             logger.error(f"Gemini LLM extraction failed: {e}")
             return {"procedures": [], "billing_codes": [], "error": str(e)}
     
+    def _extract_single_billing_code(self, code_obj: dict, parent_obj: dict = None) -> dict:
+        """Extract a single billing code from various possible formats"""
+        if not isinstance(code_obj, dict):
+            return None
+            
+        # Try all possible field name combinations Gemini might use
+        code_value = (
+            code_obj.get("code") or 
+            code_obj.get("ziffer") or 
+            code_obj.get("position") or 
+            code_obj.get("nummer") or ""
+        ).strip()
+        
+        description = (
+            code_obj.get("description") or 
+            code_obj.get("beschreibung") or 
+            code_obj.get("text") or ""
+        ).strip()
+        
+        # Extract system/type information
+        system = (
+            code_obj.get("system") or 
+            code_obj.get("fee_type") or 
+            code_obj.get("abrechnungsart") or 
+            code_obj.get("gebuehrenordnung") or 
+            code_obj.get("type") or ""
+        ).lower().strip()
+        
+        # Clean up system name
+        if "bema" in system:
+            system = "bema"
+        elif "goz" in system or "goä" in system:
+            system = "goz"
+        elif system and "privat" not in system and "zusatz" not in system:
+            # If we have a system but it's not clearly BEMA/GOZ, default to BEMA
+            system = "bema"
+        
+        # Get tooth number from code or parent
+        tooth_number = (
+            code_obj.get("tooth_number") or 
+            code_obj.get("zahn_nummer") or 
+            code_obj.get("zahn") or
+            (parent_obj.get("tooth_number") if parent_obj else None) or
+            (parent_obj.get("zahn_region") if parent_obj else None) or
+            None
+        )
+        
+        # Only return if we have at least a code
+        if code_value:
+            return {
+                "code": code_value,
+                "description": description,
+                "system": system,
+                "type": system,
+                "tooth_number": tooth_number,
+                "quantity": code_obj.get("quantity") or code_obj.get("anzahl") or 1,
+                "factor": code_obj.get("factor") or code_obj.get("faktor") or 1.0,
+                "points": code_obj.get("points") or code_obj.get("punkte") or 0,
+                "confidence": "medium"
+            }
+        return None
+    
     def _normalize_gemini_response(self, result: dict) -> dict:
-        """Convert Gemini's response format to our expected format"""
+        """Convert Gemini's response format to our expected format - UNIVERSAL PARSER"""
         
         print(f"🔧 NORMALIZING Gemini response: {list(result.keys())}")
         
         normalized = {}
+        all_billing_codes = []
+        simple_procedures = []
+        
+        # 🚀 UNIVERSAL EXTRACTION: Find billing codes ANYWHERE in the JSON
+        def extract_codes_recursively(obj, parent_key="", depth=0):
+            """Recursively extract billing codes from any JSON structure"""
+            print(f"{'  ' * depth}🔍 Scanning: {parent_key} (type: {type(obj).__name__})")
+            
+            if isinstance(obj, dict):
+                # Look for billing code arrays with various names
+                for key in ["billing_codes", "abrechnungspositionen", "codes", "positionen", "entries"]:
+                    if key in obj and isinstance(obj[key], list):
+                        print(f"{'  ' * depth}✅ FOUND {key} with {len(obj[key])} codes")
+                        for code_obj in obj[key]:
+                            extracted = self._extract_single_billing_code(code_obj, obj)
+                            if extracted:
+                                all_billing_codes.append(extracted)
+                                print(f"{'  ' * depth}  📋 Extracted: {extracted['code']} ({extracted.get('system', 'unknown')})")
+                
+                # Look for procedure names
+                for key in ["procedure_description", "bezeichnung", "name", "description", "procedure_name"]:
+                    if key in obj and isinstance(obj[key], str):
+                        simple_procedures.append(obj[key])
+                        print(f"{'  ' * depth}  📝 Found procedure: {obj[key]}")
+                
+                # Recurse into nested objects
+                for key, value in obj.items():
+                    extract_codes_recursively(value, f"{parent_key}.{key}" if parent_key else key, depth + 1)
+                    
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    extract_codes_recursively(item, f"{parent_key}[{i}]", depth + 1)
+        
+        # Start recursive extraction
+        print(f"🚀 Starting UNIVERSAL extraction...")
+        extract_codes_recursively(result)
+        
+        # Remove duplicates while preserving order
+        unique_procedures = []
+        for proc in simple_procedures:
+            if proc not in unique_procedures:
+                unique_procedures.append(proc)
+        
+        normalized["procedures"] = unique_procedures
+        normalized["billing_codes"] = all_billing_codes
+        
+        print(f"🎯 UNIVERSAL EXTRACTION COMPLETE:")
+        print(f"   📝 Procedures: {len(unique_procedures)}")
+        print(f"   📋 Billing Codes: {len(all_billing_codes)}")
+        
+        # If we found anything, we're done!
+        if all_billing_codes or unique_procedures:
+            return normalized
+        
+        # 🆕 Fallback: Handle specific known structures
+        if "abrechnung" in result:
+            print(f"🔧 FOUND 'abrechnung' structure - extracting billing codes")
+            abrechnung = result["abrechnung"]
+            
+            simple_procedures = []
+            all_billing_codes = []
+            
+            # Extract from behandlungen array
+            behandlungen = abrechnung.get("behandlungen", [])
+            print(f"🔧 Found {len(behandlungen)} behandlungen")
+            
+            for behandlung in behandlungen:
+                # Extract procedure name
+                proc_name = behandlung.get("bezeichnung", "Unbekannte Behandlung")
+                simple_procedures.append(proc_name)
+                print(f"🔧 Added procedure: {proc_name}")
+                
+                # Extract billing codes from abrechnungspositionen
+                abrechnungspositionen = behandlung.get("abrechnungspositionen", [])
+                print(f"🔧 Found {len(abrechnungspositionen)} abrechnungspositionen in '{proc_name}'")
+                
+                for pos in abrechnungspositionen:
+                    print(f"🔧 Processing position: {pos}")
+                    
+                    # Map German fields to our format
+                    converted_code = {
+                        "code": pos.get("ziffer", ""),
+                        "description": pos.get("beschreibung", ""),
+                        "system": pos.get("abrechnungsart", "").lower(),  # "BEMA" -> "bema"
+                        "type": pos.get("abrechnungsart", "").lower(),
+                        "tooth_number": behandlung.get("zahn_region", None),
+                        "quantity": pos.get("anzahl", 1),
+                        "factor": pos.get("faktor", 1.0),
+                        "points": pos.get("punkte", 0),
+                        "confidence": "medium"
+                    }
+                    all_billing_codes.append(converted_code)
+                    print(f"🔧 EXTRACTED billing code: {converted_code['code']} ({converted_code['system']})")
+            
+            normalized["procedures"] = simple_procedures
+            normalized["billing_codes"] = all_billing_codes
+            print(f"🔧 FINAL: {len(simple_procedures)} procedures, {len(all_billing_codes)} billing codes")
+            return normalized
         
         # Convert procedures and extract nested billing codes
-        if "treatment_summary" in result:
+        elif "treatment_summary" in result:
             treatment = result["treatment_summary"]
             procedures = []
             if "treatment_description" in treatment:
@@ -621,7 +797,8 @@ class EnhancedDocumentationProcessor:
             result = await self.llm_extractor.extract_procedures_and_codes(
                 text=text,
                 bema_goz_catalog=bema_goz_catalog,
-                findings=findings
+                findings=findings,
+                insurance_type=insurance_type
             )
             
             # Debug: Log what we actually got back
