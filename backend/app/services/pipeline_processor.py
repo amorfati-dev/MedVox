@@ -29,10 +29,10 @@ class PipelineStage:
 
 
 class TextNormalizationStage(PipelineStage):
-    """Stage B: Post-correction & Normalization using GPT-4o-mini"""
+    """Stage B: Post-correction & Normalization using GPT-4o"""
     
     def __init__(self):
-        super().__init__("Text Normalization", "gpt-4o-mini")
+        super().__init__("Text Normalization", "gpt-4o")
         self.temperature = 0.1
     
     async def process(self, raw_text: str) -> Dict[str, Any]:
@@ -109,10 +109,10 @@ Gib NUR den korrigierten Text zurück, keine Erklärungen."""
 
 
 class BillingMappingStage(PipelineStage):
-    """Stage C: BEMA/GOZ Mapping using GPT-4o (proven reliable)"""
+    """Stage C: BEMA/GOZ Mapping using GPT-4o (excellent reliability)"""
     
     def __init__(self):
-        super().__init__("Billing Mapping", "gpt-4o-2024-11-20")  # Stable GPT-4o
+        super().__init__("Billing Mapping", "gpt-4o")  # GPT-4o for excellent accuracy
         self.temperature = 0.1
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -243,21 +243,18 @@ AUSGABEFORMAT (JSON):
       "code": "BEMA_01",
       "description": "Untersuchung",
       "points": 18,
-      "fee": "23.61 €",
       "type": "bema"
     },
     {
       "code": "GOZ_2197", 
       "description": "Adhäsive Technik",
       "points": 130,
-      "fee": "22.73 €", 
+      "factor": 2.3,
       "type": "goz",
       "note": "MKV"
     }
   ],
-  "total_bema": "23.61 €",
-  "total_goz": "22.73 €",
-  "patient_cost": "22.73 €",
+  "total_positions": 2,
   "reasoning": "Behandlungsbegründung..."
 }"""
     
@@ -379,7 +376,7 @@ class AdvancedBillingStage(PipelineStage):
     """Optional Stage C+: Advanced BEMA/GOZ Mapping using GPT-4o for complex cases"""
     
     def __init__(self):
-        super().__init__("Advanced Billing Mapping", "gpt-4o-2024-11-20")  # Stable GPT-4o
+        super().__init__("Advanced Billing Mapping", "gpt-4o")  # GPT-4o for excellent accuracy
         self.temperature = 0.1
         
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -609,21 +606,14 @@ Führe eine umfassende Analyse durch und gib optimierte Abrechnungsempfehlungen.
             if catalog_key in catalog and code_id in catalog[catalog_key]:
                 catalog_info = catalog[catalog_key][code_id]
                 
-                if system == "bema":
-                    point_value = catalog["meta"]["bema_point_value"]
-                    fee_euros = round(catalog_info["points"] * point_value, 2)
-                    factor = None
-                else:  # GOZ
-                    point_value = catalog["meta"]["goz_point_value"]
-                    factor = catalog_info.get("standard_factor", 2.3)
-                    fee_euros = round(catalog_info["points"] * point_value * factor, 2)
+                # No fee calculations - dentists set their own prices
+                factor = catalog_info.get("standard_factor", 2.3) if system == "goz" else None
                 
                 enhanced.append({
                     "code": catalog_info["code"],
                     "system": system,
                     "description": catalog_info["description"],
                     "points": catalog_info["points"],
-                    "fee_euros": fee_euros,
                     "factor": factor,
                     "confidence": code.get("confidence", 0.9),
                     "reasoning": code.get("reasoning", ""),
@@ -640,7 +630,7 @@ class PlausibilityCheckStage(PipelineStage):
     
     def __init__(self):
         # Use configured audit model (o3-mini by default)
-        model = settings.PIPELINE_AUDIT_MODEL if self._is_o3_available() else "gpt-4o"
+        model = settings.PIPELINE_AUDIT_MODEL  # Always use O3
         super().__init__("Plausibility Check", model)
         self.temperature = 0.1
         self.use_o3_for_complex = settings.USE_O3_FOR_COMPLEX_CASES
@@ -681,9 +671,10 @@ class PlausibilityCheckStage(PipelineStage):
             # Adjust max_completion_tokens for newer models (they can handle more complex reasoning)
             max_completion_tokens = 2000 if selected_model.startswith("o3") else 1000
             
-            response = client.chat.completions.create(
-                model=selected_model,
-                messages=[
+            # Prepare API parameters
+            api_params = {
+                "model": selected_model,
+                "messages": [
                     {
                         "role": "system",
                         "content": self._get_audit_prompt(selected_model)
@@ -693,10 +684,15 @@ class PlausibilityCheckStage(PipelineStage):
                         "content": self._create_audit_query(data)
                     }
                 ],
-                temperature=self.temperature,
-                response_format={"type": "json_object"},
-                max_completion_tokens=max_completion_tokens
-            )
+                "response_format": {"type": "json_object"},
+                "max_completion_tokens": max_completion_tokens
+            }
+            
+            # Only add temperature for models that support it (exclude O3 models)
+            if not selected_model.startswith("o3"):
+                api_params["temperature"] = self.temperature
+            
+            response = client.chat.completions.create(**api_params)
             
             audit_result = json.loads(response.choices[0].message.content)
             processing_time = int((time.time() - start_time) * 1000)

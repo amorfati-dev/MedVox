@@ -122,13 +122,15 @@ class BEMAGOZMapper:
     
     def __init__(self):
         self.codes_data = self._load_codes_database()
-        self.bema_point_value = self.codes_data["meta"]["bema_point_value"]
-        self.goz_point_value = self.codes_data["meta"]["goz_point_value"]
+        # Safe access with fallback values
+        meta = self.codes_data.get("meta", {})
+        self.bema_point_value = meta.get("bema_point_value", 1.1271)
+        self.goz_point_value = meta.get("goz_point_value", 0.0582873)
         
         logger.info("BEMA/GOZ database loaded", 
-                   version=self.codes_data["meta"]["version"],
-                   bema_codes=len(self.codes_data["bema_codes"]),
-                   goz_codes=len(self.codes_data["goz_codes"]))
+                   version=meta.get("version", "fallback"),
+                   bema_codes=len(self.codes_data.get("bema_codes", {})),
+                   goz_codes=len(self.codes_data.get("goz_codes", {})))
     
     def _load_codes_database(self) -> dict:
         """Load BEMA/GOZ codes from JSON database"""
@@ -193,13 +195,13 @@ class BEMAGOZMapper:
                     if system == "bema" and code_id in self.codes_data["bema_codes"]:
                         code_info = self.codes_data["bema_codes"][code_id].copy()
                         code_info["system"] = "bema"
-                        code_info["fee_euros"] = self._calculate_bema_fee(code_info["points"])
+                        # No fee calculation - dentists set their own prices
                         matching_codes.append(code_info)
                     elif system == "goz" and code_id in self.codes_data["goz_codes"]:
                         code_info = self.codes_data["goz_codes"][code_id].copy() 
                         code_info["system"] = "goz"
                         factor = code_info.get("standard_factor", 2.3)
-                        code_info["fee_euros"] = self._calculate_goz_fee(code_info["points"], factor)
+                        # No fee calculation - dentists set their own prices
                         code_info["factor"] = factor
                         matching_codes.append(code_info)
         
@@ -260,13 +262,7 @@ class BEMAGOZMapper:
         
         return matching_codes
     
-    def _calculate_goz_fee(self, points: int, factor: float = 2.3) -> float:
-        """Calculate GOZ fee based on points and factor"""
-        return round(points * self.goz_point_value * factor, 2)
-    
-    def _calculate_bema_fee(self, points: int) -> float:
-        """Calculate BEMA fee based on points"""
-        return round(points * self.bema_point_value, 2)
+    # Fee calculation methods removed - dentists set their own prices
 
 
 class DocumentationProcessor:
@@ -283,8 +279,22 @@ class DocumentationProcessor:
         else:
             self.pipeline_processor = None
             
-        self.use_llm_extraction = settings.OPENAI_API_KEY is not None
-        self.use_multi_stage_pipeline = settings.USE_MULTI_STAGE_PIPELINE and settings.OPENAI_API_KEY is not None
+        # FORCE: Use ONLY Gemini 2.5 Pro - no fallbacks, no pipeline
+        self.use_llm_extraction = True  # Always use LLM
+        self.use_multi_stage_pipeline = False  # Never use pipeline
+        
+        # Debug logging to trace the decision  
+        print(f"🔧 DocumentationProcessor initialized:")
+        print(f"   LLM_PROVIDER: {settings.LLM_PROVIDER}")
+        print(f"   USE_MULTI_STAGE_PIPELINE: {settings.USE_MULTI_STAGE_PIPELINE}")
+        print(f"   use_llm_extraction: {self.use_llm_extraction}")
+        print(f"   use_multi_stage_pipeline: {self.use_multi_stage_pipeline}")
+        
+        logger.info(f"🔧 DocumentationProcessor initialized:")
+        logger.info(f"   LLM_PROVIDER: {settings.LLM_PROVIDER}")
+        logger.info(f"   USE_MULTI_STAGE_PIPELINE: {settings.USE_MULTI_STAGE_PIPELINE}")
+        logger.info(f"   use_llm_extraction: {self.use_llm_extraction}")
+        logger.info(f"   use_multi_stage_pipeline: {self.use_multi_stage_pipeline}")
         
     async def process_transcription(
         self, 
@@ -305,162 +315,98 @@ class DocumentationProcessor:
         
         try:
             # Normalize the text
+            print(f"🔍 Step 1: Normalizing text...")
             normalized_text = self._normalize_text(transcription_result.text)
+            print(f"🔍 Step 1 OK: Text normalized: {len(normalized_text)} chars")
             
             # Extract dental findings (tooth-specific conditions)
+            print(f"🔍 Step 2: Extracting dental findings...")
             findings = self._extract_dental_findings(normalized_text)
+            print(f"🔍 Step 2 OK: Found {len(findings)} findings")
             
             # Load BEMA/GOZ codes catalog
+            print(f"🔍 Step 3: Loading BEMA/GOZ catalog...")
             bema_goz_catalog = self.billing_mapper.codes_data
+            print(f"🔍 Step 3 OK: Catalog loaded")
             
-            # Choose processing method based on configuration
-            if self.use_multi_stage_pipeline:
-                logger.info("Using sophisticated multi-stage pipeline")
-                try:
-                    # Run the sophisticated multi-stage pipeline
-                    logger.info(f"Starting pipeline with insurance_type: {insurance_type}")
-                    pipeline_result = await self.pipeline_processor.process_complete(
-                        normalized_text, 
-                        findings,
-                        insurance_type=insurance_type,
-                        patient_id=patient_id,
-                        dentist_id=dentist_id
-                    )
-                    logger.info(f"Pipeline completed successfully: {bool(pipeline_result)}")
-                    logger.info(f"Pipeline result keys: {list(pipeline_result.keys()) if pipeline_result else 'None'}")
-                    
-                    if pipeline_result and 'billing_codes' in pipeline_result:
-                        logger.info(f"Billing codes in pipeline result: {len(pipeline_result['billing_codes'])}")
+            # USE ONLY GEMINI 2.5 PRO - NO FALLBACKS, NO PIPELINE
+            print(f"🔍 Step 4: Starting LLM extraction...")
+            logger.info("🚀 Using ONLY Gemini 2.5 Pro direct extraction")
+            logger.info(f"🔍 BEFORE LLM CALL: text={normalized_text[:100]}...")
+            logger.info(f"🔍 BEFORE LLM CALL: insurance_type={insurance_type}")
+            logger.info(f"🔍 BEFORE LLM CALL: findings_count={len(findings)}")
+            
+            try:
+                print(f"🔍 Step 4a: Calling LLM processor...")
+                llm_result = await self.llm_processor.extract_procedures_intelligent(
+                    normalized_text, 
+                    bema_goz_catalog, 
+                    findings,
+                    insurance_type=insurance_type,
+                    patient_id=patient_id
+                )
+                print(f"🔍 Step 4b: LLM call returned successfully!")
+                logger.info("🔍 AFTER LLM CALL: Success!")
+            except Exception as llm_error:
+                print(f"🔍 Step 4 FAILED: {llm_error}")
+                logger.error(f"🔍 LLM CALL FAILED: {llm_error}")
+                logger.error(f"🔍 LLM Error type: {type(llm_error)}")
+                raise
+            
+            # 🔍 DEBUG: Log what LLM actually returned
+            logger.info(f"🔍 LLM result type: {type(llm_result)}")
+            logger.info(f"🔍 LLM result keys: {list(llm_result.keys()) if isinstance(llm_result, dict) else 'Not a dict'}")
+            if isinstance(llm_result, dict):
+                logger.info(f"🔍 LLM billing_codes raw: {llm_result.get('billing_codes', 'NOT_FOUND')}")
+                logger.info(f"🔍 LLM procedures raw: {llm_result.get('procedures', 'NOT_FOUND')}")
+                if "raw_gemini_response" in llm_result:
+                    raw_preview = llm_result["raw_gemini_response"][:300] + "..." if len(llm_result["raw_gemini_response"]) > 300 else llm_result["raw_gemini_response"]
+                    logger.info(f"🔍 LLM raw_gemini_response preview: {raw_preview}")
+            
+            # Ensure llm_result is a dict before processing
+            if not isinstance(llm_result, dict):
+                logger.error(f"Gemini 2.5 Pro returned non-dict result: {type(llm_result)} = {llm_result}")
+                raise ValueError(f"Gemini 2.5 Pro returned {type(llm_result)} instead of dict")
+            
+            # Convert LLM result to our format
+            procedures_raw = llm_result.get("procedures", [])
+            logger.info(f"🚀 Gemini 2.5 Pro procedures extracted: {procedures_raw}")
+            
+            # Handle ANY format Gemini returns for procedures
+            procedures = []
+            for proc in procedures_raw:
+                if isinstance(proc, dict):
+                    # Try different possible keys Gemini might use
+                    if "name" in proc:
+                        procedures.append(proc["name"])
+                    elif "procedure" in proc:
+                        procedures.append(proc["procedure"])
+                    elif "description" in proc:
+                        procedures.append(proc["description"])
                     else:
-                        logger.warning("No billing codes found in pipeline result")
-                    
-                    final_output = pipeline_result.get("final_output", {})
-                    
-                    # Extract procedures from pipeline result
-                    procedures = [proc["name"] for proc in final_output.get("procedures", [])]
-                    billing_codes_data = final_output.get("billing_codes", [])
-                    
-                    # Convert billing codes format
-                    billing_codes = []
-                    for code_data in billing_codes_data:
-                        billing_code = BillingCode(
-                            code=code_data["code"],
-                            system=BillingSystem.BEMA if code_data["system"] == "bema" else BillingSystem.GOZ,
-                            description=code_data["description"],
-                            factor=code_data.get("factor"),
-                            points=code_data.get("points"),
-                            fee_euros=code_data.get("fee_euros"),
-                            confidence=ConfidenceLevel.HIGH if code_data.get("confidence", 0) > 0.8 else ConfidenceLevel.MEDIUM
-                        )
-                        billing_codes.append(billing_code)
-                    
-                    # Log pipeline stages performance
-                    stages = pipeline_result.get("pipeline_stages", {})
-                    logger.info("🎯 Multi-stage pipeline completed",
-                               normalization_time=stages.get("normalization", {}).get("processing_time_ms", 0),
-                               billing_mapping_time=stages.get("billing_mapping", {}).get("processing_time_ms", 0),
-                               audit_time=stages.get("plausibility_check", {}).get("processing_time_ms", 0),
-                               total_time=final_output.get("total_processing_time_ms", 0),
-                               procedures_found=len(procedures),
-                               billing_codes=len(billing_codes),
-                               pipeline_confidence=final_output.get("confidence", 0))
-                    
-                except Exception as e:
-                    logger.warning("🚨 Multi-stage pipeline failed, falling back to simple LLM", error=str(e))
-                    # Fallback to simple LLM method with error handling
-                    if self.use_llm_extraction:
-                        try:
-                            logger.info("🔄 Pipeline fallback: attempting LLM extraction")
-                            llm_result = await self.llm_processor.extract_procedures_intelligent(
-                                normalized_text, bema_goz_catalog, findings
-                            )
-                            logger.info(f"🔄 Pipeline fallback LLM result type: {type(llm_result)}")
-                            logger.info(f"🔄 Pipeline fallback LLM result: {llm_result}")
-                            
-                            # Ensure llm_result is a dict before processing
-                            if isinstance(llm_result, dict):
-                                procedures_raw = llm_result.get("procedures", [])
-                                billing_codes_raw = llm_result.get("billing_codes", [])
-                                
-                                logger.info(f"🔄 Pipeline fallback procedures (raw): {procedures_raw}")
-                                logger.info(f"🔄 Pipeline fallback billing codes (raw): {billing_codes_raw}")
-                                
-                                procedures = [proc["name"] if isinstance(proc, dict) else str(proc) for proc in procedures_raw]
-                                billing_codes = self._convert_llm_billing_codes(billing_codes_raw)
-                                
-                                logger.info(f"🔄 Pipeline fallback procedures (processed): {procedures}")
-                                logger.info(f"🔄 Pipeline fallback billing codes (processed): {len(billing_codes)} codes")
-                            else:
-                                logger.error(f"🔄 Pipeline fallback: LLM returned non-dict result: {type(llm_result)} = {llm_result}")
-                                procedures = self._extract_procedures(normalized_text)
-                                billing_codes = self._generate_billing_codes(procedures, findings)
-                        except Exception as llm_error:
-                            logger.error(f"🔄 Pipeline fallback: LLM extraction also failed: {llm_error}")
-                            logger.error(f"🔄 Pipeline fallback: Exception type: {type(llm_error).__name__}")
-                            procedures = self._extract_procedures(normalized_text)
-                            billing_codes = self._generate_billing_codes(procedures, findings)
-                    else:
-                        procedures = self._extract_procedures(normalized_text)
-                        billing_codes = self._generate_billing_codes(procedures, findings)
-                        
-            elif self.use_llm_extraction:
-                try:
-                    logger.info("🧠 Using O3-mini direct extraction")
-                    llm_result = await self.llm_processor.extract_procedures_intelligent(
-                        normalized_text, 
-                        bema_goz_catalog, 
-                        findings,
-                        insurance_type=insurance_type,
-                        patient_id=patient_id
-                    )
-                    
-                    # Ensure llm_result is a dict before processing
-                    if not isinstance(llm_result, dict):
-                        logger.error(f"LLM returned non-dict result: {type(llm_result)} = {llm_result}")
-                        raise ValueError(f"LLM returned {type(llm_result)} instead of dict")
-                    
-                    # Convert LLM result to our format
-                    procedures_raw = llm_result.get("procedures", [])
-                    logger.info(f"🧠 LLM procedures extracted (raw): {procedures_raw}")
-                    
-                    # Handle both string and dict formats for procedures
-                    procedures = [proc["name"] if isinstance(proc, dict) else str(proc) for proc in procedures_raw]
-                    logger.info(f"🧠 LLM procedures processed: {procedures}")
-                    
-                    llm_billing_codes_raw = llm_result.get("billing_codes", [])
-                    logger.info(f"🧠 LLM billing codes (raw): {llm_billing_codes_raw}")
-                    
-                    billing_codes = self._convert_llm_billing_codes(llm_billing_codes_raw)
-                    logger.info(f"🧠 Converted billing codes: {[{
-                        'code': bc.code, 
-                        'system': bc.system, 
-                        'description': bc.description,
-                        'fee_euros': bc.fee_euros
-                    } for bc in billing_codes]}")
-                    
-                    logger.info("O3-mini extraction completed",
-                               procedures_found=len(procedures),
-                               billing_codes=len(billing_codes),
-                               overall_confidence=llm_result.get("confidence_overall", 0))
-                    
-                except Exception as e:
-                    logger.error(f"🚨 O3-mini extraction failed, falling back to traditional method", error=str(e))
-                    logger.error(f"🚨 Exception details: {type(e).__name__}: {str(e)}")
-                    logger.error(f"🚨 LLM result that caused failure: {llm_result if 'llm_result' in locals() else 'Not available'}")
-                    # Fallback to traditional method
-                    logger.warning("📝 Using fallback: traditional keyword extraction")
-                    procedures = self._extract_procedures(normalized_text)
-                    logger.warning(f"📝 Fallback procedures: {procedures}")
-                    billing_codes = self._generate_billing_codes(procedures, findings)
-                    logger.warning(f"📝 Fallback billing codes: {[{
-                        'code': bc.code, 
-                        'description': bc.description
-                    } for bc in billing_codes]}")
+                        # Just take the first value if it's a dict
+                        procedures.append(str(list(proc.values())[0]) if proc.values() else str(proc))
+                else:
+                    procedures.append(str(proc))
+            
+            llm_billing_codes_raw = llm_result.get("billing_codes", [])
+            logger.info(f"🚀 Gemini 2.5 Pro billing codes: {llm_billing_codes_raw}")
+            
+            # Add debug logging to see what Gemini actually returns
+            logger.info(f"🔍 Raw Gemini result structure: {list(llm_result.keys())}")
+            logger.info(f"🔍 Raw Gemini full response: {llm_result}")
+            
+            # Handle empty billing codes gracefully
+            if not llm_billing_codes_raw:
+                logger.warning("⚠️ Gemini returned no billing codes")
+                billing_codes = []
             else:
-                # Traditional extraction method
-                logger.info("📝 Using traditional keyword-based extraction")
-                procedures = self._extract_procedures(normalized_text)
-                billing_codes = self._generate_billing_codes(procedures, findings)
+                billing_codes = self._convert_llm_billing_codes(llm_billing_codes_raw)
+            
+            logger.info("🎉 Gemini 2.5 Pro extraction completed",
+                       procedures_found=len(procedures),
+                       billing_codes=len(billing_codes),
+                       overall_confidence=llm_result.get("confidence_overall", 0))
             
             # Generate treatment plan
             treatment_plan = self._generate_treatment_plan(findings, procedures)
@@ -477,6 +423,13 @@ class DocumentationProcessor:
             import uuid
             recording_id = f"rec_{int(time.time())}_{uuid.uuid4().hex[:8]}"
             
+            # Extract raw Gemini response if available
+            raw_gemini_response = llm_result.get("raw_gemini_response", None)
+            
+            logger.info(f"🎯 Raw Gemini response extracted: {len(raw_gemini_response) if raw_gemini_response else 0} chars")
+            if raw_gemini_response:
+                logger.info(f"🎯 Raw Gemini preview: {raw_gemini_response[:200]}...")
+            
             return DentalDocumentation(
                 recording_id=recording_id,
                 dentist_id="system",  # Default dentist
@@ -485,7 +438,8 @@ class DocumentationProcessor:
                 findings=findings,
                 procedures_performed=procedures,
                 billing_codes=billing_codes,
-                treatment_plan=treatment_plan
+                treatment_plan=treatment_plan,
+                raw_gemini_response=raw_gemini_response  # Forward Gemini's raw output!
             )
             
         except Exception as e:
@@ -593,7 +547,6 @@ class DocumentationProcessor:
                     description=code_info["description"],
                     factor=code_info.get("factor"),
                     points=code_info.get("points"),
-                    fee_euros=code_info.get("fee_euros"),
                     confidence=ConfidenceLevel.HIGH if len(matching_codes) == 1 else ConfidenceLevel.MEDIUM
                 )
                 billing_codes.append(billing_code)
@@ -816,7 +769,6 @@ class DocumentationProcessor:
                     description=code_data.get("description", ""),
                     factor=code_data.get("factor"),
                     points=code_data.get("points", 0),
-                    fee_euros=self._parse_fee_amount(code_data.get("fee", "0.00")),
                     confidence=ConfidenceLevel.HIGH if code_data.get("confidence", 0) > 0.8 else ConfidenceLevel.MEDIUM
                 )
                 billing_codes.append(billing_code)
@@ -829,26 +781,7 @@ class DocumentationProcessor:
         logger.info(f"Successfully converted {len(billing_codes)} billing codes")
         return billing_codes
     
-    def _parse_fee_amount(self, fee_string: str) -> float:
-        """Parse fee amount from string like '23.61 €' to float"""
-        if isinstance(fee_string, (int, float)):
-            return float(fee_string)
-        
-        if isinstance(fee_string, str):
-            # Remove currency symbols and spaces
-            cleaned = fee_string.replace('€', '').replace(' ', '').replace(',', '.')
-            try:
-                return float(cleaned)
-            except ValueError:
-                logger.warning(f"Could not parse fee amount: {fee_string}")
-                return 0.0
-        
-        return 0.0
+    # Fee parsing function removed - no more price calculations in backend
     
-    def _calculate_goz_fee(self, points: int, factor: float = 2.3) -> float:
-        """Calculate GOZ fee based on points and factor using current point values"""
-        return self.billing_mapper._calculate_goz_fee(points, factor)
-    
-    def _calculate_bema_fee(self, points: int) -> float:
-        """Calculate BEMA fee based on points using current point values"""
-        return self.billing_mapper._calculate_bema_fee(points) 
+    # Fee calculation functions removed - no more price calculations in backend
+    # Dentists set their own GOZ factors and current BEMA point values 

@@ -66,14 +66,13 @@ class DentalFinding(BaseModel):
 
 
 class BillingCode(BaseModel):
-    """Billing code (BEMA/GOZ) with details"""
+    """Billing code (BEMA/GOZ) with details - no price calculations"""
     
     code: str = Field(..., description="Billing code (e.g. 'BEMA 13', 'GOZ 2080')")
     system: BillingSystem = Field(..., description="Billing system")
     description: str = Field(..., description="Code description")
     factor: Optional[float] = Field(None, description="GOZ factor if applicable")
     points: Optional[int] = Field(None, description="Point value")
-    fee_euros: Optional[float] = Field(None, description="Calculated fee in EUR")
     tooth_number: Optional[str] = Field(None, description="Related tooth if applicable")
     confidence: ConfidenceLevel = Field(ConfidenceLevel.MEDIUM, description="AI confidence level")
     
@@ -85,7 +84,6 @@ class BillingCode(BaseModel):
                 "description": "Füllung einflächig",
                 "factor": 2.3,
                 "points": 48,
-                "fee_euros": 26.40,
                 "tooth_number": "36",
                 "confidence": "high"
             }
@@ -186,6 +184,9 @@ class DentalDocumentation(BaseModel):
     requires_review: bool = Field(False, description="Flag if manual review needed")
     review_notes: Optional[str] = Field(None, description="Notes for manual review")
     
+    # LLM Raw Output
+    raw_gemini_response: Optional[str] = Field(None, description="Raw Gemini 2.5 Pro response for direct display")
+    
     # Integration status
     exported_to_evident: bool = Field(False, description="Exported to Evident PMS")
     export_timestamp: Optional[datetime] = Field(None, description="Export timestamp")
@@ -232,9 +233,7 @@ class DentalDocumentation(BaseModel):
         if overall_confidence in [ConfidenceLevel.LOW, ConfidenceLevel.UNSURE]:
             return True
             
-        # Require review for high-value billing codes
-        if any(code.fee_euros and code.fee_euros > 100 for code in billing_codes):
-            return True
+        # Review logic for complex cases simplified (no price-based review)
             
         # Require review if no billing codes found but procedures mentioned
         procedures = values.get('procedures_performed', [])
@@ -264,28 +263,30 @@ class DentalDocumentation(BaseModel):
                         "code": "GOZ 2080",
                         "system": "goz",
                         "description": "Füllung einflächig",
-                        "fee_euros": 26.40,
+                        "points": 48,
+                        "factor": 2.3,
                         "confidence": "high"
                     },
                     {
                         "code": "BEMA L1",
                         "system": "bema",
                         "description": "Leitungsanästhesie",
-                        "fee_euros": 10.72,
+                        "points": 8,
                         "confidence": "high"
                     },
                     {
                         "code": "GOZ 0090",
                         "system": "goz",
                         "description": "Leitungsanästhesie",
-                        "fee_euros": 12.00,
+                        "points": 8,
+                        "factor": 2.3,
                         "confidence": "high"
                     },
                     {
                         "code": "BEMA bmf",
                         "system": "bema",
                         "description": "Stillung einer Papillenblutung, Zähne separiert",
-                        "fee_euros": 6.00,
+                        "points": 5,
                         "confidence": "medium"
                     }
                 ],

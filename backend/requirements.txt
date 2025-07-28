@@ -38,4 +38,4 @@ passlib[bcrypt]==1.7.4
 cryptography==43.0.1
 
 # CORS & Security Headers
-starlette==0.40.0 
+# starlette is included with fastapi, no need to specify version 

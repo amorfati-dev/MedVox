@@ -1,6 +1,6 @@
 """
 Enhanced LLM Processor Service
-Uses OpenAI's advanced models for intelligent procedure and billing code extraction
+Uses Gemini2.5 Pro advanced models for intelligent procedure and billing code extraction
 """
 
 import json
@@ -11,6 +11,9 @@ import structlog
 from app.core.config import settings
 from app.schemas.dental_documentation import DentalFinding, BillingCode, BillingSystem, ConfidenceLevel
 from app.utils.llm_logger import llm_logger
+from app.services.rag_retriever import DentalCodeRetriever
+
+import requests
 
 logger = structlog.get_logger()
 
@@ -20,14 +23,291 @@ class LLMExtractionError(Exception):
     pass
 
 
+class GeminiLLMProcedureExtractor:
+    """Extract dental procedures and billing codes using Google Gemini Pro 2.5"""
+    def __init__(self):
+        from app.core.config import settings
+        self.api_key = settings.GOOGLE_GEMINI_API_KEY
+        self.api_url = settings.GOOGLE_GEMINI_API_URL
+        self.model = "gemini-2.5-pro"  # Latest and most powerful
+        self.max_tokens = settings.LLM_MAX_TOKENS
+        self.max_completion_tokens = settings.LLM_MAX_TOKENS  # Alias for compatibility
+        self.temperature = settings.LLM_TEMPERATURE
+        
+        # RAG temporarily disabled for simplification
+        # from app.services.rag_retriever import DentalCodeRetriever
+        # self.rag_retriever = DentalCodeRetriever()
+        
+        # 🔍 DEBUG: Check model assignment
+        logger.info(f"🔧 settings.LLM_MODEL: {settings.LLM_MODEL}")
+        logger.info(f"🔧 Hardcoded self.model: {self.model}")
+        logger.info(f"🤖 Gemini LLM initialized: {self.model}")
+        logger.info(f"🔑 Gemini API Key present: {bool(self.api_key)}")
+        logger.info(f"🌐 Gemini API URL: {self.api_url}")
+        # logger.info(f"🔍 RAG retriever initialized with {self.rag_retriever.get_catalog_info()}")
+
+    async def extract_procedures_and_codes(self, text: str, bema_goz_catalog: dict, findings: list = None) -> dict:
+        """
+        Use Gemini to extract procedures and suggest BEMA/GOZ codes
+        """
+        import asyncio
+        findings_context = ""
+        if findings:
+            findings_context = "\n".join([
+                f"- Zahn {f.tooth_number}: {f.diagnosis}" + (f" ({f.surface})" if f.surface else "")
+                for f in findings
+            ])
+        prompt = self._create_extraction_prompt(text, bema_goz_catalog, findings_context)
+        logger.info("Starting Gemini LLM extraction", text_length=len(text), model=self.model)
+        headers = {
+            "Content-Type": "application/json",
+        }
+        body = {
+            "contents": [
+                {"role": "user", "parts": [{"text": f"Bitte erstelle mir eine bema abrechnung für meine zahnmedizinische dokumentation:: {prompt}\n\nErstelle JSON mit procedures und billing_codes (GOZ/BEMA, je nachdem wie der Patient versichert ist)."}]}
+            ],
+            "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 32000,
+                "responseMimeType": "application/json"  # We do want JSON back
+            }
+        }
+        
+        # Simple logging
+        logger.info(f"🎤 Voice input: {len(prompt)} chars → Gemini 2.5 Pro")
+        try:
+            # Add API key as query parameter (Google Gemini auth method)
+            url_with_key = f"{self.api_url}?key={self.api_key}"
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: requests.post(url_with_key, headers=headers, json=body, timeout=60)
+            )
+            logger.info(f"Gemini API status: {response.status_code}")
+            if response.status_code != 200:
+                logger.error(f"Gemini API error: {response.text}")
+                raise Exception(f"Gemini API error: {response.status_code}")
+            data = response.json()
+            
+            # 🔍 CRITICAL DEBUG: Log what Gemini actually returned
+            print(f"🔍 GEMINI RAW RESPONSE: {data}")
+            logger.info(f"🔍 Gemini response keys: {list(data.keys())}")
+            logger.info(f"🔍 Gemini response type: {type(data)}")
+            
+            # Parse Gemini response structure
+            try:
+                candidate = data["candidates"][0]
+                finish_reason = candidate.get("finishReason", "")
+                
+                print(f"🔍 GEMINI FINISH REASON: {finish_reason}")
+                
+                if finish_reason == "MAX_TOKENS":
+                    logger.error("Gemini response was cut off due to MAX_TOKENS limit")
+                    raise Exception("Response truncated - increase max_tokens")
+                
+                if finish_reason == "SAFETY":
+                    logger.error("Gemini response blocked by safety filters")
+                    raise Exception("Response blocked by safety filters")
+                
+                # Extract the actual response text
+                content = candidate.get("content", {})
+                parts = content.get("parts", [])
+                
+                print(f"🔍 GEMINI CONTENT: {content}")
+                print(f"🔍 GEMINI PARTS: {parts}")
+                
+                if not parts:
+                    logger.error(f"No parts in Gemini response. Content: {content}")
+                    raise Exception("No response content received")
+                
+                result_text = parts[0].get("text", "")
+                
+                print(f"🔍 GEMINI RESULT TEXT: {result_text[:500]}...")
+                
+                if not result_text:
+                    logger.error("Empty text in Gemini response")
+                    raise Exception("Empty response text")
+                    
+            except Exception as e:
+                logger.error(f"Gemini response parsing failed: {e}")
+                logger.error(f"Raw Gemini response: {data}")
+                raise Exception(f"Gemini response parsing failed: {str(e)}")
+            # 🎯 DIRECT RAW OUTPUT - no processing!
+            logger.info("✅ Gemini response received - returning raw")
+            
+            # Try to parse as JSON, but if it fails, return the raw text
+            import json as pyjson
+            try:
+                print(f"🔍 ATTEMPTING JSON PARSE...")
+                result = pyjson.loads(result_text)
+                print(f"🔍 JSON PARSE SUCCESS: {list(result.keys())}")
+                
+                # 🔧 FIX: Convert Gemini's field names to our expected format
+                normalized_result = self._normalize_gemini_response(result)
+                print(f"🔍 NORMALIZED RESULT: {list(normalized_result.keys())}")
+                
+                normalized_result["raw_gemini_response"] = result_text
+                return normalized_result
+            except Exception as json_error:
+                print(f"🔍 JSON PARSE FAILED: {json_error}")
+                print(f"🔍 JSON PARSE FAILED - Raw text preview: {result_text[:200]}...")
+                # If JSON parsing fails, return raw text for frontend
+                return {
+                    "raw_gemini_response": result_text,
+                    "procedures": [],
+                    "billing_codes": []
+                }
+        except Exception as e:
+            logger.error(f"Gemini LLM extraction failed: {e}")
+            return {"procedures": [], "billing_codes": [], "error": str(e)}
+    
+    def _normalize_gemini_response(self, result: dict) -> dict:
+        """Convert Gemini's response format to our expected format"""
+        
+        print(f"🔧 NORMALIZING Gemini response: {list(result.keys())}")
+        
+        normalized = {}
+        
+        # Convert procedures and extract nested billing codes
+        if "treatment_summary" in result:
+            treatment = result["treatment_summary"]
+            procedures = []
+            if "treatment_description" in treatment:
+                procedures.append(treatment["treatment_description"])
+            normalized["procedures"] = procedures
+            print(f"🔧 MAPPED treatment_summary → procedures: {procedures}")
+        elif "procedures" in result or "prozeduren" in result:
+            # Handle nested structure where billing_codes are inside procedures (English or German)
+            procedures_list = result.get("procedures") or result.get("prozeduren", [])
+            simple_procedures = []
+            all_billing_codes = []
+            
+            for proc in procedures_list:
+                # Extract procedure name (English or German)
+                if isinstance(proc, dict):
+                    proc_name = (proc.get("procedure_name") or 
+                               proc.get("beschreibung") or 
+                               str(proc))
+                    simple_procedures.append(proc_name)
+                    
+                    # Extract nested billing codes (handle ALL possible field names Gemini might use)
+                    billing_codes_field = None
+                    field_name_used = None
+                    
+                    for field_name in ["billing_codes", "abrechnungspositionen", "billing_entries", "codes", "positionen", "entries"]:
+                        if field_name in proc and proc[field_name]:
+                            billing_codes_field = proc[field_name]
+                            field_name_used = field_name
+                            break
+                    
+                    print(f"🔍 PROCEDURE FIELDS: {list(proc.keys())}")
+                    print(f"🔍 FOUND billing field: '{field_name_used}' with {len(billing_codes_field) if billing_codes_field else 0} codes")
+                    
+                    if billing_codes_field:
+                        for code in billing_codes_field:
+                            # Convert nested billing code format (handle German fields)
+                            
+                            # Debug: Show what fields Gemini provided
+                            print(f"🔍 RAW CODE DATA: {code}")
+                            
+                            code_value = (code.get("code") or code.get("position") or "")
+                            type_value = (code.get("code_system") or 
+                                        code.get("gebuehrenordnung") or
+                                        code.get("system") or "").lower()
+                            
+                            print(f"🔍 MAPPED code: '{code_value}', type: '{type_value}'")
+                            
+                            converted_code = {
+                                "code": code_value,
+                                "description": (code.get("description") or 
+                                              code.get("beschreibung") or ""),
+                                "type": type_value,
+                                "tooth_number": (proc.get("tooth_number") or 
+                                               proc.get("zahn") or ""),
+                                "quantity": (code.get("quantity") or 
+                                           code.get("anzahl") or 1),
+                                "factor": (code.get("factor") or 
+                                         code.get("faktor") or 1.0),
+                                "points": (code.get("points") or 
+                                         code.get("punkte") or 0),
+                                "note": ""
+                            }
+                            all_billing_codes.append(converted_code)
+                            print(f"🔧 EXTRACTED nested billing code: {converted_code['code']} (type: {converted_code['type']}) from procedure")
+                else:
+                    simple_procedures.append(str(proc))
+            
+            normalized["procedures"] = simple_procedures
+            
+            # If we found nested billing codes, use them
+            if all_billing_codes:
+                if "billing_codes" not in normalized:
+                    normalized["billing_codes"] = []
+                normalized["billing_codes"].extend(all_billing_codes)
+                print(f"🔧 EXTRACTED {len(all_billing_codes)} billing codes from nested procedures")
+        else:
+            normalized["procedures"] = result.get("procedures", [])
+        
+        # Convert billing codes  
+        if "billing_entries" in result:
+            billing_entries = result["billing_entries"]
+            billing_codes = []
+            
+            for entry in billing_entries:
+                # Convert each billing entry to our expected format
+                converted_code = {
+                    "code": entry.get("code", ""),
+                    "description": entry.get("description", ""),
+                    "type": entry.get("billing_type", "").lower(),
+                    "tooth_number": entry.get("tooth_region", ""),
+                    "quantity": entry.get("quantity", 1),
+                    "factor": entry.get("factor", 1.0),
+                    "points": entry.get("points", 0),
+                    "note": ""
+                }
+                billing_codes.append(converted_code)
+                print(f"🔧 CONVERTED billing entry: {entry.get('code')} → {converted_code}")
+            
+            normalized["billing_codes"] = billing_codes
+            print(f"🔧 MAPPED billing_entries → billing_codes: {len(billing_codes)} codes")
+        else:
+            # Ensure billing_codes is always present (might be populated from nested procedures above)
+            if "billing_codes" not in normalized:
+                normalized["billing_codes"] = result.get("billing_codes", [])
+                print(f"🔧 USING existing billing_codes: {len(normalized['billing_codes'])} codes")
+        
+        # Copy other fields
+        for key, value in result.items():
+            if key not in ["treatment_summary", "billing_entries"]:
+                normalized[key] = value
+        
+        return normalized
+
+    def _get_system_prompt(self) -> str:
+        """Delegate to the static method from LLMProcedureExtractor"""
+        return LLMProcedureExtractor._get_system_prompt()
+    
+    def _create_extraction_prompt(self, text: str, bema_goz_catalog: dict, findings_context: str, insurance_type: str = "bema") -> str:
+        # Use the same prompt as OpenAI for now
+        return self._get_system_prompt() + f"\n\nBEHANDLUNGSTEXT:\n{text}\n\nBEFUNDE:\n{findings_context}\n"
+
+
 class LLMProcedureExtractor:
-    """Extract dental procedures and billing codes using GPT-4o for proven accuracy"""
+    """Extract dental procedures and billing codes using GPT-4o for excellent accuracy"""
     
     def __init__(self):
-        self.api_key = settings.OPENAI_API_KEY
-        self.model = settings.LLM_MODEL or "gpt-4o-2024-11-20"  # Default to stable GPT-4o
+        from app.core.config import settings
+        self.model = settings.LLM_MODEL  # Force use settings model (no fallback)
         self.temperature = settings.LLM_TEMPERATURE
-        self.max_completion_tokens = settings.LLM_MAX_TOKENS  # Updated for newer models
+        self.max_completion_tokens = settings.LLM_MAX_TOKENS
+        
+        # RAG temporarily disabled for simplification  
+        # self.rag_retriever = DentalCodeRetriever()
+        
+        # Log actual model being used
+        logger.info(f"🤖 LLM Model initialized: {self.model}")
+        logger.info(f"🤖 Settings LLM_MODEL: {settings.LLM_MODEL}")
+        # logger.info(f"🔍 RAG retriever initialized with {self.rag_retriever.get_catalog_info()}")
         
         # Validate model availability
         self._validate_model_selection()
@@ -35,18 +315,20 @@ class LLMProcedureExtractor:
     def _validate_model_selection(self):
         """Validate that the selected model is available and optimal for the task"""
         valid_models = {
-            # Generally Available
-            "gpt-4o": {"reasoning": "excellent", "cost": "medium", "speed": "fast", "availability": "public"},
-            "gpt-4-turbo": {"reasoning": "very good", "cost": "medium", "speed": "fast", "availability": "public"},
-            "gpt-4": {"reasoning": "good", "cost": "medium", "speed": "slow", "availability": "public"},
-            # Limited Access (waitlist required)
-            "o3-mini": {"reasoning": "superior", "cost": "low", "speed": "fast", "availability": "limited_preview"},
-            "o3": {"reasoning": "outstanding", "cost": "very_high", "speed": "slow", "availability": "research_preview"}
+            # Only Gemini models supported
+            "gemini-2.5-pro": {"reasoning": "excellent", "cost": "low", "speed": "fast", "availability": "public"}
         }
         
         if self.model not in valid_models:
-            logger.warning(f"Model {self.model} not in validated list. Using anyway but results may vary.")
+            logger.warning(f"🚨 Model {self.model} not in validated list. Using anyway but results may vary.")
         else:
+            model_info = valid_models[self.model]
+            logger.info(f"✅ Using validated model {self.model}: {model_info}")
+        
+        # Force log current model for debugging
+        logger.info(f"🎯 FINAL MODEL BEING USED: {self.model}")
+        
+        if self.model in valid_models:
             model_info = valid_models[self.model]
             logger.info(f"Using LLM model: {self.model}", 
                        reasoning_quality=model_info["reasoning"],
@@ -62,7 +344,7 @@ class LLMProcedureExtractor:
             
             # Recommend best available option
             if self.model not in ["o3-mini", "o3", "gpt-4o"]:
-                logger.info("💡 Tip: Consider 'gpt-4o' for excellent medical reasoning with public access")
+                logger.info("💡 Tip: Use 'gpt-4o' for excellent medical reasoning, or 'o3' if organization is verified")
         
     async def extract_procedures_and_codes(
         self, 
@@ -153,89 +435,18 @@ class LLMProcedureExtractor:
             logger.error("LLM procedure extraction failed", error=str(e))
             raise LLMExtractionError(f"LLM processing error: {str(e)}")
     
-    def _get_system_prompt(self) -> str:
-        """O3-optimized system prompt for German dental billing extraction"""
-        return """Du bist ein hochspezialisierter deutscher Zahnarzt-Abrechnungsexperte mit umfassendem Wissen über BEMA und GOZ.
-
-AUFGABE: Analysiere Behandlungsdokumentationen und erstelle präzise BEMA/GOZ-Abrechnungen.
-
-WICHTIGE ABRECHNUNGSLOGIK:
-
-🏥 BEMA-PATIENT (Kassenpatient):
-- PRIMÄR: BEMA-Leistungen abrechnen (Kassensachleistungen)  
-- ZUSÄTZLICH: GOZ-Leistungen mit Mehrkostenvereinbarung (MKV) möglich
-- Bei GOZ-Leistungen: "note": "MKV" hinzufügen
-
-💰 GOZ-PATIENT (Privatpatient):
-- NUR GOZ-Leistungen abrechnen
-- KEINE BEMA-Leistungen
-
-HÄUFIGE DEUTSCHE ZAHNMEDIZINISCHE BEGRIFFE:
-- Karies → BEMA 13a/b/c (je nach Flächen) oder GOZ 2080-2100
-- Lokalanästhesie → BEMA L1 oder GOZ 0080
-- Röntgen → BEMA Ä 925a oder GOZ Rö2
-- Untersuchung → BEMA 01 oder GOZ I
-- Füllung → BEMA 13 oder GOZ 2080-2197
-- Extraktion → BEMA X1/X2 oder GOZ 3000
-
-AUSGABEFORMAT (JSON):
-{
-  "procedures": ["Lokalanästhesie", "Kompositfüllung", "Röntgenaufnahme"],
-  "billing_codes": [
-    {
-      "code": "BEMA_01",
-      "description": "Untersuchung", 
-      "type": "bema",
-      "points": 18,
-      "fee": "23.61 €"
-    },
-    {
-      "code": "GOZ_2197",
-      "description": "Adhäsive Technik",
-      "type": "goz", 
-      "points": 130,
-      "fee": "22.73 €",
-      "note": "MKV"
-    }
-  ],
-  "confidence_overall": 0.9
-}
-
-QUALITÄTSANFORDERUNGEN:
-- Extrahiere ALLE relevanten Behandlungen
-- Verwende korrekte deutsche BEMA/GOZ-Codes  
-- Berechne realistische Honorare
-- Berücksichtige Versicherungstyp (BEMA vs GOZ)"""
+    @staticmethod
+    def _get_system_prompt() -> str:
+        """Direct prompt for raw Gemini 2.5 Pro output"""
+        return """Du bist ein Zahnarzt-Abrechnungsexperte. Erstelle Abrechnungen im JSON Format."""
     
     def _create_extraction_prompt(self, text: str, bema_goz_catalog: dict, findings_context: str, insurance_type: str = "bema") -> str:
-        """Create extraction prompt with insurance type context"""
+        """Direct voice text to Gemini - no extra processing"""
         
-        # Insurance-specific instruction
-        if insurance_type.lower() == "bema":
-            insurance_instruction = """
-🏥 KASSENPATIENT (BEMA):
-- Rechne PRIMÄR alle Standard-Leistungen nach BEMA ab
-- Hochwertige Zusatzleistungen (Komposit, Adhäsive, etc.) als GOZ mit MKV
-- Beispiel: BEMA 13c + GOZ 2197 (MKV - Adhäsive Technik)"""
-        else:
-            insurance_instruction = """
-💰 PRIVATPATIENT (GOZ):
-- Rechne ALLE Leistungen ausschließlich nach GOZ ab
-- KEINE BEMA-Codes verwenden
-- Vollständige Privatabrechnung"""
+        logger.info(f"🎤 Sending direct voice input to Gemini")
         
-        return f"""
-BEHANDLUNGSTEXT:
-{text}
-
-BEFUNDE:
-{findings_context}
-
-VERSICHERUNGSTYP: {insurance_type.upper()}
-{insurance_instruction}
-
-Analysiere den Text und erstelle eine vollständige Abrechnung nach den oben genannten Regeln.
-Antworte im JSON-Format wie im System-Prompt beschrieben."""
+        # Just the voice text - nothing else!
+        return text
     
     def _get_key_codes_for_prompt(self, bema_goz_catalog: dict) -> dict:
         """Extract the most important BEMA/GOZ codes for the prompt"""
@@ -313,21 +524,13 @@ Antworte im JSON-Format wie im System-Prompt beschrieben."""
         if catalog_key in bema_goz_catalog and code_id in bema_goz_catalog[catalog_key]:
             catalog_info = bema_goz_catalog[catalog_key][code_id]
             
-            # Calculate fees
-            if system == "bema":
-                point_value = bema_goz_catalog["meta"]["bema_point_value"]
-                fee_euros = round(catalog_info["points"] * point_value, 2)
-            else:  # GOZ
-                point_value = bema_goz_catalog["meta"]["goz_point_value"]
-                factor = catalog_info.get("standard_factor", 2.3)
-                fee_euros = round(catalog_info["points"] * point_value * factor, 2)
+            # No fee calculations - dentists set their own prices
             
             return {
                 "code": catalog_info["code"],
                 "system": system,
                 "description": catalog_info["description"],
                 "points": catalog_info["points"],
-                "fee_euros": fee_euros,
                 "factor": catalog_info.get("standard_factor") if system == "goz" else None,
                 "confidence": min(code.get("confidence", 0.5), 0.95),  # Cap LLM confidence
                 "reasoning": code.get("reasoning", ""),
@@ -337,12 +540,40 @@ Antworte im JSON-Format wie im System-Prompt beschrieben."""
         return None
 
 
+# Provider switch logic
+class ProviderSwitchLLMExtractor:
+    def __init__(self):
+        from app.core.config import settings
+        self.provider = settings.LLM_PROVIDER.lower()
+        
+        # 🔍 CRITICAL DEBUG: Log provider selection
+        logger.info(f"🔧 settings.LLM_PROVIDER: '{settings.LLM_PROVIDER}'")
+        logger.info(f"🔧 self.provider (lowercased): '{self.provider}'")
+        
+        if self.provider == "google":
+            self.extractor = GeminiLLMProcedureExtractor()
+            logger.info("✅ 🔄 Using Google Gemini Pro 2.5 as LLM provider")
+            logger.info(f"✅ Gemini model: {self.extractor.model}")
+        else:
+            self.extractor = LLMProcedureExtractor()
+            logger.error("❌ 🔄 Using OpenAI GPT-4o as LLM provider")
+            logger.error(f"❌ OpenAI model: {self.extractor.model}")
+            logger.error("❌ This should be Gemini! Check LLM_PROVIDER setting!")
+
+    async def extract_procedures_and_codes(self, *args, **kwargs):
+        return await self.extractor.extract_procedures_and_codes(*args, **kwargs)
+
+    # Delegate all attributes and methods to the underlying extractor
+    def __getattr__(self, name):
+        return getattr(self.extractor, name)
+
+
 class EnhancedDocumentationProcessor:
     """Enhanced processor that combines traditional and LLM-based extraction"""
     
     def __init__(self):
-        self.llm_extractor = LLMProcedureExtractor() if settings.USE_LLM_EXTRACTION else None
-        self.use_llm = settings.USE_LLM_EXTRACTION and settings.OPENAI_API_KEY is not None
+        self.llm_extractor = ProviderSwitchLLMExtractor()
+        self.use_llm = True
         
     async def extract_procedures_intelligent(
         self, 
@@ -362,9 +593,6 @@ class EnhancedDocumentationProcessor:
         start_time = time.time()
         
         try:
-            import openai
-            client = openai.OpenAI(api_key=self.llm_extractor.api_key)
-            
             # Create findings context
             findings_context = "Keine spezifischen Befunde dokumentiert"
             if findings:
@@ -378,109 +606,61 @@ class EnhancedDocumentationProcessor:
                         findings_list.append(str(finding))
                 findings_context = "\n".join(findings_list)
             
-            logger.info(f"LLM extraction starting with O3-mini, insurance_type: {insurance_type}")
+            logger.info(f"LLM extraction starting with {self.llm_extractor.model}, insurance_type: {insurance_type}")
+            logger.info(f"🚀 Using provider: {type(self.llm_extractor).__name__}")
+            logger.info(f"🔧 Underlying extractor: {type(self.llm_extractor.extractor).__name__}")
+            logger.info(f"🔧 Provider setting: {self.llm_extractor.provider}")
             
-            # Create extraction query with insurance type
-            query = self.llm_extractor._create_extraction_prompt(text, bema_goz_catalog, findings_context, insurance_type)
-            system_prompt = self.llm_extractor._get_system_prompt()
+            # 🔍 CRITICAL DEBUG: Verify Gemini is being used
+            if type(self.llm_extractor.extractor).__name__ == "GeminiLLMProcedureExtractor":
+                logger.info("✅ Confirmed: Using Gemini 2.5 Pro")
+            else:
+                logger.error(f"❌ WRONG PROVIDER: Expected GeminiLLMProcedureExtractor, got {type(self.llm_extractor.extractor).__name__}")
             
-            logger.info(f"Sending prompt to O3-mini (model: {self.llm_extractor.model})")
+            # Delegate to the appropriate extractor (OpenAI or Gemini)
+            result = await self.llm_extractor.extract_procedures_and_codes(
+                text=text,
+                bema_goz_catalog=bema_goz_catalog,
+                findings=findings
+            )
             
-            # Prepare API call parameters
-            api_params = {
-                "model": self.llm_extractor.model,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user", 
-                        "content": query
-                    }
-                ],
-                "response_format": {"type": "json_object"},  # Force JSON output
-                "max_completion_tokens": self.llm_extractor.max_completion_tokens
-            }
-            
-            # Only add temperature for models that support it (exclude O3 models)
-            if not self.llm_extractor.model.startswith("o3"):
-                api_params["temperature"] = self.llm_extractor.temperature
-            
-            # Call O3-mini for dental analysis
-            response = client.chat.completions.create(**api_params)
+            # Debug: Log what we actually got back
+            logger.info(f"🔍 LLM result keys: {list(result.keys())}")
+            logger.info(f"🔍 Result type: {type(result)}")
+            if "raw_gemini_response" in result:
+                logger.info(f"🎯 Gemini raw response length: {len(result['raw_gemini_response'])}")
+                logger.info(f"🎯 Gemini raw response start: {result['raw_gemini_response'][:200]}...")
             
             processing_time = int((time.time() - start_time) * 1000)
             
-            # Parse the response
-            result_text = response.choices[0].message.content
+            # Log the extraction result
+            logger.info(f"🎉 {type(self.llm_extractor).__name__} extraction completed", 
+                       processing_time_ms=processing_time,
+                       result_type=type(result).__name__)
             
-            # Log the complete LLM interaction
-            llm_logger.log_interaction(
-                model=self.llm_extractor.model,
-                system_prompt=system_prompt,
-                user_prompt=query,
-                response=result_text,
-                insurance_type=insurance_type,
-                patient_id=patient_id,
-                processing_time_ms=processing_time,
-                metadata={
-                    "temperature": self.llm_extractor.temperature,
-                    "max_completion_tokens": self.llm_extractor.max_completion_tokens,
-                    "findings_count": len(findings) if findings else 0,
-                    "text_length": len(text)
-                }
-            )
-            
-            # Parse and validate JSON response
-            try:
-                logger.info(f"Parsing O3 response (length: {len(result_text)})")
-                logger.info(f"Raw O3 response: {result_text[:500]}...")  # First 500 chars
+            # Validate result structure
+            if not isinstance(result, dict):
+                logger.error(f"Expected dict but got {type(result)}: {result}")
+                raise ValueError(f"LLM returned {type(result)} instead of dict")
                 
-                result = json.loads(result_text)
-                logger.info(f"JSON parsing successful, type: {type(result)}")
-                logger.info(f"Result keys: {list(result.keys()) if isinstance(result, dict) else 'Not a dict'}")
-                
-                # Validate that result is a dictionary
-                if not isinstance(result, dict):
-                    logger.error(f"Expected dict but got {type(result)}: {result}")
-                    raise ValueError(f"LLM returned {type(result)} instead of dict")
-                
-                # Check for required fields
+            # Log result summary - prioritize raw response over structured data
+            raw_response = result.get("raw_gemini_response", "")
+            if raw_response:
+                logger.info(f"✅ Raw Gemini response received: {len(raw_response)} chars")
+                logger.info(f"🎯 Raw response preview: {raw_response[:100]}...")
+            else:
+                # Only check for structured fields if no raw response available
                 if "billing_codes" in result:
                     billing_codes = result["billing_codes"]
-                    logger.info(f"Found billing_codes: {type(billing_codes)} with {len(billing_codes) if isinstance(billing_codes, list) else 'not a list'} items")
-                    if isinstance(billing_codes, list) and billing_codes:
-                        logger.info(f"First billing code: {type(billing_codes[0])} = {billing_codes[0]}")
+                    logger.info(f"Found billing_codes: {len(billing_codes) if isinstance(billing_codes, list) else 'not a list'} items")
                 else:
-                    logger.warning("No 'billing_codes' field in O3 response")
+                    logger.info("No structured billing_codes (raw response expected)")
                     
                 if "procedures" in result:
                     procedures = result["procedures"]
-                    logger.info(f"Found procedures: {type(procedures)} = {procedures}")
+                    logger.info(f"Found procedures: {len(procedures) if isinstance(procedures, list) else 'not a list'} items")
                 else:
-                    logger.warning("No 'procedures' field in O3 response")
-                
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON parsing failed: {e}")
-                logger.error(f"Raw response: {result_text}")
-                # Return a safe fallback
-                result = {
-                    "procedures": [],
-                    "billing_codes": [],
-                    "confidence_overall": 0.0,
-                    "error": f"JSON parsing failed: {str(e)}"
-                }
-            except Exception as e:
-                logger.error(f"Response processing failed: {e}")
-                logger.error(f"Raw response: {result_text}")
-                # Return a safe fallback
-                result = {
-                    "procedures": [],
-                    "billing_codes": [],
-                    "confidence_overall": 0.0,
-                    "error": f"Response processing failed: {str(e)}"
-                }
+                    logger.info("No structured procedures (raw response expected)")
             
             # Validate and enhance the result
             validated_result = self._validate_and_enhance_result(result, bema_goz_catalog)
@@ -498,6 +678,48 @@ class EnhancedDocumentationProcessor:
         except Exception as e:
             logger.error("LLM procedure extraction failed", error=str(e))
             raise LLMExtractionError(f"LLM processing error: {str(e)}")
+    
+    def _format_codes_for_prompt(self, relevant_codes: List[Dict]) -> str:
+        """Format retrieved codes for inclusion in LLM prompt"""
+        if not relevant_codes:
+            return "Keine spezifischen Codes gefunden - verwende Standard-Mapping."
+        
+        formatted_sections = {
+            "BEMA (Kassencodes)": [],
+            "GOZ (Privatcodes)": [],
+            "GOÄ (Ärztliche Codes)": []
+        }
+        
+        for code_info in relevant_codes:
+            system = code_info.get("system", "").upper()
+            code = code_info.get("code", "")
+            description = code_info.get("description", "")
+            points = code_info.get("points", 0)
+            factor = code_info.get("factor", "") or code_info.get("standard_factor", "")
+            relevance = code_info.get("relevance_score", 0)
+            reason = code_info.get("retrieval_reason", "")
+            
+            # Format code entry
+            if system == "BEMA":
+                entry = f"- {code}: {description} ({points} Punkte) [Relevanz: {relevance:.1%}]"
+                formatted_sections["BEMA (Kassencodes)"].append(entry)
+            elif system == "GOZ":
+                factor_text = f", Faktor {factor}" if factor else ""
+                entry = f"- {code}: {description} ({points} Punkte{factor_text}) [Relevanz: {relevance:.1%}]"
+                formatted_sections["GOZ (Privatcodes)"].append(entry)
+            elif system == "GOAE":
+                factor_text = f", Faktor {factor}" if factor else ""
+                entry = f"- {code}: {description} (Faktor {factor_text}) [Relevanz: {relevance:.1%}]"
+                formatted_sections["GOÄ (Ärztliche Codes)"].append(entry)
+        
+        # Build final formatted text
+        formatted_text = []
+        for section_name, entries in formatted_sections.items():
+            if entries:
+                formatted_text.append(f"\n{section_name}:")
+                formatted_text.extend(entries)
+        
+        return "\n".join(formatted_text) if formatted_text else "Keine relevanten Codes gefunden."
     
     def _traditional_extraction(self, text: str, bema_goz_catalog: dict) -> Dict[str, Any]:
         """Traditional keyword-based extraction as fallback"""
@@ -538,7 +760,8 @@ class EnhancedDocumentationProcessor:
                 "billing_codes": [],
                 "confidence_overall": 0.0,
                 "extraction_method": "o3_direct",
-                "error": f"Invalid result type: {type(result)}"
+                "error": f"Invalid result type: {type(result)}",
+                "raw_gemini_response": None  # Can't preserve if not a dict
             }
         
         # Ensure required fields exist with safe access
@@ -573,21 +796,35 @@ class EnhancedDocumentationProcessor:
                 try:
                     logger.info(f"Validating billing code {i}: {type(code)}")
                     
-                    if isinstance(code, dict) and "code" in code:
-                        # Ensure required fields with safe defaults
-                        validated_code = {
-                            "code": code.get("code", ""),
-                            "description": code.get("description", ""),
-                            "type": code.get("type", "unknown"),
-                            "points": code.get("points", 0),
-                            "fee": code.get("fee", "0.00 €"),
-                            "note": code.get("note", ""),
-                            "factor": code.get("factor", 1.0)
-                        }
-                        validated_codes.append(validated_code)
-                        logger.info(f"Successfully validated billing code {i}")
+                    if isinstance(code, dict):
+                        # Check if code is already normalized (from Gemini extraction)
+                        if "code" in code and "description" in code and "type" in code:
+                            # Already normalized - use directly
+                            normalized_code = code
+                            logger.info(f"Using pre-normalized code {i}: {normalized_code}")
+                        else:
+                            # Convert German field names to English (traditional extraction)
+                            normalized_code = self._normalize_german_billing_code(code)
+                            logger.info(f"German-normalized code {i}: {normalized_code}")
+                        
+                        if normalized_code.get("code"):
+                            # Ensure required fields with safe defaults
+                            validated_code = {
+                                "code": normalized_code.get("code", ""),
+                                "description": normalized_code.get("description", ""),
+                                "type": normalized_code.get("type", "bema"),
+                                "points": normalized_code.get("points", 0),
+                                "quantity": normalized_code.get("quantity", 1),
+                                "tooth_number": normalized_code.get("tooth_number", ""),
+                                "note": normalized_code.get("note", ""),
+                                "factor": normalized_code.get("factor", 1.0)
+                            }
+                            validated_codes.append(validated_code)
+                            logger.info(f"✅ Successfully validated billing code {i}: {validated_code['code']}")
+                        else:
+                            logger.warning(f"❌ No valid code found in {i}: {code}")
                     else:
-                        logger.warning(f"Invalid billing code {i}: {type(code)} = {code}")
+                        logger.warning(f"❌ Invalid billing code {i}: {type(code)} = {code}")
                         
                 except Exception as e:
                     logger.error(f"Error validating billing code {i}: {e}")
@@ -596,6 +833,11 @@ class EnhancedDocumentationProcessor:
             
             validated_result["billing_codes"] = validated_codes
             logger.info(f"Validation complete: {len(validated_codes)} billing codes validated")
+            
+            # CRITICAL: Preserve raw_gemini_response!
+            if "raw_gemini_response" in result:
+                validated_result["raw_gemini_response"] = result["raw_gemini_response"]
+                logger.info(f"✅ Preserving raw_gemini_response: {len(result['raw_gemini_response'])} chars")
             
             return validated_result
             
@@ -607,5 +849,75 @@ class EnhancedDocumentationProcessor:
                 "billing_codes": [],
                 "confidence_overall": 0.0,
                 "extraction_method": "o3_direct",
-                "error": f"Validation failed: {str(e)}"
-            } 
+                "error": f"Validation failed: {str(e)}",
+                "raw_gemini_response": result.get("raw_gemini_response")  # PRESERVE EVEN ON ERROR!
+            }
+    
+    def _normalize_german_billing_code(self, code: dict) -> dict:
+        """Normalisiert die Feldnamen für konsistente interne Verarbeitung
+        
+        Wir behalten die deutschen Feldnamen bei, da dies natürlicher für die Anwendung ist.
+        Die Normalisierung ist trotzdem nötig um verschiedene Schreibweisen zu vereinheitlichen.
+        """
+        
+        # Mapping verschiedener deutscher Schreibweisen auf einheitliche Feldnamen
+        field_mapping = {
+            "bema_position": "position",
+            "goz_position": "position",
+            "kurzbezeichnung": "position",
+            "position": "position",
+            "code": "position",
+            
+            "beschreibung": "beschreibung", 
+            "bezeichnung": "beschreibung",
+            "description": "beschreibung",
+            
+            "anzahl": "anzahl",
+            "menge": "anzahl",
+            "quantity": "anzahl",
+            
+            "zahn_region": "zahn",
+            "zahn": "zahn", 
+            "zahnbereich": "zahn",
+            "tooth_number": "zahn",
+            
+            "punkte": "punkte",
+            "punktwert": "punkte",
+            "points": "punkte",
+            
+            "faktor": "faktor",
+            "factor": "faktor",
+            
+            "anmerkung": "anmerkung",
+            "bemerkung": "anmerkung", 
+            "hinweis": "anmerkung",
+            "note": "anmerkung"
+        }
+        
+        normalized = {}
+        
+        # Convert all fields using mapping
+        for german_key, english_key in field_mapping.items():
+            if german_key in code:
+                value = code[german_key]
+                
+                # Special handling for tooth regions (convert list to single tooth)
+                if english_key == "tooth_number" and isinstance(value, list) and value:
+                    normalized[english_key] = str(value[0])  # Take first tooth
+                elif english_key == "tooth_number" and value:
+                    normalized[english_key] = str(value)
+                else:
+                    normalized[english_key] = value
+        
+        # Determine billing type from code prefix
+        code_value = normalized.get("code", "")
+        if code_value:
+            if code_value.startswith(("GOZ", "2", "3", "4", "5", "6", "7", "8", "9")):
+                normalized["type"] = "goz"
+            elif code_value.startswith(("Ä", "A")):
+                normalized["type"] = "goä"
+            else:
+                normalized["type"] = "bema"
+        
+        logger.info(f"🔄 German→English: {code} → {normalized}")
+        return normalized 

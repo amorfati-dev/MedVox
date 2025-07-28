@@ -47,25 +47,30 @@ class Settings(BaseSettings):
     WHISPER_TEMPERATURE: float = 0.1  # Lower for more consistent medical terms
     DENTAL_TERMINOLOGY_BOOST: bool = True  # Enable dental terminology enhancement
     
-    # LLM Configuration for Intelligent Procedure Extraction
-    LLM_MODEL: str = "o3-mini"  # Direct O3-mini for best German dental accuracy
-    LLM_TEMPERATURE: float = 0.1  # Lower for consistent medical interpretation
-    LLM_MAX_TOKENS: int = 2000
+    # LLM Configuration for Intelligent Procedure Extraction  
+    LLM_MODEL: str = "gemini-2.5-pro"  # Gemini 2.5 Pro for best German dental results
+    LLM_TEMPERATURE: float = 0.1  # Lower temperature for medical consistency
+    LLM_MAX_TOKENS: int = 32000  # Much higher limit for Gemini 2.5 Pro thinking mode
     USE_LLM_EXTRACTION: bool = True  # Enable LLM-based procedure extraction
     
-    # Advanced models for complex cases
-    ADVANCED_LLM_MODEL: str = "gpt-4o-2024-11-20"  # Stable GPT-4o for complex billing cases
-    BILLING_LLM_MODEL: str = "gpt-4o-2024-11-20"  # Reliable GPT-4o for BEMA/GOZ
+    # LLM Provider Umschaltung
+    LLM_PROVIDER: str = "google"  # "openai" oder "google"
+    GOOGLE_GEMINI_API_KEY: Optional[str] = None
+    GOOGLE_GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent"
     
-    # Multi-Stage Pipeline Configuration
-    USE_MULTI_STAGE_PIPELINE: bool = False  # Simplified: Use direct O3 approach
+    # Advanced models for complex cases - USE GPT-4o (fallback from O3)
+    ADVANCED_LLM_MODEL: str = "gpt-4o"  # GPT-4o for complex billing cases
+    BILLING_LLM_MODEL: str = "gpt-4o"  # GPT-4o for BEMA/GOZ
+    
+    # Multi-Stage Pipeline Configuration - FORCE DISABLED for Gemini testing
+    USE_MULTI_STAGE_PIPELINE: bool = False  # HARD OVERRIDE: Force disable pipeline
     PIPELINE_NORMALIZATION_ENABLED: bool = False
     PIPELINE_BILLING_MAPPING_ENABLED: bool = False
     PIPELINE_ADVANCED_BILLING_ENABLED: bool = False
     PIPELINE_PLAUSIBILITY_CHECK_ENABLED: bool = False
     
-    # Pipeline Model Settings (for compatibility, even if disabled)
-    PIPELINE_NORMALIZATION_MODEL: str = "gpt-4o-mini"
+    # Pipeline Model Settings - USE GPT-4o (O3 requires verification)
+    PIPELINE_NORMALIZATION_MODEL: str = "gpt-4o"
     PIPELINE_BILLING_MODEL: str = "gpt-4o"
     PIPELINE_AUDIT_MODEL: str = "gpt-4o"
     
@@ -101,6 +106,14 @@ class Settings(BaseSettings):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        
+        # FORCE OVERRIDE: Disable pipeline for Gemini testing
+        # This overrides any .env file settings that might be causing issues
+        self.USE_MULTI_STAGE_PIPELINE = False
+        self.PIPELINE_NORMALIZATION_ENABLED = False
+        self.PIPELINE_BILLING_MAPPING_ENABLED = False
+        self.PIPELINE_ADVANCED_BILLING_ENABLED = False
+        self.PIPELINE_PLAUSIBILITY_CHECK_ENABLED = False
         
         # Validate that required settings are present in production
         if self.is_production:

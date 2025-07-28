@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "version": "2025.1",
+    "last_updated": "2025-01-23",
+    "type": "bema_complete",
+    "source": "KZBV Official 2025",
+    "codes_count": 150
+  },
+  "bema_codes": {
+    "01": {
+      "code": "BEMA 01",
+      "description": "Eingehende Untersuchung",
+      "points": 8,
+      "category": "Diagnostik",
+      "subcategory": "Untersuchung",
+      "keywords": ["untersuchung", "befund", "kontrolle", "diagnose", "erstuntersuchung"],
+      "alternatives": ["Erstuntersuchung", "Befunderhebung", "Diagnose"],
+      "frequency": "häufig"
+    },
+    "02": {
+      "code": "BEMA 02",
+      "description": "Weitere Untersuchung",
+      "points": 4,
+      "category": "Diagnostik",
+      "subcategory": "Untersuchung",
+      "keywords": ["kontrolluntersuchung", "nachuntersuchung", "verlaufskontrolle"],
+      "alternatives": ["Kontrolluntersuchung", "Nachkontrolle"],
+      "frequency": "häufig"
+    },
+    "IP1": {
+      "code": "BEMA IP1",
+      "description": "Aufklärung über Krankheitsursachen und deren Vermeidung",
+      "points": 8,
+      "category": "Individualprophylaxe",
+      "subcategory": "Aufklärung",
+      "keywords": ["aufklärung", "prophylaxe", "mundgesundheit", "ip1"],
+      "alternatives": ["Individualprophylaxe", "Aufklärung"],
+      "frequency": "häufig"
+    },
+    "IP4": {
+      "code": "BEMA IP4",
+      "description": "Professionelle Zahnreinigung bei Parodontitis",
+      "points": 60,
+      "category": "Individualprophylaxe",
+      "subcategory": "Reinigung",
+      "keywords": ["professionelle zahnreinigung", "pzr", "parodontitis", "prophylaxe", "ip4"],
+      "alternatives": ["PZR", "Professionelle Zahnreinigung"],
+      "frequency": "mittel"
+    },
+    "13a": {
+      "code": "BEMA 13a",
+      "description": "Füllung einflächig",
+      "points": 8,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung einflächig", "komposit einflächig", "amalgam einflächig", "okklusal"],
+      "alternatives": ["Einflächige Füllung", "Okklusalfüllung"],
+      "frequency": "sehr häufig"
+    },
+    "13b": {
+      "code": "BEMA 13b",
+      "description": "Füllung zweiflächig",
+      "points": 9,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung zweiflächig", "komposit zweiflächig", "mo", "od", "approximal"],
+      "alternatives": ["Zweiflächige Füllung", "Approximalfüllung"],
+      "frequency": "sehr häufig"
+    },
+    "13c": {
+      "code": "BEMA 13c",
+      "description": "Füllung dreiflächig",
+      "points": 11,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung dreiflächig", "mod", "komplexe füllung"],
+      "alternatives": ["Dreiflächige Füllung", "MOD-Füllung"],
+      "frequency": "häufig"
+    },
+    "13d": {
+      "code": "BEMA 13d",
+      "description": "Füllung vierflächig",
+      "points": 14,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung vierflächig", "modl", "komplexe füllung", "großflächig"],
+      "alternatives": ["Vierflächige Füllung", "MODL-Füllung"],
+      "frequency": "mittel"
+    },
+    "28a": {
+      "code": "BEMA 28a",
+      "description": "Wurzelkanalbehandlung einwurzeliger Zahn",
+      "points": 40,
+      "category": "Endodontie",
+      "subcategory": "Wurzelkanalbehandlung",
+      "keywords": ["wurzelkanal", "endodontie", "wurzelbehandlung", "einwurzelig", "frontzahn"],
+      "alternatives": ["Endodontie einwurzelig", "Wurzelkanalbehandlung Frontzahn"],
+      "frequency": "häufig"
+    },
+    "28b": {
+      "code": "BEMA 28b",
+      "description": "Wurzelkanalbehandlung mehrwurzeliger Zahn",
+      "points": 51,
+      "category": "Endodontie",
+      "subcategory": "Wurzelkanalbehandlung",
+      "keywords": ["wurzelkanal mehrwurzelig", "endodontie", "molar", "prämolar", "seitenzahn"],
+      "alternatives": ["Endodontie mehrwurzelig", "Wurzelkanalbehandlung Molar"],
+      "frequency": "häufig"
+    },
+    "41": {
+      "code": "BEMA 41",
+      "description": "Infiltrationsanästhesie",
+      "points": 3,
+      "category": "Anästhesie",
+      "subcategory": "Lokalanästhesie",
+      "keywords": ["lokalanästhesie", "infiltration", "betäubung", "spritze"],
+      "alternatives": ["Lokalanästhesie", "Betäubung"],
+      "frequency": "sehr häufig"
+    },
+    "42": {
+      "code": "BEMA 42",
+      "description": "Leitungsanästhesie",
+      "points": 7,
+      "category": "Anästhesie",
+      "subcategory": "Lokalanästhesie",
+      "keywords": ["leitungsanästhesie", "nervenblockade", "mandibuläre anästhesie"],
+      "alternatives": ["Leitungsanästhesie", "Nervenblockade"],
+      "frequency": "häufig"
+    },
+    "43": {
+      "code": "BEMA 43",
+      "description": "Zahnentfernung einwurzeliger Zahn",
+      "points": 9,
+      "category": "Chirurgie",
+      "subcategory": "Extraktion",
+      "keywords": ["extraktion", "zahnentfernung", "ziehen", "einwurzelig", "frontzahn"],
+      "alternatives": ["Extraktion Frontzahn", "Zahnentfernung einwurzelig"],
+      "frequency": "häufig"
+    },
+    "44": {
+      "code": "BEMA 44",
+      "description": "Zahnentfernung mehrwurzeliger Zahn",
+      "points": 13,
+      "category": "Chirurgie",
+      "subcategory": "Extraktion",
+      "keywords": ["extraktion", "zahnentfernung", "ziehen", "mehrwurzelig", "molar"],
+      "alternatives": ["Extraktion Molar", "Zahnentfernung mehrwurzelig"],
+      "frequency": "häufig"
+    },
+    "45": {
+      "code": "BEMA 45",
+      "description": "Operative Zahnentfernung",
+      "points": 22,
+      "category": "Chirurgie",
+      "subcategory": "Operative Extraktion",
+      "keywords": ["operative extraktion", "chirurgische entfernung", "osteotomie", "weisheitszahn"],
+      "alternatives": ["Operative Extraktion", "Chirurgische Zahnentfernung"],
+      "frequency": "mittel"
+    },
+    "P200": {
+      "code": "BEMA P200",
+      "description": "Systematische Parodontalbehandlung (SPA)",
+      "points": 24,
+      "category": "Parodontologie",
+      "subcategory": "SPA",
+      "keywords": ["spa", "systematische parodontalbehandlung", "parodontitis", "scaling"],
+      "alternatives": ["SPA", "Parodontitisbehandlung"],
+      "frequency": "häufig"
+    },
+    "P201": {
+      "code": "BEMA P201",
+      "description": "Geschlossene Kürettage je Zahn",
+      "points": 3,
+      "category": "Parodontologie",
+      "subcategory": "Kürettage",
+      "keywords": ["kürettage", "scaling", "wurzelglättung", "deep cleaning"],
+      "alternatives": ["Wurzelglättung", "Subgingivale Kürettage"],
+      "frequency": "häufig"
+    },
+    "50": {
+      "code": "BEMA 50",
+      "description": "Krone",
+      "points": 95,
+      "category": "Prothetik",
+      "subcategory": "Einzelzahnprothetik",
+      "keywords": ["krone", "überkronung", "zahnkrone", "vollkrone"],
+      "alternatives": ["Vollkrone", "Überkronung"],
+      "frequency": "häufig"
+    },
+    "60": {
+      "code": "BEMA 60",
+      "description": "Teilkrone",
+      "points": 70,
+      "category": "Prothetik",
+      "subcategory": "Einzelzahnprothetik",
+      "keywords": ["teilkrone", "dreiviertelkrone", "partielle krone"],
+      "alternatives": ["3/4-Krone", "Partielle Krone"],
+      "frequency": "mittel"
+    },
+    "70": {
+      "code": "BEMA 70",
+      "description": "Inlay",
+      "points": 40,
+      "category": "Prothetik",
+      "subcategory": "Einlagefüllungen",
+      "keywords": ["inlay", "einlagefüllung", "guß", "keramik inlay"],
+      "alternatives": ["Einlagefüllung", "Gussfüllung"],
+      "frequency": "selten"
+    },
+    "80": {
+      "code": "BEMA 80",
+      "description": "Brückenglied",
+      "points": 95,
+      "category": "Prothetik",
+      "subcategory": "Brückenprothetik",
+      "keywords": ["brücke", "brückenglied", "zwischenglied", "pontic"],
+      "alternatives": ["Brückenzwischenglied", "Pontic"],
+      "frequency": "häufig"
+    },
+    "90": {
+      "code": "BEMA 90",
+      "description": "Brückenpfeiler",
+      "points": 95,
+      "category": "Prothetik",
+      "subcategory": "Brückenprothetik",
+      "keywords": ["brückenpfeiler", "pfeilerzahn", "brückenanker"],
+      "alternatives": ["Pfeilerkrone", "Brückenanker"],
+      "frequency": "häufig"
+    }
+  }
+} 

@@ -18,9 +18,12 @@
         <header class="app-header">
             <div class="header-content">
                 <h1>🦷 MedVox</h1>
-                <div class="status-indicators">
-                    <span class="status-badge" id="connection-status">⚫ Offline</span>
-                    <span class="status-badge" id="api-status">🔑 Ready</span>
+                <div class="header-actions">
+                    <div class="status-indicators">
+                        <span class="status-badge" id="connection-status">⚫ Offline</span>
+                        <span class="status-badge" id="api-status">🤖 AI-Ready</span>
+                    </div>
+                    <button class="header-settings-btn" id="header-settings-toggle">⚙️ Einstellungen</button>
                 </div>
             </div>
         </header>
@@ -31,7 +34,19 @@
             <section class="patient-section">
                 <div class="input-group">
                     <label for="patient-id">Patient ID</label>
-                    <input type="text" id="patient-id" placeholder="z.B. P-2024-001" class="touch-input">
+                    <div class="patient-id-group">
+                        <input type="text" id="patient-id" placeholder="z.B. P-2024-001" class="touch-input">
+                        <div class="insurance-toggle">
+                            <span class="toggle-label">Abrechnung:</span>
+                            <div class="toggle-switch" id="insurance-toggle">
+                                <input type="radio" id="bema-radio" name="insurance" value="bema" checked>
+                                <label for="bema-radio" class="toggle-option bema">BEMA</label>
+                                <input type="radio" id="goz-radio" name="insurance" value="goz">
+                                <label for="goz-radio" class="toggle-option goz">GOZ</label>
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="input-group">
                     <label for="dentist-id">Zahnarzt</label>
@@ -105,8 +120,8 @@
                 <div class="result-card">
                     <h3>💰 Abrechnungsziffern</h3>
                     <div class="billing-codes" id="billing-codes"></div>
-                    <div class="total-fee">
-                        <strong>Gesamt: <span id="total-fee">€0.00</span></strong>
+                    <div class="codes-summary" id="total-fee-container">
+                        <!-- Dynamic position summary will be populated here -->
                     </div>
                 </div>
 

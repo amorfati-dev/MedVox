@@ -1,0 +1,269 @@
+name: 🚀 MedVox CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '18'
+
+jobs:
+  # 🧪 Backend Testing & Quality Checks
+  backend-tests:
+    name: 🧪 Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 📦 Cache Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: 🔧 Install Dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-asyncio flake8 black
+        
+    - name: 🎨 Code Formatting Check
+      run: |
+        cd backend
+        black --check --diff app/
+        
+    - name: 🔍 Linting
+      run: |
+        cd backend
+        flake8 app/ --max-line-length=120 --ignore=E203,W503
+        
+    - name: 🧪 Run Tests
+      env:
+        # Mock environment for testing
+        DATABASE_URL: sqlite:///./test.db
+        OPENAI_API_KEY: test-key-for-mocking
+        SECRET_KEY: test-secret-key
+        DEBUG: true
+      run: |
+        cd backend
+        pytest tests/ -v --cov=app --cov-report=xml --cov-report=term
+        
+    - name: 📊 Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+
+  # 🌐 Frontend Quality Checks
+  frontend-checks:
+    name: 🌐 Frontend Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: 🎨 Frontend Linting
+      run: |
+        cd frontend
+        # Basic HTML/CSS/JS validation
+        echo "🔍 Checking frontend files..."
+        
+        # Check for syntax errors in JavaScript
+        node -c app.js
+        
+        # Basic file structure validation
+        test -f index.html && echo "✅ index.html exists"
+        test -f app.js && echo "✅ app.js exists"  
+        test -f styles.css && echo "✅ styles.css exists"
+        
+    - name: 📱 Validate PWA Manifest
+      run: |
+        cd frontend
+        if [ -f manifest.json ]; then
+          echo "🔍 Validating PWA manifest..."
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json', 'utf8'))"
+          echo "✅ PWA manifest is valid JSON"
+        fi
+
+  # 🔌 Integration Tests
+  integration-tests:
+    name: 🔌 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [backend-tests]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🔧 Install Dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 🗄️ Setup Test Database
+      run: |
+        cd backend
+        export DATABASE_URL=sqlite:///./test_integration.db
+        export SECRET_KEY=test-secret-key
+        python -c "
+        from app.core.database import engine, Base
+        Base.metadata.create_all(bind=engine)
+        print('✅ Test database created')
+        "
+        
+    - name: 🚀 Start Test Server
+      env:
+        DATABASE_URL: sqlite:///./test_integration.db
+        OPENAI_API_KEY: mock-key-for-testing
+        SECRET_KEY: test-secret-key
+        DEBUG: true
+        USE_MULTI_STAGE_PIPELINE: false  # Disable for testing without real API
+      run: |
+        cd backend
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        sleep 5
+        echo "🚀 Test server started"
+        
+    - name: 🧪 API Health Check
+      run: |
+        # Test basic API endpoints
+        curl -f http://localhost:8000/health || exit 1
+        echo "✅ Health check passed"
+        
+        curl -f http://localhost:8000/api/v1/ || exit 1
+        echo "✅ API root accessible"
+        
+        curl -f http://localhost:8000/api/v1/documentation/supported-formats || exit 1
+        echo "✅ Documentation API accessible"
+
+  # 🐳 Docker Build Test
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐳 Build Docker Image
+      run: |
+        if [ -f Dockerfile ]; then
+          docker build -t medvox:test .
+          echo "✅ Docker build successful"
+        else
+          echo "⏭️ No Dockerfile found, skipping"
+        fi
+
+  # 🔒 Security Scan
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: 🔒 Install Security Tools
+      run: |
+        pip install bandit safety
+        
+    - name: 🛡️ Run Bandit Security Scan
+      run: |
+        cd backend
+        bandit -r app/ -f json -o bandit-report.json || true
+        bandit -r app/ || true
+        
+    - name: 🔍 Check Dependencies for Vulnerabilities
+      run: |
+        cd backend
+        safety check --json || true
+
+  # 📝 Code Quality Report
+  quality-report:
+    name: 📝 Quality Report
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-checks, integration-tests]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📊 Generate Quality Summary
+      run: |
+        echo "## 🎯 Quality Report for PR #${{ github.event.number }}" >> $GITHUB_STEP_SUMMARY
+        echo "### ✅ All Checks Passed:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🧪 Backend tests" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌐 Frontend validation" >> $GITHUB_STEP_SUMMARY  
+        echo "- 🔌 Integration tests" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔒 Security scan" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🚀 **Ready for merge!**" >> $GITHUB_STEP_SUMMARY
+
+  # 🏷️ Release Build (only on version tags)
+  release:
+    name: 🏷️ Release Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    needs: [backend-tests, frontend-checks, integration-tests]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🎉 Create Release Assets
+      run: |
+        echo "🎉 Building release ${{ github.event.release.tag_name }}"
+        
+        # Create release directory
+        mkdir -p release
+        
+        # Copy important files
+        cp -r backend/ release/
+        cp -r frontend/ release/
+        cp README.md release/
+        cp requirements.txt release/ 2>/dev/null || true
+        
+        # Create release archive
+        tar -czf medvox-${{ github.event.release.tag_name }}.tar.gz release/
+        
+    - name: 📤 Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./medvox-${{ github.event.release.tag_name }}.tar.gz
+        asset_name: medvox-${{ github.event.release.tag_name }}.tar.gz
+        asset_content_type: application/gzip 

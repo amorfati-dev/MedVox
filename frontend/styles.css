@@ -85,6 +85,12 @@ body {
     color: var(--primary-color);
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 .status-indicators {
     display: flex;
     gap: var(--spacing-sm);
@@ -97,6 +103,27 @@ body {
     border-radius: 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+.header-settings-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.header-settings-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
 }
 
 /* Main Content */
@@ -130,6 +157,102 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     font-size: 0.875rem;
+}
+
+/* Patient ID Group with Insurance Toggle */
+.patient-id-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.patient-id-group .touch-input {
+    margin-bottom: 0;
+}
+
+.insurance-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.toggle-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.toggle-switch {
+    position: relative;
+    display: flex;
+    background: var(--surface-alt);
+    border: 2px solid var(--border);
+    border-radius: 2rem;
+    padding: 0.125rem;
+    min-height: 2.25rem;
+    overflow: hidden;
+}
+
+.toggle-switch input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toggle-option {
+    position: relative;
+    z-index: 2;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    border-radius: 1.5rem;
+    min-width: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.toggle-option.bema {
+    color: var(--primary-color);
+}
+
+.toggle-option.goz {
+    color: var(--warning-color);
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: calc(50% - 0.125rem);
+    height: calc(100% - 0.25rem);
+    background: var(--surface);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+    z-index: 1;
+    border: 1px solid var(--border-light);
+}
+
+.toggle-switch input[name="insurance"]:checked + .toggle-option {
+    color: white;
+}
+
+.toggle-switch input[value="bema"]:checked ~ .toggle-slider {
+    transform: translateX(0);
+    background: var(--primary-color);
+}
+
+.toggle-switch input[value="goz"]:checked ~ .toggle-slider {
+    transform: translateX(100%);
+    background: var(--warning-color);
 }
 
 .touch-input {
@@ -376,9 +499,38 @@ body {
     font-weight: 500;
 }
 
+/* Enhanced Billing Codes Display */
 .billing-codes {
-    display: grid;
-    gap: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.billing-section {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.billing-section-header {
+    background: var(--primary-color);
+    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.bema-section .billing-section-header {
+    background: var(--success-color);
+}
+
+.goz-mkv-section .billing-section-header {
+    background: var(--warning-color);
+}
+
+.goz-private-section .billing-section-header {
+    background: var(--primary-color);
 }
 
 .billing-code {
@@ -386,35 +538,149 @@ body {
     justify-content: space-between;
     align-items: center;
     background: var(--surface);
-    border-radius: 0.5rem;
-    padding: var(--spacing-md);
-    border: 1px solid var(--border);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.billing-code:last-child {
+    border-bottom: none;
+}
+
+.billing-code-bema {
+    background: var(--surface);
+    border-left: 4px solid var(--success-color);
+}
+
+.billing-code-goz-mkv {
+    background: #fffbf0;
+    border-left: 4px solid var(--warning-color);
+}
+
+.billing-code-goz-private {
+    background: #f8fafc;
+    border-left: 4px solid var(--primary-color);
 }
 
 .code-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
 }
 
 .code-number {
     font-weight: 700;
     color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.billing-code-bema .code-number {
+    color: var(--success-color);
+}
+
+.billing-code-goz-mkv .code-number {
+    color: var(--warning-color);
 }
 
 .code-description {
     color: var(--text-secondary);
     font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.code-points {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.code-fee-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-xs);
 }
 
 .code-fee {
     font-weight: 700;
     color: var(--success-color);
+    font-size: 1.125rem;
 }
 
+.mkv-note {
+    background: var(--warning-color);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.code-note {
+    background: var(--surface-alt);
+    color: var(--text-secondary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Total Fees Display */
 .total-fee {
-    text-align: right;
-    padding: var(--spacing-md);
-    font-size: 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--surface-alt);
+    border-radius: 0.75rem;
+    margin-top: var(--spacing-md);
+}
+
+.fee-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    font-size: 1rem;
+}
+
+.bema-fee {
     color: var(--success-color);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.goz-fee {
+    color: var(--warning-color);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.goz-private-fee {
+    color: var(--primary-color);
+}
+
+.patient-cost {
+    color: var(--primary-color);
+    font-size: 1.125rem;
+    padding-top: var(--spacing-sm);
+    border-top: 2px solid var(--border);
+}
+
+/* Billing Warning */
+.billing-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: #fef3cd;
+    border: 1px solid #facc15;
+    border-radius: 0.5rem;
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    color: #92400e;
+}
+
+.warning-icon {
+    font-size: 1.25rem;
 }
 
 .notes-textarea {
@@ -491,13 +757,14 @@ body {
     transition: right 0.3s ease;
     z-index: 200;
     display: flex !important; /* Override any hidden class */
+    overflow-y: auto;
 }
 
 .settings-panel.open {
     right: 0;
 }
 
-/* Ensure settings panel is always displayed (never hidden) */
+/* Ensure settings panel is never actually hidden, just moved off-screen */
 .settings-panel.hidden {
     display: flex !important;
     right: -500px;
@@ -657,8 +924,16 @@ body {
 /* Responsive for smaller settings panel */
 @media (max-width: 600px) {
     .settings-panel {
-        width: 100%;
-        right: -100%;
+        width: 100% !important;
+        right: -100% !important;
+    }
+    
+    .settings-panel.open {
+        right: 0 !important;
+    }
+    
+    .settings-panel.hidden {
+        right: -100% !important;
     }
     
     .settings-tabs {
@@ -802,3 +1077,352 @@ body {
         transition: transform 0.1s ease;
     }
 } 
+
+/* Professional Billing Table Styles - Gemini-like output */
+.professional-billing-table {
+    margin: var(--spacing-lg) 0;
+}
+
+.billing-section {
+    margin-bottom: var(--spacing-xl);
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.billing-section h3 {
+    margin: 0 0 var(--spacing-lg) 0;
+    color: var(--text-color);
+    font-size: 1.125rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.billing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+    background: var(--background);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+}
+
+.billing-table thead {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.billing-table th {
+    padding: var(--spacing-md) var(--spacing-sm);
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.billing-table th:last-child {
+    border-right: none;
+}
+
+.billing-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s ease;
+}
+
+.billing-table tbody tr:hover {
+    background: var(--surface-hover);
+}
+
+.billing-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.billing-table td {
+    padding: var(--spacing-md) var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--text-color);
+    border-right: 1px solid var(--border);
+}
+
+.billing-table td:last-child {
+    border-right: none;
+}
+
+.billing-table td:nth-child(3) {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+}
+
+.billing-table td:nth-child(4) {
+    font-weight: 500;
+}
+
+.billing-table td:nth-child(6) {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Gemini Raw Output Styles */
+.gemini-raw-output {
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+
+.gemini-raw-output h3 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--primary-color);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.gemini-content {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    white-space: pre-wrap;
+    background: var(--background);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+}
+
+/* Procedures Display */
+.procedures-display {
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.procedures-display h3 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--text-color);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.procedures-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.procedure-tag {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-pill);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: var(--shadow-xs);
+}
+
+/* No codes message */
+.no-codes {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--text-muted);
+    font-style: italic;
+    background: var(--surface);
+    border-radius: var(--border-radius-lg);
+    border: 2px dashed var(--border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .billing-table {
+        font-size: 0.8rem;
+    }
+    
+    .billing-table th,
+    .billing-table td {
+        padding: var(--spacing-sm) var(--spacing-xs);
+    }
+    
+    .billing-section {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 600px) {
+    .billing-code {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .code-fee-container {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+    
+    .fee-line {
+        font-size: 0.875rem;
+    }
+    
+    .billing-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* ==========================================
+   GEMINI RAW OUTPUT STYLES
+   ========================================== */
+
+/* Gemini Raw Output Container */
+.gemini-raw-output {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-lg);
+    background: var(--background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.gemini-raw-output h3 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--primary-color);
+    font-size: 1.125rem;
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: var(--spacing-sm);
+}
+
+.gemini-content {
+    line-height: 1.6;
+    color: var(--text-color);
+    font-family: var(--font-family);
+}
+
+/* Style Gemini's HTML tables */
+.gemini-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-md) 0;
+    background: var(--background);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+}
+
+.gemini-content table thead {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+}
+
+.gemini-content table th,
+.gemini-content table td {
+    padding: var(--spacing-sm) var(--spacing-xs);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.gemini-content table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.gemini-content table tbody tr:hover {
+    background: var(--background-secondary);
+}
+
+.gemini-content table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Gemini headings */
+.gemini-content h3,
+.gemini-content h4 {
+    color: var(--primary-color);
+    margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    font-weight: 600;
+}
+
+/* Gemini Info Message */
+.gemini-info {
+    text-align: center;
+    color: var(--success-color);
+    font-weight: 500;
+    padding: var(--spacing-md);
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--success-color);
+}
+
+/* Code type badges */
+.code-type {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.code-type.bema {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.code-type.goz,
+.code-type.goä {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+/* Procedure blocks */
+.procedure-block {
+    margin: var(--spacing-md) 0;
+    padding: var(--spacing-md);
+    background: var(--background-secondary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+}
+
+.procedure-block h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--primary-color);
+}
+
+/* Compact billing table */
+.billing-table.compact {
+    margin-top: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+.billing-table.compact th,
+.billing-table.compact td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Description cell */
+.description-cell {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* JSON display */
+.gemini-json {
+    background: var(--background-secondary);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}

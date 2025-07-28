@@ -42,6 +42,7 @@ class MedVoxApp {
             
             // Billing
             defaultBillingSystem: localStorage.getItem('defaultBillingSystem') || 'both',
+            selectedInsuranceType: localStorage.getItem('selectedInsuranceType') || 'bema',
             gozFactor: parseFloat(localStorage.getItem('gozFactor')) || 2.3,
             showBillingWarnings: localStorage.getItem('showBillingWarnings') === 'true',
             autoBillingCodes: localStorage.getItem('autoBillingCodes') === 'true',
@@ -94,9 +95,11 @@ class MedVoxApp {
         
         // Settings
         const settingsToggle = document.getElementById('settings-toggle');
+        const headerSettingsToggle = document.getElementById('header-settings-toggle');
         const closeSettings = document.getElementById('close-settings');
         
         console.log('Settings toggle button found:', !!settingsToggle);
+        console.log('Header settings toggle button found:', !!headerSettingsToggle);
         console.log('Close settings button found:', !!closeSettings);
         
         if (settingsToggle) {
@@ -104,6 +107,13 @@ class MedVoxApp {
             console.log('Settings toggle event listener attached');
         } else {
             console.error('Settings toggle button not found!');
+        }
+        
+        if (headerSettingsToggle) {
+            headerSettingsToggle.addEventListener('click', () => this.toggleSettings());
+            console.log('Header settings toggle event listener attached');
+        } else {
+            console.error('Header settings toggle button not found!');
         }
         
         if (closeSettings) {
@@ -125,6 +135,12 @@ class MedVoxApp {
         // Patient inputs
         document.getElementById('patient-id').addEventListener('input', () => this.validateInputs());
         document.getElementById('dentist-id').addEventListener('input', () => this.validateInputs());
+        
+        // Insurance type toggle
+        const insuranceRadios = document.querySelectorAll('input[name="insurance"]');
+        insuranceRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => this.handleInsuranceTypeChange(e));
+        });
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
@@ -197,6 +213,27 @@ class MedVoxApp {
         const dentistId = document.getElementById('dentist-id').value.trim();
         
         return patientId.length > 0 && dentistId.length > 0;
+    }
+    
+    handleInsuranceTypeChange(event) {
+        const selectedType = event.target.value;
+        this.config.selectedInsuranceType = selectedType;
+        localStorage.setItem('selectedInsuranceType', selectedType);
+        
+        // Visual feedback
+        const toggleSwitch = document.getElementById('insurance-toggle');
+        toggleSwitch.setAttribute('data-selected', selectedType);
+        
+        // Show toast notification
+        const typeName = selectedType === 'bema' ? 'BEMA (Kasse)' : 'GOZ (Privat)';
+        this.showToast(`Abrechnungstyp geändert zu ${typeName}`, 'info');
+        
+        console.log(`Insurance type changed to: ${selectedType}`);
+    }
+    
+    getSelectedInsuranceType() {
+        const checkedRadio = document.querySelector('input[name="insurance"]:checked');
+        return checkedRadio ? checkedRadio.value : this.config.selectedInsuranceType;
     }
     
     async toggleRecording() {
@@ -448,32 +485,41 @@ class MedVoxApp {
             formData.append('audio_file', audioBlob, filename);
             formData.append('patient_id', document.getElementById('patient-id').value);
             formData.append('dentist_id', document.getElementById('dentist-id').value);
+            formData.append('insurance_type', this.getSelectedInsuranceType());
             formData.append('use_mock', 'false'); // Use real OpenAI Whisper
             
             this.updateProcessingStatus('Transkription wird erstellt...');
             
-            // Send to API
+            // Send to API with enhanced headers
             const response = await fetch(`${this.config.apiEndpoint}/api/v1/documentation/process-audio`, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Model-Version': 'gpt-4o',
+                    'X-Insurance-Type': this.getSelectedInsuranceType(),
+                    'X-AI-Engine': 'openai-gpt4o'
+                }
             });
             
             if (!response.ok) {
                 throw new Error(`API Error: ${response.status}`);
             }
             
+            this.updateProcessingStatus('🧠 GPT-4o analysiert Behandlung...');
+            
             const result = await response.json();
             
             if (result.success) {
+                this.updateProcessingStatus('💰 GPT-4o erstellt BEMA/GOZ Abrechnung...');
                 this.displayResults(result.documentation);
-                this.showToast('Dokumentation erstellt! 🎉', 'success');
+                this.showToast('🎉 Enhanced Dokumentation erstellt!', 'success');
             } else {
                 throw new Error(result.error_message || 'Processing failed');
             }
             
         } catch (error) {
             console.error('Processing failed:', error);
-            this.showToast('Verarbeitung fehlgeschlagen: ' + error.message, 'error');
+            this.showToast('GPT-4o-Verarbeitung fehlgeschlagen: ' + error.message, 'error');
         } finally {
             this.hideProcessing();
         }
@@ -507,48 +553,571 @@ class MedVoxApp {
         }
         resultsSection.classList.remove('hidden');
         
-        // Transcription
-        document.getElementById('transcription-text').textContent = documentation.transcription.text;
-        document.getElementById('confidence-score').textContent = Math.round(documentation.transcription.confidence * 100);
-        document.getElementById('detected-language').textContent = documentation.transcription.language.toUpperCase();
+        // Transcription - handle nested structure
+        const transcription = documentation.transcription || {};
+        document.getElementById('transcription-text').textContent = transcription.text || documentation.transcription_text || '';
+        document.getElementById('confidence-score').textContent = Math.round((transcription.confidence || 0.9) * 100);
+        document.getElementById('detected-language').textContent = (transcription.language || 'DE').toUpperCase();
         
-        // Procedures
-        const proceduresList = document.getElementById('procedures-list');
-        proceduresList.innerHTML = '';
-        documentation.procedures_performed.forEach(procedure => {
-            const tag = document.createElement('span');
-            tag.className = 'procedure-tag';
-            tag.textContent = procedure;
-            proceduresList.appendChild(tag);
-        });
-        
-        // Billing codes
-        const billingCodes = document.getElementById('billing-codes');
-        billingCodes.innerHTML = '';
-        let totalFee = 0;
-        
-        documentation.billing_codes.forEach(code => {
-            const codeElement = document.createElement('div');
-            codeElement.className = 'billing-code';
-            codeElement.innerHTML = `
-                <div class="code-info">
-                    <div class="code-number">${code.code}</div>
-                    <div class="code-description">${code.description}</div>
-                </div>
-                <div class="code-fee">€${code.fee_euros.toFixed(2)}</div>
-            `;
-            billingCodes.appendChild(codeElement);
-            totalFee += code.fee_euros;
-        });
-        
-        document.getElementById('total-fee').textContent = `€${totalFee.toFixed(2)}`;
+        // NEW APPROACH: Display Gemini's raw professional output directly
+        this.displayGeminiOutput(documentation);
         
         // Clinical notes
-        document.getElementById('clinical-notes').value = documentation.clinical_notes || '';
+        document.getElementById('clinical-notes').value = documentation.clinical_notes || documentation.notes || '';
         
         // Store documentation for export
         this.currentDocumentation = documentation;
     }
+    
+    displayBillingCodes(billingCodes) {
+        const billingCodesContainer = document.getElementById('billing-codes');
+        billingCodesContainer.innerHTML = '';
+        
+        const insuranceType = this.getSelectedInsuranceType();
+        
+        // Debug log to check data structure
+        console.log('🔍 Billing codes received:', billingCodes);
+        if (billingCodes.length > 0) {
+            console.log('🔍 First billing code structure:', billingCodes[0]);
+        }
+        
+        // Clean billing codes - remove any undefined fee properties that might cause toFixed errors
+        const cleanedBillingCodes = billingCodes.map((code, index) => {
+            try {
+                console.log(`🔧 Cleaning billing code ${index}:`, code);
+                const cleanCode = { ...code };
+                // Remove any fee-related properties that might be undefined
+                delete cleanCode.fee_euros;
+                delete cleanCode.fee;
+                delete cleanCode.total_fee;
+                delete cleanCode.cost;
+                delete cleanCode.price;
+                console.log(`✅ Cleaned billing code ${index}:`, cleanCode);
+                return cleanCode;
+            } catch (error) {
+                console.error(`❌ Error cleaning billing code ${index}:`, error, code);
+                return {}; // Return empty object on error
+            }
+        });
+        
+        // Separate codes by system (backend uses 'system' field, not 'type')
+        const bemaCodes = cleanedBillingCodes.filter(code => code.system === 'bema');
+        const gozCodes = cleanedBillingCodes.filter(code => code.system === 'goz');
+        
+        // BEMA Patient Logic
+        if (insuranceType === 'bema') {
+            // Show BEMA Codes (Kassensachleistungen)
+            if (bemaCodes.length > 0) {
+                const bemaSection = this.createBillingSection('🏥 BEMA Sachleistungen (Kasse)', 'bema-section');
+                bemaCodes.forEach((code, index) => {
+                    try {
+                        console.log(`🏥 Creating BEMA code element ${index}:`, code);
+                        const codeElement = this.createBillingCodeElement(code, 'bema');
+                        bemaSection.appendChild(codeElement);
+                    } catch (error) {
+                        console.error(`❌ Error creating BEMA code element ${index}:`, error, code);
+                    }
+                });
+                billingCodesContainer.appendChild(bemaSection);
+            }
+            
+            // Show GOZ Codes with MKV (Mehrkostenvereinbarung)
+            if (gozCodes.length > 0) {
+                const gozSection = this.createBillingSection('💰 GOZ Mehrkostenvereinbarung (MKV)', 'goz-mkv-section');
+                gozCodes.forEach((code, index) => {
+                    try {
+                        console.log(`💰 Creating GOZ-MKV code element ${index}:`, code);
+                        const codeElement = this.createBillingCodeElement(code, 'goz-mkv');
+                        gozSection.appendChild(codeElement);
+                    } catch (error) {
+                        console.error(`❌ Error creating GOZ-MKV code element ${index}:`, error, code);
+                    }
+                });
+                billingCodesContainer.appendChild(gozSection);
+            }
+            
+        } else {
+            // GOZ Patient Logic - Only GOZ codes
+            if (gozCodes.length > 0) {
+                const gozSection = this.createBillingSection('💰 GOZ Privatleistungen', 'goz-private-section');
+                gozCodes.forEach((code, index) => {
+                    try {
+                        console.log(`💰 Creating GOZ-Private code element ${index}:`, code);
+                        const codeElement = this.createBillingCodeElement(code, 'goz-private');
+                        gozSection.appendChild(codeElement);
+                    } catch (error) {
+                        console.error(`❌ Error creating GOZ-Private code element ${index}:`, error, code);
+                    }
+                });
+                billingCodesContainer.appendChild(gozSection);
+            }
+            
+            // Show warning if BEMA codes are present for GOZ patient
+            if (bemaCodes.length > 0) {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'billing-warning';
+                warningDiv.innerHTML = `
+                    <span class="warning-icon">⚠️</span>
+                    <span>ACHTUNG: BEMA-Codes wurden für Privatpatienten erkannt. Diese werden nicht abgerechnet.</span>
+                `;
+                billingCodesContainer.appendChild(warningDiv);
+            }
+        }
+        
+        // Display summary information about code counts
+        this.displayCodeSummary(bemaCodes.length, gozCodes.length, insuranceType);
+    }
+    
+    createBillingSection(title, className) {
+        const section = document.createElement('div');
+        section.className = `billing-section ${className}`;
+        
+        const header = document.createElement('h4');
+        header.className = 'billing-section-header';
+        header.textContent = title;
+        section.appendChild(header);
+        
+        return section;
+    }
+    
+    createBillingCodeElement(code, displayType) {
+        const codeElement = document.createElement('div');
+        codeElement.className = `billing-code billing-code-${displayType}`;
+        
+        // Debug log to check code structure
+        console.log('🔍 Creating element for code:', code);
+        
+        // Safe access to all properties with fallbacks
+        const safeCode = code.code || 'N/A';
+        const safeDescription = code.description || 'Keine Beschreibung';
+        const safeToothNumber = code.tooth_number || code.tooth || null;
+        const safePoints = code.points || null;
+        const safeFactor = code.factor || null;
+        const safeQuantity = code.quantity || 1;
+        const safeNote = code.note || '';
+        
+        let noteHtml = '';
+        if (displayType === 'goz-mkv') {
+            noteHtml = '<span class="mkv-note">MKV</span>';
+        } else if (safeNote && safeNote !== '') {
+            noteHtml = `<span class="code-note">${safeNote}</span>`;
+        }
+        
+        codeElement.innerHTML = `
+            <div class="code-info">
+                <div class="code-number">${safeCode}</div>
+                <div class="code-description">${safeDescription}</div>
+                ${safeToothNumber ? `<div class="code-tooth">Zahn: ${safeToothNumber}</div>` : ''}
+                ${safePoints ? `<div class="code-points">${safePoints} Punkte</div>` : ''}
+                ${safeFactor ? `<div class="code-factor">Faktor: ${safeFactor}</div>` : ''}
+                ${safeQuantity && safeQuantity > 1 ? `<div class="code-quantity">× ${safeQuantity}</div>` : ''}
+            </div>
+            <div class="code-note-container">
+                ${noteHtml}
+                ${safeNote && safeNote !== 'MKV' ? `<span class="code-note">${safeNote}</span>` : ''}
+            </div>
+        `;
+        
+        return codeElement;
+    }
+    
+    displayGeminiOutput(documentation) {
+        // Get the containers we need to update
+        const proceduresContainer = document.getElementById('procedures-list');
+        const billingCodesContainer = document.getElementById('billing-codes');
+        const summaryContainer = document.getElementById('total-fee-container');
+        
+        // Clear old content
+        proceduresContainer.innerHTML = '';
+        billingCodesContainer.innerHTML = '';
+        summaryContainer.innerHTML = '';
+        
+        console.log('🚀 Full Documentation for Gemini display:', documentation);
+        console.log('📊 Documentation keys:', Object.keys(documentation));
+        console.log('🔍 raw_gemini_response field:', documentation.raw_gemini_response);
+        
+        // Try to get the raw Gemini response if available
+        const rawGeminiResponse = documentation.raw_gemini_response || documentation.llm_raw_response || documentation.gemini_response || null;
+        const billingCodes = documentation.billing_codes || [];
+        const procedures = documentation.procedures || [];
+        
+        console.log('🔍 Raw response check:', {
+            hasRawResponse: !!rawGeminiResponse,
+            rawLength: rawGeminiResponse ? rawGeminiResponse.length : 0,
+            rawPreview: rawGeminiResponse ? rawGeminiResponse.substring(0, 200) + '...' : 'null',
+            billingCodesCount: billingCodes.length
+        });
+        
+        // PRIORITY 1: Always show Gemini's raw output if available
+        if (rawGeminiResponse && rawGeminiResponse.trim()) {
+            console.log('✅ Showing Gemini raw response - this is the best!');
+            this.displayRawGeminiResponse(rawGeminiResponse, billingCodesContainer);
+            proceduresContainer.innerHTML = '<div class="gemini-info">✅ Siehe Gemini-Ausgabe unten</div>';
+        } else if (billingCodes.length > 0) {
+            console.log('⚠️ No raw response available, using processed data');
+            this.createProfessionalBillingTable(billingCodes, billingCodesContainer);
+        } else {
+            console.log('❌ No useful data available');
+            this.displayProcedures(procedures, proceduresContainer);
+            billingCodesContainer.innerHTML = '<div class="no-codes">Keine Abrechnungsdaten verfügbar</div>';
+        }
+    }
+    
+    displayRawGeminiResponse(rawResponse, container) {
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'gemini-raw-output';
+        
+        // Clear container and show ONLY Gemini's output
+        container.innerHTML = '';
+        
+        try {
+            // Try to parse and beautify JSON
+            const geminiData = JSON.parse(rawResponse);
+            console.log('🎯 Parsed Gemini JSON:', geminiData);
+            
+            // Create a beautiful display from Gemini's data
+            responseDiv.innerHTML = `<h3>🤖 Gemini 2.5 Pro Abrechnungsvorschlag</h3>`;
+            
+            // Check which format Gemini used and display accordingly
+            if (geminiData.billed_items) {
+                // Format: Top-level billed_items
+                this.displayGeminiBilledItems(geminiData, responseDiv);
+            } else if (geminiData.procedures) {
+                // Format: Nested procedures with billing_codes/billing_entries
+                this.displayGeminiProcedures(geminiData, responseDiv);
+            } else if (geminiData.prozeduren) {
+                // Format: German prozeduren
+                this.displayGeminiProzeduren(geminiData, responseDiv);
+            } else if (geminiData.billing_entries) {
+                // Format: Direct billing_entries
+                this.displayGeminiBillingEntries(geminiData, responseDiv);
+            } else {
+                // Fallback: Show raw JSON beautifully
+                responseDiv.innerHTML += `<pre class="gemini-json">${JSON.stringify(geminiData, null, 2)}</pre>`;
+            }
+            
+        } catch (e) {
+            // Not JSON - show as HTML/Text
+            console.log('🔍 Gemini response is not JSON, showing as HTML');
+            responseDiv.innerHTML = `
+                <h3>🤖 Gemini 2.5 Pro Abrechnungsvorschlag</h3>
+                <div class="gemini-content">
+                    ${rawResponse}
+                </div>
+            `;
+        }
+        
+        container.appendChild(responseDiv);
+        console.log('🤖 Showing Gemini response');
+    }
+    
+    displayGeminiBilledItems(data, container) {
+        // Create beautiful table from billed_items
+        const tableHTML = `
+            <div class="billing-section">
+                <h4>📋 Behandlung: ${data.treatment_summary || 'Zahnbehandlung'}</h4>
+                <p>📅 Datum: ${data.treatment_date || new Date().toLocaleDateString('de-DE')}</p>
+                
+                <table class="billing-table">
+                    <thead>
+                        <tr>
+                            <th>Zahn</th>
+                            <th>System</th>
+                            <th>Code</th>
+                            <th>Leistung</th>
+                            <th>Beschreibung</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.billed_items.map(item => `
+                            <tr>
+                                <td>${item.tooth || item.zahn || '-'}</td>
+                                <td><span class="code-type ${item.code_system?.toLowerCase()}">${item.code_system || item.system || ''}</span></td>
+                                <td><strong>${item.code || item.position || ''}</strong></td>
+                                <td>${item.description || item.beschreibung || ''}</td>
+                                <td class="description-cell">${item.official_description || ''}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        container.innerHTML += tableHTML;
+    }
+    
+    displayGeminiProcedures(data, container) {
+        // Handle nested procedures format
+        container.innerHTML += '<div class="procedures-section">';
+        
+        data.procedures.forEach(proc => {
+            const procDiv = document.createElement('div');
+            procDiv.className = 'procedure-block';
+            procDiv.innerHTML = `
+                <h4>🦷 ${proc.procedure_name || proc.beschreibung || 'Behandlung'} 
+                    ${proc.tooth_number || proc.zahn ? `- Zahn ${proc.tooth_number || proc.zahn}` : ''}</h4>
+            `;
+            
+            // Extract billing codes from nested structure
+            const codes = proc.billing_codes || proc.billing_entries || proc.abrechnungspositionen || [];
+            if (codes.length > 0) {
+                procDiv.innerHTML += this.createBillingTable(codes);
+            }
+            
+            container.appendChild(procDiv);
+        });
+        
+        container.innerHTML += '</div>';
+    }
+    
+    createBillingTable(codes) {
+        return `
+            <table class="billing-table compact">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>System</th>
+                        <th>Beschreibung</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${codes.map(code => `
+                        <tr>
+                            <td><strong>${code.code || code.position || ''}</strong></td>
+                            <td><span class="code-type ${(code.system || code.code_system || '').toLowerCase()}">${code.system || code.code_system || ''}</span></td>
+                            <td>${code.description || code.beschreibung || ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+    
+    displayGeminiProzeduren(data, container) {
+        // Handle German "prozeduren" format
+        const procedures = data.prozeduren || [];
+        
+        if (procedures.length === 0) {
+            container.innerHTML += '<p>Keine Prozeduren gefunden.</p>';
+            return;
+        }
+        
+        // Create header section
+        container.innerHTML += `
+            <div class="billing-section">
+                <h4>📋 Behandlung vom ${data.behandlungsdatum || new Date().toLocaleDateString('de-DE')}</h4>
+                <p>🏥 Abrechnungstyp: ${data.abrechnungstyp || 'BEMA'}</p>
+            </div>
+        `;
+        
+        // Create procedures section
+        const proceduresHTML = procedures.map(proc => {
+            const codes = proc.abrechnungspositionen || [];
+            
+            return `
+                <div class="procedure-block">
+                    <h4>🦷 ${proc.prozedur_beschreibung || 'Behandlung'} 
+                        ${proc.zahn ? `- Zahn ${proc.zahn}` : ''}</h4>
+                    ${proc.flaechen && proc.flaechen.length > 0 ? 
+                        `<p>Flächen: ${proc.flaechen.join(', ').toUpperCase()}</p>` : ''}
+                    
+                    ${codes.length > 0 ? `
+                        <table class="billing-table compact">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>System</th>
+                                    <th>Beschreibung</th>
+                                    <th>Anzahl</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${codes.map(code => `
+                                    <tr>
+                                        <td><strong>${code.code || ''}</strong></td>
+                                        <td><span class="code-type ${(code.code_system || '').toLowerCase()}">${code.code_system || ''}</span></td>
+                                        <td>${code.beschreibung || ''}</td>
+                                        <td>${code.anzahl || 1}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    ` : '<p>Keine Abrechnungspositionen</p>'}
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML += proceduresHTML;
+    }
+    
+    createProfessionalBillingTable(billingCodes, container) {
+        const insuranceType = this.getSelectedInsuranceType();
+        const today = new Date().toLocaleDateString('de-DE');
+        
+        const tableDiv = document.createElement('div');
+        tableDiv.className = 'professional-billing-table';
+        
+        // Separate BEMA and GOZ codes
+        const bemaCodes = billingCodes.filter(code => code.system === 'bema');
+        const gozCodes = billingCodes.filter(code => code.system === 'goz' || code.system === 'goä');
+        
+        let tableHTML = '';
+        
+        // BEMA Table (if applicable)
+        if (bemaCodes.length > 0 && insuranceType === 'bema') {
+            tableHTML += `
+                <div class="billing-section">
+                    <h3>🏥 BEMA-Abrechnung (Kassensachleistungen)</h3>
+                    <table class="billing-table">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Zahn</th>
+                                <th>BEMA-Nr.</th>
+                                <th>Bezeichnung</th>
+                                <th>Anzahl</th>
+                                <th>Anmerkungen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bemaCodes.map(code => `
+                                <tr>
+                                    <td>${today}</td>
+                                    <td>${code.tooth_number || code.tooth || '-'}</td>
+                                    <td>${code.code || 'N/A'}</td>
+                                    <td>${code.description || 'Keine Beschreibung'}</td>
+                                    <td>${code.quantity || 1}</td>
+                                    <td>${code.note || 'Standardbehandlung'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // GOZ Table
+        if (gozCodes.length > 0) {
+            const gozTitle = insuranceType === 'bema' ? 
+                '💰 GOZ-Abrechnung (Mehrkostenvereinbarung)' : 
+                '💰 GOZ-Abrechnung (Privatleistungen)';
+                
+            tableHTML += `
+                <div class="billing-section">
+                    <h3>${gozTitle}</h3>
+                    <table class="billing-table">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Zahn</th>
+                                <th>GOZ/GOÄ-Nr.</th>
+                                <th>Bezeichnung</th>
+                                <th>Anzahl</th>
+                                <th>Anmerkungen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${gozCodes.map(code => `
+                                <tr>
+                                    <td>${today}</td>
+                                    <td>${code.tooth_number || code.tooth || code.zahn || '-'}</td>
+                                    <td>${code.code || 'N/A'}</td>
+                                    <td>${code.description || 'Keine Beschreibung'}</td>
+                                    <td>${code.quantity || 1}</td>
+                                    <td>${this.formatBillingNote(code, insuranceType)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        if (tableHTML === '') {
+            tableHTML = '<div class="no-codes">Keine Abrechnungsdaten verfügbar</div>';
+        }
+        
+        tableDiv.innerHTML = tableHTML;
+        container.appendChild(tableDiv);
+    }
+    
+    formatBillingNote(code, insuranceType) {
+        // Start with Gemini's note if available
+        let note = code.note || code.anmerkung || '';
+        
+        // Add quantity info if more than 1
+        if (code.quantity > 1) {
+            note = note ? `${note} (${code.quantity}x)` : `${code.quantity}x`;
+        }
+        
+        // Add MKV info only if it's BEMA patient with GOZ codes AND no other note
+        if (insuranceType === 'bema' && (code.system === 'goz' || code.type === 'goz') && !note) {
+            note = 'MKV';
+        }
+        
+        // Fallback only if really nothing available
+        return note || '-';
+    }
+    
+    displayProcedures(procedures, container) {
+        if (procedures.length === 0) return;
+        
+        const proceduresDiv = document.createElement('div');
+        proceduresDiv.className = 'procedures-display';
+        proceduresDiv.innerHTML = `
+            <h3>📋 Durchgeführte Maßnahmen</h3>
+            <div class="procedures-list">
+                ${procedures.map(proc => `
+                    <span class="procedure-tag">${proc}</span>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(proceduresDiv);
+    }
+    
+    displayCodeSummary(bemaCodesCount, gozCodesCount, insuranceType) {
+        const summaryContainer = document.getElementById('total-fee-container');
+        summaryContainer.innerHTML = '';
+        
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = 'codes-summary';
+        
+        if (insuranceType === 'bema') {
+            if (bemaCodesCount > 0) {
+                const bemaSum = document.createElement('div');
+                bemaSum.className = 'summary-line bema-summary';
+                bemaSum.innerHTML = `<span>🏥 BEMA Positionen:</span> <span>${bemaCodesCount}</span>`;
+                summaryDiv.appendChild(bemaSum);
+            }
+            
+            if (gozCodesCount > 0) {
+                const gozSum = document.createElement('div');
+                gozSum.className = 'summary-line goz-summary';
+                gozSum.innerHTML = `<span>💰 GOZ Positionen (MKV):</span> <span>${gozCodesCount}</span>`;
+                summaryDiv.appendChild(gozSum);
+            }
+            
+        } else {
+            if (gozCodesCount > 0) {
+                const gozSum = document.createElement('div');
+                gozSum.className = 'summary-line goz-private-summary';
+                gozSum.innerHTML = `<span>💰 GOZ Positionen:</span> <span>${gozCodesCount}</span>`;
+                summaryDiv.appendChild(gozSum);
+            }
+        }
+        
+        const totalPositions = bemaCodesCount + gozCodesCount;
+        if (totalPositions > 0) {
+            const totalSum = document.createElement('div');
+            totalSum.className = 'summary-line total-summary';
+            totalSum.innerHTML = `<strong><span>📋 Gesamt erfasste Positionen:</span> <span>${totalPositions}</span></strong>`;
+            summaryDiv.appendChild(totalSum);
+        }
+        
+        summaryContainer.appendChild(summaryDiv);
+    }
+    
+    // Price parsing function removed - no more euro calculations in frontend
     
     showProcessing(message) {
         document.getElementById('processing-section').classList.remove('hidden');
@@ -775,6 +1344,14 @@ class MedVoxApp {
             const dentistField = document.getElementById('dentist-id');
             if (dentistField && this.config.defaultDentist) {
                 dentistField.value = this.config.defaultDentist;
+            }
+            
+            // Set insurance type toggle
+            const insuranceRadio = document.querySelector(`input[name="insurance"][value="${this.config.selectedInsuranceType}"]`);
+            if (insuranceRadio) {
+                insuranceRadio.checked = true;
+                // Trigger change event to update visual state
+                insuranceRadio.dispatchEvent(new Event('change'));
             }
             
             // Load available microphones
