@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_MODEL: str = "whisper-1"
     MAX_AUDIO_SIZE_MB: int = 25
-    SUPPORTED_AUDIO_FORMATS: str = "wav,mp3,m4a,flac"
+    SUPPORTED_AUDIO_FORMATS: str = "wav,mp3,m4a,flac,webm"
     AUDIO_SAMPLE_RATE: int = 44100  # Higher quality for better accuracy
     WHISPER_MODEL_SIZE: str = "large-v3"  # Best available model
     WHISPER_DEVICE: str = "auto"

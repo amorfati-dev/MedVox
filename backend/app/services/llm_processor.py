@@ -797,11 +797,14 @@ class EnhancedDocumentationProcessor:
                     logger.info(f"Validating billing code {i}: {type(code)}")
                     
                     if isinstance(code, dict):
-                        # Check if code is already normalized (from Gemini extraction)
-                        if "code" in code and "description" in code and "type" in code:
-                            # Already normalized - use directly
-                            normalized_code = code
-                            logger.info(f"Using pre-normalized code {i}: {normalized_code}")
+                        # Check if code has basic required fields (from Gemini extraction)
+                        if "code" in code and "description" in code:
+                            # Use Gemini format and add missing fields
+                            normalized_code = code.copy()
+                            # Add type field if missing (infer from fee_schedule)
+                            if "type" not in normalized_code:
+                                normalized_code["type"] = normalized_code.get("fee_schedule", "bema").lower()
+                            logger.info(f"Using Gemini code {i}: {normalized_code}")
                         else:
                             # Convert German field names to English (traditional extraction)
                             normalized_code = self._normalize_german_billing_code(code)
