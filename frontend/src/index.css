@@ -4,46 +4,99 @@
 
 @layer base {
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
+    @apply bg-dental-surface text-gray-900;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-dental-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;
+    @apply bg-dental-primary text-white px-4 py-2.5 rounded-xl font-medium
+           hover:bg-dental-primary-dark focus:outline-none focus:ring-2 focus:ring-dental-primary/40 focus:ring-offset-2
+           transition-all duration-200 active:scale-[0.98] shadow-sm;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;
+    @apply bg-white text-gray-700 px-4 py-2.5 rounded-xl font-medium border border-gray-200
+           hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300/40 focus:ring-offset-2
+           transition-all duration-200 active:scale-[0.98] shadow-sm;
+  }
+
+  .btn-ghost {
+    @apply text-gray-500 px-3 py-2 rounded-xl font-medium
+           hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300/40
+           transition-all duration-200;
+  }
+
+  .btn-icon {
+    @apply p-2.5 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700
+           focus:outline-none focus:ring-2 focus:ring-gray-300/40
+           transition-all duration-200;
   }
 
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dental-primary focus:border-transparent;
+    @apply w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-white
+           focus:outline-none focus:ring-2 focus:ring-dental-primary/30 focus:border-dental-primary
+           transition-all duration-200 text-sm placeholder:text-gray-400;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white rounded-2xl shadow-card p-6 border border-gray-100
+           transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-card-hover;
+  }
+
+  .badge-bema {
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+           bg-dental-bema-light text-dental-bema;
+  }
+
+  .badge-goz {
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+           bg-dental-goz-light text-dental-goz;
+  }
+
+  .badge-zusatz {
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+           bg-dental-zusatz-light text-dental-zusatz;
   }
 
   .recording-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: recording-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  @keyframes pulse {
+  @keyframes recording-pulse {
     0%, 100% {
       opacity: 1;
+      transform: scale(1);
     }
     50% {
-      opacity: .5;
+      opacity: 0.6;
+      transform: scale(1.1);
     }
   }
-} 
+
+  /* Overlay for settings panel */
+  .overlay {
+    @apply fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300;
+  }
+
+  /* Slide-in panel */
+  .slide-panel {
+    @apply fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-elevated z-50
+           transform transition-transform duration-300 ease-out;
+  }
+
+  /* Copy feedback tooltip */
+  .copy-feedback {
+    @apply absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg
+           animate-fade-in pointer-events-none whitespace-nowrap;
+  }
+}

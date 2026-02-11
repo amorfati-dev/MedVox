@@ -197,5 +197,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=settings.is_development,
+        reload_excludes=["venv/*", ".venv/*", "__pycache__/*"] if settings.is_development else None,
         log_level=settings.LOG_LEVEL.lower(),
     ) 

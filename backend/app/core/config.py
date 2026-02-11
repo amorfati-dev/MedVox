@@ -48,19 +48,30 @@ class Settings(BaseSettings):
     DENTAL_TERMINOLOGY_BOOST: bool = True  # Enable dental terminology enhancement
     
     # LLM Configuration for Intelligent Procedure Extraction  
-    LLM_MODEL: str = "gemini-2.5-pro"  # Gemini 2.5 Pro for best German dental results
+    LLM_MODEL: str = "gemini-3-flash-preview"  # Gemini 3 Flash for fast, high-quality extraction
     LLM_TEMPERATURE: float = 0.1  # Lower temperature for medical consistency
-    LLM_MAX_TOKENS: int = 32000  # Much higher limit for Gemini 2.5 Pro thinking mode
+    LLM_MAX_TOKENS: int = 65536  # Gemini 3 supports up to 65k output tokens
     USE_LLM_EXTRACTION: bool = True  # Enable LLM-based procedure extraction
+    
+    # Google Cloud Configuration
+    GOOGLE_CLOUD_API_KEY: Optional[str] = None  # Google Cloud API Key for Speech-to-Text
+    GOOGLE_CLOUD_PROJECT_ID: Optional[str] = None  # Google Cloud Project ID
     
     # LLM Provider Umschaltung
     LLM_PROVIDER: str = "google"  # "openai" oder "google"
     GOOGLE_GEMINI_API_KEY: Optional[str] = None
-    GOOGLE_GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent"
+    GOOGLE_GEMINI_API_URL: Optional[str] = None  # Auto-generated from LLM_MODEL if not set
     
-    # Advanced models for complex cases - USE GPT-4o (fallback from O3)
-    ADVANCED_LLM_MODEL: str = "gpt-4o"  # GPT-4o for complex billing cases
-    BILLING_LLM_MODEL: str = "gpt-4o"  # GPT-4o for BEMA/GOZ
+    @property
+    def gemini_api_url(self) -> str:
+        """Build Gemini API URL from model name, or use explicit override"""
+        if self.GOOGLE_GEMINI_API_URL:
+            return self.GOOGLE_GEMINI_API_URL
+        return f"https://generativelanguage.googleapis.com/v1beta/models/{self.LLM_MODEL}:generateContent"
+    
+    # Advanced models for complex cases
+    ADVANCED_LLM_MODEL: str = "gemini-3-pro-preview"  # Gemini 3 Pro for complex billing cases
+    BILLING_LLM_MODEL: str = "gemini-3-pro-preview"  # Gemini 3 Pro for BEMA/GOZ
     
     # Multi-Stage Pipeline Configuration - FORCE DISABLED for Gemini testing
     USE_MULTI_STAGE_PIPELINE: bool = False  # HARD OVERRIDE: Force disable pipeline

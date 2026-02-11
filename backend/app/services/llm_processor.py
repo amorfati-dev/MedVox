@@ -3,6 +3,7 @@ Enhanced LLM Processor Service
 Uses Gemini2.5 Pro advanced models for intelligent procedure and billing code extraction
 """
 
+import asyncio
 import json
 import time
 from typing import Dict, Any, List, Optional
@@ -24,12 +25,12 @@ class LLMExtractionError(Exception):
 
 
 class GeminiLLMProcedureExtractor:
-    """Extract dental procedures and billing codes using Google Gemini Pro 2.5"""
+    """Extract dental procedures and billing codes using Google Gemini 3"""
     def __init__(self):
         from app.core.config import settings
         self.api_key = settings.GOOGLE_GEMINI_API_KEY
-        self.api_url = settings.GOOGLE_GEMINI_API_URL
-        self.model = "gemini-2.5-pro"  # Latest and most powerful
+        self.api_url = settings.gemini_api_url  # Auto-generated from LLM_MODEL
+        self.model = settings.LLM_MODEL
         self.max_tokens = settings.LLM_MAX_TOKENS
         self.max_completion_tokens = settings.LLM_MAX_TOKENS  # Alias for compatibility
         self.temperature = settings.LLM_TEMPERATURE
@@ -65,31 +66,69 @@ class GeminiLLMProcedureExtractor:
         # Create insurance-specific prompt
         insurance_instruction = ""
         if insurance_type.lower() == "bema":
-            insurance_instruction = "WICHTIG: Der Patient ist ein BEMA-Patient (gesetzlich versichert). Bitte ausschließlich BEMA-Abrechnungsziffern verwenden und Kassenabrechnung anwenden. Bei Zusatzleistungen entsprechend kennzeichnen."
+            insurance_instruction = """ABRECHNUNGSTYP: BEMA (Gesetzlich versicherter Kassenpatient)
+
+REGELN FÜR BEMA-ABRECHNUNG:
+- Verwende primär BEMA-Abrechnungsziffern für alle Kassenleistungen
+- WICHTIG: Prüfe bei jeder Behandlung, ob GOZ-Zusatzleistungen (Zuzahlungen) sinnvoll sind
+- Zusatzleistungen sind Leistungen, die über den Kassenkatalog hinausgehen und vom Patienten privat bezahlt werden
+- Beispiele für Zusatzleistungen: Kompositfüllungen statt Amalgam (GOZ 2080 + 2197), hochwertige Keramik, Adhäsivtechnik, erweiterte Prophylaxe
+- Markiere Zusatzleistungen mit "is_zusatzleistung": true und "system": "GOZ"
+- Alle Kassenleistungen mit "is_zusatzleistung": false und "system": "BEMA"
+"""
         else:
-            insurance_instruction = "WICHTIG: Der Patient ist ein GOZ-Patient (Privatpatient). Bitte ausschließlich GOZ-Abrechnungsziffern verwenden."
+            insurance_instruction = """ABRECHNUNGSTYP: GOZ (Privatpatient)
+
+REGELN FÜR GOZ-ABRECHNUNG:
+- Verwende ausschließlich GOZ-Abrechnungsziffern
+- Beachte die Steigerungsfaktoren (Standard 2,3-fach)
+- Ärztliche Leistungen mit Ä-Ziffern abrechnen (z.B. Ä5004 für Röntgen)
+- Alle Leistungen mit "system": "GOZ" und "is_zusatzleistung": false
+"""
             
         body = {
             "contents": [
-                {"role": "user", "parts": [{"text": f"{insurance_instruction}\n\nBitte erstelle mir eine {insurance_type.upper()}-Abrechnung für meine zahnmedizinische Dokumentation: {prompt}\n\nErstelle JSON mit procedures und billing_codes ({insurance_type.upper()}-Abrechnungsziffern)."}]}
+                {"role": "user", "parts": [{"text": f"{insurance_instruction}\nBEHANDLUNGSDOKUMENTATION:\n{prompt}\n\nErstelle eine vollständige Abrechnung als JSON mit 'procedures' und 'billing_codes'."}]}
             ],
             "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 32000,
-                "responseMimeType": "application/json"  # We do want JSON back
+                "temperature": self.temperature,
+                "maxOutputTokens": self.max_tokens,
+                "responseMimeType": "application/json"
             }
         }
         
         # Simple logging
-        logger.info(f"🎤 Voice input: {len(prompt)} chars → Gemini 2.5 Pro")
+        logger.info(f"🎤 Voice input: {len(prompt)} chars → {self.model} ({insurance_type.upper()})")
+        
+        # Retry logic for timeouts
+        max_retries = 3
+        timeout_seconds = 90  # Increased from 60
+        
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"🔄 Gemini attempt {attempt + 1}/{max_retries}")
+                # Add API key as query parameter (Google Gemini auth method)
+                url_with_key = f"{self.api_url}?key={self.api_key}"
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(
+                    None,
+                    lambda: requests.post(url_with_key, headers=headers, json=body, timeout=timeout_seconds)
+                )
+                # If we get here, the request succeeded
+                break
+            except Exception as retry_error:
+                logger.warning(f"🔄 Gemini attempt {attempt + 1} failed: {retry_error}")
+                if attempt == max_retries - 1:
+                    # Last attempt failed, re-raise the error
+                    raise retry_error
+                # Wait before retry (exponential backoff)
+                import time
+                wait_time = (attempt + 1) * 2  # 2, 4, 6 seconds
+                logger.info(f"⏳ Waiting {wait_time}s before retry...")
+                await asyncio.sleep(wait_time)
+                continue
+        
         try:
-            # Add API key as query parameter (Google Gemini auth method)
-            url_with_key = f"{self.api_url}?key={self.api_key}"
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: requests.post(url_with_key, headers=headers, json=body, timeout=60)
-            )
             logger.info(f"Gemini API status: {response.status_code}")
             if response.status_code != 200:
                 logger.error(f"Gemini API error: {response.text}")
@@ -213,6 +252,9 @@ class GeminiLLMProcedureExtractor:
         elif system and "privat" not in system and "zusatz" not in system:
             # If we have a system but it's not clearly BEMA/GOZ, default to BEMA
             system = "bema"
+        else:
+            # If no system specified, default to BEMA (since most German dental codes are BEMA)
+            system = "bema"
         
         # Get tooth number from code or parent
         tooth_number = (
@@ -255,7 +297,7 @@ class GeminiLLMProcedureExtractor:
             
             if isinstance(obj, dict):
                 # Look for billing code arrays with various names
-                for key in ["billing_codes", "abrechnungspositionen", "codes", "positionen", "entries"]:
+                for key in ["billing_codes", "abrechnungspositionen", "abrechnungsziffern", "codes", "positionen", "entries"]:
                     if key in obj and isinstance(obj[key], list):
                         print(f"{'  ' * depth}✅ FOUND {key} with {len(obj[key])} codes")
                         for code_obj in obj[key]:
@@ -370,7 +412,7 @@ class GeminiLLMProcedureExtractor:
                     billing_codes_field = None
                     field_name_used = None
                     
-                    for field_name in ["billing_codes", "abrechnungspositionen", "billing_entries", "codes", "positionen", "entries"]:
+                    for field_name in ["billing_codes", "abrechnungspositionen", "abrechnungsziffern", "billing_entries", "codes", "positionen", "entries"]:
                         if field_name in proc and proc[field_name]:
                             billing_codes_field = proc[field_name]
                             field_name_used = field_name
@@ -491,8 +533,9 @@ class LLMProcedureExtractor:
     def _validate_model_selection(self):
         """Validate that the selected model is available and optimal for the task"""
         valid_models = {
-            # Only Gemini models supported
-            "gemini-2.5-pro": {"reasoning": "excellent", "cost": "low", "speed": "fast", "availability": "public"}
+            "gemini-3-flash-preview": {"reasoning": "excellent", "cost": "low", "speed": "very fast", "availability": "public"},
+            "gemini-3-pro-preview": {"reasoning": "best", "cost": "medium", "speed": "fast", "availability": "public"},
+            "gemini-2.5-pro": {"reasoning": "excellent", "cost": "low", "speed": "fast", "availability": "deprecated March 2026"},
         }
         
         if self.model not in valid_models:
@@ -613,8 +656,43 @@ class LLMProcedureExtractor:
     
     @staticmethod
     def _get_system_prompt() -> str:
-        """Direct prompt for raw Gemini 2.5 Pro output"""
-        return """Du bist ein Zahnarzt-Abrechnungsexperte. Erstelle Abrechnungen im JSON Format."""
+        """Comprehensive dental billing expert system prompt"""
+        return """Du bist ein erfahrener Zahnarzt-Abrechnungsexperte mit umfassenden Kenntnissen der BEMA- und GOZ-Gebührenordnung.
+
+Deine Aufgabe: Analysiere zahnmedizinische Behandlungsdokumentation und erstelle eine vollständige Abrechnung im JSON-Format.
+
+REGELN:
+1. Extrahiere ALLE durchgeführten Behandlungen aus dem Text
+2. Ordne jeder Behandlung die korrekten Abrechnungsziffern zu
+3. Gib Zahnnummern im FDI-Schema an (z.B. 36, 14, 21)
+4. Gib Flächen an wo relevant (z.B. MOD, OB, MB)
+5. Bei mehreren Zähnen: separate Einträge pro Zahn
+
+Antworte IMMER als JSON-Objekt mit dieser Struktur:
+{
+  "procedures": [
+    {
+      "procedure_name": "Name der Behandlung",
+      "tooth_number": "Zahnnummer oder null",
+      "surfaces": "Flächen oder null",
+      "description": "Kurzbeschreibung"
+    }
+  ],
+  "billing_codes": [
+    {
+      "code": "Abrechnungsziffer (z.B. 13a, Oe1, 2080)",
+      "system": "BEMA oder GOZ",
+      "description": "Leistungsbeschreibung",
+      "tooth_number": "Zahnnummer oder null",
+      "quantity": 1,
+      "is_zusatzleistung": false
+    }
+  ]
+}
+
+Häufige BEMA-Ziffern: 01 (Untersuchung), 04 (Vitalitätsprüfung), 8 (Sensibilitätsprüfung), Ä925 (Röntgen-Zahnfilm), Ä935a (OPG), IP1-IP4 (Prophylaxe), 13a-13e (Füllungen 1-5-flächig), Oe1/Oe2 (Panorama/Fernröntgen), 47a/47b (Extraktion), cp (Chirurgische Maßnahmen), X1-X3 (Anästhesie).
+
+Häufige GOZ-Ziffern: 0010 (Untersuchung), 2060-2120 (Füllungen), 2080 (Kompositfüllung), 2197 (Adhäsive Befestigung), 1040 (PZR), 3010-3040 (Chirurgie), 5000-5260 (Prothetik), Ä5004 (Röntgen Zahnfilm), Ä5370 (OPG)."""
     
     def _create_extraction_prompt(self, text: str, bema_goz_catalog: dict, findings_context: str, insurance_type: str = "bema") -> str:
         """Direct voice text to Gemini - no extra processing"""
@@ -728,8 +806,8 @@ class ProviderSwitchLLMExtractor:
         
         if self.provider == "google":
             self.extractor = GeminiLLMProcedureExtractor()
-            logger.info("✅ 🔄 Using Google Gemini Pro 2.5 as LLM provider")
-            logger.info(f"✅ Gemini model: {self.extractor.model}")
+            logger.info(f"✅ Using Google Gemini as LLM provider: {self.extractor.model}")
+            logger.info(f"✅ Gemini API URL: {self.extractor.api_url}")
         else:
             self.extractor = LLMProcedureExtractor()
             logger.error("❌ 🔄 Using OpenAI GPT-4o as LLM provider")

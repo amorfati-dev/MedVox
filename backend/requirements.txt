@@ -12,8 +12,8 @@ pydantic==2.9.2
 pydantic-settings==2.6.0
 python-dotenv==1.0.1
 
-# AI/ML
-openai==1.54.0
+# AI/ML - Google Cloud Speech-to-Text
+google-cloud-speech==2.24.1
 
 # Audio Processing
 pydub==0.25.1

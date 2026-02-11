@@ -13,6 +13,7 @@ import structlog
 from app.core.config import settings
 from app.schemas.dental_documentation import TranscriptionResult, AudioMetadata
 from app.utils.audio import AudioProcessor, AudioValidationError
+from app.services.google_speech_service import GoogleCloudSpeechService
 
 logger = structlog.get_logger()
 
@@ -22,218 +23,10 @@ class AudioTranscriptionError(Exception):
     pass
 
 
-class OpenAIWhisperService:
-    """OpenAI Whisper API integration"""
-    
-    def __init__(self):
-        self.api_key = settings.OPENAI_API_KEY
-        self.model = settings.OPENAI_MODEL
-        self.max_file_size = settings.MAX_AUDIO_SIZE_MB * 1024 * 1024
-        
-    async def transcribe(self, audio_file: BinaryIO, filename: str) -> TranscriptionResult:
-        """
-        Transcribe audio using OpenAI Whisper API
-        
-        Args:
-            audio_file: Audio file binary data
-            filename: Original filename for format detection
-            
-        Returns:
-            TranscriptionResult with transcribed text and metadata
-        """
-        if not self.api_key:
-            raise AudioTranscriptionError("OpenAI API key not configured")
-        
-        start_time = time.time()
-        
-        try:
-            # Import OpenAI here to avoid dependency issues if not installed
-            import openai
-            
-            # Configure OpenAI client
-            client = openai.OpenAI(api_key=self.api_key)
-            
-            logger.info("Starting OpenAI Whisper transcription", filename=filename)
-            
-            # Prepare dental terminology prompt for better accuracy
-            dental_prompt = self._get_dental_terminology_prompt() if settings.DENTAL_TERMINOLOGY_BOOST else None
-            
-            # Call Whisper API with enhanced settings
-            response = client.audio.transcriptions.create(
-                model=self.model,
-                file=(filename, audio_file, "audio/wav"),
-                language="de",  # German language
-                response_format="verbose_json",  # Get confidence scores
-                temperature=settings.WHISPER_TEMPERATURE,  # Enhanced temperature setting
-                prompt=dental_prompt  # Dental context for better recognition
-            )
-            
-            processing_time = int((time.time() - start_time) * 1000)
-            
-            # Extract result
-            transcribed_text = response.text
-            
-            # Get confidence from segments if available
-            confidence = getattr(response, 'confidence', 0.9)  # Default confidence
-            segments = getattr(response, 'segments', None)
-            
-            # Convert TranscriptionSegment objects to dictionaries for new OpenAI library
-            if segments:
-                converted_segments = []
-                for segment in segments:
-                    if hasattr(segment, '__dict__'):
-                        # Convert TranscriptionSegment object to dictionary
-                        segment_dict = {
-                            'id': getattr(segment, 'id', 0),
-                            'start': getattr(segment, 'start', 0.0),
-                            'end': getattr(segment, 'end', 0.0),
-                            'text': getattr(segment, 'text', ''),
-                            'avg_logprob': getattr(segment, 'avg_logprob', -0.5),
-                            'compression_ratio': getattr(segment, 'compression_ratio', 1.0),
-                            'no_speech_prob': getattr(segment, 'no_speech_prob', 0.0),
-                            'temperature': getattr(segment, 'temperature', 0.0)
-                        }
-                        converted_segments.append(segment_dict)
-                    else:
-                        # Already a dictionary
-                        converted_segments.append(segment)
-                segments = converted_segments
-            
-            # Calculate average confidence from segments if available
-            if segments and len(segments) > 0:
-                # Convert log probability to confidence (approximate)
-                avg_logprob = sum(seg.get('avg_logprob', -0.5) for seg in segments) / len(segments)
-                confidence = min(1.0, max(0.0, (avg_logprob + 1.0)))  # Normalize to 0-1
-            
-            logger.info("OpenAI Whisper transcription completed",
-                       text_length=len(transcribed_text),
-                       confidence=confidence,
-                       processing_time_ms=processing_time)
-            
-            return TranscriptionResult(
-                text=transcribed_text,
-                language="de",
-                confidence=confidence,
-                segments=segments,
-                processing_time_ms=processing_time,
-                stt_model=f"openai-{self.model}"
-            )
-            
-        except ImportError:
-            raise AudioTranscriptionError("OpenAI library not installed. Run: pip install openai")
-        except Exception as e:
-            logger.error("OpenAI Whisper transcription failed", error=str(e))
-            raise AudioTranscriptionError(f"Whisper API error: {str(e)}")
-    
-    def _get_dental_terminology_prompt(self) -> str:
-        """
-        Generate a dental terminology prompt to improve Whisper's recognition
-        of German dental terms and procedures
-        """
-        return """Dies ist eine Aufnahme aus einer deutschen Zahnarztpraxis. 
-        Häufige Begriffe: Karies, Parodontitis, Zahnextraktion, Füllungstherapie, 
-        Lokalanästhesie, Leitungsanästhesie, Röntgenbild, Zahn, okklusal, 
-        mesial, distal, vestibulär, lingual, Komposit, Amalgam, Krone, 
-        Brücke, Implantat, Wurzelkanalbehandlung, Gingivitis, Prophylaxe,
-        BEMA, GOZ, Ziffer, Abrechnung."""
+# OpenAI Whisper Service removed - using Google Cloud Speech-to-Text exclusively
 
 
-class LocalWhisperService:
-    """Local Whisper model (fallback when OpenAI API not available)"""
-    
-    def __init__(self):
-        self.model_size = settings.WHISPER_MODEL_SIZE
-        self.device = settings.WHISPER_DEVICE
-        self._model = None
-        
-    def _load_model(self):
-        """Lazy load Whisper model"""
-        if self._model is None:
-            try:
-                import whisper
-                
-                logger.info("Loading local Whisper model", 
-                           model_size=self.model_size,
-                           device=self.device)
-                
-                self._model = whisper.load_model(
-                    self.model_size, 
-                    device=self.device if self.device != "auto" else None
-                )
-                
-                logger.info("Local Whisper model loaded successfully")
-                
-            except ImportError:
-                raise AudioTranscriptionError("Whisper library not installed. Run: pip install openai-whisper")
-            except Exception as e:
-                raise AudioTranscriptionError(f"Failed to load Whisper model: {str(e)}")
-    
-    async def transcribe(self, audio_file_path: str) -> TranscriptionResult:
-        """
-        Transcribe audio using local Whisper model
-        
-        Args:
-            audio_file_path: Path to audio file
-            
-        Returns:
-            TranscriptionResult with transcribed text and metadata
-        """
-        self._load_model()
-        
-        start_time = time.time()
-        
-        try:
-            logger.info("Starting local Whisper transcription", file_path=audio_file_path)
-            
-            # Transcribe with Whisper (enhanced settings)
-            result = self._model.transcribe(
-                audio_file_path,
-                language="de",
-                word_timestamps=True,
-                temperature=settings.WHISPER_TEMPERATURE,
-                initial_prompt="Deutsche Zahnarztpraxis: Karies, Zahn, Lokalanästhesie, Füllung, Röntgenbild"
-            )
-            
-            processing_time = int((time.time() - start_time) * 1000)
-            
-            # Extract segments for detailed timing
-            segments = []
-            if "segments" in result:
-                segments = [
-                    {
-                        "start": seg["start"],
-                        "end": seg["end"], 
-                        "text": seg["text"],
-                        "confidence": getattr(seg, "avg_logprob", -0.5)
-                    }
-                    for seg in result["segments"]
-                ]
-            
-            # Calculate overall confidence
-            confidence = 0.85  # Default for local Whisper
-            if segments:
-                avg_logprob = sum(seg.get("confidence", -0.5) for seg in segments) / len(segments)
-                confidence = min(1.0, max(0.0, (avg_logprob + 1.0)))
-            
-            transcribed_text = result["text"]
-            
-            logger.info("Local Whisper transcription completed",
-                       text_length=len(transcribed_text),
-                       confidence=confidence,
-                       processing_time_ms=processing_time)
-            
-            return TranscriptionResult(
-                text=transcribed_text,
-                language=result.get("language", "de"),
-                confidence=confidence,
-                segments=segments,
-                processing_time_ms=processing_time,
-                stt_model=f"whisper-{self.model_size}"
-            )
-            
-        except Exception as e:
-            logger.error("Local Whisper transcription failed", error=str(e))
-            raise AudioTranscriptionError(f"Local Whisper error: {str(e)}")
+# Local Whisper Service removed - using Google Cloud Speech-to-Text exclusively
 
 
 class MockTranscriptionService:
@@ -263,9 +56,8 @@ class AudioService:
     def __init__(self):
         self.audio_processor = AudioProcessor()
         
-        # Initialize available transcription services
-        self.openai_service = OpenAIWhisperService() if settings.OPENAI_API_KEY else None
-        self.local_service = LocalWhisperService()
+        # Initialize transcription services - Google Cloud Speech only
+        self.google_cloud_service = GoogleCloudSpeechService() if settings.GOOGLE_CLOUD_API_KEY else None
         self.mock_service = MockTranscriptionService()
         
     async def process_audio(
@@ -295,23 +87,18 @@ class AudioService:
             # Validate audio file
             audio_metadata = self.audio_processor.validate_audio(audio_data, filename)
             
-            # Choose transcription service
+            # Choose transcription service - Priority: Google Cloud > Mock
             if use_mock:
                 transcription_service = self.mock_service
                 logger.info("Using mock transcription service")
-            elif self.openai_service:
-                transcription_service = self.openai_service
-                logger.info("Using OpenAI Whisper API")
+            elif self.google_cloud_service:
+                transcription_service = self.google_cloud_service
+                logger.info("Using Google Cloud Speech-to-Text API")
             else:
-                transcription_service = self.local_service
-                logger.info("Using local Whisper model")
+                raise AudioTranscriptionError("Google Cloud Speech-to-Text not configured. Please set GOOGLE_CLOUD_API_KEY.")
             
-            # For local Whisper, we need to save to temp file
-            if transcription_service == self.local_service:
-                transcription_result = await self._transcribe_with_local(audio_data, filename)
-            else:
-                # API services can handle file objects directly
-                transcription_result = await transcription_service.transcribe(audio_file, filename)
+            # All API services can handle file objects directly
+            transcription_result = await transcription_service.transcribe(audio_file, filename)
             
             logger.info("Audio processing completed successfully",
                        filename=filename,
@@ -327,25 +114,7 @@ class AudioService:
             logger.error("Audio processing failed", filename=filename, error=str(e))
             raise AudioTranscriptionError(f"Audio processing error: {str(e)}")
     
-    async def _transcribe_with_local(self, audio_data: bytes, filename: str) -> TranscriptionResult:
-        """Transcribe using local Whisper with temporary file"""
-        
-        # Create temporary file
-        suffix = Path(filename).suffix or ".wav"
-        
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
-            temp_file.write(audio_data)
-            temp_path = temp_file.name
-        
-        try:
-            # Transcribe with local service
-            return await self.local_service.transcribe(temp_path)
-        finally:
-            # Clean up temporary file
-            try:
-                os.unlink(temp_path)
-            except OSError:
-                logger.warning("Failed to delete temporary file", path=temp_path)
+# Local transcription method removed - using Google Cloud Speech-to-Text exclusively
     
     def get_supported_formats(self) -> list[str]:
         """Get list of supported audio formats"""

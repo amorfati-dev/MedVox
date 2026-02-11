@@ -10,6 +10,8 @@ export interface BillingCode {
   quantity?: number;
   anzahl?: number;
   fee?: number;
+  is_zusatzleistung?: boolean;
+  tooth_number?: string;
 }
 
 export interface DentalProcedure {
@@ -82,6 +84,23 @@ export interface PatientFormData {
   dentistName: string;
   insuranceType: 'BEMA' | 'GOZ';
 }
+
+// Settings Types
+export interface AppSettings {
+  dentistName: string;
+  defaultInsuranceType: 'BEMA' | 'GOZ';
+  gozFactor: number;
+  autoStopDuration: number;
+  apiEndpoint: string;
+}
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  dentistName: 'Dr. Martin Hartmann',
+  defaultInsuranceType: 'BEMA',
+  gozFactor: 2.3,
+  autoStopDuration: 30,
+  apiEndpoint: '/api/v1',
+};
 
 // API Request Types
 export interface ProcessAudioRequest {

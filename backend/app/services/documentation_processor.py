@@ -314,9 +314,27 @@ class DocumentationProcessor:
                    confidence=transcription_result.confidence)
         
         try:
+            # Check if transcription actually contains text
+            raw_text = transcription_result.text.strip()
+            if not raw_text:
+                logger.warning("⚠️ Transcription text is empty - skipping LLM extraction")
+                import uuid
+                recording_id = f"rec_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+                return DentalDocumentation(
+                    recording_id=recording_id,
+                    dentist_id=dentist_id or "system",
+                    patient_id=patient_id,
+                    transcription=transcription_result,
+                    audio_metadata=audio_metadata,
+                    findings=[],
+                    procedures_performed=[],
+                    billing_codes=[],
+                    clinical_notes="Keine Transkription erkannt. Bitte erneut aufnehmen.",
+                )
+
             # Normalize the text
             print(f"🔍 Step 1: Normalizing text...")
-            normalized_text = self._normalize_text(transcription_result.text)
+            normalized_text = self._normalize_text(raw_text)
             print(f"🔍 Step 1 OK: Text normalized: {len(normalized_text)} chars")
             
             # Extract dental findings (tooth-specific conditions)
