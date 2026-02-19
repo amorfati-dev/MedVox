@@ -5,7 +5,7 @@ Defines request/response models for QR-code based data transfer
 """
 
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 
 
@@ -64,16 +64,13 @@ class CreateTransferResponse(BaseModel):
     expires_at: datetime = Field(..., description="Expiration timestamp")
     expires_in_seconds: int = Field(..., description="Seconds until expiration")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "session_id": "550e8400-e29b-41d4-a716-446655440000",
-                "transfer_url": "https://medvox.app/transfer/550e8400-e29b-41d4-a716-446655440000",
-                "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANS...",
-                "expires_at": "2026-02-12T10:35:00.000000",
-                "expires_in_seconds": 300
-            }
-        }
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "session_id": "550e8400-e29b-41d4-a716-446655440000",
+        "transfer_url": "https://medvox.app/transfer/550e8400-e29b-41d4-a716-446655440000",
+        "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANS...",
+        "expires_at": "2026-02-12T10:35:00.000000",
+        "expires_in_seconds": 300
+    }})
 
 
 class TransferSessionResponse(BaseModel):
@@ -86,24 +83,21 @@ class TransferSessionResponse(BaseModel):
     patient_id: Optional[str] = Field(None, description="Patient identifier if provided")
     created_at: datetime = Field(..., description="Session creation timestamp")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "session_id": "550e8400-e29b-41d4-a716-446655440000",
-                "billing_codes": [
-                    {
-                        "code": "13a",
-                        "system": "BEMA",
-                        "description": "Füllungstherapie einflächig",
-                        "quantity": 1,
-                        "tooth_number": "36"
-                    }
-                ],
-                "transcription": "Zahn 36, MOD-Füllung mit Komposite",
-                "patient_id": "12345",
-                "created_at": "2026-02-12T10:30:00.000000"
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "session_id": "550e8400-e29b-41d4-a716-446655440000",
+        "billing_codes": [
+            {
+                "code": "13a",
+                "system": "BEMA",
+                "description": "Füllungstherapie einflächig",
+                "quantity": 1,
+                "tooth_number": "36"
             }
-        }
+        ],
+        "transcription": "Zahn 36, MOD-Füllung mit Komposite",
+        "patient_id": "12345",
+        "created_at": "2026-02-12T10:30:00.000000"
+    }})
 
 
 class ErrorResponse(BaseModel):
@@ -113,10 +107,7 @@ class ErrorResponse(BaseModel):
     detail: str = Field(..., description="Error message")
     error_code: Optional[str] = Field(None, description="Machine-readable error code")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "detail": "Session not found or expired",
-                "error_code": "SESSION_NOT_FOUND"
-            }
-        }
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "detail": "Session not found or expired",
+        "error_code": "SESSION_NOT_FOUND"
+    }})

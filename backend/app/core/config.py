@@ -3,7 +3,7 @@ Configuration settings for MedVox
 """
 import os
 from typing import List, Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from dotenv import load_dotenv
 
@@ -141,9 +141,7 @@ class Settings(BaseSettings):
                 import warnings
                 warnings.warn("OPENAI_API_KEY not set - only mock transcription will work")
     
-    class Config:
-        case_sensitive = True
-        extra = "ignore"  # Ignore extra environment variables
+    model_config = SettingsConfigDict(case_sensitive=True, extra="ignore")
 
 
 # Create settings instance

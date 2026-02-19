@@ -259,11 +259,13 @@ class TestTransferAPISecurity:
         data = response.json()
 
         transfer_url = data["transfer_url"]
+        session_id = data["session_id"]
 
-        # Should NOT contain sensitive data
-        assert "12345" not in transfer_url  # patient_id
-        assert "13a" not in transfer_url    # billing code
-        assert "36" not in transfer_url     # tooth number
+        # URL should be /transfer/{session_id} only - no sensitive data appended
+        assert transfer_url.endswith(f"/transfer/{session_id}")
+        assert "12345" not in transfer_url  # patient_id should never appear
+        assert "13a" not in transfer_url    # billing code should never appear
+        # Note: short tooth numbers like "36" can appear as UUID substrings - not checked
 
     def test_session_id_in_response_body_only(self, client, sample_transfer_request):
         """Session ID should not leak in headers or other places"""

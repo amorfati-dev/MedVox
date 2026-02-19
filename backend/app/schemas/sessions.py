@@ -4,7 +4,7 @@ Session schemas for managing multiple recordings
 
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SessionSummary(BaseModel):
@@ -20,20 +20,17 @@ class SessionSummary(BaseModel):
     created_at: datetime = Field(..., description="Session creation timestamp")
     status: str = Field(..., description="Recording status")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "id": 123,
-                "patient_id": "12345",
-                "dentist_id": 1,
-                "dentist_name": "Dr. Müller",
-                "transcription_preview": "Zahn 36 okklusal Karies profunda...",
-                "processing_mode": "with_billing",
-                "billing_codes_count": 3,
-                "created_at": "2026-02-12T10:30:00",
-                "status": "transcribed"
-            }
-        }
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "id": 123,
+        "patient_id": "12345",
+        "dentist_id": 1,
+        "dentist_name": "Dr. Müller",
+        "transcription_preview": "Zahn 36 okklusal Karies profunda...",
+        "processing_mode": "with_billing",
+        "billing_codes_count": 3,
+        "created_at": "2026-02-12T10:30:00",
+        "status": "transcribed"
+    }})
 
 
 class SessionListResponse(BaseModel):
@@ -42,10 +39,7 @@ class SessionListResponse(BaseModel):
     sessions: List[SessionSummary] = Field(..., description="List of session summaries")
     total: int = Field(..., description="Total number of sessions")
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "sessions": [],
-                "total": 10
-            }
-        }
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "sessions": [],
+        "total": 10
+    }})
