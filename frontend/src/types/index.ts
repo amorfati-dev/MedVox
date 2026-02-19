@@ -150,6 +150,7 @@ export interface ProcessAudioRequest {
 // Transfer Session Types
 export interface TransferSession {
   session_id: string;
+  short_code?: string;
   transfer_url: string;
   qr_code: string;
   expires_at: string;
@@ -180,4 +181,14 @@ export interface SessionSummary {
 export interface SessionListResponse {
   sessions: SessionSummary[];
   total: number;
-} 
+}
+
+// Auth Types
+export interface AuthUser {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  is_active: boolean;
+}

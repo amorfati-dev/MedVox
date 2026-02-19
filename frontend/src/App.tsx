@@ -1,12 +1,57 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { Mic, MicOff, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock } from 'lucide-react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { Mic, MicOff, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock, LogOut } from 'lucide-react';
 import { BillingCodesDisplay } from './components/BillingCodesDisplay';
 import { SettingsPanel, loadSettings, saveSettings } from './components/SettingsPanel';
 import { ShortCodeModal } from './components/ShortCodeModal';
 import { SessionPanel } from './components/SessionPanel';
-import { DocumentationResponse, SelectedBillingCode, RecordingState, PatientFormData, AppSettings, TransferSession, ProcessingMode, RecordingSession, SessionState, AudioSegment } from './types';
+import { LoginPage } from './pages/LoginPage';
+import { DocumentationResponse, SelectedBillingCode, RecordingState, PatientFormData, AppSettings, TransferSession, ProcessingMode, RecordingSession, SessionState, AudioSegment, AuthUser } from './types';
+
+const AUTH_TOKEN_KEY = 'medvox-auth-token';
 
 function App() {
+  // Auth state
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(AUTH_TOKEN_KEY));
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+
+  const handleLogin = (newToken: string) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, newToken);
+    setToken(newToken);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    setToken(null);
+    setAuthUser(null);
+  };
+
+  // Validate token on mount and fetch current user
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${loadSettings().apiEndpoint}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(async (res) => {
+      if (res.status === 401) {
+        handleLogout();
+      } else if (res.ok) {
+        const user: AuthUser = await res.json();
+        setAuthUser(user);
+      }
+    }).catch(() => {
+      // Server unreachable - keep token, will fail on next API call
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auth-aware fetch wrapper
+  const apiFetch = useCallback(async (url: string, options: RequestInit = {}): Promise<Response> => {
+    const headers = new Headers(options.headers);
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) handleLogout();
+    return res;
+  }, [token]);
+
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     const loaded = loadSettings();
     return loaded;
@@ -218,7 +263,7 @@ function App() {
       formData.append('audio_file', audioBlob, `segment${fileExtension}`);
       formData.append('processing_mode', 'transcription_only');
 
-      const response = await fetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
+      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
         method: 'POST',
         body: formData,
       });
@@ -252,7 +297,7 @@ function App() {
       formData.append('insurance_type', sessionData.insuranceType);
       formData.append('processing_mode', processingMode);
 
-      const response = await fetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
+      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
         method: 'POST',
         body: formData,
       });
@@ -303,7 +348,7 @@ function App() {
       formData.append('insurance_type', patientData.insuranceType);
       formData.append('processing_mode', processingMode);
 
-      const response = await fetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
+      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
         method: 'POST',
         body: formData,
       });
@@ -371,7 +416,7 @@ function App() {
       }
 
       // Create transfer session
-      const response = await fetch(`${appSettings.apiEndpoint}/transfer/create`, {
+      const response = await apiFetch(`${appSettings.apiEndpoint}/transfer/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -460,7 +505,7 @@ function App() {
 
   const handleLoadSession = async (sessionId: number) => {
     try {
-      const response = await fetch(`${appSettings.apiEndpoint}/documentation/sessions/${sessionId}`);
+      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/sessions/${sessionId}`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -503,6 +548,10 @@ function App() {
 
   const progressPercent = (recordingState.duration / appSettings.autoStopDuration) * 100;
 
+  if (!token) {
+    return <LoginPage apiEndpoint={appSettings.apiEndpoint} onLogin={handleLogin} />;
+  }
+
   return (
     <div className="min-h-screen bg-dental-surface">
       {/* Header */}
@@ -531,6 +580,13 @@ function App() {
                 title="Einstellungen"
               >
                 <Settings className="h-4.5 w-4.5" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="btn-icon"
+                title={authUser ? `Abmelden (${authUser.email})` : 'Abmelden'}
+              >
+                <LogOut className="h-4.5 w-4.5" />
               </button>
             </div>
           </div>
@@ -874,6 +930,7 @@ function App() {
         onLoadSession={handleLoadSession}
         apiEndpoint={appSettings.apiEndpoint}
         currentDentistName={patientData.dentistName}
+        fetchFn={apiFetch}
       />
 
       {/* Short Code Modal */}

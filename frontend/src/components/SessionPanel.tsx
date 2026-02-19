@@ -8,6 +8,7 @@ interface SessionPanelProps {
   onLoadSession: (sessionId: number) => void;
   apiEndpoint: string;
   currentDentistName?: string;
+  fetchFn?: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
 const CACHE_KEY = 'medvox-sessions-cache';
@@ -51,6 +52,7 @@ export const SessionPanel: React.FC<SessionPanelProps> = ({
   onLoadSession,
   apiEndpoint,
   currentDentistName,
+  fetchFn = fetch,
 }) => {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -96,7 +98,7 @@ export const SessionPanel: React.FC<SessionPanelProps> = ({
       }
 
       console.log('🌐 Fetching:', url.toString());
-      const response = await fetch(url.toString());
+      const response = await fetchFn(url.toString());
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -126,7 +128,7 @@ export const SessionPanel: React.FC<SessionPanelProps> = ({
     }
 
     try {
-      const response = await fetch(`${apiEndpoint}/documentation/sessions/${sessionId}`, {
+      const response = await fetchFn(`${apiEndpoint}/documentation/sessions/${sessionId}`, {
         method: 'DELETE',
       });
 

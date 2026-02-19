@@ -65,7 +65,7 @@ export const ShortCodeModal: React.FC<ShortCodeModalProps> = ({
   const copyCode = async () => {
     if (!transferSession) return;
     try {
-      await navigator.clipboard.writeText(transferSession.short_code);
+      await navigator.clipboard.writeText(transferSession.short_code ?? '');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -73,7 +73,7 @@ export const ShortCodeModal: React.FC<ShortCodeModalProps> = ({
     }
   };
 
-  const formattedCode = formatCodeWithDash(transferSession.short_code);
+  const formattedCode = formatCodeWithDash(transferSession.short_code ?? '');
 
   return (
     <>
