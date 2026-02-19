@@ -9,7 +9,6 @@ import { DocumentationResponse, SelectedBillingCode, RecordingState, PatientForm
 function App() {
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
     const loaded = loadSettings();
-    console.log('🔧 Initial settings loaded:', loaded);
     return loaded;
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -42,7 +41,6 @@ function App() {
   });
   const [selectedDentistId, setSelectedDentistId] = useState<string>(() => {
     const currentDentist = getCurrentDentist();
-    console.log('🔧 Initial dentist:', currentDentist);
     return currentDentist?.id || 'dentist-1';
   });
 
@@ -68,7 +66,6 @@ function App() {
         ? 'audio/webm;codecs=opus'
         : 'audio/webm';
 
-      console.log('🎤 Using audio format:', mimeType);
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
@@ -84,14 +81,12 @@ function App() {
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const duration = recordingState.duration;
-        console.log('🎵 Audio blob created:', audioBlob.size, 'bytes, type:', audioBlob.type);
 
         stream.getTracks().forEach((track) => track.stop());
 
         // ALWAYS session mode: Add segment and quick transcribe
         {
           // Add segment to session
-          console.log('📝 Adding segment to session...');
           setRecordingState((prev) => ({ ...prev, isProcessing: true }));
 
           const transcription = await quickTranscribe(audioBlob);
@@ -126,7 +121,6 @@ function App() {
 
           setSessionState('paused');
           setRecordingState((prev) => ({ ...prev, isProcessing: false }));
-          console.log('✅ Segment added, session paused');
         }
       };
 
@@ -207,7 +201,6 @@ function App() {
       setSession(null);
       setSessionState('idle');
       setDocumentation(null);
-      console.log('🗑️ Session discarded');
     }
   }, []);
 
@@ -269,7 +262,6 @@ function App() {
       }
 
       const result = await response.json();
-      console.log('📨 API Response:', result);
 
       const doc = result.success ? result.documentation : null;
       setDocumentation(doc);
@@ -280,7 +272,6 @@ function App() {
         if (currentDentist) {
           const cacheKey = `medvox-sessions-cache-${currentDentist.name}`;
           localStorage.removeItem(cacheKey);
-          console.log('🗑️ Invalidated sessions cache:', cacheKey);
         }
       }
     } catch (error) {
@@ -305,7 +296,6 @@ function App() {
         ? '.mp4'
         : '.webm';
 
-      console.log('📤 Uploading audio:', audioBlob.type, fileExtension);
 
       formData.append('audio_file', audioBlob, `recording${fileExtension}`);
       formData.append('patient_id', patientData.patientId);
@@ -323,7 +313,6 @@ function App() {
       }
 
       const result = await response.json();
-      console.log('📨 API Response:', result);
 
       const doc = result.success ? result.documentation : null;
       setDocumentation(doc);
@@ -334,7 +323,6 @@ function App() {
         if (currentDentist) {
           const cacheKey = `medvox-sessions-cache-${currentDentist.name}`;
           localStorage.removeItem(cacheKey);
-          console.log('🗑️ Invalidated sessions cache:', cacheKey);
         }
       }
     } catch (error) {
@@ -400,7 +388,6 @@ function App() {
       }
 
       const session: TransferSession = await response.json();
-      console.log('📱 Transfer session created:', session);
 
       setTransferSession(session);
       setCodeModalOpen(true);
@@ -411,13 +398,11 @@ function App() {
   };
 
   const handleSettingsSave = (newSettings: AppSettings) => {
-    console.log('💾 Saving settings:', newSettings);
     setAppSettings(newSettings);
     saveSettings(newSettings);
 
     // Update patient data with new defaults
     const currentDentist = newSettings.dentists.find(d => d.id === newSettings.currentDentistId) || newSettings.dentists[0];
-    console.log('👨‍⚕️ Current dentist:', currentDentist);
 
     if (currentDentist) {
       setSelectedDentistId(currentDentist.id);
@@ -429,7 +414,6 @@ function App() {
   };
 
   const handleDentistChange = (dentistId: string) => {
-    console.log('🔄 Changing dentist to:', dentistId);
     setSelectedDentistId(dentistId);
     const dentist = appSettings.dentists.find(d => d.id === dentistId);
     if (dentist) {
@@ -476,7 +460,6 @@ function App() {
 
   const handleLoadSession = async (sessionId: number) => {
     try {
-      console.log('📥 Loading session:', sessionId);
       const response = await fetch(`${appSettings.apiEndpoint}/documentation/sessions/${sessionId}`);
 
       if (!response.ok) {
@@ -484,11 +467,8 @@ function App() {
       }
 
       const result = await response.json();
-      console.log('📥 Loaded session result:', result);
 
       if (result.success && result.documentation) {
-        console.log('📥 Documentation:', result.documentation);
-        console.log('📥 Transcription:', result.documentation.transcription);
 
         setDocumentation(result.documentation);
 

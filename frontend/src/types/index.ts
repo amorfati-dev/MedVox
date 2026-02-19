@@ -135,7 +135,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultInsuranceType: 'BEMA',
   defaultProcessingMode: 'with_billing',
   gozFactor: 2.3,
-  autoStopDuration: 30,
+  autoStopDuration: 120,
   apiEndpoint: '/api/v1',
 };
 

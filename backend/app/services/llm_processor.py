@@ -122,7 +122,6 @@ REGELN FÜR GOZ-ABRECHNUNG:
                     # Last attempt failed, re-raise the error
                     raise retry_error
                 # Wait before retry (exponential backoff)
-                import time
                 wait_time = (attempt + 1) * 2  # 2, 4, 6 seconds
                 logger.info(f"⏳ Waiting {wait_time}s before retry...")
                 await asyncio.sleep(wait_time)
@@ -136,7 +135,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
             data = response.json()
             
             # 🔍 CRITICAL DEBUG: Log what Gemini actually returned
-            print(f"🔍 GEMINI RAW RESPONSE: {data}")
+            logger.debug(f"🔍 GEMINI RAW RESPONSE: {data}")
             logger.info(f"🔍 Gemini response keys: {list(data.keys())}")
             logger.info(f"🔍 Gemini response type: {type(data)}")
             
@@ -145,7 +144,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                 candidate = data["candidates"][0]
                 finish_reason = candidate.get("finishReason", "")
                 
-                print(f"🔍 GEMINI FINISH REASON: {finish_reason}")
+                logger.debug(f"🔍 GEMINI FINISH REASON: {finish_reason}")
                 
                 if finish_reason == "MAX_TOKENS":
                     logger.error("Gemini response was cut off due to MAX_TOKENS limit")
@@ -159,8 +158,8 @@ REGELN FÜR GOZ-ABRECHNUNG:
                 content = candidate.get("content", {})
                 parts = content.get("parts", [])
                 
-                print(f"🔍 GEMINI CONTENT: {content}")
-                print(f"🔍 GEMINI PARTS: {parts}")
+                logger.debug(f"🔍 GEMINI CONTENT: {content}")
+                logger.debug(f"🔍 GEMINI PARTS: {parts}")
                 
                 if not parts:
                     logger.error(f"No parts in Gemini response. Content: {content}")
@@ -168,7 +167,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                 
                 result_text = parts[0].get("text", "")
                 
-                print(f"🔍 GEMINI RESULT TEXT: {result_text[:500]}...")
+                logger.debug(f"🔍 GEMINI RESULT TEXT: {result_text[:500]}...")
                 
                 if not result_text:
                     logger.error("Empty text in Gemini response")
@@ -182,30 +181,29 @@ REGELN FÜR GOZ-ABRECHNUNG:
             logger.info("✅ Gemini response received - returning raw")
             
             # Try to parse as JSON, but if it fails, return the raw text
-            import json as pyjson
             try:
-                print(f"🔍 ATTEMPTING JSON PARSE...")
-                result = pyjson.loads(result_text)
+                logger.debug("Attempting JSON parse of Gemini response")
+                result = json.loads(result_text)
                 
                 # Handle both object and array responses from Gemini
                 if isinstance(result, list):
-                    print(f"🔍 JSON PARSE SUCCESS: Array with {len(result)} items")
+                    logger.debug(f"🔍 JSON PARSE SUCCESS: Array with {len(result)} items")
                     # Convert array to object format for normalization
                     result = {"procedures": result}
                 elif isinstance(result, dict):
-                    print(f"🔍 JSON PARSE SUCCESS: Object with keys {list(result.keys())}")
+                    logger.debug(f"🔍 JSON PARSE SUCCESS: Object with keys {list(result.keys())}")
                 else:
-                    print(f"🔍 JSON PARSE SUCCESS: {type(result).__name__}")
+                    logger.debug(f"🔍 JSON PARSE SUCCESS: {type(result).__name__}")
                 
                 # 🔧 FIX: Convert Gemini's field names to our expected format
                 normalized_result = self._normalize_gemini_response(result)
-                print(f"🔍 NORMALIZED RESULT: {list(normalized_result.keys())}")
+                logger.debug(f"🔍 NORMALIZED RESULT: {list(normalized_result.keys())}")
                 
                 normalized_result["raw_gemini_response"] = result_text
                 return normalized_result
             except Exception as json_error:
-                print(f"🔍 JSON PARSE FAILED: {json_error}")
-                print(f"🔍 JSON PARSE FAILED - Raw text preview: {result_text[:200]}...")
+                logger.debug(f"🔍 JSON PARSE FAILED: {json_error}")
+                logger.debug(f"🔍 JSON PARSE FAILED - Raw text preview: {result_text[:200]}...")
                 # If JSON parsing fails, return raw text for frontend
                 return {
                     "raw_gemini_response": result_text,
@@ -284,7 +282,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
     def _normalize_gemini_response(self, result: dict) -> dict:
         """Convert Gemini's response format to our expected format - UNIVERSAL PARSER"""
         
-        print(f"🔧 NORMALIZING Gemini response: {list(result.keys())}")
+        logger.debug(f"🔧 NORMALIZING Gemini response: {list(result.keys())}")
         
         normalized = {}
         all_billing_codes = []
@@ -293,24 +291,24 @@ REGELN FÜR GOZ-ABRECHNUNG:
         # 🚀 UNIVERSAL EXTRACTION: Find billing codes ANYWHERE in the JSON
         def extract_codes_recursively(obj, parent_key="", depth=0):
             """Recursively extract billing codes from any JSON structure"""
-            print(f"{'  ' * depth}🔍 Scanning: {parent_key} (type: {type(obj).__name__})")
+            logger.debug(f"{'  ' * depth}🔍 Scanning: {parent_key} (type: {type(obj).__name__})")
             
             if isinstance(obj, dict):
                 # Look for billing code arrays with various names
                 for key in ["billing_codes", "abrechnungspositionen", "abrechnungsziffern", "codes", "positionen", "entries"]:
                     if key in obj and isinstance(obj[key], list):
-                        print(f"{'  ' * depth}✅ FOUND {key} with {len(obj[key])} codes")
+                        logger.debug(f"{'  ' * depth}✅ FOUND {key} with {len(obj[key])} codes")
                         for code_obj in obj[key]:
                             extracted = self._extract_single_billing_code(code_obj, obj)
                             if extracted:
                                 all_billing_codes.append(extracted)
-                                print(f"{'  ' * depth}  📋 Extracted: {extracted['code']} ({extracted.get('system', 'unknown')})")
+                                logger.debug(f"{'  ' * depth}  📋 Extracted: {extracted['code']} ({extracted.get('system', 'unknown')})")
                 
                 # Look for procedure names
                 for key in ["procedure_description", "bezeichnung", "name", "description", "procedure_name"]:
                     if key in obj and isinstance(obj[key], str):
                         simple_procedures.append(obj[key])
-                        print(f"{'  ' * depth}  📝 Found procedure: {obj[key]}")
+                        logger.debug(f"{'  ' * depth}  📝 Found procedure: {obj[key]}")
                 
                 # Recurse into nested objects
                 for key, value in obj.items():
@@ -321,7 +319,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                     extract_codes_recursively(item, f"{parent_key}[{i}]", depth + 1)
         
         # Start recursive extraction
-        print(f"🚀 Starting UNIVERSAL extraction...")
+        logger.debug(f"🚀 Starting UNIVERSAL extraction...")
         extract_codes_recursively(result)
         
         # Remove duplicates while preserving order
@@ -333,9 +331,9 @@ REGELN FÜR GOZ-ABRECHNUNG:
         normalized["procedures"] = unique_procedures
         normalized["billing_codes"] = all_billing_codes
         
-        print(f"🎯 UNIVERSAL EXTRACTION COMPLETE:")
-        print(f"   📝 Procedures: {len(unique_procedures)}")
-        print(f"   📋 Billing Codes: {len(all_billing_codes)}")
+        logger.debug(f"🎯 UNIVERSAL EXTRACTION COMPLETE:")
+        logger.debug(f"   📝 Procedures: {len(unique_procedures)}")
+        logger.debug(f"   📋 Billing Codes: {len(all_billing_codes)}")
         
         # If we found anything, we're done!
         if all_billing_codes or unique_procedures:
@@ -343,7 +341,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
         
         # 🆕 Fallback: Handle specific known structures
         if "abrechnung" in result:
-            print(f"🔧 FOUND 'abrechnung' structure - extracting billing codes")
+            logger.debug(f"🔧 FOUND 'abrechnung' structure - extracting billing codes")
             abrechnung = result["abrechnung"]
             
             simple_procedures = []
@@ -351,20 +349,20 @@ REGELN FÜR GOZ-ABRECHNUNG:
             
             # Extract from behandlungen array
             behandlungen = abrechnung.get("behandlungen", [])
-            print(f"🔧 Found {len(behandlungen)} behandlungen")
+            logger.debug(f"🔧 Found {len(behandlungen)} behandlungen")
             
             for behandlung in behandlungen:
                 # Extract procedure name
                 proc_name = behandlung.get("bezeichnung", "Unbekannte Behandlung")
                 simple_procedures.append(proc_name)
-                print(f"🔧 Added procedure: {proc_name}")
+                logger.debug(f"🔧 Added procedure: {proc_name}")
                 
                 # Extract billing codes from abrechnungspositionen
                 abrechnungspositionen = behandlung.get("abrechnungspositionen", [])
-                print(f"🔧 Found {len(abrechnungspositionen)} abrechnungspositionen in '{proc_name}'")
+                logger.debug(f"🔧 Found {len(abrechnungspositionen)} abrechnungspositionen in '{proc_name}'")
                 
                 for pos in abrechnungspositionen:
-                    print(f"🔧 Processing position: {pos}")
+                    logger.debug(f"🔧 Processing position: {pos}")
                     
                     # Map German fields to our format
                     converted_code = {
@@ -379,11 +377,11 @@ REGELN FÜR GOZ-ABRECHNUNG:
                         "confidence": "medium"
                     }
                     all_billing_codes.append(converted_code)
-                    print(f"🔧 EXTRACTED billing code: {converted_code['code']} ({converted_code['system']})")
+                    logger.debug(f"🔧 EXTRACTED billing code: {converted_code['code']} ({converted_code['system']})")
             
             normalized["procedures"] = simple_procedures
             normalized["billing_codes"] = all_billing_codes
-            print(f"🔧 FINAL: {len(simple_procedures)} procedures, {len(all_billing_codes)} billing codes")
+            logger.debug(f"🔧 FINAL: {len(simple_procedures)} procedures, {len(all_billing_codes)} billing codes")
             return normalized
         
         # Convert procedures and extract nested billing codes
@@ -393,7 +391,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
             if "treatment_description" in treatment:
                 procedures.append(treatment["treatment_description"])
             normalized["procedures"] = procedures
-            print(f"🔧 MAPPED treatment_summary → procedures: {procedures}")
+            logger.debug(f"🔧 MAPPED treatment_summary → procedures: {procedures}")
         elif "procedures" in result or "prozeduren" in result:
             # Handle nested structure where billing_codes are inside procedures (English or German)
             procedures_list = result.get("procedures") or result.get("prozeduren", [])
@@ -418,22 +416,22 @@ REGELN FÜR GOZ-ABRECHNUNG:
                             field_name_used = field_name
                             break
                     
-                    print(f"🔍 PROCEDURE FIELDS: {list(proc.keys())}")
-                    print(f"🔍 FOUND billing field: '{field_name_used}' with {len(billing_codes_field) if billing_codes_field else 0} codes")
+                    logger.debug(f"🔍 PROCEDURE FIELDS: {list(proc.keys())}")
+                    logger.debug(f"🔍 FOUND billing field: '{field_name_used}' with {len(billing_codes_field) if billing_codes_field else 0} codes")
                     
                     if billing_codes_field:
                         for code in billing_codes_field:
                             # Convert nested billing code format (handle German fields)
                             
                             # Debug: Show what fields Gemini provided
-                            print(f"🔍 RAW CODE DATA: {code}")
+                            logger.debug(f"🔍 RAW CODE DATA: {code}")
                             
                             code_value = (code.get("code") or code.get("position") or "")
                             type_value = (code.get("code_system") or 
                                         code.get("gebuehrenordnung") or
                                         code.get("system") or "").lower()
                             
-                            print(f"🔍 MAPPED code: '{code_value}', type: '{type_value}'")
+                            logger.debug(f"🔍 MAPPED code: '{code_value}', type: '{type_value}'")
                             
                             converted_code = {
                                 "code": code_value,
@@ -451,7 +449,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                                 "note": ""
                             }
                             all_billing_codes.append(converted_code)
-                            print(f"🔧 EXTRACTED nested billing code: {converted_code['code']} (type: {converted_code['type']}) from procedure")
+                            logger.debug(f"🔧 EXTRACTED nested billing code: {converted_code['code']} (type: {converted_code['type']}) from procedure")
                 else:
                     simple_procedures.append(str(proc))
             
@@ -462,7 +460,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                 if "billing_codes" not in normalized:
                     normalized["billing_codes"] = []
                 normalized["billing_codes"].extend(all_billing_codes)
-                print(f"🔧 EXTRACTED {len(all_billing_codes)} billing codes from nested procedures")
+                logger.debug(f"🔧 EXTRACTED {len(all_billing_codes)} billing codes from nested procedures")
         else:
             normalized["procedures"] = result.get("procedures", [])
         
@@ -484,15 +482,15 @@ REGELN FÜR GOZ-ABRECHNUNG:
                     "note": ""
                 }
                 billing_codes.append(converted_code)
-                print(f"🔧 CONVERTED billing entry: {entry.get('code')} → {converted_code}")
+                logger.debug(f"🔧 CONVERTED billing entry: {entry.get('code')} → {converted_code}")
             
             normalized["billing_codes"] = billing_codes
-            print(f"🔧 MAPPED billing_entries → billing_codes: {len(billing_codes)} codes")
+            logger.debug(f"🔧 MAPPED billing_entries → billing_codes: {len(billing_codes)} codes")
         else:
             # Ensure billing_codes is always present (might be populated from nested procedures above)
             if "billing_codes" not in normalized:
                 normalized["billing_codes"] = result.get("billing_codes", [])
-                print(f"🔧 USING existing billing_codes: {len(normalized['billing_codes'])} codes")
+                logger.debug(f"🔧 USING existing billing_codes: {len(normalized['billing_codes'])} codes")
         
         # Copy other fields
         for key, value in result.items():

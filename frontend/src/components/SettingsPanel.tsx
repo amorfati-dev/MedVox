@@ -292,7 +292,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 onChange={(e) =>
                   setDraft((prev) => ({
                     ...prev,
-                    autoStopDuration: parseInt(e.target.value) || 30,
+                    autoStopDuration: parseInt(e.target.value) || 120,
                   }))
                 }
                 className="input-field"
