@@ -194,12 +194,23 @@ class GoogleCloudSpeechService:
                     stt_model="google-cloud-speech"
                 )
             
-            # Get best result
-            result = response_data["results"][0]
+            # Merge all result segments (Google returns one entry per utterance/pause)
+            all_results = response_data["results"]
+            transcribed_text = " ".join(
+                r["alternatives"][0]["transcript"]
+                for r in all_results
+                if r.get("alternatives")
+            )
+            confidences = [
+                r["alternatives"][0].get("confidence", 0.9)
+                for r in all_results
+                if r.get("alternatives")
+            ]
+            overall_confidence = sum(confidences) / len(confidences) if confidences else 0.9
+
+            # Use first result for word-level segments (detailed data)
+            result = all_results[0]
             alternative = result["alternatives"][0]
-            
-            transcribed_text = alternative["transcript"]
-            overall_confidence = alternative.get("confidence", 0.9)
             
             # Extract word-level segments
             segments = []

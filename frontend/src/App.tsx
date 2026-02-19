@@ -1,11 +1,12 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Mic, MicOff, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock, LogOut } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Mic, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock, LogOut } from 'lucide-react';
 import { BillingCodesDisplay } from './components/BillingCodesDisplay';
 import { SettingsPanel, loadSettings, saveSettings } from './components/SettingsPanel';
 import { ShortCodeModal } from './components/ShortCodeModal';
 import { SessionPanel } from './components/SessionPanel';
 import { LoginPage } from './pages/LoginPage';
-import { DocumentationResponse, SelectedBillingCode, RecordingState, PatientFormData, AppSettings, TransferSession, ProcessingMode, RecordingSession, SessionState, AudioSegment, AuthUser } from './types';
+import { DocumentationResponse, SelectedBillingCode, PatientFormData, AppSettings, ProcessingMode, AuthUser } from './types';
+import { useRecording } from './hooks/useRecording';
 
 const AUTH_TOKEN_KEY = 'medvox-auth-token';
 
@@ -52,331 +53,45 @@ function App() {
     return res;
   }, [token]);
 
-  const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const loaded = loadSettings();
-    return loaded;
-  });
+  const [appSettings, setAppSettings] = useState<AppSettings>(() => loadSettings());
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
   const [transcriptionCopied, setTranscriptionCopied] = useState(false);
-  const [codeModalOpen, setCodeModalOpen] = useState(false);
-  const [transferSession, setTransferSession] = useState<TransferSession | null>(null);
   const [processingMode, setProcessingMode] = useState<ProcessingMode>(appSettings.defaultProcessingMode);
 
-  const [recordingState, setRecordingState] = useState<RecordingState>({
-    isRecording: false,
-    isProcessing: false,
-    duration: 0,
-  });
-
-  // Session-based recording state (ALWAYS session mode now)
-  const [session, setSession] = useState<RecordingSession | null>(null);
-  const [sessionState, setSessionState] = useState<SessionState>('idle');
-
-  const [documentation, setDocumentation] = useState<DocumentationResponse | null>(null);
-
-  const getCurrentDentist = () => {
-    return appSettings.dentists.find(d => d.id === appSettings.currentDentistId) || appSettings.dentists[0];
-  };
+  const getCurrentDentist = () =>
+    appSettings.dentists.find((d) => d.id === appSettings.currentDentistId) || appSettings.dentists[0];
 
   const [patientData, setPatientData] = useState<PatientFormData>({
     patientId: '',
     dentistName: getCurrentDentist()?.name || 'Unknown',
     insuranceType: appSettings.defaultInsuranceType,
   });
-  const [selectedDentistId, setSelectedDentistId] = useState<string>(() => {
-    const currentDentist = getCurrentDentist();
-    return currentDentist?.id || 'dentist-1';
-  });
+  const [selectedDentistId, setSelectedDentistId] = useState<string>(
+    () => getCurrentDentist()?.id || 'dentist-1',
+  );
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: 44100,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-
-      const mimeType = MediaRecorder.isTypeSupported('audio/wav')
-        ? 'audio/wav'
-        : MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : 'audio/webm';
-
-
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType,
-        audioBitsPerSecond: 64000,
-      });
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        const duration = recordingState.duration;
-
-        stream.getTracks().forEach((track) => track.stop());
-
-        // ALWAYS session mode: Add segment and quick transcribe
-        {
-          // Add segment to session
-          setRecordingState((prev) => ({ ...prev, isProcessing: true }));
-
-          const transcription = await quickTranscribe(audioBlob);
-
-          const segment: AudioSegment = {
-            blob: audioBlob,
-            duration,
-            transcription,
-            timestamp: new Date(),
-          };
-
-          setSession((prev) => {
-            if (!prev) {
-              // First segment - create new session
-              return {
-                segments: [segment],
-                isActive: true,
-                accumulatedTranscription: transcription,
-                patientId: patientData.patientId,
-                dentistName: patientData.dentistName,
-                insuranceType: patientData.insuranceType,
-              };
-            }
-
-            // Add to existing session
-            return {
-              ...prev,
-              segments: [...prev.segments, segment],
-              accumulatedTranscription: prev.accumulatedTranscription + ' ' + transcription,
-            };
-          });
-
-          setSessionState('paused');
-          setRecordingState((prev) => ({ ...prev, isProcessing: false }));
-        }
-      };
-
-      mediaRecorder.start();
-      setRecordingState((prev) => ({ ...prev, isRecording: true, duration: 0 }));
-
-      // Set session state to recording if session is active
-      if (session || sessionState === 'paused') {
-        setSessionState('recording');
-      }
-
-      durationIntervalRef.current = setInterval(() => {
-        setRecordingState((prev) => {
-          const newDuration = prev.duration + 1;
-          if (newDuration >= appSettings.autoStopDuration) {
-            stopRecording();
-            return prev;
-          }
-          return { ...prev, duration: newDuration };
-        });
-      }, 1000);
-    } catch (error) {
-      console.error('Error starting recording:', error);
-      alert('Fehler beim Zugriff auf das Mikrofon');
-    }
-  };
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-      setRecordingState((prev) => ({ ...prev, isRecording: false }));
-
-      if (durationIntervalRef.current) {
-        clearInterval(durationIntervalRef.current);
-      }
-    }
-  }, []);
-
-  // Session Management Functions
-  const handlePause = useCallback(async () => {
-    // Stop the current recording
-    stopRecording();
-
-    // The audioBlob will be handled in mediaRecorder.onstop
-    // We'll add it to the session there
-  }, [stopRecording]);
-
-  const handleResume = useCallback(async () => {
-    // Start a new recording segment
-    setSessionState('recording');
-    await startRecording();
-  }, []);
-
-  const handleFinalize = useCallback(async () => {
-    if (!session || session.segments.length === 0) return;
-
-    setSessionState('processing');
-
-    try {
-      // Merge all audio blobs
-      const mergedBlob = await mergeAudioBlobs(session.segments.map(s => s.blob));
-
-      // Process the merged audio
-      await processAudioWithSession(mergedBlob, session);
-
-      // Clear session
-      setSession(null);
-      setSessionState('idle');
-    } catch (error) {
-      console.error('Error finalizing session:', error);
-      alert('Fehler beim Abschließen der Session');
-      setSessionState('paused');
-    }
-  }, [session]);
-
-  const handleDiscard = useCallback(() => {
-    if (confirm('Möchten Sie die aktuelle Session wirklich verwerfen?')) {
-      setSession(null);
-      setSessionState('idle');
-      setDocumentation(null);
-    }
-  }, []);
-
-  // Helper: Merge audio blobs
-  const mergeAudioBlobs = async (blobs: Blob[]): Promise<Blob> => {
-    // Simple concatenation for WebM - works for most cases
-    return new Blob(blobs, { type: blobs[0]?.type || 'audio/webm' });
-  };
-
-  // Quick transcription (STT only, no LLM)
-  const quickTranscribe = async (audioBlob: Blob): Promise<string> => {
-    try {
-      const formData = new FormData();
-      const fileExtension = audioBlob.type.includes('wav') ? '.wav' : '.webm';
-      formData.append('audio_file', audioBlob, `segment${fileExtension}`);
-      formData.append('processing_mode', 'transcription_only');
-
-      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) return '[Transkription fehlgeschlagen]';
-
-      const result = await response.json();
-      const transcription = result.documentation?.transcription;
-
-      if (typeof transcription === 'string') return transcription;
-      if (transcription?.text) return transcription.text;
-
-      return '[Keine Transkription]';
-    } catch (error) {
-      console.error('Quick transcription error:', error);
-      return '[Fehler]';
-    }
-  };
-
-  // Process audio with session context
-  const processAudioWithSession = async (audioBlob: Blob, sessionData: RecordingSession) => {
-    setRecordingState((prev) => ({ ...prev, isProcessing: true }));
-
-    try {
-      const formData = new FormData();
-      const fileExtension = audioBlob.type.includes('wav') ? '.wav' : '.webm';
-
-      formData.append('audio_file', audioBlob, `recording${fileExtension}`);
-      formData.append('patient_id', sessionData.patientId);
-      formData.append('dentist_id', sessionData.dentistName);
-      formData.append('insurance_type', sessionData.insuranceType);
-      formData.append('processing_mode', processingMode);
-
-      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      const doc = result.success ? result.documentation : null;
-      setDocumentation(doc);
-
-      // Invalidate sessions cache
-      if (doc) {
-        const currentDentist = getCurrentDentist();
-        if (currentDentist) {
-          const cacheKey = `medvox-sessions-cache-${currentDentist.name}`;
-          localStorage.removeItem(cacheKey);
-        }
-      }
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      alert('Fehler bei der Verarbeitung der Aufnahme');
-    } finally {
-      setRecordingState((prev) => ({ ...prev, isProcessing: false }));
-    }
-  };
-
-  const processAudio = async (audioBlob: Blob) => {
-    setRecordingState((prev) => ({ ...prev, isProcessing: true }));
-
-    try {
-      const formData = new FormData();
-
-      const fileExtension = audioBlob.type.includes('wav')
-        ? '.wav'
-        : audioBlob.type.includes('webm')
-        ? '.webm'
-        : audioBlob.type.includes('mp4')
-        ? '.mp4'
-        : '.webm';
-
-
-      formData.append('audio_file', audioBlob, `recording${fileExtension}`);
-      formData.append('patient_id', patientData.patientId);
-      formData.append('dentist_id', patientData.dentistName);
-      formData.append('insurance_type', patientData.insuranceType);
-      formData.append('processing_mode', processingMode);
-
-      const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/process-audio`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      const doc = result.success ? result.documentation : null;
-      setDocumentation(doc);
-
-      // Invalidate sessions cache so SessionPanel shows new recording
-      if (doc) {
-        const currentDentist = getCurrentDentist();
-        if (currentDentist) {
-          const cacheKey = `medvox-sessions-cache-${currentDentist.name}`;
-          localStorage.removeItem(cacheKey);
-        }
-      }
-    } catch (error) {
-      console.error('Error processing audio:', error);
-      alert('Fehler bei der Verarbeitung der Aufnahme');
-    } finally {
-      setRecordingState((prev) => ({ ...prev, isProcessing: false }));
-    }
-  };
+  // Recording logic extracted into hook
+  const recording = useRecording({ appSettings, patientData, processingMode, apiFetch });
+  const {
+    recordingState,
+    session,
+    sessionState,
+    documentation,
+    transferSession,
+    codeModalOpen,
+    startRecording,
+    handlePause,
+    handleResume,
+    handleFinalize,
+    handleDiscard,
+    createTransferSession,
+    setDocumentation,
+    setCodeModalOpen,
+    getTranscriptionText,
+    progressPercent,
+    formatDuration,
+  } = recording;
 
   const handleExport = (selectedCodes: SelectedBillingCode[]) => {
     const exportData = {
@@ -402,93 +117,28 @@ function App() {
     alert('Manuelle Eingabe kommt bald!');
   };
 
-  const createTransferSession = async () => {
-    if (!documentation) return;
-
-    try {
-      // Extract billing codes from documentation
-      const billingCodes = documentation.billing_codes || documentation.abrechnungspositionen || [];
-      const transcription = getTranscriptionText();
-
-      if (billingCodes.length === 0) {
-        alert('Keine Abrechnungscodes zum Übertragen vorhanden');
-        return;
-      }
-
-      // Create transfer session
-      const response = await apiFetch(`${appSettings.apiEndpoint}/transfer/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          billing_codes: billingCodes,
-          transcription: transcription,
-          patient_id: patientData.patientId || undefined,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const session: TransferSession = await response.json();
-
-      setTransferSession(session);
-      setCodeModalOpen(true);
-    } catch (error) {
-      console.error('Error creating transfer session:', error);
-      alert('Fehler beim Erstellen der Übertragung');
-    }
-  };
-
   const handleSettingsSave = (newSettings: AppSettings) => {
     setAppSettings(newSettings);
     saveSettings(newSettings);
 
-    // Update patient data with new defaults
-    const currentDentist = newSettings.dentists.find(d => d.id === newSettings.currentDentistId) || newSettings.dentists[0];
+    const currentDentist =
+      newSettings.dentists.find((d) => d.id === newSettings.currentDentistId) || newSettings.dentists[0];
 
     if (currentDentist) {
       setSelectedDentistId(currentDentist.id);
-      setPatientData((prev) => ({
-        ...prev,
-        dentistName: currentDentist.name,
-      }));
+      setPatientData((prev) => ({ ...prev, dentistName: currentDentist.name }));
     }
   };
 
   const handleDentistChange = (dentistId: string) => {
     setSelectedDentistId(dentistId);
-    const dentist = appSettings.dentists.find(d => d.id === dentistId);
+    const dentist = appSettings.dentists.find((d) => d.id === dentistId);
     if (dentist) {
-      setPatientData((prev) => ({
-        ...prev,
-        dentistName: dentist.name,
-      }));
-
-      // Update currentDentistId in settings and save
-      const updatedSettings = {
-        ...appSettings,
-        currentDentistId: dentistId,
-      };
+      setPatientData((prev) => ({ ...prev, dentistName: dentist.name }));
+      const updatedSettings = { ...appSettings, currentDentistId: dentistId };
       setAppSettings(updatedSettings);
       saveSettings(updatedSettings);
     }
-  };
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  /** Get the plain text from the transcription response */
-  const getTranscriptionText = (): string => {
-    if (!documentation) return '';
-    const t = documentation.transcription;
-    if (typeof t === 'string') return t;
-    return t?.text || '';
   };
 
   const copyTranscription = async () => {
@@ -507,31 +157,20 @@ function App() {
     try {
       const response = await apiFetch(`${appSettings.apiEndpoint}/documentation/sessions/${sessionId}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const result = await response.json();
 
       if (result.success && result.documentation) {
-
         setDocumentation(result.documentation);
-
-        // Set patient ID if available
         if (result.documentation.patient_id) {
-          setPatientData((prev) => ({
-            ...prev,
-            patientId: result.documentation.patient_id
-          }));
+          setPatientData((prev) => ({ ...prev, patientId: result.documentation.patient_id }));
         }
-
         setSessionPanelOpen(false);
       } else {
-        console.error('❌ Session load failed:', result);
         alert('Fehler: Session konnte nicht geladen werden');
       }
     } catch (error) {
-      console.error('❌ Error loading session:', error);
       alert('Fehler beim Laden der Behandlung: ' + error);
     }
   };
@@ -545,8 +184,6 @@ function App() {
     typeof documentation?.transcription === 'object'
       ? documentation.transcription?.language
       : documentation?.language;
-
-  const progressPercent = (recordingState.duration / appSettings.autoStopDuration) * 100;
 
   if (!token) {
     return <LoginPage apiEndpoint={appSettings.apiEndpoint} onLogin={handleLogin} />;
@@ -607,7 +244,6 @@ function App() {
               />
             </div>
 
-            {/* Dentist Dropdown - always show if dentists configured */}
             {appSettings.dentists.length > 0 && (
               <div className="sm:w-56">
                 <select
@@ -652,7 +288,7 @@ function App() {
 
         {/* Recording Section */}
         <div className="card text-center">
-          {/* IDLE STATE: Start Button */}
+          {/* IDLE STATE */}
           {sessionState === 'idle' && !recordingState.isRecording && !recordingState.isProcessing && (
             <div className="py-4">
               {/* Processing Mode Toggle */}
@@ -685,9 +321,7 @@ function App() {
                 onClick={startRecording}
                 className="group relative inline-flex items-center justify-center"
               >
-                {/* Outer ring */}
                 <span className="absolute w-24 h-24 rounded-full bg-dental-primary/10 group-hover:bg-dental-primary/15 transition-colors duration-300" />
-                {/* Inner button */}
                 <span className="relative w-16 h-16 rounded-full bg-gradient-to-br from-dental-primary to-dental-primary-dark flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 group-active:scale-95">
                   <Mic className="h-7 w-7 text-white" />
                 </span>
@@ -697,10 +331,9 @@ function App() {
             </div>
           )}
 
-          {/* RECORDING STATE: Pause Button */}
+          {/* RECORDING STATE */}
           {recordingState.isRecording && !recordingState.isProcessing && (
             <div className="py-4 space-y-5 animate-fade-in">
-              {/* Pause button */}
               <button
                 onClick={handlePause}
                 className="group relative inline-flex items-center justify-center"
@@ -714,7 +347,6 @@ function App() {
                 </span>
               </button>
 
-              {/* Timer */}
               <div>
                 <div className="text-3xl font-mono font-light text-gray-900 tracking-widest">
                   {formatDuration(recordingState.duration)}
@@ -724,7 +356,6 @@ function App() {
                 </p>
               </div>
 
-              {/* Progress bar */}
               <div className="max-w-xs mx-auto">
                 <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
@@ -736,10 +367,9 @@ function App() {
             </div>
           )}
 
-          {/* PAUSED STATE: Session Info + Action Buttons */}
+          {/* PAUSED STATE */}
           {sessionState === 'paused' && !recordingState.isRecording && !recordingState.isProcessing && session && (
             <div className="py-6 space-y-5 animate-fade-in">
-              {/* Session Info */}
               <div className="mb-6">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-4">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
@@ -748,7 +378,6 @@ function App() {
                   </span>
                 </div>
 
-                {/* Accumulated Transcription Preview */}
                 <div className="max-w-md mx-auto bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <p className="text-sm text-gray-600 font-medium mb-2">Bisherige Transkription:</p>
                   <p className="text-sm text-gray-800 leading-relaxed line-clamp-3">
@@ -757,12 +386,8 @@ function App() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
-                  onClick={handleResume}
-                  className="btn-primary flex items-center gap-2 w-full sm:w-auto"
-                >
+                <button onClick={handleResume} className="btn-primary flex items-center gap-2 w-full sm:w-auto">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
@@ -785,7 +410,7 @@ function App() {
             </div>
           )}
 
-          {/* PROCESSING STATE: Loading */}
+          {/* PROCESSING STATE */}
           {(recordingState.isProcessing || sessionState === 'processing') && (
             <div className="py-8 space-y-4 animate-fade-in">
               <Loader2 className="h-10 w-10 animate-spin mx-auto text-dental-primary" />
@@ -815,10 +440,7 @@ function App() {
                   Transkription
                 </h2>
                 {transcriptionText && (
-                  <button
-                    onClick={copyTranscription}
-                    className="btn-ghost flex items-center gap-1.5 text-sm"
-                  >
+                  <button onClick={copyTranscription} className="btn-ghost flex items-center gap-1.5 text-sm">
                     {transcriptionCopied ? (
                       <>
                         <Check className="h-3.5 w-3.5 text-dental-success" />
@@ -839,9 +461,7 @@ function App() {
                   <p className="text-gray-800 leading-relaxed">{transcriptionText}</p>
                   {transcriptionConfidence != null && transcriptionConfidence > 0 && (
                     <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-                      <span>
-                        Vertrauen: {Math.round(transcriptionConfidence * 100)}%
-                      </span>
+                      <span>Vertrauen: {Math.round(transcriptionConfidence * 100)}%</span>
                       <span>&middot;</span>
                       <span>Sprache: {transcriptionLanguage || 'DE'}</span>
                     </div>
@@ -859,7 +479,7 @@ function App() {
             </div>
 
             {/* Transfer Code Button */}
-            {transcriptionText && (documentation.billing_codes || documentation.abrechnungspositionen)?.length > 0 && (
+            {transcriptionText && ((documentation.billing_codes || documentation.abrechnungspositionen) ?? []).length > 0 && (
               <div className="card bg-gradient-to-br from-dental-primary/5 to-dental-primary/10 border-dental-primary/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -871,10 +491,7 @@ function App() {
                       <p className="text-sm text-gray-500">Transfer-Code zum Eintippen am PC</p>
                     </div>
                   </div>
-                  <button
-                    onClick={createTransferSession}
-                    className="btn-primary flex items-center gap-2"
-                  >
+                  <button onClick={createTransferSession} className="btn-primary flex items-center gap-2">
                     <Hash className="h-4 w-4" />
                     Code erstellen
                   </button>
@@ -882,7 +499,7 @@ function App() {
               </div>
             )}
 
-            {/* Billing Codes - only show if transcription was successful and mode is with_billing */}
+            {/* Billing Codes */}
             {transcriptionText && processingMode === 'with_billing' && (
               <BillingCodesDisplay
                 procedures={documentation.procedures || []}
@@ -915,7 +532,6 @@ function App() {
         )}
       </main>
 
-      {/* Settings Panel */}
       <SettingsPanel
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -923,7 +539,6 @@ function App() {
         onSave={handleSettingsSave}
       />
 
-      {/* Session Panel */}
       <SessionPanel
         isOpen={sessionPanelOpen}
         onClose={() => setSessionPanelOpen(false)}
@@ -933,7 +548,6 @@ function App() {
         fetchFn={apiFetch}
       />
 
-      {/* Short Code Modal */}
       <ShortCodeModal
         isOpen={codeModalOpen}
         onClose={() => setCodeModalOpen(false)}

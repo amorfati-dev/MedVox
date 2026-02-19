@@ -129,7 +129,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           </button>
 
           {/* Session ID (for debugging) */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-400 font-mono">
                 Session: {transferSession.session_id}
