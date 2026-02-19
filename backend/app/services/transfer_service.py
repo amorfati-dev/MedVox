@@ -7,7 +7,7 @@ Features:
 - Auto-expiring sessions (DSGVO compliant)
 - One-time use sessions (security)
 - QR code generation
-- In-memory storage (MVP)
+- SQLite persistence (sessions survive server restarts)
 
 Author: Claude + Martin
 Date: 2026-02-12
@@ -16,6 +16,8 @@ Date: 2026-02-12
 import uuid
 import base64
 import io
+import json
+import sqlite3
 import qrcode
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -60,41 +62,108 @@ class TransferService:
     """
     Manages transfer sessions for QR-code based data transfer
 
-    Simple, pragmatic implementation:
-    - In-memory storage (TTLCache)
-    - No database required for MVP
-    - Automatic cleanup via TTL
+    Storage: SQLite (persists across server restarts) + TTLCache (fast reads)
     """
 
-    def __init__(self, session_ttl_seconds: int = 300, base_url: str = "https://medvox.app"):
-        """
-        Initialize transfer service
-
-        Args:
-            session_ttl_seconds: Time-to-live for sessions (default: 5 minutes)
-            base_url: Base URL for transfer links
-        """
+    def __init__(
+        self,
+        session_ttl_seconds: int = 300,
+        base_url: str = "http://localhost:3000",
+        db_path: str = "./medvox.db"
+    ):
         self.session_ttl = session_ttl_seconds
         self.base_url = base_url
+        self.db_path = db_path
 
-        # In-memory cache with automatic expiration
-        # maxsize=1000: supports up to 1000 concurrent sessions
-        self._sessions: TTLCache = TTLCache(
-            maxsize=1000,
-            ttl=session_ttl_seconds
-        )
+        # In-memory cache for fast reads
+        self._sessions: TTLCache = TTLCache(maxsize=1000, ttl=session_ttl_seconds)
+        self._code_to_id: TTLCache = TTLCache(maxsize=1000, ttl=session_ttl_seconds)
 
-        # Short code → Session ID mapping
-        self._code_to_id: TTLCache = TTLCache(
-            maxsize=1000,
-            ttl=session_ttl_seconds
-        )
+        # Initialize SQLite table and load existing sessions
+        self._init_db()
+        self._load_sessions_from_db()
 
         logger.info(
             "Transfer service initialized",
             ttl_seconds=session_ttl_seconds,
-            max_sessions=1000
+            max_sessions=1000,
+            db_path=db_path
         )
+
+    def _get_conn(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _init_db(self) -> None:
+        """Create transfer_sessions table if it doesn't exist."""
+        with self._get_conn() as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS transfer_sessions (
+                    id          TEXT PRIMARY KEY,
+                    short_code  TEXT UNIQUE NOT NULL,
+                    billing_codes TEXT NOT NULL,
+                    transcription TEXT NOT NULL,
+                    patient_id  TEXT,
+                    created_at  TEXT NOT NULL,
+                    expires_at  TEXT NOT NULL
+                )
+            """)
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_ts_expires ON transfer_sessions (expires_at)"
+            )
+
+    def _load_sessions_from_db(self) -> None:
+        """Load non-expired sessions from DB into cache on startup."""
+        now = datetime.now().isoformat()
+        with self._get_conn() as conn:
+            # Delete expired rows first (DSGVO cleanup)
+            conn.execute("DELETE FROM transfer_sessions WHERE expires_at <= ?", (now,))
+            rows = conn.execute(
+                "SELECT * FROM transfer_sessions WHERE expires_at > ?", (now,)
+            ).fetchall()
+
+        loaded = 0
+        for row in rows:
+            session = self._row_to_session(row)
+            self._sessions[session.id] = session
+            self._code_to_id[session.short_code] = session.id
+            loaded += 1
+
+        if loaded:
+            logger.info("Sessions loaded from DB on startup", count=loaded)
+
+    def _row_to_session(self, row: sqlite3.Row) -> TransferSession:
+        return TransferSession(
+            id=row["id"],
+            short_code=row["short_code"],
+            billing_codes=json.loads(row["billing_codes"]),
+            transcription=row["transcription"],
+            patient_id=row["patient_id"],
+            created_at=datetime.fromisoformat(row["created_at"]),
+            expires_at=datetime.fromisoformat(row["expires_at"]),
+        )
+
+    def _save_to_db(self, session: TransferSession) -> None:
+        with self._get_conn() as conn:
+            conn.execute(
+                """INSERT OR REPLACE INTO transfer_sessions
+                   (id, short_code, billing_codes, transcription, patient_id, created_at, expires_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    session.id,
+                    session.short_code,
+                    json.dumps(session.billing_codes),
+                    session.transcription,
+                    session.patient_id,
+                    session.created_at.isoformat(),
+                    session.expires_at.isoformat(),
+                ),
+            )
+
+    def _delete_from_db(self, session_id: str) -> None:
+        with self._get_conn() as conn:
+            conn.execute("DELETE FROM transfer_sessions WHERE id = ?", (session_id,))
 
     def create_session(
         self,
@@ -103,23 +172,11 @@ class TransferService:
         patient_id: Optional[str] = None
     ) -> TransferSession:
         """
-        Create a new transfer session
-
-        Args:
-            billing_codes: List of billing codes (BEMA/GOZ)
-            transcription: Voice transcription text
-            patient_id: Optional patient identifier
-
-        Returns:
-            TransferSession with unique ID and short code
+        Create a new transfer session (persisted to SQLite + cached in memory).
         """
-        # Generate UUID
         session_id = str(uuid.uuid4())
-
-        # Generate short code
         short_code = generate_short_code(session_id, formatted=False)
 
-        # Create session
         session = TransferSession(
             id=session_id,
             short_code=short_code,
@@ -127,13 +184,12 @@ class TransferService:
             transcription=transcription,
             patient_id=patient_id,
             created_at=datetime.now(),
-            expires_at=datetime.now() + timedelta(seconds=self.session_ttl)
+            expires_at=datetime.now() + timedelta(seconds=self.session_ttl),
         )
 
-        # Store in cache
+        # Persist to DB first, then cache
+        self._save_to_db(session)
         self._sessions[session_id] = session
-
-        # Store code mapping
         self._code_to_id[short_code] = session_id
 
         logger.info(
@@ -142,121 +198,89 @@ class TransferService:
             short_code=short_code,
             codes_count=len(billing_codes),
             patient_id=patient_id,
-            expires_at=session.expires_at.isoformat()
+            expires_at=session.expires_at.isoformat(),
         )
 
         return session
 
     def get_session(self, session_id: str) -> TransferSession:
         """
-        Retrieve and consume a transfer session
-
-        Security: One-time use - session is deleted after retrieval
-
-        Args:
-            session_id: UUID of the session
-
-        Returns:
-            TransferSession
-
-        Raises:
-            SessionNotFoundError: If session doesn't exist
-            SessionExpiredError: If session has expired
+        Retrieve and consume a transfer session (one-time use).
+        Checks TTLCache first, falls back to SQLite.
         """
-        # Check if session exists
-        if session_id not in self._sessions:
-            # Could be expired or never existed
-            logger.warning("Session not found", session_id=session_id)
-            raise SessionNotFoundError(f"Session {session_id} not found")
+        # Try cache first
+        session = self._sessions.get(session_id)
 
-        # Get session
-        session = self._sessions[session_id]
+        # Fallback to DB (e.g. after server restart)
+        if session is None:
+            now = datetime.now().isoformat()
+            with self._get_conn() as conn:
+                row = conn.execute(
+                    "SELECT * FROM transfer_sessions WHERE id = ? AND expires_at > ?",
+                    (session_id, now),
+                ).fetchone()
+            if row is None:
+                logger.warning("Session not found", session_id=session_id)
+                raise SessionNotFoundError(f"Session {session_id} not found")
+            session = self._row_to_session(row)
 
-        # Check expiration (redundant with TTLCache, but explicit)
+        # Check expiration
         if session.expires_at < datetime.now():
+            self._delete_from_db(session_id)
+            self._sessions.pop(session_id, None)
+            self._code_to_id.pop(session.short_code, None)
             logger.warning("Session expired", session_id=session_id)
-            del self._sessions[session_id]
-            # Also delete code mapping
-            if session.short_code in self._code_to_id:
-                del self._code_to_id[session.short_code]
             raise SessionExpiredError(f"Session {session_id} has expired")
 
-        # Delete session (one-time use for security)
-        del self._sessions[session_id]
-
-        # Delete code mapping
-        if session.short_code in self._code_to_id:
-            del self._code_to_id[session.short_code]
+        # Consume: delete from DB and cache (one-time use)
+        self._delete_from_db(session_id)
+        self._sessions.pop(session_id, None)
+        self._code_to_id.pop(session.short_code, None)
 
         logger.info(
             "Session retrieved and consumed",
             session_id=session_id,
             short_code=session.short_code,
-            codes_count=len(session.billing_codes)
+            codes_count=len(session.billing_codes),
         )
 
         return session
 
     def get_session_by_code(self, short_code: str) -> TransferSession:
-        """
-        Retrieve session by short code
-
-        Args:
-            short_code: 6-character code (e.g., "AB1234")
-
-        Returns:
-            TransferSession
-
-        Raises:
-            SessionNotFoundError: If session doesn't exist
-            SessionExpiredError: If session has expired
-        """
-        # Normalize code
+        """Retrieve session by short code."""
         try:
             normalized_code = decode_short_code(short_code)
         except Exception as e:
             logger.warning("Invalid short code format", short_code=short_code, error=str(e))
             raise SessionNotFoundError(f"Invalid code format: {short_code}")
 
-        # Lookup session ID
-        if normalized_code not in self._code_to_id:
-            logger.warning("Short code not found", short_code=normalized_code)
-            raise SessionNotFoundError(f"Code {normalized_code} not found or expired")
+        # Try cache mapping first
+        session_id = self._code_to_id.get(normalized_code)
 
-        session_id = self._code_to_id[normalized_code]
+        # Fallback: query DB directly
+        if session_id is None:
+            now = datetime.now().isoformat()
+            with self._get_conn() as conn:
+                row = conn.execute(
+                    "SELECT id FROM transfer_sessions WHERE short_code = ? AND expires_at > ?",
+                    (normalized_code, now),
+                ).fetchone()
+            if row is None:
+                logger.warning("Short code not found", short_code=normalized_code)
+                raise SessionNotFoundError(f"Code {normalized_code} not found or expired")
+            session_id = row["id"]
 
-        # Get session (this will consume it)
         return self.get_session(session_id)
 
     def get_transfer_url(self, session_id: str) -> str:
-        """
-        Generate transfer URL for QR code
-
-        Args:
-            session_id: UUID of the session
-
-        Returns:
-            Full URL for transfer page
-        """
         return f"{self.base_url}/transfer/{session_id}"
 
     def generate_qr_code(self, session_id: str, size: int = 300) -> str:
-        """
-        Generate QR code as base64 data URL
-
-        Args:
-            session_id: UUID of the session
-            size: QR code size in pixels (default: 300x300)
-
-        Returns:
-            Base64 data URL (data:image/png;base64,...)
-        """
-        # Generate transfer URL
+        """Generate QR code as base64 data URL."""
         transfer_url = self.get_transfer_url(session_id)
 
-        # Create QR code
         qr = qrcode.QRCode(
-            version=1,  # Auto-size
+            version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
             border=4,
@@ -264,54 +288,41 @@ class TransferService:
         qr.add_data(transfer_url)
         qr.make(fit=True)
 
-        # Generate image
         img = qr.make_image(fill_color="black", back_color="white")
-
-        # Resize to desired size
         img = img.resize((size, size))
 
-        # Convert to base64
         buffer = io.BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, format="PNG")
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
 
-        # Return as data URL
         return f"data:image/png;base64,{img_base64}"
 
     def cleanup_expired_sessions(self) -> int:
-        """
-        Manually cleanup expired sessions
-
-        Note: TTLCache handles this automatically, but this method
-        allows explicit cleanup for testing/monitoring
-
-        Returns:
-            Number of sessions removed
-        """
-        now = datetime.now()
-        expired_ids = [
-            sid for sid, session in self._sessions.items()
-            if session.expires_at < now
-        ]
-
-        for sid in expired_ids:
-            del self._sessions[sid]
-
-        if expired_ids:
-            logger.info(
-                "Expired sessions cleaned up",
-                removed_count=len(expired_ids)
+        """Delete expired sessions from DB and return count removed."""
+        now = datetime.now().isoformat()
+        with self._get_conn() as conn:
+            cursor = conn.execute(
+                "DELETE FROM transfer_sessions WHERE expires_at <= ?", (now,)
             )
+            removed = cursor.rowcount
 
-        return len(expired_ids)
+        # Also evict from cache
+        expired_ids = [
+            sid for sid, s in list(self._sessions.items())
+            if s.expires_at < datetime.now()
+        ]
+        for sid in expired_ids:
+            session = self._sessions.pop(sid, None)
+            if session:
+                self._code_to_id.pop(session.short_code, None)
+
+        total = removed + len(expired_ids)
+        if total:
+            logger.info("Expired sessions cleaned up", db_removed=removed, cache_evicted=len(expired_ids))
+
+        return total
 
     def get_active_session_count(self) -> int:
-        """
-        Get count of active sessions (for monitoring)
-
-        Returns:
-            Number of active sessions
-        """
         return len(self._sessions)
 
 
@@ -320,20 +331,15 @@ _transfer_service: Optional[TransferService] = None
 
 
 def get_transfer_service() -> TransferService:
-    """
-    Dependency injection for FastAPI
-
-    Returns:
-        Singleton TransferService instance
-    """
+    """Dependency injection for FastAPI."""
     global _transfer_service
 
     if _transfer_service is None:
-        # Initialize with default settings
-        # TODO: Load from app.core.config.settings
+        from app.core.config import settings
         _transfer_service = TransferService(
-            session_ttl_seconds=300,  # 5 minutes
-            base_url="http://localhost:3000"  # TODO: Production URL
+            session_ttl_seconds=settings.TRANSFER_SESSION_TTL,
+            base_url=settings.FRONTEND_URL,
+            db_path=settings.DATABASE_URL.replace("sqlite:///", ""),
         )
 
     return _transfer_service

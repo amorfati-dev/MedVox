@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./medvox.db"
     ECHO_SQL: bool = False
+
+    # Transfer Feature
+    FRONTEND_URL: str = "http://localhost:3000"  # Base URL for QR code links
+    TRANSFER_SESSION_TTL: int = 300  # Seconds until transfer sessions expire
     
     # OpenAI/Whisper
     OPENAI_API_KEY: Optional[str] = None
