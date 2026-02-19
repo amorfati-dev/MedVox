@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 import time
 
 from app.core.config import settings
+from app.core.security import get_password_hash
 
 # Configure structlog for JSON logging
 structlog.configure(
@@ -110,6 +111,42 @@ from app.api.v1.api import api_router
 
 # Include API router
 app.include_router(api_router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+def create_default_admin() -> None:
+    """
+    Create a default admin user on first startup if no users exist.
+    Credentials are read from env vars ADMIN_EMAIL / ADMIN_PASSWORD,
+    falling back to safe defaults for development.
+    """
+    import os
+    from app.core.database import SessionLocal
+    from app.models.user import User, UserRole
+
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@medvox.local")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "changeme123")
+
+    db = SessionLocal()
+    try:
+        if db.query(User).count() == 0:
+            admin = User(
+                email=admin_email,
+                hashed_password=get_password_hash(admin_password),
+                first_name="Admin",
+                last_name="MedVox",
+                role=UserRole.ADMIN,
+                is_active=True,
+                is_superuser=True,
+            )
+            db.add(admin)
+            db.commit()
+            logger.warning(
+                "Default admin created – change the password!",
+                email=admin_email,
+            )
+    finally:
+        db.close()
 
 
 @app.get("/")

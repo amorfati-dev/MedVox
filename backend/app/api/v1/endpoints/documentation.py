@@ -22,6 +22,7 @@ from app.models.user import User, UserRole
 from app.models.patient import Patient, Gender, InsuranceType
 from app.core.database import get_db
 from app.core.config import settings
+from app.api.dependencies import get_current_user
 from sqlalchemy.orm import Session, joinedload
 import os
 from pathlib import Path
@@ -29,7 +30,7 @@ from datetime import date
 
 logger = structlog.get_logger()
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user)])
 
 # Initialize services
 audio_service = AudioService()

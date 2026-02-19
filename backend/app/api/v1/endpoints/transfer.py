@@ -22,6 +22,8 @@ from app.services.transfer_service import (
     SessionNotFoundError,
     SessionExpiredError
 )
+from app.api.dependencies import get_current_user
+from app.models.user import User
 
 logger = structlog.get_logger()
 
@@ -47,7 +49,8 @@ router = APIRouter()
 )
 async def create_transfer_session(
     request: CreateTransferRequest,
-    transfer_service: TransferService = Depends(get_transfer_service)
+    transfer_service: TransferService = Depends(get_transfer_service),
+    current_user: User = Depends(get_current_user),
 ) -> CreateTransferResponse:
     """
     Create a new transfer session

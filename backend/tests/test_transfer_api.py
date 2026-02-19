@@ -4,15 +4,33 @@ Test-Driven Development: Tests written BEFORE implementation
 """
 
 import pytest
+from types import SimpleNamespace
 from fastapi.testclient import TestClient
 from app.main import app
 from app.services.transfer_service import get_transfer_service, TransferService
+from app.api.dependencies import get_current_user
+from app.models.user import UserRole
+
+
+def _mock_user():
+    """Return a fake authenticated user for tests."""
+    return SimpleNamespace(
+        id=1,
+        email="test@medvox.local",
+        first_name="Test",
+        last_name="User",
+        role=UserRole.DENTIST,
+        is_active=True,
+        is_superuser=False,
+    )
 
 
 @pytest.fixture
 def client():
-    """Create test client"""
-    return TestClient(app)
+    """Create test client with auth dependency overridden."""
+    app.dependency_overrides[get_current_user] = _mock_user
+    yield TestClient(app)
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 @pytest.fixture
