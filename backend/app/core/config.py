@@ -56,6 +56,9 @@ class Settings(BaseSettings):
     # Google Cloud Configuration
     GOOGLE_CLOUD_API_KEY: Optional[str] = None  # Google Cloud API Key for Speech-to-Text
     GOOGLE_CLOUD_PROJECT_ID: Optional[str] = None  # Google Cloud Project ID
+
+    # STT (Speech-to-Text) Provider Selection
+    STT_PROVIDER: str = "whisper"  # "whisper" (OpenAI Whisper V3) or "google" (Google Cloud Speech)
     
     # LLM Provider Umschaltung
     LLM_PROVIDER: str = "google"  # "openai" oder "google"

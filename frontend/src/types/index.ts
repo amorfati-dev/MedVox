@@ -79,24 +79,61 @@ export interface RecordingState {
   audioUrl?: string;
 }
 
+// Session-based Recording Types
+export interface AudioSegment {
+  blob: Blob;
+  duration: number;
+  transcription: string;
+  timestamp: Date;
+}
+
+export interface RecordingSession {
+  segments: AudioSegment[];
+  isActive: boolean;
+  accumulatedTranscription: string;
+  patientId: string;
+  dentistName: string;
+  insuranceType: 'BEMA' | 'GOZ';
+}
+
+export type SessionState = 'idle' | 'recording' | 'paused' | 'processing';
+
 export interface PatientFormData {
   patientId: string;
   dentistName: string;
   insuranceType: 'BEMA' | 'GOZ';
 }
 
+// Dentist Management Types
+export interface DentistInfo {
+  id: string;
+  name: string;
+  licenseNumber?: string;
+}
+
 // Settings Types
 export interface AppSettings {
-  dentistName: string;
+  dentists: DentistInfo[];
+  currentDentistId: string;
   defaultInsuranceType: 'BEMA' | 'GOZ';
+  defaultProcessingMode: ProcessingMode;
   gozFactor: number;
   autoStopDuration: number;
   apiEndpoint: string;
+  // Legacy field for backward compatibility
+  dentistName?: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  dentistName: 'Dr. Martin Hartmann',
+  dentists: [
+    {
+      id: 'dentist-1',
+      name: 'Dr. Martin Hartmann',
+    },
+  ],
+  currentDentistId: 'dentist-1',
   defaultInsuranceType: 'BEMA',
+  defaultProcessingMode: 'with_billing',
   gozFactor: 2.3,
   autoStopDuration: 30,
   apiEndpoint: '/api/v1',
@@ -108,4 +145,39 @@ export interface ProcessAudioRequest {
   patient_id?: string;
   dentist_name?: string;
   insurance_type?: 'BEMA' | 'GOZ';
+}
+
+// Transfer Session Types
+export interface TransferSession {
+  session_id: string;
+  transfer_url: string;
+  qr_code: string;
+  expires_at: string;
+  expires_in_seconds: number;
+}
+
+export interface CreateTransferRequest {
+  billing_codes: BillingCode[];
+  transcription: string;
+  patient_id?: string;
+}
+
+// Session Management Types
+export type ProcessingMode = 'transcription_only' | 'with_billing';
+
+export interface SessionSummary {
+  id: number;
+  patient_id: string | null;
+  dentist_id: number;
+  dentist_name: string;
+  transcription_preview: string;
+  processing_mode: ProcessingMode;
+  billing_codes_count: number;
+  created_at: string;
+  status: string;
+}
+
+export interface SessionListResponse {
+  sessions: SessionSummary[];
+  total: number;
 } 

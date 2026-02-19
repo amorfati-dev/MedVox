@@ -297,12 +297,13 @@ class DocumentationProcessor:
         logger.info(f"   use_multi_stage_pipeline: {self.use_multi_stage_pipeline}")
         
     async def process_transcription(
-        self, 
-        transcription_result: TranscriptionResult, 
+        self,
+        transcription_result: TranscriptionResult,
         audio_metadata: AudioMetadata,
         insurance_type: str = "bema",
         patient_id: Optional[str] = None,
-        dentist_id: Optional[str] = None
+        dentist_id: Optional[str] = None,
+        processing_mode: str = "with_billing"
     ) -> DentalDocumentation:
         """
         Process transcription result into structured dental documentation
@@ -342,11 +343,32 @@ class DocumentationProcessor:
             findings = self._extract_dental_findings(normalized_text)
             print(f"🔍 Step 2 OK: Found {len(findings)} findings")
             
+            # Check processing mode
+            if processing_mode == "transcription_only":
+                # Skip billing code extraction - return transcription only
+                logger.info("🔍 Processing mode: transcription_only - skipping billing extraction")
+                print(f"🔍 Processing mode: transcription_only - skipping billing extraction")
+
+                import uuid
+                recording_id = f"rec_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+
+                return DentalDocumentation(
+                    recording_id=recording_id,
+                    dentist_id=dentist_id or "system",
+                    patient_id=patient_id,
+                    transcription=transcription_result,
+                    audio_metadata=audio_metadata,
+                    findings=findings,
+                    procedures_performed=[],
+                    billing_codes=[],
+                    clinical_notes=normalized_text,
+                )
+
             # Load BEMA/GOZ codes catalog
             print(f"🔍 Step 3: Loading BEMA/GOZ catalog...")
             bema_goz_catalog = self.billing_mapper.codes_data
             print(f"🔍 Step 3 OK: Catalog loaded")
-            
+
             # USE ONLY GEMINI 2.5 PRO - NO FALLBACKS, NO PIPELINE
             print(f"🔍 Step 4: Starting LLM extraction...")
             logger.info("🚀 Using ONLY Gemini 2.5 Pro direct extraction")
@@ -710,33 +732,8 @@ class DocumentationProcessor:
     
     def _extract_dental_findings(self, text: str) -> List[DentalFinding]:
         """Extract dental findings from normalized text"""
-        findings = []
-        
-        # Use existing findings extraction but format for DentalFinding objects
-        raw_findings = self._extract_findings(text)
-        
-        for finding in raw_findings:
-            # Extract tooth number from finding text
-            tooth_match = re.search(r'\b(\d{1,2})\b', finding)
-            tooth_number = tooth_match.group(1) if tooth_match else None
-            
-            # Extract surface information
-            surface = None
-            for surface_term in ['okklusal', 'mesial', 'distal', 'vestibulär', 'palatinal', 'lingual']:
-                if surface_term in finding.lower():
-                    surface = surface_term
-                    break
-            
-            dental_finding = DentalFinding(
-                tooth_number=tooth_number,
-                diagnosis=finding,
-                surface=surface,
-                severity="normal",  # Could be enhanced with LLM
-                confidence=ConfidenceLevel.MEDIUM
-            )
-            findings.append(dental_finding)
-        
-        return findings
+        # _extract_findings already returns List[DentalFinding], so just return it
+        return self._extract_findings(text)
     
     def _convert_llm_billing_codes(self, llm_billing_codes: List[Dict]) -> List[BillingCode]:
         """Convert LLM billing codes format to BillingCode objects"""

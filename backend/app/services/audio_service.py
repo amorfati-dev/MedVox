@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.schemas.dental_documentation import TranscriptionResult, AudioMetadata
 from app.utils.audio import AudioProcessor, AudioValidationError
 from app.services.google_speech_service import GoogleCloudSpeechService
+from app.services.whisper_service import WhisperService
 
 logger = structlog.get_logger()
 
@@ -52,13 +53,22 @@ class MockTranscriptionService:
 
 class AudioService:
     """Main audio processing service"""
-    
+
     def __init__(self):
         self.audio_processor = AudioProcessor()
-        
-        # Initialize transcription services - Google Cloud Speech only
+
+        # Initialize transcription services based on configuration
+        self.whisper_service = WhisperService() if settings.OPENAI_API_KEY else None
         self.google_cloud_service = GoogleCloudSpeechService() if settings.GOOGLE_CLOUD_API_KEY else None
         self.mock_service = MockTranscriptionService()
+
+        # Log which STT provider is configured
+        logger.info(
+            "AudioService initialized",
+            stt_provider=settings.STT_PROVIDER,
+            whisper_available=self.whisper_service is not None,
+            google_available=self.google_cloud_service is not None
+        )
         
     async def process_audio(
         self, 
@@ -87,15 +97,24 @@ class AudioService:
             # Validate audio file
             audio_metadata = self.audio_processor.validate_audio(audio_data, filename)
             
-            # Choose transcription service - Priority: Google Cloud > Mock
+            # Choose transcription service based on configuration
             if use_mock:
                 transcription_service = self.mock_service
                 logger.info("Using mock transcription service")
-            elif self.google_cloud_service:
-                transcription_service = self.google_cloud_service
-                logger.info("Using Google Cloud Speech-to-Text API")
+            elif settings.STT_PROVIDER == "whisper":
+                if self.whisper_service:
+                    transcription_service = self.whisper_service
+                    logger.info("Using OpenAI Whisper V3 API")
+                else:
+                    raise AudioTranscriptionError("Whisper not configured. Please set OPENAI_API_KEY.")
+            elif settings.STT_PROVIDER == "google":
+                if self.google_cloud_service:
+                    transcription_service = self.google_cloud_service
+                    logger.info("Using Google Cloud Speech-to-Text API")
+                else:
+                    raise AudioTranscriptionError("Google Cloud Speech-to-Text not configured. Please set GOOGLE_CLOUD_API_KEY.")
             else:
-                raise AudioTranscriptionError("Google Cloud Speech-to-Text not configured. Please set GOOGLE_CLOUD_API_KEY.")
+                raise AudioTranscriptionError(f"Unknown STT_PROVIDER: {settings.STT_PROVIDER}. Use 'whisper' or 'google'.")
             
             # All API services can handle file objects directly
             transcription_result = await transcription_service.transcribe(audio_file, filename)

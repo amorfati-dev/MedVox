@@ -38,4 +38,11 @@ passlib[bcrypt]==1.7.4
 cryptography==43.0.1
 
 # CORS & Security Headers
-# starlette is included with fastapi, no need to specify version 
+# starlette is included with fastapi, no need to specify version
+
+# QR Code Generation
+qrcode==7.4.2
+Pillow==10.4.0
+
+# Caching/Session Store (in-memory for MVP)
+cachetools==5.5.0 
