@@ -4,10 +4,10 @@ Replaces OpenAI Whisper for more accurate German dental transcription
 """
 
 import time
-import tempfile
-import os
+import asyncio
 from typing import BinaryIO
 import structlog
+import requests
 
 from app.core.config import settings
 from app.schemas.dental_documentation import TranscriptionResult
@@ -88,15 +88,13 @@ class GoogleCloudSpeechService:
         start_time = time.time()
         
         try:
-            import requests
             import base64
             
             logger.info("Starting Google Cloud Speech transcription", 
                        filename=filename,
                        language=self.language_code)
             
-            # Use REST API with API key directly
-            api_url = f"https://speech.googleapis.com/v1/speech:recognize?key={self.api_key}"
+            api_url = "https://speech.googleapis.com/v1/speech:recognize"
             
             # Read audio content
             audio_file.seek(0)
@@ -164,10 +162,39 @@ class GoogleCloudSpeechService:
             # Perform transcription
             logger.info("Sending audio to Google Cloud Speech API")
             headers = {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "x-goog-api-key": self.api_key,
             }
-            
-            response = requests.post(api_url, json=request_data, headers=headers)
+
+            response = None
+            for attempt in range(settings.EXTERNAL_API_MAX_RETRIES):
+                try:
+                    response = requests.post(
+                        api_url,
+                        json=request_data,
+                        headers=headers,
+                        timeout=settings.EXTERNAL_API_TIMEOUT_SECONDS,
+                    )
+                    if response.status_code < 500:
+                        break
+                    logger.warning(
+                        "Transient Google STT error",
+                        status_code=response.status_code,
+                        attempt=attempt + 1,
+                    )
+                except requests.RequestException as e:
+                    logger.warning(
+                        "Google STT request failed",
+                        error=str(e),
+                        attempt=attempt + 1,
+                    )
+
+                if attempt < settings.EXTERNAL_API_MAX_RETRIES - 1:
+                    delay = settings.EXTERNAL_API_BACKOFF_SECONDS * (2 ** attempt)
+                    await asyncio.sleep(delay)
+
+            if response is None:
+                raise AudioTranscriptionError("Google Cloud Speech request failed without response")
             
             # Debug: Log response details
             logger.info(f"Google Cloud Speech API Response Status: {response.status_code}")

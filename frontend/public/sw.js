@@ -1,7 +1,7 @@
 // MedVox Service Worker – App-Shell caching strategy
 // Cache-First for app shell assets, Network-First for API calls.
 
-const CACHE_NAME = 'medvox-v2';
+const CACHE_NAME = 'medvox-v3';
 
 const APP_SHELL = [
   '/',
@@ -36,7 +36,15 @@ self.addEventListener('fetch', (event) => {
 
   // Network-First for API calls – never cache API responses
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(
+        () =>
+          new Response(
+            JSON.stringify({ detail: 'Offline: API nicht erreichbar' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } },
+          ),
+      ),
+    );
     return;
   }
 

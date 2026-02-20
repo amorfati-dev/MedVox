@@ -65,7 +65,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   if (!isOpen) return null;
 
   const handleSave = () => {
-    console.log('💾 SettingsPanel: Saving draft:', draft);
     saveSettings(draft);
     onSave(draft);
     onClose();

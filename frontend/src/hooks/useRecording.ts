@@ -16,9 +16,16 @@ export interface UseRecordingOptions {
   patientData: PatientFormData;
   processingMode: ProcessingMode;
   apiFetch: (url: string, options?: RequestInit) => Promise<Response>;
+  onError?: (message: string) => void;
 }
 
-export function useRecording({ appSettings, patientData, processingMode, apiFetch }: UseRecordingOptions) {
+export function useRecording({
+  appSettings,
+  patientData,
+  processingMode,
+  apiFetch,
+  onError,
+}: UseRecordingOptions) {
   const [recordingState, setRecordingState] = useState<RecordingState>({
     isRecording: false,
     isProcessing: false,
@@ -116,7 +123,7 @@ export function useRecording({ appSettings, patientData, processingMode, apiFetc
       }
     } catch (error) {
       console.error('Error processing audio:', error);
-      alert('Fehler bei der Verarbeitung der Aufnahme');
+      onError?.('Fehler bei der Verarbeitung der Aufnahme');
     } finally {
       setRecordingState((prev) => ({ ...prev, isProcessing: false }));
     }
@@ -217,7 +224,7 @@ export function useRecording({ appSettings, patientData, processingMode, apiFetc
       }, 1000);
     } catch (error) {
       console.error('Error starting recording:', error);
-      alert('Fehler beim Zugriff auf das Mikrofon');
+      onError?.('Fehler beim Zugriff auf das Mikrofon');
     }
   };
 
@@ -246,7 +253,7 @@ export function useRecording({ appSettings, patientData, processingMode, apiFetc
       setSessionState('idle');
     } catch (error) {
       console.error('Error finalizing session:', error);
-      alert('Fehler beim Abschließen der Session');
+      onError?.('Fehler beim Abschließen der Session');
       setSessionState('paused');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -271,7 +278,7 @@ export function useRecording({ appSettings, patientData, processingMode, apiFetc
       })();
 
       if (billingCodes.length === 0) {
-        alert('Keine Abrechnungscodes zum Übertragen vorhanden');
+        onError?.('Keine Abrechnungscodes zum Übertragen vorhanden');
         return;
       }
 
@@ -295,9 +302,9 @@ export function useRecording({ appSettings, patientData, processingMode, apiFetc
       setCodeModalOpen(true);
     } catch (error) {
       console.error('Error creating transfer session:', error);
-      alert('Fehler beim Erstellen der Übertragung');
+      onError?.('Fehler beim Erstellen der Übertragung');
     }
-  }, [documentation]);
+  }, [documentation, onError]);
 
   const progressPercent = (recordingState.duration / appSettings.autoStopDuration) * 100;
 

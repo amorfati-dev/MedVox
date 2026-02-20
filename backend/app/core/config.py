@@ -1,7 +1,8 @@
 """
 Configuration settings for MedVox
 """
-import os
+import secrets
+import warnings
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
@@ -16,7 +17,7 @@ class Settings(BaseSettings):
     
     # App Settings
     PROJECT_NAME: str = "MedVox"
-    DEBUG: bool = True
+    DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
     UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50MB
@@ -25,7 +26,7 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080"
     
     # Security
-    SECRET_KEY: str = "dev-secret-key-change-in-production"
+    SECRET_KEY: Optional[str] = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     HSTS_MAX_AGE: int = 31536000  # 1 year
     X_FRAME_OPTIONS: str = "DENY"
@@ -62,7 +63,7 @@ class Settings(BaseSettings):
     GOOGLE_CLOUD_PROJECT_ID: Optional[str] = None  # Google Cloud Project ID
 
     # STT (Speech-to-Text) Provider Selection
-    STT_PROVIDER: str = "whisper"  # "whisper" (OpenAI Whisper V3) or "google" (Google Cloud Speech)
+    STT_PROVIDER: str = "google"  # "whisper" or "google"
     
     # LLM Provider Umschaltung
     LLM_PROVIDER: str = "google"  # "openai" oder "google"
@@ -101,6 +102,13 @@ class Settings(BaseSettings):
     EVIDENT_API_URL: str = "https://api.evident.de"
     EVIDENT_API_KEY: Optional[str] = None
     EVIDENT_CLIENT_ID: Optional[str] = None
+
+    # API Resilience / Rate limiting
+    EXTERNAL_API_TIMEOUT_SECONDS: int = 30
+    EXTERNAL_API_MAX_RETRIES: int = 3
+    EXTERNAL_API_BACKOFF_SECONDS: float = 1.5
+    RATE_LIMIT_LOGIN_PER_MINUTE: int = 20
+    RATE_LIMIT_AUDIO_PER_MINUTE: int = 30
     
     @property
     def is_development(self) -> bool:
@@ -133,17 +141,28 @@ class Settings(BaseSettings):
         self.PIPELINE_ADVANCED_BILLING_ENABLED = False
         self.PIPELINE_PLAUSIBILITY_CHECK_ENABLED = False
         
-        # Validate that required settings are present in production
-        if self.is_production:
-            if not self.OPENAI_API_KEY:
-                raise ValueError("OPENAI_API_KEY is required in production")
-            if self.SECRET_KEY == "dev-secret-key-change-in-production":
-                raise ValueError("SECRET_KEY must be set in production")
-        else:
-            # In development, warn about missing API key but don't fail
-            if not self.OPENAI_API_KEY:
-                import warnings
-                warnings.warn("OPENAI_API_KEY not set - only mock transcription will work")
+        # Security hardening: no unsafe default SECRET_KEY
+        if not self.SECRET_KEY:
+            if self.is_production:
+                raise ValueError("SECRET_KEY is required in production")
+            self.SECRET_KEY = secrets.token_urlsafe(32)
+            warnings.warn("SECRET_KEY not set - generated ephemeral development key")
+
+        # Validate provider-specific keys
+        if self.STT_PROVIDER.lower() == "google" and not self.GOOGLE_CLOUD_API_KEY:
+            if self.is_production:
+                raise ValueError("GOOGLE_CLOUD_API_KEY is required when STT_PROVIDER=google")
+            warnings.warn("GOOGLE_CLOUD_API_KEY not set - Google STT will not work")
+
+        if self.STT_PROVIDER.lower() == "whisper" and not self.OPENAI_API_KEY:
+            if self.is_production:
+                raise ValueError("OPENAI_API_KEY is required when STT_PROVIDER=whisper")
+            warnings.warn("OPENAI_API_KEY not set - Whisper fallback will not work")
+
+        if self.LLM_PROVIDER.lower() == "google" and not self.GOOGLE_GEMINI_API_KEY:
+            if self.is_production:
+                raise ValueError("GOOGLE_GEMINI_API_KEY is required when LLM_PROVIDER=google")
+            warnings.warn("GOOGLE_GEMINI_API_KEY not set - Gemini extraction will not work")
     
     model_config = SettingsConfigDict(case_sensitive=True, extra="ignore")
 

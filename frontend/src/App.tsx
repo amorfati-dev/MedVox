@@ -1,16 +1,19 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock, LogOut } from 'lucide-react';
+import { Mic, Loader2, FileText, Settings, Copy, Check, Activity, Hash, Clock, LogOut, Moon, Sun } from 'lucide-react';
 import { BillingCodesDisplay } from './components/BillingCodesDisplay';
 import { SettingsPanel, loadSettings, saveSettings } from './components/SettingsPanel';
 import { ShortCodeModal } from './components/ShortCodeModal';
 import { SessionPanel } from './components/SessionPanel';
 import { LoginPage } from './pages/LoginPage';
+import { Toast } from './components/Toast';
+import { useTheme } from './contexts/ThemeContext';
 import { DocumentationResponse, SelectedBillingCode, PatientFormData, AppSettings, ProcessingMode, AuthUser } from './types';
 import { useRecording } from './hooks/useRecording';
 
 const AUTH_TOKEN_KEY = 'medvox-auth-token';
 
 function App() {
+  const { theme, toggleTheme } = useTheme();
   // Auth state
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(AUTH_TOKEN_KEY));
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -57,6 +60,7 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sessionPanelOpen, setSessionPanelOpen] = useState(false);
   const [transcriptionCopied, setTranscriptionCopied] = useState(false);
+  const [uiError, setUiError] = useState<string | null>(null);
   const [processingMode, setProcessingMode] = useState<ProcessingMode>(appSettings.defaultProcessingMode);
 
   const getCurrentDentist = () =>
@@ -71,8 +75,13 @@ function App() {
     () => getCurrentDentist()?.id || 'dentist-1',
   );
 
+  const showError = useCallback((message: string) => {
+    setUiError(message);
+    window.setTimeout(() => setUiError(null), 5000);
+  }, []);
+
   // Recording logic extracted into hook
-  const recording = useRecording({ appSettings, patientData, processingMode, apiFetch });
+  const recording = useRecording({ appSettings, patientData, processingMode, apiFetch, onError: showError });
   const {
     recordingState,
     session,
@@ -114,7 +123,7 @@ function App() {
   };
 
   const handleAddManual = () => {
-    alert('Manuelle Eingabe kommt bald!');
+    showError('Manuelle Eingabe kommt bald!');
   };
 
   const handleSettingsSave = (newSettings: AppSettings) => {
@@ -168,10 +177,10 @@ function App() {
         }
         setSessionPanelOpen(false);
       } else {
-        alert('Fehler: Session konnte nicht geladen werden');
+        showError('Session konnte nicht geladen werden');
       }
     } catch (error) {
-      alert('Fehler beim Laden der Behandlung: ' + error);
+      showError(`Fehler beim Laden der Behandlung: ${String(error)}`);
     }
   };
 
@@ -190,9 +199,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-dental-surface">
+    <div className="min-h-screen bg-dental-surface dark:bg-gray-950">
+      <Toast message={uiError} onClose={() => setUiError(null)} />
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -204,6 +214,14 @@ function App() {
                 <Activity className="h-3 w-3 text-dental-success" />
                 <span>Bereit</span>
               </div>
+              <button
+                onClick={toggleTheme}
+                className="btn-icon"
+                title={theme === 'dark' ? 'Helles Theme' : 'Dunkles Theme'}
+                aria-label={theme === 'dark' ? 'Helles Theme aktivieren' : 'Dunkles Theme aktivieren'}
+              >
+                {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+              </button>
               <button
                 onClick={() => setSessionPanelOpen(true)}
                 className="btn-icon"

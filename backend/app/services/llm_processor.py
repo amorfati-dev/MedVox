@@ -62,6 +62,7 @@ class GeminiLLMProcedureExtractor:
         logger.info("Starting Gemini LLM extraction", text_length=len(text), model=self.model)
         headers = {
             "Content-Type": "application/json",
+            "x-goog-api-key": self.api_key,
         }
         # Create insurance-specific prompt
         insurance_instruction = ""
@@ -101,18 +102,16 @@ REGELN FÜR GOZ-ABRECHNUNG:
         logger.info(f"🎤 Voice input: {len(prompt)} chars → {self.model} ({insurance_type.upper()})")
         
         # Retry logic for timeouts
-        max_retries = 3
-        timeout_seconds = 90  # Increased from 60
+        max_retries = settings.EXTERNAL_API_MAX_RETRIES
+        timeout_seconds = settings.EXTERNAL_API_TIMEOUT_SECONDS
         
         for attempt in range(max_retries):
             try:
                 logger.info(f"🔄 Gemini attempt {attempt + 1}/{max_retries}")
-                # Add API key as query parameter (Google Gemini auth method)
-                url_with_key = f"{self.api_url}?key={self.api_key}"
                 loop = asyncio.get_event_loop()
                 response = await loop.run_in_executor(
                     None,
-                    lambda: requests.post(url_with_key, headers=headers, json=body, timeout=timeout_seconds)
+                    lambda: requests.post(self.api_url, headers=headers, json=body, timeout=timeout_seconds)
                 )
                 # If we get here, the request succeeded
                 break
@@ -122,7 +121,7 @@ REGELN FÜR GOZ-ABRECHNUNG:
                     # Last attempt failed, re-raise the error
                     raise retry_error
                 # Wait before retry (exponential backoff)
-                wait_time = (attempt + 1) * 2  # 2, 4, 6 seconds
+                wait_time = settings.EXTERNAL_API_BACKOFF_SECONDS * (2 ** attempt)
                 logger.info(f"⏳ Waiting {wait_time}s before retry...")
                 await asyncio.sleep(wait_time)
                 continue
