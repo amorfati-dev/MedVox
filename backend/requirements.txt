@@ -12,8 +12,8 @@ pydantic==2.9.2
 pydantic-settings==2.6.0
 python-dotenv==1.0.1
 
-# AI/ML
-openai==1.54.0
+# AI/ML - Google Cloud Speech-to-Text
+google-cloud-speech==2.24.1
 
 # Audio Processing
 pydub==0.25.1
@@ -38,4 +38,11 @@ passlib[bcrypt]==1.7.4
 cryptography==43.0.1
 
 # CORS & Security Headers
-starlette==0.40.0 
+# starlette is included with fastapi, no need to specify version
+
+# QR Code Generation
+qrcode==7.4.2
+Pillow==10.4.0
+
+# Caching/Session Store (in-memory for MVP)
+cachetools==5.5.0 

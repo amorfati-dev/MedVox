@@ -9,8 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import time
+import uuid
+from collections import defaultdict, deque
+from urllib.parse import urlparse
+from sqlalchemy import text
 
 from app.core.config import settings
+from app.core.security import get_password_hash
 
 # Configure structlog for JSON logging
 structlog.configure(
@@ -49,13 +54,21 @@ app.add_middleware(
     allow_origins=settings.allowed_hosts_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
+
+# Parse hostnames from configured allowed hosts for TrustedHost middleware
+trusted_hosts = []
+for host in settings.allowed_hosts_list:
+    parsed = urlparse(host)
+    if parsed.hostname:
+        trusted_hosts.append(parsed.hostname)
+trusted_hosts.extend(["localhost", "127.0.0.1"])
 
 # Add trusted host middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"] if settings.is_development else ["localhost", "127.0.0.1"],
+    allowed_hosts=["*"] if settings.is_development else sorted(set(trusted_hosts)),
 )
 
 # Security headers middleware
@@ -76,27 +89,76 @@ async def add_security_headers(request: Request, call_next):
     
     return response
 
+# Lightweight in-memory rate limiting for critical endpoints
+_rate_limit_buckets: dict[str, deque] = defaultdict(deque)
+_rate_limit_window_seconds = 60
+
+
+def _is_rate_limited(path: str, client_ip: str) -> bool:
+    if path.endswith("/auth/login"):
+        limit = settings.RATE_LIMIT_LOGIN_PER_MINUTE
+    elif path.endswith("/documentation/process-audio"):
+        limit = settings.RATE_LIMIT_AUDIO_PER_MINUTE
+    else:
+        return False
+
+    key = f"{path}:{client_ip}"
+    now = time.time()
+    bucket = _rate_limit_buckets[key]
+
+    while bucket and now - bucket[0] > _rate_limit_window_seconds:
+        bucket.popleft()
+
+    if len(bucket) >= limit:
+        return True
+
+    bucket.append(now)
+    return False
+
+
+@app.middleware("http")
+async def rate_limit_requests(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(request.url.path, client_ip):
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        return JSONResponse(
+            status_code=429,
+            content={
+                "detail": "Too many requests",
+                "request_id": request_id,
+                "timestamp": time.time(),
+            },
+            headers={"X-Request-ID": request_id},
+        )
+    return await call_next(request)
+
+
 # Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """Log all requests with timing"""
     start_time = time.time()
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    request.state.request_id = request_id
     
     # Log request
     logger.info(
         "Request started",
+        request_id=request_id,
         method=request.method,
         url=str(request.url),
         client_ip=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent"),
     )
     
     response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
     
     # Log response
     process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(round(process_time, 4))
     logger.info(
         "Request completed",
+        request_id=request_id,
         method=request.method,
         url=str(request.url),
         status_code=response.status_code,
@@ -110,6 +172,51 @@ from app.api.v1.api import api_router
 
 # Include API router
 app.include_router(api_router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+def create_default_admin() -> None:
+    """
+    Create a default admin user on first startup if no users exist.
+    Credentials are read from env vars ADMIN_EMAIL / ADMIN_PASSWORD.
+    In production, no defaults are allowed.
+    """
+    import os
+    import secrets
+    from app.core.database import SessionLocal
+    from app.models.user import User, UserRole
+
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@medvox.local")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
+
+    if settings.is_production and not admin_password:
+        logger.error("ADMIN_PASSWORD is required in production - default admin will not be created")
+        return
+
+    if not admin_password:
+        admin_password = secrets.token_urlsafe(12)
+        logger.warning("Generated development admin password", email=admin_email)
+
+    db = SessionLocal()
+    try:
+        if db.query(User).count() == 0:
+            admin = User(
+                email=admin_email,
+                hashed_password=get_password_hash(admin_password),
+                first_name="Admin",
+                last_name="MedVox",
+                role=UserRole.ADMIN,
+                is_active=True,
+                is_superuser=True,
+            )
+            db.add(admin)
+            db.commit()
+            logger.warning(
+                "Default admin created – change the password!",
+                email=admin_email,
+            )
+    finally:
+        db.close()
 
 
 @app.get("/")
@@ -142,20 +249,28 @@ async def readiness_check():
     """Readiness check endpoint for Docker/K8s"""
     logger.info("Readiness check requested")
     
-    # TODO: Add actual health checks for:
-    # - Database connectivity
-    # - OpenAI API connectivity
-    # - Whisper model availability
-    # - Evident API connectivity (if configured)
-    
+    from app.core.database import SessionLocal
+
+    db_status = "ok"
+    try:
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "error"
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
     checks = {
-        "database": "ok",  # TODO: implement actual check
-        "openai": "ok",    # TODO: implement actual check
-        "whisper": "ok",   # TODO: implement actual check
+        "database": db_status,
+        "stt_provider": "ok" if (settings.STT_PROVIDER != "google" or settings.GOOGLE_CLOUD_API_KEY) else "misconfigured",
+        "llm_provider": "ok" if (settings.LLM_PROVIDER != "google" or settings.GOOGLE_GEMINI_API_KEY) else "misconfigured",
         "evident": "ok" if settings.EVIDENT_API_URL else "not_configured"
     }
     
-    all_healthy = all(status == "ok" for status in checks.values())
+    all_healthy = all(status in {"ok", "not_configured"} for status in checks.values())
     
     return {
         "status": "ready" if all_healthy else "not_ready",
@@ -169,6 +284,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler with structured logging"""
     logger.error(
         "Unhandled exception",
+        request_id=getattr(request.state, "request_id", None),
         method=request.method,
         url=str(request.url),
         exception_type=type(exc).__name__,
@@ -197,5 +313,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=settings.is_development,
+        reload_excludes=["venv/*", ".venv/*", "__pycache__/*"] if settings.is_development else None,
         log_level=settings.LOG_LEVEL.lower(),
     ) 

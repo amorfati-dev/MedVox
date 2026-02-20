@@ -11,8 +11,8 @@ from app.core.config import settings
 
 # Create database engine
 engine = create_engine(
-    settings.database.DATABASE_URL,
-    echo=settings.database.ECHO_SQL,
+    settings.DATABASE_URL,
+    echo=settings.ECHO_SQL,
     pool_pre_ping=True,  # Verify connections before using them
     pool_size=10,
     max_overflow=20,

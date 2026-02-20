@@ -29,10 +29,10 @@ class PipelineStage:
 
 
 class TextNormalizationStage(PipelineStage):
-    """Stage B: Post-correction & Normalization using GPT-4o-mini"""
+    """Stage B: Post-correction & Normalization using GPT-4o"""
     
     def __init__(self):
-        super().__init__("Text Normalization", "gpt-4o-mini")
+        super().__init__("Text Normalization", "gpt-4o")
         self.temperature = 0.1
     
     async def process(self, raw_text: str) -> Dict[str, Any]:
@@ -109,10 +109,10 @@ Gib NUR den korrigierten Text zurück, keine Erklärungen."""
 
 
 class BillingMappingStage(PipelineStage):
-    """Stage C: BEMA/GOZ Mapping using GPT-4o (full version)"""
+    """Stage C: BEMA/GOZ Mapping using GPT-4o (excellent reliability)"""
     
     def __init__(self):
-        super().__init__("Billing Mapping", "gpt-4o")
+        super().__init__("Billing Mapping", "gpt-4o")  # GPT-4o for excellent accuracy
         self.temperature = 0.1
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -121,6 +121,17 @@ class BillingMappingStage(PipelineStage):
         
         normalized_text = data.get("normalized_text", "")
         findings = data.get("findings", [])
+        insurance_type = data.get("insurance_type", "bema")
+        patient_id = data.get("patient_id")
+        dentist_id = data.get("dentist_id")
+        
+        logger.info(f"BillingMappingStage: Processing with insurance_type={insurance_type}")
+        logger.info(f"BillingMappingStage: Text length={len(normalized_text)}")
+        logger.info(f"BillingMappingStage: Findings count={len(findings)}")
+        
+        if not normalized_text.strip():
+            logger.warning("BillingMappingStage: Empty text provided")
+            return {"billing_codes": [], "reasoning": "No text to process"}
         
         try:
             import openai
@@ -134,6 +145,8 @@ class BillingMappingStage(PipelineStage):
             bema_goz_catalog = self._load_billing_catalog()
             key_codes = self._get_key_codes_for_context(bema_goz_catalog)
             
+            # Create completion with enhanced prompt and reasoning focus
+            logger.info(f"BillingMappingStage: Making OpenAI API call with model {self.model}")
             response = client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -143,19 +156,37 @@ class BillingMappingStage(PipelineStage):
                     },
                     {
                         "role": "user",
-                        "content": self._create_billing_query(normalized_text, findings, key_codes)
+                        "content": self._create_billing_query(normalized_text, findings, key_codes, insurance_type)
                     }
                 ],
                 temperature=self.temperature,
                 response_format={"type": "json_object"},
-                max_tokens=1500
+                max_tokens=1500  # Updated parameter name for newer models
             )
+            logger.info(f"BillingMappingStage: OpenAI API call successful")
+            logger.info(f"BillingMappingStage: Response content length: {len(response.choices[0].message.content) if response.choices else 0}")
             
             result_text = response.choices[0].message.content
-            billing_result = json.loads(result_text)
+            logger.info(f"BillingMappingStage: Raw response: {result_text[:200]}...")
+            
+            # Parse the structured result
+            try:
+                billing_result = json.loads(result_text)
+                logger.info(f"BillingMappingStage: JSON parsing successful")
+                billing_codes = billing_result.get("billing_codes", [])
+                logger.info(f"BillingMappingStage: Parsed {len(billing_codes)} billing codes")
+                
+                if billing_codes:
+                    logger.info(f"BillingMappingStage: First billing code: {billing_codes[0]}")
+                else:
+                    logger.warning("BillingMappingStage: No billing codes found in JSON response")
+            except json.JSONDecodeError as e:
+                logger.error(f"BillingMappingStage: JSON parsing failed: {e}")
+                logger.error(f"BillingMappingStage: Full response: {result_text}")
+                billing_codes = []
             
             # Enhance with actual fee calculations
-            enhanced_codes = self._enhance_billing_codes(billing_result.get("billing_codes", []), bema_goz_catalog)
+            enhanced_codes = self._enhance_billing_codes(billing_codes, bema_goz_catalog)
             
             processing_time = int((time.time() - start_time) * 1000)
             
@@ -187,68 +218,79 @@ class BillingMappingStage(PipelineStage):
             }
     
     def _get_billing_prompt(self) -> str:
-        return """Du bist ein Abrechnungsexperte für deutsche Zahnmedizin mit jahrelanger Erfahrung.
+        """Enhanced prompt optimized for German BEMA/GOZ billing logic"""
+        return """Du bist ein hochspezialisierter deutscher Zahnarzt-Abrechnungsexperte mit umfassendem Wissen über BEMA und GOZ.
 
-Deine Aufgabe:
-1. Analysiere den zahnärztlichen Text präzise
-2. Erkenne ALLE durchgeführten Behandlungen
-3. Ordne exakte BEMA/GOZ-Codes zu
-4. Berücksichtige Komplexität und Schwierigkeitsgrad
-5. Begründe jede Zuordnung detailliert
+WICHTIGE ABRECHNUNGSLOGIK:
 
-Wichtige Regeln:
-- BEMA für gesetzlich Versicherte, GOZ für Privatpatienten
-- Berücksichtige Zahntyp (einwurzelig/mehrwurzelig) für Extraktionen
-- Prüfe Flächenanzahl für Füllungen (1-4 Flächen)
-- Anästhesie nicht vergessen bei invasiven Eingriffen
-- Bei Unsicherheit: niedrigere Konfidenz angeben
+🏥 BEMA-PATIENT (Kassenpatient):
+- PRIMÄR: BEMA-Leistungen abrechnen (Kassensachleistungen)
+- ZUSÄTZLICH: GOZ-Leistungen MIT Mehrkostenvereinbarung (MKV) möglich
+- Bei GOZ-Leistungen: IMMER "MKV" Vermerk hinzufügen
+- Beispiel: BEMA 13c (Füllung) + GOZ 2197 (MKV - Adhäsive Technik)
 
-Antworte im JSON-Format:
+💰 GOZ-PATIENT (Privatpatient):
+- NUR GOZ-Leistungen abrechnen
+- KEINE BEMA-Leistungen
+- Alle Leistungen nach GOZ-Katalog
+
+AUFGABE: Analysiere die Behandlungsdokumentation und erstelle eine präzise, evidence-based Abrechnung.
+
+AUSGABEFORMAT (JSON):
 {
-    "procedures": [
-        {
-            "name": "Genaue Bezeichnung",
-            "description": "Detaillierte Beschreibung",
-            "tooth_numbers": ["36"],
-            "complexity": "einfach|mittel|komplex"
-        }
-    ],
-    "billing_codes": [
-        {
-            "code": "BEMA 13a",
-            "system": "bema",
-            "description": "Füllung einflächig",
-            "procedure_match": "Kompositfüllung",
-            "reasoning": "Detaillierte Begründung der Zuordnung",
-            "confidence": 0.95,
-            "tooth_number": "36"
-        }
-    ],
-    "reasoning": "Gesamtbegründung der Analyse",
-    "confidence": 0.9
+  "billing_codes": [
+    {
+      "code": "BEMA_01",
+      "description": "Untersuchung",
+      "points": 18,
+      "type": "bema"
+    },
+    {
+      "code": "GOZ_2197", 
+      "description": "Adhäsive Technik",
+      "points": 130,
+      "factor": 2.3,
+      "type": "goz",
+      "note": "MKV"
+    }
+  ],
+  "total_positions": 2,
+  "reasoning": "Behandlungsbegründung..."
 }"""
     
-    def _create_billing_query(self, text: str, findings: List, key_codes: Dict) -> str:
-        findings_text = ""
-        if findings:
-            findings_text = "\n".join([
-                f"- Zahn {f.tooth_number}: {f.diagnosis}" + 
-                (f" ({f.surface})" if hasattr(f, 'surface') and f.surface else "")
-                for f in findings
-            ])
+    def _create_billing_query(self, text: str, findings: List, key_codes: Dict, insurance_type: str) -> str:
+        """Create billing query with insurance-type specific logic"""
+        findings_text = "\n".join([f"- {f}" for f in findings]) if findings else "Keine spezifischen Befunde"
+        key_codes_text = "\n".join([f"- {code}: {desc}" for code, desc in key_codes.items()]) if key_codes else ""
+        
+        # Insurance-specific instructions
+        if insurance_type.lower() == "bema":
+            insurance_instruction = """
+🏥 KASSENPATIENT (BEMA):
+- Rechne PRIMÄR alle Leistungen nach BEMA ab
+- Zusätzliche hochwertige Leistungen (Kunststoff, Adhäsive, etc.) können als GOZ mit MKV abgerechnet werden
+- Bei GOZ-Leistungen: Füge "MKV" (Mehrkostenvereinbarung) Vermerk hinzu
+- Berechne Patientenanteil: GOZ-Anteil minus BEMA-Erstattung"""
+        else:  # GOZ
+            insurance_instruction = """
+💰 PRIVATPATIENT (GOZ):
+- Rechne ALLE Leistungen ausschließlich nach GOZ ab
+- KEINE BEMA-Leistungen verwenden
+- Vollständige Privatabrechnung nach GOZ-Katalog
+- Patient trägt vollständige Kosten"""
         
         return f"""
-ZAHNÄRZTLICHER TEXT:
-"{text}"
+BEHANDLUNGSTEXT: {text}
 
-BEFUNDE:
-{findings_text}
+BEFUNDE: {findings_text}
 
-VERFÜGBARE CODES (Auswahl):
-{json.dumps(key_codes, indent=2, ensure_ascii=False)}
+VERSICHERUNGSTYP: {insurance_type.upper()}
+{insurance_instruction}
 
-Analysiere den Text und extrahiere alle Abrechnungspositionen mit Begründung.
-"""
+RELEVANTE CODES (Auszug):
+{key_codes_text}
+
+Analysiere die Behandlung und erstelle eine präzise Abrechnung nach den oben genannten Regeln im JSON-Format."""
     
     def _load_billing_catalog(self) -> Dict:
         """Load BEMA/GOZ catalog"""
@@ -289,48 +331,52 @@ Analysiere den Text und extrahiere alle Abrechnungspositionen mit Begründung.
         
         return key_codes
     
-    def _enhance_billing_codes(self, codes: List[Dict], catalog: Dict) -> List[Dict]:
-        """Enhance billing codes with actual fee calculations"""
+    def _enhance_billing_codes(self, billing_codes: List[Dict], catalog: Dict) -> List[Dict]:
+        """Enhance billing codes with detailed information and proper BEMA/GOZ separation"""
         enhanced = []
         
-        for code in codes:
-            code_id = code.get("code", "").replace("BEMA ", "").replace("GOZ ", "")
-            system = code.get("system", "").lower()
+        for code_info in billing_codes:
+            code = code_info.get("code", "")
+            code_type = code_info.get("type", "unknown")
             
-            catalog_key = f"{system}_codes"
-            if catalog_key in catalog and code_id in catalog[catalog_key]:
-                catalog_info = catalog[catalog_key][code_id]
-                
-                if system == "bema":
-                    point_value = catalog["meta"]["bema_point_value"]
-                    fee_euros = round(catalog_info["points"] * point_value, 2)
-                    factor = None
-                else:  # GOZ
-                    point_value = catalog["meta"]["goz_point_value"]
-                    factor = catalog_info.get("standard_factor", 2.3)
-                    fee_euros = round(catalog_info["points"] * point_value * factor, 2)
-                
-                enhanced.append({
-                    "code": catalog_info["code"],
-                    "system": system,
-                    "description": catalog_info["description"],
-                    "points": catalog_info["points"],
-                    "fee_euros": fee_euros,
-                    "factor": factor,
-                    "confidence": code.get("confidence", 0.8),
-                    "reasoning": code.get("reasoning", ""),
-                    "tooth_number": code.get("tooth_number"),
-                    "llm_extracted": True
-                })
+            enhanced_code = {
+                "code": code,
+                "description": code_info.get("description", ""),
+                "points": code_info.get("points", 0),
+                "fee": code_info.get("fee", "0.00 €"),
+                "type": code_type,
+                "note": code_info.get("note", ""),  # MKV or other notes
+                "factor": code_info.get("factor", 1.0),
+                "category": "diagnostic" if any(x in code.lower() for x in ["01", "02", "röntgen", "untersuch"]) else "treatment"
+            }
+            
+            # Add MKV indicator for GOZ codes in BEMA patients
+            if code_type == "goz" and code_info.get("note") == "MKV":
+                enhanced_code["mkv"] = True
+                enhanced_code["note"] = "Mehrkostenvereinbarung"
+            
+            # Lookup additional details from catalog if available
+            if catalog:
+                for system_name, system_codes in catalog.items():
+                    if code in system_codes:
+                        catalog_info = system_codes[code]
+                        enhanced_code.update({
+                            "catalog_description": catalog_info.get("description", enhanced_code["description"]),
+                            "catalog_points": catalog_info.get("points", enhanced_code["points"]),
+                            "category": catalog_info.get("category", enhanced_code["category"])
+                        })
+                        break
+            
+            enhanced.append(enhanced_code)
         
         return enhanced
 
 
 class AdvancedBillingStage(PipelineStage):
-    """Optional Stage C+: Advanced BEMA/GOZ Mapping using o3 for complex cases"""
+    """Optional Stage C+: Advanced BEMA/GOZ Mapping using GPT-4o for complex cases"""
     
     def __init__(self):
-        super().__init__("Advanced Billing Mapping", "o3")
+        super().__init__("Advanced Billing Mapping", "gpt-4o")  # GPT-4o for excellent accuracy
         self.temperature = 0.1
         
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -560,21 +606,14 @@ Führe eine umfassende Analyse durch und gib optimierte Abrechnungsempfehlungen.
             if catalog_key in catalog and code_id in catalog[catalog_key]:
                 catalog_info = catalog[catalog_key][code_id]
                 
-                if system == "bema":
-                    point_value = catalog["meta"]["bema_point_value"]
-                    fee_euros = round(catalog_info["points"] * point_value, 2)
-                    factor = None
-                else:  # GOZ
-                    point_value = catalog["meta"]["goz_point_value"]
-                    factor = catalog_info.get("standard_factor", 2.3)
-                    fee_euros = round(catalog_info["points"] * point_value * factor, 2)
+                # No fee calculations - dentists set their own prices
+                factor = catalog_info.get("standard_factor", 2.3) if system == "goz" else None
                 
                 enhanced.append({
                     "code": catalog_info["code"],
                     "system": system,
                     "description": catalog_info["description"],
                     "points": catalog_info["points"],
-                    "fee_euros": fee_euros,
                     "factor": factor,
                     "confidence": code.get("confidence", 0.9),
                     "reasoning": code.get("reasoning", ""),
@@ -591,7 +630,7 @@ class PlausibilityCheckStage(PipelineStage):
     
     def __init__(self):
         # Use configured audit model (o3-mini by default)
-        model = settings.PIPELINE_AUDIT_MODEL if self._is_o3_available() else "gpt-4o"
+        model = settings.PIPELINE_AUDIT_MODEL  # Always use O3
         super().__init__("Plausibility Check", model)
         self.temperature = 0.1
         self.use_o3_for_complex = settings.USE_O3_FOR_COMPLEX_CASES
@@ -629,12 +668,13 @@ class PlausibilityCheckStage(PipelineStage):
                        reasoning_mode=self.reasoning_mode,
                        using_full_o3=use_full_o3)
             
-            # Adjust max_tokens for o3 models (they can handle more complex reasoning)
-            max_tokens = 2000 if selected_model.startswith("o3") else 1000
+            # Adjust max_completion_tokens for newer models (they can handle more complex reasoning)
+            max_completion_tokens = 2000 if selected_model.startswith("o3") else 1000
             
-            response = client.chat.completions.create(
-                model=selected_model,
-                messages=[
+            # Prepare API parameters
+            api_params = {
+                "model": selected_model,
+                "messages": [
                     {
                         "role": "system",
                         "content": self._get_audit_prompt(selected_model)
@@ -644,10 +684,15 @@ class PlausibilityCheckStage(PipelineStage):
                         "content": self._create_audit_query(data)
                     }
                 ],
-                temperature=self.temperature,
-                response_format={"type": "json_object"},
-                max_tokens=max_tokens
-            )
+                "response_format": {"type": "json_object"},
+                "max_completion_tokens": max_completion_tokens
+            }
+            
+            # Only add temperature for models that support it (exclude O3 models)
+            if not selected_model.startswith("o3"):
+                api_params["temperature"] = self.temperature
+            
+            response = client.chat.completions.create(**api_params)
             
             audit_result = json.loads(response.choices[0].message.content)
             processing_time = int((time.time() - start_time) * 1000)
@@ -829,7 +874,10 @@ class ProcessingPipeline:
     async def process_complete(
         self, 
         raw_text: str, 
-        findings: List[DentalFinding] = None
+        findings: List[DentalFinding] = None,
+        insurance_type: str = "bema",
+        patient_id: Optional[str] = None,
+        dentist_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """Run complete pipeline from raw text to validated billing codes"""
         
@@ -853,7 +901,10 @@ class ProcessingPipeline:
             logger.info("💰 Stage C: Billing Code Mapping")
             billing_input = {
                 **norm_result,
-                "findings": findings or []
+                "findings": findings or [],
+                "insurance_type": insurance_type,
+                "patient_id": patient_id,
+                "dentist_id": dentist_id
             }
             billing_result = await self.stages["billing_mapping"].process(billing_input)
             results["pipeline_stages"]["billing_mapping"] = billing_result
@@ -865,7 +916,10 @@ class ProcessingPipeline:
                 advanced_input = {
                     **norm_result,
                     **billing_result,
-                    "findings": findings or []
+                    "findings": findings or [],
+                    "insurance_type": insurance_type,
+                    "patient_id": patient_id,
+                    "dentist_id": dentist_id
                 }
                 advanced_result = await self.stages["advanced_billing"].process(advanced_input)
                 results["pipeline_stages"]["advanced_billing"] = advanced_result

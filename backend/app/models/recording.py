@@ -2,7 +2,7 @@
 Recording model for audio recordings
 """
 
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Text, Enum as SQLEnum
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Text, Enum as SQLEnum, JSON
 from sqlalchemy.orm import relationship
 import enum
 
@@ -42,7 +42,11 @@ class Recording(BaseModel):
     # Foreign keys
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    
+
+    # Session management fields
+    processing_mode = Column(String(20), default="with_billing", nullable=False)
+    session_metadata = Column(JSON, nullable=True)
+
     # Relationships
     patient = relationship("Patient", back_populates="recordings")
     created_by = relationship("User", back_populates="recordings")

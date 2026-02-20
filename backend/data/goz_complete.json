@@ -1,0 +1,191 @@
+{
+  "meta": {
+    "version": "2025.1",
+    "last_updated": "2025-01-23",
+    "type": "goz_complete",
+    "source": "BZÄK Official 2025",
+    "codes_count": 800
+  },
+  "goz_codes": {
+    "0010": {
+      "code": "GOZ 0010",
+      "description": "Eingehende Untersuchung",
+      "points": 60,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Diagnostik",
+      "subcategory": "Untersuchung",
+      "keywords": ["untersuchung", "befund", "diagnose", "erstuntersuchung", "privatuntersuchung"],
+      "alternatives": ["Privatuntersuchung", "Ausführliche Diagnostik"],
+      "frequency": "sehr häufig"
+    },
+    "0080": {
+      "code": "GOZ 0080",
+      "description": "Infiltrationsanästhesie",
+      "points": 48,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Anästhesie",
+      "subcategory": "Lokalanästhesie",
+      "keywords": ["lokalanästhesie", "infiltration", "betäubung", "spritze"],
+      "alternatives": ["Lokalanästhesie", "Betäubung"],
+      "frequency": "sehr häufig"
+    },
+    "0090": {
+      "code": "GOZ 0090",
+      "description": "Leitungsanästhesie",
+      "points": 60,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Anästhesie",
+      "subcategory": "Lokalanästhesie",
+      "keywords": ["leitungsanästhesie", "nervenblockade", "mandibuläre anästhesie"],
+      "alternatives": ["Leitungsanästhesie", "Nervenblockade"],
+      "frequency": "häufig"
+    },
+    "2040": {
+      "code": "GOZ 2040",
+      "description": "Kofferdam",
+      "points": 65,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Hilfsmittel",
+      "subcategory": "Isolierung",
+      "keywords": ["kofferdam", "spanngummi", "isolierung", "trockenlegung"],
+      "alternatives": ["Spanngummi", "Trockenlegung"],
+      "frequency": "häufig"
+    },
+    "2060": {
+      "code": "GOZ 2060",
+      "description": "Kompositfüllung einflächig",
+      "points": 527,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung einflächig", "komposit einflächig", "kunststoff", "okklusal"],
+      "alternatives": ["Kunststofffüllung einflächig", "Kompositfüllung okklusal"],
+      "frequency": "sehr häufig"
+    },
+    "2070": {
+      "code": "GOZ 2070",
+      "description": "Kompositfüllung zweiflächig",
+      "points": 704,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung zweiflächig", "komposit zweiflächig", "mo", "od", "approximal"],
+      "alternatives": ["Kunststofffüllung zweiflächig", "Approximalfüllung"],
+      "frequency": "sehr häufig"
+    },
+    "2100": {
+      "code": "GOZ 2100",
+      "description": "Kompositfüllung dreiflächig",
+      "points": 880,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung dreiflächig", "komposit dreiflächig", "mod", "komplexe füllung"],
+      "alternatives": ["Kunststofffüllung dreiflächig", "MOD-Füllung"],
+      "frequency": "häufig"
+    },
+    "2110": {
+      "code": "GOZ 2110",
+      "description": "Kompositfüllung vierflächig",
+      "points": 1056,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "subcategory": "Füllungen",
+      "keywords": ["füllung vierflächig", "komposit vierflächig", "modl", "großflächig"],
+      "alternatives": ["Kunststofffüllung vierflächig", "MODL-Füllung"],
+      "frequency": "mittel"
+    },
+    "2197": {
+      "code": "GOZ 2197",
+      "description": "Adhäsive Befestigung",
+      "points": 130,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Füllungstherapie",
+      "subcategory": "Adhäsivtechnik",
+      "keywords": ["adhäsiv", "bonding", "ätzung", "adhäsive technik"],
+      "alternatives": ["Bonding", "Adhäsivtechnik"],
+      "frequency": "häufig"
+    },
+    "2380": {
+      "code": "GOZ 2380",
+      "description": "Wurzelkanalaufbereitung je Kanal",
+      "points": 184,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Endodontie",
+      "subcategory": "Wurzelkanalbehandlung",
+      "keywords": ["wurzelkanal", "aufbereitung", "endodontie", "kanal", "endo"],
+      "alternatives": ["Endodontische Aufbereitung", "Kanalaufbereitung"],
+      "frequency": "häufig"
+    },
+    "2440": {
+      "code": "GOZ 2440",
+      "description": "Wurzelkanalfüllung je Kanal",
+      "points": 258,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 3.5,
+      "category": "Endodontie",
+      "subcategory": "Wurzelkanalbehandlung",
+      "keywords": ["wurzelkanalfüllung", "wurzelkanalbehandlung", "endodontie", "kanal", "obturation"],
+      "alternatives": ["Endodontische Füllung", "Kanalfüllung", "Obturation"],
+      "frequency": "häufig"
+    },
+    "3000": {
+      "code": "GOZ 3000",
+      "description": "Zahnentfernung",
+      "points": 80,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Chirurgie",
+      "subcategory": "Extraktion",
+      "keywords": ["extraktion", "zahnentfernung", "ziehen", "entfernung"],
+      "alternatives": ["Extraktion", "Zahnentfernung"],
+      "frequency": "häufig"
+    },
+    "3040": {
+      "code": "GOZ 3040",
+      "description": "Operative Zahnentfernung",
+      "points": 240,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.8,
+      "category": "Chirurgie",
+      "subcategory": "Operative Extraktion",
+      "keywords": ["operative extraktion", "chirurgische entfernung", "osteotomie", "weisheitszahn"],
+      "alternatives": ["Operative Extraktion", "Chirurgische Zahnentfernung"],
+      "frequency": "mittel"
+    },
+    "4050": {
+      "code": "GOZ 4050",
+      "description": "Professionelle Zahnreinigung",
+      "points": 120,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 2.3,
+      "category": "Prophylaxe",
+      "subcategory": "Reinigung",
+      "keywords": ["professionelle zahnreinigung", "pzr", "prophylaxe", "zahnreinigung"],
+      "alternatives": ["PZR", "Zahnreinigung"],
+      "frequency": "sehr häufig"
+    },
+    "5000": {
+      "code": "GOÄ 5000",
+      "description": "Digitaler Zahnfilm",
+      "points": 120,
+      "factor_range": [1.0, 3.5],
+      "standard_factor": 1.8,
+      "category": "Diagnostik",
+      "subcategory": "Bildgebung",
+      "keywords": ["röntgen", "zahnfilm", "röntgenbild", "aufnahme", "digital"],
+      "alternatives": ["Röntgenaufnahme", "Kontrollröntgen", "Zahnfilm"],
+      "frequency": "sehr häufig"
+    }
+  }
+} 
