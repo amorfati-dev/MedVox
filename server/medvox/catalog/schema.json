@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medvox.local/schema/catalog-v1.json",
+  "title": "MedVox Katalog (BEMA/GOZ/GOÄ)",
+  "description": "Mini-Katalog der Abrechnungspositionen, die der Regel-Extraktor vorschlagen darf. Entry-Form siehe README.md im selben Ordner.",
+  "type": "object",
+  "required": ["meta", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["name", "version", "stand", "sources", "abgerufen"],
+      "additionalProperties": true,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "stand": {"type": "object"},
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["system", "name", "url"],
+            "properties": {
+              "system": {"enum": ["BEMA", "GOZ", "GOÄ"]},
+              "name": {"type": "string", "minLength": 1},
+              "url": {"type": "string", "pattern": "^https://"}
+            }
+          }
+        },
+        "abgerufen": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/entry"}
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["code", "system", "area", "title", "points", "keywords", "rules", "sources", "review"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "Gebührennummer wie in der Praxissoftware geschrieben: 13a, 2080, Ä935d, AITa, IP5, UPTg.",
+          "type": "string",
+          "pattern": "^[0-9A-Za-zÄ]{1,6}$"
+        },
+        "system": {"enum": ["BEMA", "GOZ", "GOÄ"]},
+        "area": {
+          "description": "Fachbereich für die Gruppierung in Review-Tabelle und Oberfläche.",
+          "enum": ["Diagnostik", "Röntgen", "Anästhesie", "Konservierend", "Endodontie", "Chirurgie", "Prophylaxe", "PAR", "Prothetik"]
+        },
+        "title": {
+          "description": "Eigener Kurztext (kein amtlicher Volltext).",
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80
+        },
+        "abbrev": {
+          "description": "Amtliche BEMA-Kurzbezeichnung (U, F1, X1, VitE ...), nur bei BEMA.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 6
+        },
+        "points": {
+          "description": "BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punktzahl; null = nicht verifiziert (nie raten).",
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "keywords": {
+          "description": "Auslösewörter, so wie sie diktiert werden (klein geschrieben, ganze Wörter oder Phrasen).",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 2, "pattern": "^[^A-Z]+$"}
+        },
+        "rules": {
+          "description": "Freitext-Hinweise für Extraktor und Arzt: je Kanal, je Zahn, Altersgrenzen, Gegenstück im anderen System.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 3}
+        },
+        "surfaces_to_code": {
+          "description": "Füllungs-Familien: Flächenzahl 1..4 (4 = mehr als dreiflächig) -> Ziffer im selben System.",
+          "type": "object",
+          "required": ["1", "2", "3", "4"],
+          "additionalProperties": false,
+          "properties": {
+            "1": {"type": "string"},
+            "2": {"type": "string"},
+            "3": {"type": "string"},
+            "4": {"type": "string"}
+          }
+        },
+        "sources": {
+          "description": "Öffentliche Quelle(n), gegen die Ziffer, Kurztext und Punkte geprüft wurden.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^https://"}
+        },
+        "review": {
+          "description": "Prüfstatus des Captains: draft (ungeprüft) oder confirmed.",
+          "type": "object",
+          "required": ["status"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {"enum": ["draft", "confirmed"]},
+            "date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+            "note": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}
