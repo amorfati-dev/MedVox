@@ -26,7 +26,7 @@ make test   # pytest
 make dev    # http://127.0.0.1:8000/api/v1/health
 ```
 
-App (benötigt Node ≥ 20):
+App (benötigt Node ≥ 22.12 (oder 20.19+)):
 
 ```sh
 cd app

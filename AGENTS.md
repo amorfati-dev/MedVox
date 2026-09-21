@@ -8,7 +8,7 @@ Befehle und Arbeitspakete: `README.md`; Server-Targets: `server/Makefile`; App-S
 
 - UI-Texte, Doku, Kommentare und Commit-Beschreibungen auf Deutsch; Code-Bezeichner dürfen englisch sein.
 - Jedes Modul (Python-Datei, TS/TSX-Datei) höchstens 300 Zeilen; bei Bedarf aufteilen statt wachsen lassen.
-- Minimale Abhängigkeiten: Server nur fastapi, uvicorn, httpx, python-multipart, pydantic (+ pytest); App nur react, react-dom, vite, typescript. Kein UI-Framework, kein Tailwind. Neue Abhängigkeiten sind eine bewusste Entscheidung des Behandlers.
+- Minimale Abhängigkeiten: Server nur fastapi, uvicorn, httpx, python-multipart, pydantic (+ pytest); App zur Laufzeit nur react, react-dom, als Dev-Toolchain nur vite, typescript, @vitejs/plugin-react, @types/react, @types/react-dom – nichts weiteres ohne begründeten Anlass. Kein UI-Framework, kein Tailwind. Neue Abhängigkeiten sind eine bewusste Entscheidung des Behandlers.
 - Keine Cloud-Dienste, keine externen APIs, keine Telemetrie. Alles läuft im Praxis-LAN auf dem Praxis-Mac.
 - Zahnnummern sind zweistellige FDI-Nummern ("36", "16, 26"). Diktiert wird "drei sechs", nie "sechsunddreißig".
 - Audio wird nie persistiert: nur temporär bis zur Transkription, danach gelöscht. Keine Patienten-Stammdaten, Logs ohne Transkripttext.
