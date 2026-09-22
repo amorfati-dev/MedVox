@@ -97,14 +97,21 @@ export function Diktat({ onLogout }: Props) {
             : sending
               ? "Audio wird auf dem Praxis-Mac transkribiert …"
               : resumable
-                ? d.waiting > 0
-                  ? `Unterbrochen – „Erneut senden“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`}, „Weiter“ überträgt und nimmt weiter auf.`
-                  : "Unterbrochen – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
+                ? d.discardable
+                  ? "Dieser Abschnitt wird vom Server abgelehnt – verwerfen, damit die übrigen Abschnitte übertragen werden."
+                  : d.waiting > 0
+                    ? `Unterbrochen – „Erneut senden“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`}, „Weiter“ überträgt und nimmt weiter auf.`
+                    : "Unterbrochen – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
                 : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
         </p>
         {d.retryable && (
           <button type="button" className="btn" onClick={d.retry}>
             Erneut senden
+          </button>
+        )}
+        {d.discardable && (
+          <button type="button" className="btn" onClick={d.dropSegment}>
+            Diesen Abschnitt verwerfen
           </button>
         )}
         {resumable && (

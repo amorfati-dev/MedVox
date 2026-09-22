@@ -1,9 +1,7 @@
-// Aufnahme-Hook: MediaRecorder-Segmente aufnehmen, in Aufnahmereihenfolge an
-// /api/v1/transcribe schicken und die Transkripte aneinanderhängen.
+// Aufnahme-Hook: MediaRecorder-Segmente aufnehmen und an die Upload-Warteschlange
+// übergeben, die die Transkripte der Abschnitte aneinanderhängt.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, ApiError } from "../api";
 import {
-  filenameFor,
   MIC_MESSAGES,
   pickMimeType,
   requestMicrophone,
@@ -11,13 +9,14 @@ import {
   stopStream,
   type LevelMeter,
 } from "./recorder";
+import { useUploadQueue } from "./useUploadQueue";
 
 export const MAX_SECONDS = 60; // Server-Limit pro Abschnitt
 // Automatischer Stopp knapp unter dem Server-Limit (Ticker-Raster, Anlaufzeit).
 export const AUTO_STOP_SECONDS = MAX_SECONDS - 1;
 
-// "fortsetzbar": die Aufnahme wurde unterbrochen (Zeitlimit oder abgelaufene
-// Sitzung), das Diktat bleibt erhalten – „Weiter“ hängt an, „Neues Diktat“ beginnt neu.
+// "fortsetzbar": die Aufnahme wurde unterbrochen (Zeitlimit, abgelaufene Sitzung
+// oder Übertragungsfehler); das Diktat bleibt erhalten.
 export type DictationPhase = "bereit" | "aufnahme" | "sende" | "fortsetzbar";
 
 export type Dictation = {
@@ -27,8 +26,10 @@ export type Dictation = {
   level: number; // Pegel 0..1
   uploading: boolean; // ein Abschnitt wird gerade transkribiert
   waiting: number; // Abschnitte, die auf die Übertragung warten
-  retryable: boolean; // Übertragung ist fehlgeschlagen, Abschnitte warten weiter
+  retryable: boolean; // Übertragung fehlgeschlagen, Wiederholung möglich
   retry: () => void; // fehlgeschlagene Übertragung wiederholen
+  discardable: boolean; // der wartende Abschnitt wird dauerhaft abgelehnt
+  dropSegment: () => void; // nur diesen Abschnitt verwerfen, Rest weitersenden
   transcript: string;
   codes: string[];
   error: string | null;
@@ -47,33 +48,26 @@ export type Dictation = {
 
 export function useDictation(): Dictation {
   const [recording, setRecording] = useState(false);
-  const [waiting, setWaiting] = useState(0); // Länge der Upload-Warteschlange
-  const [paused, setPaused] = useState(false); // Warteschlange angehalten (401)
   const [resumable, setResumable] = useState(false);
-  const [sessionLost, setSessionLost] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [level, setLevel] = useState(0);
-  const [transcript, setTranscript] = useState("");
-  const [codes, setCodes] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [lastLatency, setLastLatency] = useState<number | null>(null);
 
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const meter = useRef<LevelMeter | null>(null);
   const chunks = useRef<Blob[]>([]);
   const ticker = useRef<number | null>(null);
+  const unwatchLimit = useRef<(() => void) | null>(null);
   const continueAfter = useRef(false);
   const starting = useRef(false);
-  const queue = useRef<Blob[]>([]); // Abschnitte in Aufnahmereihenfolge
-  const draining = useRef(false);
-  const halted = useRef(false);
-  const epoch = useRef(0); // steigt beim Verwerfen; entwertet laufende Übertragungen
+  const lost = useRef(false); // Sitzung abgelaufen: keine neue Aufnahme starten
   const mime = useRef<string | null>(pickMimeType());
 
   const clearTimers = useCallback(() => {
     if (ticker.current !== null) window.clearInterval(ticker.current);
     ticker.current = null;
+    unwatchLimit.current?.();
+    unwatchLimit.current = null;
     meter.current?.stop();
     meter.current = null;
     setLevel(0);
@@ -89,12 +83,9 @@ export function useDictation(): Dictation {
 
   useEffect(() => release, [release]);
 
-  // Übertragung anhalten; die Abschnitte bleiben in der Warteschlange.
-  const halt = useCallback((lost: boolean) => {
-    halted.current = true;
-    setPaused(true);
-    if (!lost) return;
-    setSessionLost(true);
+  // Abgelaufene Sitzung beendet die Aufnahme; die Abschnitte bleiben erhalten.
+  const onSessionLost = useCallback(() => {
+    lost.current = true;
     setResumable(true);
     const rec = recorder.current;
     if (rec?.state === "recording") {
@@ -103,66 +94,26 @@ export function useDictation(): Dictation {
     }
   }, []);
 
-  const sessionExpired = useCallback(() => halt(true), [halt]);
+  const uploads = useUploadQueue(onSessionLost);
+  const { enqueue, setError } = uploads;
 
-  const drain = useCallback(async () => {
-    if (draining.current || halted.current) return;
-    draining.current = true;
-    try {
-      while (queue.current.length > 0 && !halted.current) {
-        const blob = queue.current[0];
-        const mine = epoch.current;
-        try {
-          const result = await api.transcribe(blob, filenameFor(blob.type || mime.current || ""));
-          if (mine !== epoch.current) return;
-          const text = result.transcript.trim();
-          setTranscript((prev) => (prev && text ? `${prev} ${text}` : prev || text));
-          setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
-          setLastLatency(result.latency_s);
-        } catch (e) {
-          if (mine !== epoch.current) return;
-          const unauthorized = e instanceof ApiError && e.status === 401;
-          halt(unauthorized);
-          if (!unauthorized) setError(e instanceof ApiError ? e.message : "Unbekannter Fehler beim Hochladen.");
-          return;
-        }
-        queue.current.shift();
-        setWaiting(queue.current.length);
-      }
-    } finally {
-      draining.current = false;
-    }
-  }, [halt]);
-
-  const enqueue = useCallback(
-    (blob: Blob) => {
-      if (blob.size === 0) {
-        setError("Keine Audiodaten aufgenommen.");
-        return;
-      }
-      queue.current.push(blob);
-      setWaiting(queue.current.length);
-      void drain();
-    },
-    [drain],
-  );
-
-  const relogin = useCallback(() => setSessionLost(false), []);
-
-  const resumeQueue = useCallback(() => {
-    setError(null);
-    halted.current = false;
-    setPaused(false);
-    void drain();
-  }, [drain]);
-
-  // Ein Segment auf dem offenen Mikrofon-Stream aufnehmen; Uploads laufen nacheinander.
   const startSegment = useCallback(
     (mic: MediaStream): void => {
       const rec = new MediaRecorder(mic, { mimeType: mime.current ?? undefined });
       chunks.current = [];
+      const startedAt = Date.now();
+      // Zeitstempel statt Ticker: Safari drosselt Intervalle im Hintergrund.
+      const checkLimit = () => {
+        const elapsedMs = Date.now() - startedAt;
+        setSeconds(Math.floor(elapsedMs / 1000));
+        if (elapsedMs >= AUTO_STOP_SECONDS * 1000 && rec.state === "recording") {
+          rec.stop();
+          setResumable(true);
+        }
+      };
       rec.ondataavailable = (ev) => {
         if (ev.data.size > 0) chunks.current.push(ev.data);
+        checkLimit();
       };
       rec.onstop = () => {
         const blob = new Blob(chunks.current, { type: rec.mimeType || mime.current || "" });
@@ -170,7 +121,7 @@ export function useDictation(): Dictation {
         const again = continueAfter.current;
         continueAfter.current = false;
         clearTimers();
-        enqueue(blob);
+        enqueue(blob, mime.current ?? "");
         if (!again) {
           release();
           return;
@@ -185,34 +136,21 @@ export function useDictation(): Dictation {
       rec.start(250);
       recorder.current = rec;
       meter.current = startLevelMeter(mic, setLevel);
-      const startedAt = Date.now();
       setSeconds(0);
       setRecording(true);
       setResumable(false);
-      ticker.current = window.setInterval(() => {
-        const elapsedMs = Date.now() - startedAt;
-        setSeconds(Math.floor(elapsedMs / 1000));
-        if (elapsedMs >= AUTO_STOP_SECONDS * 1000 && rec.state === "recording") {
-          rec.stop();
-          setResumable(true);
-        }
-      }, 250);
+      ticker.current = window.setInterval(checkLimit, 250);
+      document.addEventListener("visibilitychange", checkLimit);
+      unwatchLimit.current = () => document.removeEventListener("visibilitychange", checkLimit);
     },
-    [clearTimers, enqueue, release],
+    [clearTimers, enqueue, release, setError],
   );
 
   const reset = useCallback(() => {
-    epoch.current += 1;
-    queue.current = [];
-    halted.current = false;
-    setWaiting(0);
-    setPaused(false);
-    setTranscript("");
-    setCodes([]);
-    setError(null);
-    setLastLatency(null);
+    lost.current = false;
     setResumable(false);
-  }, []);
+    uploads.reset();
+  }, [uploads]);
 
   // Mikrofon holen und das erste Segment starten; `append` behält das Diktat.
   const begin = useCallback(
@@ -224,14 +162,14 @@ export function useDictation(): Dictation {
       }
       starting.current = true;
       try {
-        if (append) resumeQueue();
+        if (append) uploads.resume();
         else reset();
         const mic = await requestMicrophone();
         if (!mic.ok) {
           setError(MIC_MESSAGES[mic.error]);
           return;
         }
-        if (halted.current) {
+        if (lost.current) {
           stopStream(mic.stream);
           return;
         }
@@ -246,7 +184,7 @@ export function useDictation(): Dictation {
         starting.current = false;
       }
     },
-    [release, reset, resumeQueue, startSegment],
+    [release, reset, setError, startSegment, uploads],
   );
 
   const start = useCallback(() => begin(false), [begin]);
@@ -262,31 +200,35 @@ export function useDictation(): Dictation {
     stop();
   }, [stop]);
 
-  const uploading = waiting > 0 && !paused;
-  const retryable = waiting > 0 && paused;
+  const relogin = useCallback(() => {
+    lost.current = false;
+    uploads.relogin();
+  }, [uploads]);
 
   return {
-    phase: recording ? "aufnahme" : uploading ? "sende" : resumable || retryable ? "fortsetzbar" : "bereit",
+    phase: recording ? "aufnahme" : uploads.uploading ? "sende" : resumable || uploads.blocked ? "fortsetzbar" : "bereit",
     seconds,
     remaining: Math.max(0, AUTO_STOP_SECONDS - seconds),
     level,
-    uploading,
-    waiting,
-    retryable,
-    retry: resumeQueue,
-    transcript,
-    codes,
-    error,
-    lastLatency,
+    uploading: uploads.uploading,
+    waiting: uploads.waiting,
+    retryable: uploads.blocked && !uploads.permanent,
+    retry: uploads.resume,
+    discardable: uploads.blocked && uploads.permanent,
+    dropSegment: uploads.dropSegment,
+    transcript: uploads.transcript,
+    codes: uploads.codes,
+    error: uploads.error,
+    lastLatency: uploads.lastLatency,
     supported: mime.current !== null,
-    sessionLost,
-    sessionExpired,
+    sessionLost: uploads.sessionLost,
+    sessionExpired: uploads.sessionExpired,
     relogin,
     start,
     resume,
     stop,
     next,
     reset,
-    setCodes,
+    setCodes: uploads.setCodes,
   };
 }

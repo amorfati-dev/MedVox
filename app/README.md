@@ -11,7 +11,7 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 | `/check` | Gerätetest: HTTPS, MediaRecorder-Formate, Mikrofon, Server-Health |
 
 Aufbau in `src/`: `api.ts` (API-Client, deutsche Fehlermeldungen), `router.ts` (Pfad-Switch),
-`hooks/useDictation.ts` + `hooks/recorder.ts` (MediaRecorder, MIME `audio/mp4` vor `audio/webm`,
+`hooks/useDictation.ts` + `hooks/useUploadQueue.ts` + `hooks/recorder.ts` (MediaRecorder, MIME `audio/mp4` vor `audio/webm`,
 60-s-Limit, „Weiter“-Abschnitte), `qr/encode.ts` (eigener QR-Encoder, Byte-Modus, Stufe L, Version 1–5),
 `views/`, `components/`. Der Service Worker (`public/sw.js`) cached nur die App-Hülle, nie `/api/` oder Audio.
 
@@ -54,6 +54,8 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
    erhalten. Nach der Anmeldung steht das Diktat wieder als „fortsetzbar“ bereit: „Weiter“ überträgt die
    wartenden Abschnitte in Aufnahmereihenfolge und nimmt weiter auf. Auch jeder andere Fehler beim
    Übertragen (z. B. Whisper nicht bereit, WLAN weg) behält den Abschnitt: die Meldung erscheint mit
-   „Erneut senden“; verworfen wird ein Abschnitt nur über „Verwerfen“ bzw. „Neues Diktat“.
+   „Erneut senden“. Lehnt der Server einen Abschnitt dauerhaft ab (zu lang, falsches Format), erscheint
+   „Diesen Abschnitt verwerfen“ – nur dieser Abschnitt entfällt, der bisherige Text bleibt; das ganze
+   Diktat verwirft nur „Verwerfen“ bzw. „Neues Diktat“.
 6. „An Rezeption senden“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.
