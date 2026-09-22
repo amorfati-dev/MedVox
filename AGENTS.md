@@ -10,6 +10,7 @@ Befehle und Arbeitspakete: `README.md`; Server-Targets: `server/Makefile`; App-S
 - Jedes Modul (Python-Datei, TS/TSX-Datei) höchstens 300 Zeilen; bei Bedarf aufteilen statt wachsen lassen.
 - Minimale Abhängigkeiten: Server nur fastapi, uvicorn, httpx, python-multipart, pydantic (+ pytest); App zur Laufzeit nur react, react-dom, als Dev-Toolchain nur vite, typescript, @vitejs/plugin-react, @types/react, @types/react-dom – nichts weiteres ohne begründeten Anlass. Kein UI-Framework, kein Tailwind. Neue Abhängigkeiten sind eine bewusste Entscheidung des Behandlers. `ffmpeg` ist Systemvoraussetzung des Servers (per subprocess), keine Python-Abhängigkeit.
 - Keine Cloud-Dienste, keine externen APIs, keine Telemetrie. Alles läuft im Praxis-LAN auf dem Praxis-Mac.
+- BEMA/GOZ/GOÄ-Katalog: `server/medvox/catalog/` (Aufbau, Regeln und Pflege in dessen `README.md`). Einzige Quelle, aus der der Extraktor Ziffern vorschlagen darf; Punktwerte nur aus den amtlichen Quellen, sonst `null` – nie raten.
 - Zahnnummern sind zweistellige FDI-Nummern ("36", "16, 26"). Diktiert wird "drei sechs", nie "sechsunddreißig".
 - Audio wird nie persistiert: nur temporär bis zur Transkription, danach gelöscht. Keine Patienten-Stammdaten, Logs ohne Transkripttext.
 - Der alte Cloud-Prototyp (Google STT + Gemini) ist nur in der Git-Historie vor diesem Neuaufbau; seine BEMA/GOZ-Daten waren fachlich falsch und werden nicht übernommen.

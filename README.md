@@ -23,8 +23,9 @@ Server (benötigt [`uv`](https://docs.astral.sh/uv/) und `ffmpeg`; Details in `s
 
 ```sh
 cd server
-make test   # pytest
-make dev    # http://127.0.0.1:8000/api/v1/health
+make test           # pytest
+make dev            # http://127.0.0.1:8000/api/v1/health
+make catalog-check  # BEMA/GOZ/GOÄ-Katalog prüfen, Review-Tabelle ausgeben
 ```
 
 App (benötigt Node ≥ 22.12 (oder 20.19+)):
@@ -55,7 +56,7 @@ Die Arbeitspakete der Phase 1 (Details im Planungsbericht, nicht Teil des Repos)
 - WP-4 PWA-Aufnahme iPad-fest
 - WP-5 Normalisierer (Zahnnummern → FDI, Flächen, Zahlwörter)
 - WP-6 Fachwörterbuch + Fuzzy-Korrektur
-- WP-7 Katalog v1 (BEMA/GOZ, vom Behandler geprüft)
+- WP-7 Katalog v1 (BEMA/GOZ, vom Behandler geprüft; siehe `server/medvox/catalog/README.md`)
 - WP-8 Regel-Extraktor
 - WP-9 iPad-Ergebnisansicht
 - WP-10 Kurzcode-Transfer

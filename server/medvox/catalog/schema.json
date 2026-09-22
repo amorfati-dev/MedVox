@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://medvox.local/schema/catalog-v1.json",
   "title": "MedVox Katalog (BEMA/GOZ/GOÄ)",
-  "description": "Mini-Katalog der Abrechnungspositionen, die der Regel-Extraktor vorschlagen darf. Entry-Form siehe README.md im selben Ordner.",
+  "description": "Abrechnungspositionen für den Regel-Extraktor: gilt für catalog_v1.json (Alltagspositionen, wird geladen) und catalog_extended.json (Saat für Phase 2). Entry-Form siehe README.md im selben Ordner.",
   "type": "object",
   "required": ["meta", "entries"],
   "additionalProperties": false,
