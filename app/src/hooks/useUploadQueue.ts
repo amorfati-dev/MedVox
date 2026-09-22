@@ -19,7 +19,7 @@ export type UploadQueue = {
   lastLatency: number | null;
   error: string | null;
   setError: (message: string | null) => void;
-  enqueue: (blob: Blob, fallbackMime: string) => void;
+  enqueue: (blob: Blob) => void;
   resume: () => void; // angehaltene Warteschlange fortsetzen
   dropSegment: () => void; // nur den wartenden Abschnitt verwerfen
   sessionExpired: () => void; // 401 aus einem anderen Aufruf
@@ -38,7 +38,6 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
   const [error, setError] = useState<string | null>(null);
 
   const queue = useRef<Blob[]>([]);
-  const mimes = useRef<string[]>([]);
   const draining = useRef(false);
   const halted = useRef(false);
   const epoch = useRef(0); // steigt beim Verwerfen; entwertet laufende Übertragungen
@@ -62,7 +61,7 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
         const blob = queue.current[0];
         const mine = epoch.current;
         try {
-          const result = await api.transcribe(blob, filenameFor(mimes.current[0] ?? ""));
+          const result = await api.transcribe(blob, filenameFor(blob.type));
           if (mine !== epoch.current) continue;
           const text = result.transcript.trim();
           setTranscript((prev) => (prev && text ? `${prev} ${text}` : prev || text));
@@ -80,7 +79,6 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
           return;
         }
         queue.current.shift();
-        mimes.current.shift();
         setWaiting(queue.current.length);
       }
     } finally {
@@ -89,13 +87,12 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
   }, [halt]);
 
   const enqueue = useCallback(
-    (blob: Blob, fallbackMime: string) => {
+    (blob: Blob) => {
       if (blob.size === 0) {
         setError("Keine Audiodaten aufgenommen.");
         return;
       }
       queue.current.push(blob);
-      mimes.current.push(blob.type || fallbackMime);
       setWaiting(queue.current.length);
       void drain();
     },
@@ -113,7 +110,6 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
   // Dauerhaft abgelehnten Abschnitt einzeln verwerfen; Transkript bleibt unberührt.
   const dropSegment = useCallback(() => {
     queue.current.shift();
-    mimes.current.shift();
     setWaiting(queue.current.length);
     resume();
   }, [resume]);
@@ -121,7 +117,6 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
   const reset = useCallback(() => {
     epoch.current += 1;
     queue.current = [];
-    mimes.current = [];
     halted.current = false;
     setWaiting(0);
     setPaused(false);

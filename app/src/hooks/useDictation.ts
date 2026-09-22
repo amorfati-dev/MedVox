@@ -60,6 +60,7 @@ export function useDictation(): Dictation {
   const continueAfter = useRef(false);
   const starting = useRef(false);
   const lost = useRef(false); // Sitzung abgelaufen: keine neue Aufnahme starten
+  const alive = useRef(true); // Hook noch eingebunden
   const mime = useRef<string | null>(pickMimeType());
 
   const clearTimers = useCallback(() => {
@@ -80,17 +81,21 @@ export function useDictation(): Dictation {
     setRecording(false);
   }, [clearTimers]);
 
-  useEffect(() => release, [release]);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      release();
+    };
+  }, [release]);
 
   // Abgelaufene Sitzung beendet die Aufnahme; die Abschnitte bleiben erhalten.
   const onSessionLost = useCallback(() => {
     lost.current = true;
+    continueAfter.current = false;
     setResumable(true);
     const rec = recorder.current;
-    if (rec?.state === "recording") {
-      continueAfter.current = false;
-      rec.stop();
-    }
+    if (rec?.state === "recording") rec.stop();
   }, []);
 
   const uploads = useUploadQueue(onSessionLost);
@@ -98,6 +103,10 @@ export function useDictation(): Dictation {
 
   const startSegment = useCallback(
     (mic: MediaStream): void => {
+      if (!alive.current || lost.current) {
+        release();
+        return;
+      }
       const rec = new MediaRecorder(mic, { mimeType: mime.current ?? undefined });
       chunks.current = [];
       const startedAt = Date.now();
@@ -120,7 +129,7 @@ export function useDictation(): Dictation {
         const again = continueAfter.current;
         continueAfter.current = false;
         clearTimers();
-        enqueue(blob, mime.current ?? "");
+        enqueue(blob);
         if (!again) {
           release();
           return;
@@ -166,10 +175,6 @@ export function useDictation(): Dictation {
         const mic = await requestMicrophone();
         if (!mic.ok) {
           setError(MIC_MESSAGES[mic.error]);
-          return;
-        }
-        if (lost.current) {
-          stopStream(mic.stream);
           return;
         }
         stream.current = mic.stream;
