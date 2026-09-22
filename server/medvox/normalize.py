@@ -10,6 +10,7 @@ manuellen Prüfung aus.
 
 from __future__ import annotations
 
+import argparse
 import re
 import unicodedata
 from dataclasses import dataclass, field
@@ -123,7 +124,9 @@ _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(
 _PREFIX_CODE = re.compile(
     rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
 )
-_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d{1,2}(?:(?:[\s/-]+|,\s*(?=\d(?!\d)))\d{1,2}){0,5})(?![\w\x01])")
+_PSI_CODES = re.compile(
+    r"\b(PSI(?:[\s-]*Code)?:?)\s+((?:\d{1,2}|[xX])(?:(?:[\s/-]+|,\s*(?=\d(?!\d)(?!\s\d)))(?:\d{1,2}|[xX])){0,5})(?![\w\x01])"
+)
 _IP_CODE = re.compile(rf"\bIP\s*(\d)(?![\w{_NT}])")
 
 
@@ -276,8 +279,6 @@ DEMO = (
 
 
 def main(argv: list[str] | None = None) -> None:
-    import argparse
-
     parser = argparse.ArgumentParser(description="Normalisiert ein deutsches Zahnarzt-Diktat.")
     parser.add_argument("text", nargs="*", help="Diktattext (entfällt bei --demo)")
     parser.add_argument("--demo", action="store_true", help="die eingebauten Beispieldiktate ausführen")

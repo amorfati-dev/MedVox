@@ -50,6 +50,7 @@ def test_single_tooth_forms(raw, expected_text, expected_teeth):
         ("PSI 3, 36 Karies", "PSI 3, 36 Karies", [36]),
         ("PSI 3 3 2 2 3 3 36 okklusal Karies", "PSI 3 3 2 2 3 3 36 o Karies", [36]),
         ("PSI drei drei zwei zwei drei drei drei sechs okklusal", "PSI 3 3 2 2 3 3 36 o", [36]),
+        ("PSI drei, drei sechs Karies", "PSI 3, 36 Karies", [36]),
         ("Drei sechs, drei sieben okklusal Karies", "36, 37 o Karies", [36, 37]),
         ("36, 37 okklusal, Karies", "36, 37 o, Karies", [36, 37]),
         ("36-37 okklusal Karies", "36-37 o Karies", [36, 37]),
@@ -106,16 +107,13 @@ def test_quadrant_phrases(raw, expected_text, expected_teeth):
         ("Karies an der distalen Fläche 16", "Karies an der d Fläche 16", [ToothRef(16, "")]),
         ("36 mesial und distal Karies", "36 md Karies", [ToothRef(36, "md")]),
         ("Termin Mo 36", "Termin Mo 36", [ToothRef(36, "")]),
+        ("36, 37 okklusal Karies", "36, 37 o Karies", [ToothRef(36, "o"), ToothRef(37, "o")]),
     ],
 )
 def test_surfaces(raw, expected_text, expected_teeth):
     result = normalize(raw)
     assert result.text == expected_text
     assert result.teeth == expected_teeth
-
-
-def test_surfaces_of_a_list_apply_to_every_tooth():
-    assert normalize("36, 37 okklusal Karies").teeth == [ToothRef(36, "o"), ToothRef(37, "o")]
 
 
 # --- Zahlwörter und Codes ---------------------------------------------------------
@@ -142,6 +140,7 @@ def test_surfaces_of_a_list_apply_to_every_tooth():
         ("GOZ 2100 Faktor 2,3", "GOZ 2100 Faktor 2,3"),
         ("GOZ 2100 zum 2,3-fachen Satz", "GOZ 2100 zum 2,3-fachen Satz"),
         ("PSI 33 22 33", "PSI 33 22 33"),
+        ("PSI 3 X 2 2 3 3", "PSI 3 X 2 2 3 3"),
         ("Ibuprofen sechshundert verordnet", "Ibuprofen 600 verordnet"),
         ("Amoxicillin tausend", "Amoxicillin 1000"),
         ("Professionelle Zahnreinigung, achtundzwanzig Zähne", "Professionelle Zahnreinigung, 28 Zähne"),
@@ -185,6 +184,7 @@ def test_number_words_and_codes(raw, expected_text):
         "GOZ 2100 zum 2,3-fachen Satz",
         "GOZ 2100 3,5-fach",
         "PSI 33 22 33",
+        "PSI 3 X 2 2 3 3",
         "BEMA Ziffer 13 a",
         "IP 5",
         "Sondierungstiefe 3,5 mm",
