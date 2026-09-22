@@ -55,6 +55,11 @@ def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
 
 
+def test_common_german_words_are_never_guessed_at():
+    raw = "Blutung stillt schnell, schwere Parodontitis, Medikament verordnet, Sulcus gingivalis"
+    assert correct(raw) == (raw, [])
+
+
 def test_anatomical_phrases_keep_their_meaning():
     raw = "Leitungsanästhesie am Nervus alveolaris inferior, Nervus lingualis geschont, SBI 20 Prozent"
     assert correct(raw) == (raw, [])

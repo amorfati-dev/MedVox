@@ -1,8 +1,10 @@
 """Kuratiertes deutsches Dental-Lexikon mit Fuzzy-Korrektur der Whisper-Ausgabe (WP-6).
 
-``correct(text)`` korrigiert Tokens, die innerhalb einer kleinen Levenshtein-
-Distanz zu einem Lexikon-Begriff liegen ("Artikein" -> "Artikain"), sowie
-bekannte Verhörer ("Psycho" -> "PSI", "bis Registrat" -> "Bissregistrat").
+``correct(text)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
+"PSI", "bis Registrat" -> "Bissregistrat") sowie Tokens mit Levenshtein-Distanz
+1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
+Token stehen: Distanz 2 wird nicht mehr geraten, weil das den klinischen Sinn
+verändert hat ("schwere" -> "Schmerz").
 Häufige deutsche Wörter werden nie korrigiert, Codes und Zahlen nie angefasst,
 und jede Korrektur wird zurückgegeben, damit die UI sie anzeigen kann. Läuft
 vor ``normalize``. Rein, ohne I/O.
@@ -32,7 +34,7 @@ TERMS: tuple[str, ...] = (
     # Diagnostik
     "Untersuchung", "Befund", "Vitalitätsprüfung", "Kältetest", "Perkussion", "Perkussionstest",
     "Palpation", "Sondierung", "Sondierungstiefe", "Sondierungstiefen", "Zahnfilm", "Röntgen", "OPG",
-    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "PBI", "SBI", "API", "Lockerungsgrad",
+    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "PBI", "SBI", "API", "IPR", "Lockerungsgrad",
     "Furkation", "Funktion",
     # Befunde
     "Karies", "kariös", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
@@ -78,6 +80,7 @@ TERMS: tuple[str, ...] = (
 # (kleingeschriebene Token-Fenster aus ein oder zwei Wörtern -> Ersatz).
 ALIASES: dict[tuple[str, ...], str] = {
     ("psycho",): "PSI", ("goetz",): "GOZ", ("götz",): "GOZ",
+    ("occlusal",): "okklusal", ("perichoronitis",): "Perikoronitis",
     ("bis", "registrat"): "Bissregistrat", ("biss", "registrat"): "Bissregistrat",
     ("composite",): "Komposit",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
@@ -135,10 +138,8 @@ def levenshtein(a: str, b: str, limit: int) -> int:
 
 
 def _max_distance(token: str) -> int:
-    """Kurze Tokens bekommen wenig Spielraum; 3-Buchstaben-Tokens nur als Abkürzung in Großschreibung."""
-    if len(token) <= 3:
-        return 1 if token.isupper() else 0
-    return 1 if len(token) <= 5 else 2
+    """Höchstens eine Änderung, und bei drei Buchstaben nur für Abkürzungen in Großschreibung."""
+    return 1 if len(token) > 3 or token.isupper() else 0
 
 
 def _is_inflection(low: str, term_low: str) -> bool:
@@ -148,6 +149,8 @@ def _is_inflection(low: str, term_low: str) -> bool:
 def correct_token(token: str) -> str | None:
     """Kanonische Schreibweise für ein einzelnes verhörtes Token, sonst None."""
     low = token.lower()
+    if alias := ALIASES.get((low,)):
+        return alias
     if low in _NEVER_LOWER or low in _TERMS_LOWER:
         return None
     if m := _L_CODE.match(token):
@@ -161,7 +164,7 @@ def correct_token(token: str) -> str | None:
     best, best_distance, ambiguous = None, limit + 1, False
     for term_folded, term in _TERMS_FOLDED.items():
         d = levenshtein(folded, term_folded, limit)
-        if d > limit or (d == 2 and folded[0] != term_folded[0]):
+        if d > limit:
             continue
         if folded.endswith("n") and term_folded.endswith(("ung", "et")):
             continue
@@ -178,19 +181,16 @@ def correct(text: str) -> tuple[str, list[Correction]]:
     corrections: list[Correction] = []
     i = 0
     while i < len(tokens):
-        for width in (2, 1):
-            window = tokens[i : i + width]
-            key = tuple(t[2].lower() for t in window)
-            if len(window) == width and key in ALIASES:
-                start, end = window[0][0], window[-1][1]
-                corrections.append(Correction(text[start:end], ALIASES[key], start, end))
-                i += width
-                break
-        else:
-            start, end, token = tokens[i]
-            if (replacement := correct_token(token)) is not None:
-                corrections.append(Correction(token, replacement, start, end))
-            i += 1
+        pair = tuple(t[2].lower() for t in tokens[i : i + 2])
+        if len(pair) == 2 and pair in ALIASES:
+            start, end = tokens[i][0], tokens[i + 1][1]
+            corrections.append(Correction(text[start:end], ALIASES[pair], start, end))
+            i += 2
+            continue
+        start, end, token = tokens[i]
+        if (replacement := correct_token(token)) is not None:
+            corrections.append(Correction(token, replacement, start, end))
+        i += 1
     pieces, last = [], 0
     for c in corrections:
         pieces += [text[last : c.start], c.corrected]

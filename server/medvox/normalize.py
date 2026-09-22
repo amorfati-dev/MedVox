@@ -38,6 +38,13 @@ class NormalizedText:
 
 # --- Zahlwörter ---------------------------------------------------------------
 
+_PLURAL_NOUN = (r"Zähne|Zaehne|Jahren?|Tagen?|Wochen|Monaten?|Minuten|Stunden|Sekunden|Kanäle|Kanaele|Wurzeln"
+                r"|Sitzungen|Flächen|Implantate|Millimeter|mm|Prozent|%|mg|ml|Grad|Uhr")
+_SINGULAR_NOUN = r"Zahn|Jahr|Tag|Woche|Monat|Minute|Stunde|Sekunde|Kanal|Wurzel|Sitzung|Fläche|Implantat"
+_UNIT_NOUN = rf"\s*(?:{_PLURAL_NOUN}|{_SINGULAR_NOUN})(?![^\W\d_])"
+_COUNT_WORD = r"\s*(?:[Mm]al|x)(?![^\W\d_])"
+_COUNT_NOUN = rf"(?:{_UNIT_NOUN}|{_COUNT_WORD})"
+
 _UNITS = {"null": 0, "ein": 1, "eins": 1, "zwei": 2, "zwo": 2, "drei": 3, "vier": 4, "fünf": 5,
           "fuenf": 5, "sechs": 6, "sieben": 7, "acht": 8, "neun": 9}
 _TEENS = {"zehn": 10, "elf": 11, "zwölf": 12, "zwoelf": 12, "dreizehn": 13, "vierzehn": 14,
@@ -55,6 +62,8 @@ _NUMBER_WORD = re.compile(
     rf"(?:(?P<teen>{_alt(_TEENS)})|(?:(?P<tu>{_alt(_UNITS)})und)?(?P<tens>{_alt(_TENS)})|(?P<u>{_alt(_UNITS)}))?"
 )
 _WORD = re.compile(r"[^\W\d_]+")
+# "ein" ist meist der Artikel; nur vor einer Einheit oder einer weiteren Ziffer ist es eine Anzahl.
+_EIN_AS_COUNT = re.compile(rf"{_COUNT_NOUN}|\s+(?:{_alt(_UNITS)})(?![^\W\d_])")
 
 
 def number_value(word: str) -> tuple[int, bool] | None:
@@ -84,6 +93,8 @@ def _number_words(text: str) -> str:
         low = word.lower()
         if low.endswith("mal") and len(low) > 3 and (parsed := number_value(low[:-3])):
             return f"{parsed[0]}x"  # "zweimal" -> "2x"
+        if low == "ein" and not _EIN_AS_COUNT.match(m.string, m.end()):
+            return word
         parsed = number_value(low)
         if parsed is None:
             return word
@@ -97,9 +108,11 @@ def _number_words(text: str) -> str:
 # --- Codes ---------------------------------------------------------------------
 
 _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
+_CODE_WORD = r"(?:Ziffer|Nr\.?)"
 _PREFIX_CODE = re.compile(
-    rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
+    rf"\b(GOZ|BEMA)[\s-]+(?:{_CODE_WORD}[\s-]+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
 )
+_BARE_CODE = re.compile(rf"\b({_CODE_WORD}[\s-]+)(\d{{4}})(?![^\W\d_]|\d)")
 _PSI_CODES = re.compile(
     r"\b(PSI(?:[\s-]*Code)?:?)\s+((?:\d{1,2}|[xX])(?:(?:[\s/-]+|,\s*(?=[xX]|\d(?!\d)(?!\s\d(?!\s[\dxX]))))(?:\d{1,2}|[xX])){0,5})(?![\w\x01])"
 )
@@ -112,6 +125,7 @@ def _codes(text: str) -> str:
 
     text = _AE_CODE.sub(lambda m: "Ä" + join(m.group(1), m.group(2)), text)
     text = _PREFIX_CODE.sub(lambda m: f"{m.group(1)} " + join(m.group(2), m.group(3)), text)
+    text = _BARE_CODE.sub(lambda m: m.group(1) + m.group(2) + _NT, text)
     text = _IP_CODE.sub(lambda m: "IP" + m.group(1) + _NT, text)
     return _PSI_CODES.sub(lambda m: f"{m.group(1)} " + re.sub(r"\d", lambda d: d.group() + _NT, m.group(2)), text)
 
@@ -135,17 +149,21 @@ def _surfaces(text: str) -> str:
 
 # --- Zähne ----------------------------------------------------------------------
 
-_PLURAL_NOUN = (r"Zähne|Zaehne|Jahren?|Tagen?|Wochen|Monaten?|Minuten|Stunden|Sekunden|Kanäle|Kanaele|Wurzeln"
-                r"|Sitzungen|Flächen|Implantate|Millimeter|mm|Prozent|%|mg|ml|Grad|Uhr")
-_SINGULAR_NOUN = r"Zahn|Jahr|Tag|Woche|Monat|Minute|Stunde|Sekunde|Kanal|Wurzel|Sitzung|Fläche|Implantat"
-_UNIT_NOUN = rf"\s*(?:{_PLURAL_NOUN}|{_SINGULAR_NOUN})(?![^\W\d_])"
-_COUNT_WORD = r"\s*(?:[Mm]al|x)(?![^\W\d_])"
-_COUNT_NOUN = rf"(?:{_UNIT_NOUN}|{_COUNT_WORD})"
 # Hinter einer zweistelligen Zahl ist ein Zählwort immer Plural, der Singular nie eine Anzahl.
 _TOOTH_COUNT_NOUN = rf"(?:\s*(?:{_PLURAL_NOUN})(?![^\W\d_])|{_COUNT_WORD})"
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
-_QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
+# Eine Quadrantenangabe wird nur dann zum Zahn, wenn hinter der Ziffer nichts
+# mehr steht, ein Satzzeichen, eine Fläche, eine weitere Zahnangabe oder ein
+# Befund folgt; jedes andere Wort ist eine Anzahl ("Oberkiefer rechts zwei Kronen").
+_FINDING = (r"Karies|Sekundärkaries|kariös\w*|Pulpitis|Parodontitis|Gingivitis|Perikoronitis|Nekrose|Fistel"
+            r"|Abszess|Zyste|Längsfraktur|Fraktur|Sprung|Sprünge|Attrition|Erosion|Rezession|Blutung"
+            r"|retiniert|verlagert|avital|vital|profunda|media|apikal|Aufbissbeschwerden|Hypersensibilität"
+            r"|Sondierungstiefen?|Lockerungsgrad")
+_TOOTH_CONTEXT = rf"(?:\s*$|\s*[,.;:!?]|\s*[modblpi]+{_SF}|\s*\d|\s+(?:{_FINDING})(?![^\W\d_]))"
+_QUAD_THEN_DIGIT = re.compile(
+    rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})(?={_TOOTH_CONTEXT})", re.I
+)
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
 _DIGIT_RUN = re.compile(
     rf"(?<![\w{_NT}.])(?<![Ff]aktor )(?<![Ff]aktor \d,)\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])"

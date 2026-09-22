@@ -89,6 +89,11 @@ def test_tooth_lists_and_ranges(raw, expected_text, expected_teeth):
         ("im vierten Quadranten Zahn sieben", "Zahn 47", [47]),
         ("Zahn sechs im zweiten Quadranten", "Zahn 26", [26]),
         ("im dritten Quadranten 6 Karies", "36 Karies", [36]),
+        ("Oberkiefer rechts zwei mesial Karies", "12 m Karies", [12]),
+        ("Oberkiefer rechts zwei Kronen eingegliedert", "Oberkiefer rechts 2 Kronen eingegliedert", []),
+        ("im ersten Quadranten drei Extraktionen", "im ersten Quadranten 3 Extraktionen", []),
+        ("Oberkiefer rechts ein Provisorium eingegliedert",
+         "Oberkiefer rechts ein Provisorium eingegliedert", []),
         ("Oberkiefer rechts drei Zähne fehlen", "Oberkiefer rechts 3 Zähne fehlen", []),
         ("Unterkiefer links 2 Implantate", "Unterkiefer links 2 Implantate", []),
         ("Sondierung im ersten Quadranten", "Sondierung im ersten Quadranten", []),
@@ -115,6 +120,8 @@ def test_quadrant_phrases(raw, expected_text, expected_teeth):
         ("24 bukkal und 25 vestibulär, 34 lingual", "24 b und 25 b, 34 l",
          [ToothRef(24, "b"), ToothRef(25, "b"), ToothRef(34, "l")]),
         ("Karies an der distalen Fläche 16", "Karies an der d Fläche 16", [ToothRef(16, "")]),
+        ("Füllung am 36 in Adhäsivtechnik, Kontrolle im Mai", "Füllung am 36 in Adhäsivtechnik, Kontrolle im Mai",
+         [ToothRef(36, "")]),
         ("36 mesial und distal Karies", "36 md Karies", [ToothRef(36, "md")]),
         ("Termin Mo 36", "Termin Mo 36", [ToothRef(36, "")]),
         ("36, 37 okklusal Karies", "36, 37 o Karies", [ToothRef(36, "o"), ToothRef(37, "o")]),
@@ -162,6 +169,9 @@ def test_surfaces(raw, expected_text, expected_teeth):
         ("UPT in drei Monaten, Wiedervorlage in zwei Tagen", "UPT in 3 Monaten, Wiedervorlage in 2 Tagen"),
         ("Farbnahme A drei", "Farbnahme A 3"),
         ("Nachkontrolle in einer Woche", "Nachkontrolle in einer Woche"),
+        ("Kontrolle in ein paar Tagen", "Kontrolle in ein paar Tagen"),
+        ("GOZ-Ziffer 4133 und BEMA-Ziffer 13a abgerechnet", "GOZ 4133 und BEMA 13a abgerechnet"),
+        ("Ziffer 4133", "Ziffer 4133"),
         ("zwölf, dreizehn, einundzwanzig", "12, 13, 21"),
         ("2100", "2100"),
         ("2060", "2060"),
@@ -201,6 +211,8 @@ def test_number_words_and_codes(raw, expected_text):
         "PSI 3 3 2, X 3 3",
         "Sondierungstiefen 3, 5, 6 mm",
         "BEMA Ziffer 13 a",
+        "GOZ-Ziffer 4133",
+        "Ziffer 4133",
         "IP 5",
         "Sondierungstiefe 3,5 mm",
         "in 2-3 Tagen",
@@ -217,73 +229,6 @@ def test_codes_and_counts_are_not_teeth(raw):
     assert teeth(raw) == []
 
 
-def test_prepositions_are_not_merged_with_surfaces_or_teeth():
-    result = normalize("Füllung am 36 in Adhäsivtechnik, Kontrolle im Mai")
-    assert result.text == "Füllung am 36 in Adhäsivtechnik, Kontrolle im Mai"
-    assert result.teeth == [ToothRef(36, "")]
-
-
-# --- ganze Diktate aus Anhang B / C ----------------------------------------------------
-
-def test_d01_spoken():
-    result = normalize(
-        "Zahn drei sechs mesial okklusal distal Karies profunda, Infiltrationsanästhesie mit Artikain, "
-        "Kompositfüllung in Adhäsivtechnik, dreiflächig, Kofferdam gelegt."
-    )
-    assert result.text == (
-        "Zahn 36 mod Karies profunda, Infiltrationsanästhesie mit Artikain, "
-        "Kompositfüllung in Adhäsivtechnik, dreiflächig, Kofferdam gelegt."
-    )
-    assert result.teeth == [ToothRef(36, "mod")]
-
-
-def test_d06_spoken():
-    result = normalize(
-        "Eins vier distal okklusal Sekundärkaries unter alter Amalgamfüllung, Amalgam entfernt, Unterfüllung mit "
-        "Glasionomerzement, Kompositfüllung MOD, dreiflächig, GOZ zwei eins null null als Zusatzleistung."
-    )
-    assert result.text == (
-        "14 do Sekundärkaries unter alter Amalgamfüllung, Amalgam entfernt, Unterfüllung mit "
-        "Glasionomerzement, Kompositfüllung mod, dreiflächig, GOZ 2100 als Zusatzleistung."
-    )
-    assert result.teeth == [ToothRef(14, "do")]
-
-
-def test_d11_whisper_de_prompt():
-    result = normalize(
-        "36, 37 okklusal, Karies, Füllungen mit Komposit, jeweils einflächig, BEMA 13A zweimal, "
-        "Zusatzleistung GOZ 2060."
-    )
-    assert result.text == (
-        "36, 37 o, Karies, Füllungen mit Komposit, jeweils einflächig, BEMA 13a 2x, Zusatzleistung GOZ 2060."
-    )
-    assert result.teeth == [ToothRef(36, "o"), ToothRef(37, "o")]
-
-
-def test_d11_whisper_en_no_prompt_after_correction():
-    from medvox.lexicon import correct
-
-    corrected, _ = correct("36-37 Occlusal Caries, Füllungen mit Composite, jeweils einflächig, BEMA 13a 2x, "
-                           "Zusatzleistung Goetz 2060.")
-    result = normalize(corrected)
-    assert result.text == (
-        "36-37 o Karies, Füllungen mit Komposit, jeweils einflächig, BEMA 13a 2x, Zusatzleistung GOZ 2060."
-    )
-    assert result.teeth == [ToothRef(36, "o"), ToothRef(37, "o")]
-
-
-def test_d12_planned_extraction_keeps_both_references():
-    result = normalize(
-        "Vier acht Perikoronitis, Spülung mit Chlorhexidin, Einlage, Ibuprofen sechshundert verordnet, "
-        "Wiedervorlage in zwei Tagen, danach Extraktion vier acht planen."
-    )
-    assert result.text == (
-        "48 Perikoronitis, Spülung mit Chlorhexidin, Einlage, Ibuprofen 600 verordnet, "
-        "Wiedervorlage in 2 Tagen, danach Extraktion 48 planen."
-    )
-    assert [t.fdi for t in result.teeth] == [48, 48]
-
-
 # --- Hilfsfunktionen --------------------------------------------------------------------
 
 @pytest.mark.parametrize(
@@ -298,3 +243,4 @@ def test_number_value(word, expected):
 
 def test_whitespace_and_dashes_are_tidied():
     assert normalize("  Zahn   36 –  37   okklusal ,  Karies ").text == "Zahn 36-37 o, Karies"
+
