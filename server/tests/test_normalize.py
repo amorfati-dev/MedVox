@@ -48,6 +48,8 @@ def test_single_tooth_forms(raw, expected_text, expected_teeth):
         ("IP fünf, eins sechs, zwei sechs", "IP5, 16, 26", [16, 26]),
         ("PSI 3 3 2 2 3 3, 36 okklusal Karies", "PSI 3 3 2 2 3 3, 36 o Karies", [36]),
         ("PSI 3, 36 Karies", "PSI 3, 36 Karies", [36]),
+        ("PSI 3 3 2 2 3 3 36 okklusal Karies", "PSI 3 3 2 2 3 3 36 o Karies", [36]),
+        ("PSI drei drei zwei zwei drei drei drei sechs okklusal", "PSI 3 3 2 2 3 3 36 o", [36]),
         ("Drei sechs, drei sieben okklusal Karies", "36, 37 o Karies", [36, 37]),
         ("36, 37 okklusal, Karies", "36, 37 o, Karies", [36, 37]),
         ("36-37 okklusal Karies", "36-37 o Karies", [36, 37]),

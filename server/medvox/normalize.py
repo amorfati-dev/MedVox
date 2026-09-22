@@ -123,7 +123,7 @@ _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(
 _PREFIX_CODE = re.compile(
     rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
 )
-_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d{1,2}(?:(?:[\s/-]+|,\s*(?=\d(?!\d)))\d{1,2})*)(?![\w\x01])")
+_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d{1,2}(?:(?:[\s/-]+|,\s*(?=\d(?!\d)))\d{1,2}){0,5})(?![\w\x01])")
 _IP_CODE = re.compile(rf"\bIP\s*(\d)(?![\w{_NT}])")
 
 
