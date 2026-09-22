@@ -121,9 +121,9 @@ def _number_words(text: str) -> str:
 
 _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
 _PREFIX_CODE = re.compile(
-    rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,4}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
+    rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
 )
-_PSI_CODES = re.compile(r"\bPSI\s+(\d(?!\d)(?:[\s,/-]*\d(?!\d))*)(?![\w\x01])")
+_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d(?!\d)(?:[\s,/-]*\d(?!\d))*)(?![\w\x01])")
 _IP_CODE = re.compile(rf"\bIP\s*(\d)(?![\w{_NT}])")
 
 
@@ -134,7 +134,7 @@ def _codes(text: str) -> str:
     text = _AE_CODE.sub(lambda m: "Ä" + join(m.group(1), m.group(2)), text)
     text = _PREFIX_CODE.sub(lambda m: f"{m.group(1)} " + join(m.group(2), m.group(3)), text)
     text = _IP_CODE.sub(lambda m: "IP" + m.group(1) + _NT, text)
-    return _PSI_CODES.sub(lambda m: "PSI " + re.sub(r"\d", lambda d: d.group() + _NT, m.group(1)), text)
+    return _PSI_CODES.sub(lambda m: f"{m.group(1)} " + re.sub(r"\d", lambda d: d.group() + _NT, m.group(2)), text)
 
 
 # --- Flächen ---------------------------------------------------------------------
@@ -163,7 +163,7 @@ _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
 _QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
-_DIGIT_RUN = re.compile(rf"(?<![\w{_NT}.])\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])(?!{_COUNT_NOUN})")
+_DIGIT_RUN = re.compile(rf"(?<![\w{_NT}.])(?<![Ff]aktor )\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])(?!{_COUNT_NOUN})")
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(

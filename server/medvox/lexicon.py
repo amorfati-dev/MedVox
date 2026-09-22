@@ -37,7 +37,7 @@ TERMS: tuple[str, ...] = (
     # Befunde
     "Karies", "kariös", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
     "Perikoronitis", "Nekrose", "Fistel", "Abszess", "Zyste", "Längsfraktur", "Fraktur", "retiniert",
-    "verlagert", "Attrition", "Erosion", "Dentin", "Schmelz", "Pulpa", "apikal", "avital", "Aufbissbeschwerden",
+    "verlagert", "Attrition", "Erosion", "Dentin", "Schmelz", "Pulpa", "apikal", "vital", "avital", "Sprung", "Aufbissbeschwerden",
     "Hypersensibilität", "Schmerz", "Schmerzen",
     # Füllung
     "Füllung", "Kompositfüllung", "Komposit", "Amalgam", "Amalgamfüllung", "Adhäsivtechnik", "Adhäsiv",
@@ -96,7 +96,7 @@ Nacht nahe nah Teil Zeit Sitzung Termin Woche Moment Belege grau medial digital 
 null eins zwei drei vier fünf sechs sieben acht neun zehn elf zwölf zwanzig dreißig hundert tausend
 erste ersten zweite zweiten dritte dritten vierte vierten fünften sechsten einmal zweimal dreimal
 Karte Kasse privat Code Nummer Ziffern Stück Seite Seiten oben unten hinten vorne mittig komplett
-fest fester festen festes festem belegt Grat paar Part
+fest fester festen festes festem belegt Grat paar Part denken
 """.split())
 
 _FOLDS = (("chs", "x"), ("ck", "k"), ("ph", "f"), ("th", "t"), ("ß", "ss"))

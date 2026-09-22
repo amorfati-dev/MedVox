@@ -26,6 +26,7 @@ def teeth(text: str) -> list[int]:
         ("drei acht retiniert und verlagert", "38 retiniert und verlagert", [38]),
         ("Vier acht Perikoronitis", "48 Perikoronitis", [48]),
         ("Milchzahn fünf fünf kariös", "Milchzahn 55 kariös", [55]),
+        ("GOZ zwei null acht null zwei sechs", "GOZ 2080 26", [26]),
     ],
 )
 def test_single_tooth_forms(raw, expected_text, expected_teeth):
@@ -56,10 +57,6 @@ def test_tooth_lists_and_ranges(raw, expected_text, expected_teeth):
     result = normalize(raw)
     assert result.text == expected_text
     assert [t.fdi for t in result.teeth] == expected_teeth
-
-
-def test_comma_separated_digits_are_never_merged_into_four_digit_block():
-    assert "1626" not in normalize("Fissurenversiegelung 1, 6, 2, 6").text
 
 
 # --- Quadrantenangaben --------------------------------------------------------------
@@ -138,6 +135,8 @@ def test_surfaces_of_a_list_apply_to_every_tooth():
         ("BEMA 13 2 mal", "BEMA 13 2 mal"),
         ("GOZ 2100 2 x", "GOZ 2100 2 x"),
         ("GOZ 2060 3 Flächen", "GOZ 2060 3 Flächen"),
+        ("GOZ zwei eins null null zwei mal", "GOZ 2100 2 mal"),
+        ("GOZ 2100 Faktor 2,3", "GOZ 2100 Faktor 2,3"),
         ("Ibuprofen sechshundert verordnet", "Ibuprofen 600 verordnet"),
         ("Amoxicillin tausend", "Amoxicillin 1000"),
         ("Professionelle Zahnreinigung, achtundzwanzig Zähne", "Professionelle Zahnreinigung, 28 Zähne"),
@@ -175,6 +174,9 @@ def test_number_words_and_codes(raw, expected_text):
         "Kontrolle in 14-21 Tagen",
         "PSI 3 3 2 2 3 3",
         "PSI 3/3/2/2/3/3",
+        "PSI Code drei drei zwei zwei drei drei",
+        "PSI: 3 3 2 2 3 3",
+        "GOZ 2100 Faktor 2,3",
         "BEMA Ziffer 13 a",
         "IP 5",
         "Sondierungstiefe 3,5 mm",

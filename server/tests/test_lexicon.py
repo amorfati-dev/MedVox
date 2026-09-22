@@ -26,6 +26,8 @@ from medvox.lexicon import ALIASES, TERMS, Correction, correct, correct_token, l
         ("Glasionomerzemnt", "Glasionomerzement"),
         ("Vitalexstirpazion", "Vitalexstirpation"),
         ("Osteotomi", "Osteotomie"),
+        ("Vitall", "vital"),
+        ("avitel", "avital"),
         ("Sondierungstiefe", None),
         ("Artikain", None),
         ("okklusal", None),
@@ -44,7 +46,8 @@ def test_correct_token(token, expected):
      "Grat", "Matrix", "Frontzähne", "Eckzähne", "Schneidezähne", "Weisheitszähne", "Provisorien",
      "elektrometrisch", "medikamentös", "antiinfektiös", "paar", "Part", "GIZ", "avital", "PBI",
      "Kieferorthopäden", "Kanüle", "Kürette", "spülen", "füllen", "versiegeln", "eingliedern", "abformen",
-     "fluoridieren", "aufklären", "sondieren", "überweisen", "verordnen", "planen", "Schienen"],
+     "fluoridieren", "aufklären", "sondieren", "überweisen", "verordnen", "planen", "Schienen", "vital",
+     "Vital", "Sprung", "denken"],
 )
 def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
@@ -68,7 +71,7 @@ def test_codes_and_numbers_are_never_touched(token):
 
 
 def test_common_phrases_pass_through_the_fuzzy_path_unchanged():
-    raw = "Kontrolle in ein paar Tagen, Zahn 36 füllen, mit CHX spülen, Unterfüllung mit GIZ, Krone eingliedern"
+    raw = "Kontrolle in ein paar Tagen, Zahn 36 vital, Sprung mesial, mit CHX spülen, Unterfüllung mit GIZ"
     assert correct(raw) == (raw, [])
 
 
