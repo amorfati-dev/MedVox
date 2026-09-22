@@ -149,7 +149,7 @@ def _surfaces(text: str) -> str:
 
 # --- Zähne ----------------------------------------------------------------------
 
-# Hinter einer zweistelligen Zahl ist ein Zählwort immer Plural, der Singular nie eine Anzahl.
+# Hinter einer zweistelligen Zahl ist ein Zählwort Plural, der Singular nie Anzahl; nicht nach "Zahn"/"Regio".
 _TOOTH_COUNT_NOUN = rf"(?:\s*(?:{_PLURAL_NOUN})(?![^\W\d_])|{_COUNT_WORD})"
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
@@ -182,7 +182,7 @@ _MEASURE_IN_CLAUSE = re.compile(
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(
-    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?!{_TOOTH_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
+    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
 )
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
@@ -222,6 +222,7 @@ def _collect_teeth(text: str) -> list[ToothRef]:
             run.append(hits[i + 1])
             i += 1
         i += 1
+        count = bool(re.match(_TOOTH_COUNT_NOUN, text[run[-1][1] :])) and not _MARKER_BEFORE_RUN.search(text, 0, run[0][0])
         numbers: list[int] = []
         for k, (start, _end, fdi) in enumerate(run):
             if k and text[run[k - 1][1] : start].strip() == "-":
@@ -231,7 +232,7 @@ def _collect_teeth(text: str) -> list[ToothRef]:
         after = _SURFACES_AFTER.match(text, run[-1][1])
         before = _SURFACES_BEFORE.search(text, 0, run[0][0])
         surfaces = after.group(1) if after else before.group(1) if before else ""
-        teeth += [ToothRef(n, surfaces) for n in numbers]
+        teeth += [ToothRef(n, surfaces) for n in numbers[: len(numbers) - count]]
     return teeth
 
 
