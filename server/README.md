@@ -70,3 +70,26 @@ Kurzcodes bestehen aus 6 Zeichen ohne 0/O/1/I und sind innerhalb der TTL mehrfac
 `db.py` (SQLite, Aufräumen),
 `routes_*.py` (HTTP-Schicht), `main.py` (App-Fabrik). Tests in `tests/`, whisper und
 ffmpeg dort per `httpx.MockTransport` bzw. Shell-Fake ersetzt.
+
+## Text-Pipeline
+
+Jedes Transkript durchläuft drei reine, unit-getestete Schritte:
+**Roh-Transkript → `medvox.lexicon.correct` → `medvox.normalize.normalize` → Extraktor (WP-8).**
+`correct` behebt systematische Whisper-Verhörer anhand eines kuratierten Dental-Lexikons
+("Artikein" → "Artikain", "Psycho 3" → "PSI 3", "L935d" → "Ä935d") und gibt jede Korrektur
+mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde; häufige
+deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Der
+korrigierte Text ist das, was der Behandler liest und ins PVS kopiert.
+
+`normalize` erzeugt die maschinenlesbare Form für den Regel-Extraktor: gesprochene Ziffernpaare
+und alle Whisper-Schreibweisen werden zu FDI-Nummern ("drei sechs", "3-6", "3,6" → 36;
+"1626" → 16, 26; "36-37" und "17 bis 27" sind Bereiche). Gepaart werden nur zwei Einzelziffern;
+längere Läufe nur direkt hinter "Zahn"/"Regio" ("Zahn 1 6 2 6" → 16, 26), sodass Messwertreihen
+("Sondierungstiefen 3 2 3 2 2 3"), Dosierungsschemata ("1-1-1") und Kommalisten ("1, 6, 2, 6")
+unverändert bleiben. Quadrantenangaben werden aufgelöst
+("Oberkiefer rechts sechs" → 16), Flächen werden zu Buchstaben ("mesial okklusal distal" →
+"mod"), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
+sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und Anzahlen ("28 Zähne")
+nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste der Zahnbezüge
+(FDI-Nummer plus Flächen). Ausprobieren mit `python -m medvox.normalize --demo` oder
+`python -m medvox.normalize "Zahn drei sechs mod Karies"`.
