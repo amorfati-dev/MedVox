@@ -1,0 +1,14 @@
+{
+  "name": "MedVox",
+  "short_name": "MedVox",
+  "description": "Lokale Diktat-Transkription für die Zahnarztpraxis",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#0d6b5c",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,54 @@
+// "An Rezeption senden": legt einen Kurzcode an und zeigt ihn groß plus als QR-Code.
+import { useState } from "react";
+import { api, ApiError, type TransferCreated } from "../api";
+import { QrCanvas } from "./QrCanvas";
+
+type Props = { transcript: string; codes: string[] };
+
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+}
+
+export function TransferPanel({ transcript, codes }: Props) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<TransferCreated | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const send = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      setResult(await api.createTransfer(transcript, codes));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Übergabe fehlgeschlagen.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // QR enthält die Rezeptions-URL mit Code, damit auch ein Handy-Scan direkt landet.
+  const url = result ? `${window.location.origin}/transfer?code=${result.code}` : "";
+
+  return (
+    <section className="card">
+      <button type="button" className="btn btn-primary" disabled={busy || !transcript} onClick={send}>
+        {busy ? "Sende …" : "An Rezeption senden"}
+      </button>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
+      {result && (
+        <div className="transfer-result">
+          <p className="muted">Code an der Rezeption eingeben (gültig bis {formatTime(result.expires_at)} Uhr):</p>
+          <p className="transfer-code" aria-label="Kurzcode">
+            {result.code}
+          </p>
+          <QrCanvas text={url} label={`QR-Code für Kurzcode ${result.code}`} />
+        </div>
+      )}
+    </section>
+  );
+}

@@ -34,6 +34,7 @@ npm install
 npm run dev        # http://localhost:5173, /api wird an den Server weitergeleitet
 npm run typecheck
 npm run build
+npm test           # Unit-Tests (node --test)
 ```
 
 ## Struktur
@@ -54,4 +55,4 @@ Die Arbeitspakete der Phase 1 (Details im Planungsbericht, nicht Teil des Repos)
 - WP-11 Datensparsamkeit
 - WP-12 Praxis-Installation + Abnahmelauf
 
-Leitplanken für alle Pakete stehen in `AGENTS.md`.
+Leitplanken für alle Pakete stehen in `AGENTS.md`; iPad-Installation und Testschritte in `app/README.md`.

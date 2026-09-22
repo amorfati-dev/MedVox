@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "VITE_MOCK_API=1 vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test test/",
     "preview": "vite preview"
   },
   "dependencies": {
