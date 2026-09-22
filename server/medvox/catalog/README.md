@@ -47,7 +47,7 @@ nach der BEMA-Definition (einwurzelig: Frontzähne, OK 5er, UK 4er und 5er; mehr
 - BEMA: KZBV, Gesamt- und Kurzfassung, Stand 1. Januar 2026 (13a–d bereits mit den Werten nach dem
   Amalgam-Beschluss; 13e–h existieren nicht mehr).
 - GOZ: GOZ 2012, Anlage 1, amtlicher Text auf gesetze-im-internet.de, gegengeprüft mit dem BZÄK-PDF.
-- GOÄ: Anlage Gebührenverzeichnis auf gesetze-im-internet.de (Ä1, Ä5, Ä5000, Ä5004).
+- GOÄ: Anlage Gebührenverzeichnis auf gesetze-im-internet.de (Ä1, Ä5, Ä5000, Ä5002, Ä5004).
 - Punktwerte (§ 5): GOZ 5,62421 Cent, GOÄ 5,82873 Cent (in `meta.punktwert_cent`).
   BEMA-Punktwerte sind regional und stehen nicht im Katalog.
 
