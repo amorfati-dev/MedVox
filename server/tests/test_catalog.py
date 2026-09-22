@@ -42,7 +42,7 @@ def _errors_for(catalog: dict) -> list[str]:
 def test_catalog_v1_is_a_mini_catalog(catalog):
     # Vorgabe des Behandlers: 60-80 Alltagspositionen. Die Obergrenze liegt bei 84,
     # weil er im Review sechs Positionen ausdruecklich fuer v1 nachgefordert hat
-    # (Ae935a/Ae5002 Halbseiten-Panorama, GOZ 0500-0530 Chirurgie-Zuschlaege).
+    # (Ae935a/Ae5002 Panoramaaufnahme eines Kiefers, GOZ 0500-0530 Chirurgie-Zuschlaege).
     assert 60 <= len(catalog["entries"]) <= 84
 
 

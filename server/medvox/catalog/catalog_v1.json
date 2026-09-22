@@ -37,6 +37,11 @@
         "system": "GOÄ",
         "name": "GOÄ Anlage (gesetze-im-internet.de)",
         "url": "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      },
+      {
+        "system": "GOÄ",
+        "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
+        "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
       }
     ],
     "abgerufen": "2026-09-21"
@@ -312,6 +317,9 @@
       "keywords": [
         "pan1",
         "pan eins",
+        "viertelseite",
+        "viertelaufnahme",
+        "segmentaufnahme",
         "panoramaaufnahme eines kiefers",
         "ä935a",
         "neun drei fünf a"
@@ -319,6 +327,7 @@
       "rules": [
         "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c",
         "nur ein Kiefer; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
         "Privatpatient: GOÄ Ä5002"
       ],
       "sources": [
@@ -2318,19 +2327,24 @@
       "points": 250,
       "keywords": [
         "pan1 privat",
+        "viertelseite privat",
+        "viertelaufnahme privat",
+        "segmentaufnahme privat",
         "panoramaaufnahme eines kiefers privat",
         "ä5002",
         "ä fünf null null zwei"
       ],
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "nur Einfachsatz (1,0)",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
         "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
         "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
         "Kassenpatient: BEMA Ä935a"
       ],
       "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/go__1982/__5.html"
       ],
       "review": {
         "status": "draft"
