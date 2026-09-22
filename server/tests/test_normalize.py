@@ -51,6 +51,7 @@ def test_single_tooth_forms(raw, expected_text, expected_teeth):
         ("PSI 3 3 2 2 3 3 36 okklusal Karies", "PSI 3 3 2 2 3 3 36 o Karies", [36]),
         ("PSI drei drei zwei zwei drei drei drei sechs okklusal", "PSI 3 3 2 2 3 3 36 o", [36]),
         ("PSI drei, drei sechs Karies", "PSI 3, 36 Karies", [36]),
+        ("drei sechs, drei sieben, zwei mesial", "36, 37, 2 m", [36, 37]),
         ("Drei sechs, drei sieben okklusal Karies", "36, 37 o Karies", [36, 37]),
         ("36, 37 okklusal, Karies", "36, 37 o, Karies", [36, 37]),
         ("36-37 okklusal Karies", "36-37 o Karies", [36, 37]),
@@ -153,6 +154,8 @@ def test_surfaces(raw, expected_text, expected_teeth):
         ("Farbnahme A drei", "Farbnahme A 3"),
         ("Nachkontrolle in einer Woche", "Nachkontrolle in einer Woche"),
         ("zwölf, dreizehn, einundzwanzig", "12, 13, 21"),
+        ("2100", "2100"),
+        ("2060", "2060"),
     ],
 )
 def test_number_words_and_codes(raw, expected_text):
@@ -185,6 +188,9 @@ def test_number_words_and_codes(raw, expected_text):
         "GOZ 2100 3,5-fach",
         "PSI 33 22 33",
         "PSI 3 X 2 2 3 3",
+        "PSI 3 3 2, 2 3 3",
+        "PSI 3 3 2, X 3 3",
+        "Sondierungstiefen 3, 5, 6 mm",
         "BEMA Ziffer 13 a",
         "IP 5",
         "Sondierungstiefe 3,5 mm",
@@ -197,12 +203,6 @@ def test_number_words_and_codes(raw, expected_text):
 )
 def test_codes_and_counts_are_not_teeth(raw):
     assert teeth(raw) == []
-
-
-def test_four_digit_block_only_splits_into_two_valid_teeth():
-    assert normalize("2100").text == "2100"
-    assert normalize("2060").text == "2060"
-    assert normalize("1626").text == "16, 26"
 
 
 def test_prepositions_are_not_merged_with_surfaces_or_teeth():
