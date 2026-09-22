@@ -298,8 +298,7 @@
         "neun drei fünf d"
       ],
       "rules": [
-        "Privatpatient: GOÄ Ä5004",
-        "nur diese Ziffer, wenn beide Kiefer dargestellt sind; ein Kiefer/Ausschnitt (Pan1): Ä935a"
+        "Privatpatient: GOÄ Ä5004"
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -327,9 +326,9 @@
       ],
       "rules": [
         "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c",
-        "nur ein Kiefer bzw. ein Kieferausschnitt; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
-        "Zuordnung der Viertelseite (Pan1) zu dieser Ziffer ist die Abrechnungspraxis des Behandlers; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
-        "Privatpatient: GOÄ Ä5004 (Abrechnungspraxis des Behandlers)"
+        "nur ein Kiefer; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "Privatpatient: GOÄ Ä5002"
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -2286,12 +2285,11 @@
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
         "je Projektion; mehrere Zähne auf einer Aufnahme nur einmal",
-        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä925a–d"
       ],
       "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
-        "https://www.gesetze-im-internet.de/go__1982/__5.html"
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
       ],
       "review": {
         "status": "draft"
@@ -2307,18 +2305,42 @@
         "opg privat",
         "ä5004",
         "ä fünf null null vier",
-        "panoramaschichtaufnahme privat",
-        "pan1 privat",
-        "viertelseite privat",
-        "viertelaufnahme privat",
-        "segmentaufnahme privat"
+        "panoramaschichtaufnahme privat"
       ],
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
-        "amtlich: Panoramaschichtaufnahme der Kiefer (beide Kiefer)",
-        "Zuordnung der Viertelseite (Pan1) zu dieser Ziffer ist die Abrechnungspraxis des Behandlers; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
-        "Kassenpatient: BEMA Ä935d, Viertelseite/Pan1: BEMA Ä935a"
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Kassenpatient: BEMA Ä935d"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5002",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Panoramaaufnahme(n) eines Kiefers",
+      "points": 250,
+      "keywords": [
+        "pan1 privat",
+        "viertelseite privat",
+        "viertelaufnahme privat",
+        "segmentaufnahme privat",
+        "panoramaaufnahme eines kiefers privat",
+        "ä5002",
+        "ä fünf null null zwei"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
+        "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "Kassenpatient: BEMA Ä935a"
       ],
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html",

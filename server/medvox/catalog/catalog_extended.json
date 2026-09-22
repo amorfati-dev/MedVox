@@ -37,11 +37,6 @@
         "system": "GOÄ",
         "name": "GOÄ Anlage (gesetze-im-internet.de)",
         "url": "https://www.gesetze-im-internet.de/go__1982/anlage.html"
-      },
-      {
-        "system": "GOÄ",
-        "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
-        "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
       }
     ],
     "abgerufen": "2026-09-21"
@@ -1987,32 +1982,6 @@
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "Ä5002",
-      "system": "GOÄ",
-      "area": "Röntgen",
-      "title": "Panoramaaufnahme(n) eines Kiefers",
-      "points": 250,
-      "keywords": [
-        "panoramaaufnahme eines kiefers privat",
-        "ä5002",
-        "ä fünf null null zwei"
-      ],
-      "rules": [
-        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
-        "amtlich: Panoramaaufnahme(n) eines Kiefers; Ober- und Unterkiefer getrennt aufgenommen je Kiefer berechenbar",
-        "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
-        "Viertelseite/Pan1 rechnet der Behandler privat über Ä5004 ab, nicht über diese Ziffer"
-      ],
-      "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
-        "https://www.gesetze-im-internet.de/go__1982/__5.html"
       ],
       "review": {
         "status": "draft"
