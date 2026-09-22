@@ -23,3 +23,5 @@ packages = ["medvox"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: braucht laufenden whisper-server, ffmpeg und macOS `say`"]
+addopts = "-m 'not integration'"

@@ -18,7 +18,7 @@ Cloud-Prototyp-Version liegt nur noch in der Git-Historie.
 
 ## Entwicklung
 
-Server (benötigt [`uv`](https://docs.astral.sh/uv/)):
+Server (benötigt [`uv`](https://docs.astral.sh/uv/) und `ffmpeg`; Details in `server/README.md`):
 
 ```sh
 cd server
