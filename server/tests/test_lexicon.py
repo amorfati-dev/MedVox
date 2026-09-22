@@ -47,7 +47,7 @@ def test_correct_token(token, expected):
      "elektrometrisch", "medikamentös", "antiinfektiös", "paar", "Part", "GIZ", "avital", "PBI",
      "Kieferorthopäden", "Kanüle", "Kürette", "spülen", "füllen", "versiegeln", "eingliedern", "abformen",
      "fluoridieren", "aufklären", "sondieren", "überweisen", "verordnen", "planen", "Schienen", "vital",
-     "Vital", "Sprung", "denken"],
+     "Vital", "Sprung", "Sprünge", "denken", "viral", "virale"],
 )
 def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None

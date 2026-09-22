@@ -123,7 +123,7 @@ _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(
 _PREFIX_CODE = re.compile(
     rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
 )
-_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d(?!\d)(?:[\s,/-]*\d(?!\d))*)(?![\w\x01])")
+_PSI_CODES = re.compile(r"\b(PSI(?:[\s-]*Code)?:?)\s+(\d{1,2}(?:(?:[\s/-]+|,\s*(?=\d(?!\d)))\d{1,2})*)(?![\w\x01])")
 _IP_CODE = re.compile(rf"\bIP\s*(\d)(?![\w{_NT}])")
 
 
@@ -163,7 +163,10 @@ _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
 _QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
-_DIGIT_RUN = re.compile(rf"(?<![\w{_NT}.])(?<![Ff]aktor )\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])(?!{_COUNT_NOUN})")
+_DIGIT_RUN = re.compile(
+    rf"(?<![\w{_NT}.])(?<![Ff]aktor )(?<![Ff]aktor \d,)\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+"
+    rf"(?![\w{_NT}])(?!{_COUNT_NOUN})(?!\s*-?\s*fach)"
+)
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(

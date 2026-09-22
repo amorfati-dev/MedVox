@@ -27,6 +27,10 @@ def teeth(text: str) -> list[int]:
         ("Vier acht Perikoronitis", "48 Perikoronitis", [48]),
         ("Milchzahn fünf fünf kariös", "Milchzahn 55 kariös", [55]),
         ("GOZ zwei null acht null zwei sechs", "GOZ 2080 26", [26]),
+        ("GOZ 2100 Faktor 2,3, 1, 6", "GOZ 2100 Faktor 2,3, 16", [16]),
+        ("Karies. 36 okklusal", "Karies. 36 o", [36]),
+        ("Zahn 36.", "Zahn 36.", [36]),
+        ("36: Karies", "36: Karies", [36]),
     ],
 )
 def test_single_tooth_forms(raw, expected_text, expected_teeth):
@@ -74,16 +78,13 @@ def test_tooth_lists_and_ranges(raw, expected_text, expected_teeth):
         ("im dritten Quadranten 6 Karies", "36 Karies", [36]),
         ("Oberkiefer rechts drei Zähne fehlen", "Oberkiefer rechts 3 Zähne fehlen", []),
         ("Unterkiefer links 2 Implantate", "Unterkiefer links 2 Implantate", []),
+        ("Sondierung im ersten Quadranten", "Sondierung im ersten Quadranten", []),
     ],
 )
 def test_quadrant_phrases(raw, expected_text, expected_teeth):
     result = normalize(raw)
     assert result.text == expected_text
     assert [t.fdi for t in result.teeth] == expected_teeth
-
-
-def test_quadrant_phrase_without_digit_is_left_alone():
-    assert normalize("Sondierung im ersten Quadranten").text == "Sondierung im ersten Quadranten"
 
 
 # --- Flächen ---------------------------------------------------------------------------
@@ -137,6 +138,8 @@ def test_surfaces_of_a_list_apply_to_every_tooth():
         ("GOZ 2060 3 Flächen", "GOZ 2060 3 Flächen"),
         ("GOZ zwei eins null null zwei mal", "GOZ 2100 2 mal"),
         ("GOZ 2100 Faktor 2,3", "GOZ 2100 Faktor 2,3"),
+        ("GOZ 2100 zum 2,3-fachen Satz", "GOZ 2100 zum 2,3-fachen Satz"),
+        ("PSI 33 22 33", "PSI 33 22 33"),
         ("Ibuprofen sechshundert verordnet", "Ibuprofen 600 verordnet"),
         ("Amoxicillin tausend", "Amoxicillin 1000"),
         ("Professionelle Zahnreinigung, achtundzwanzig Zähne", "Professionelle Zahnreinigung, 28 Zähne"),
@@ -177,6 +180,9 @@ def test_number_words_and_codes(raw, expected_text):
         "PSI Code drei drei zwei zwei drei drei",
         "PSI: 3 3 2 2 3 3",
         "GOZ 2100 Faktor 2,3",
+        "GOZ 2100 zum 2,3-fachen Satz",
+        "GOZ 2100 3,5-fach",
+        "PSI 33 22 33",
         "BEMA Ziffer 13 a",
         "IP 5",
         "Sondierungstiefe 3,5 mm",
@@ -195,12 +201,6 @@ def test_four_digit_block_only_splits_into_two_valid_teeth():
     assert normalize("2100").text == "2100"
     assert normalize("2060").text == "2060"
     assert normalize("1626").text == "16, 26"
-
-
-def test_sentence_punctuation_next_to_a_tooth_keeps_it():
-    assert teeth("Karies. 36 okklusal") == [36]
-    assert teeth("Zahn 36.") == [36]
-    assert teeth("36: Karies") == [36]
 
 
 def test_prepositions_are_not_merged_with_surfaces_or_teeth():
