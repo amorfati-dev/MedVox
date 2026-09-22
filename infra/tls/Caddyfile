@@ -10,9 +10,14 @@
 	# Kein Let's Encrypt, keine Internetverbindung: Zertifikate kommen von mkcert.
 	auto_https disable_redirects
 	admin off
-	# Kein `log`-Block: die Laufzeitmeldungen gehen nach stderr und landen über
-	# launchd in ~/Library/Logs/MedVox/caddy.log. Bewusst keine Zugriffslogs –
-	# damit stehen weder Anfrage-URLs noch Kurzcodes auf der Platte.
+	# Laufzeitmeldungen gehen nach stderr und landen über launchd in
+	# ~/Library/Logs/MedVox/caddy.log. Bewusst keine Zugriffslogs, und das
+	# Fehlerlog (http.log.error, z. B. bei 502) ist ausgeschlossen, weil es
+	# URI und Client-IP enthält – damit stehen weder Anfrage-URLs noch
+	# Kurzcodes auf der Platte.
+	log default {
+		exclude http.log.error
+	}
 }
 
 https://medvox.local:@@HTTPS_PORT@@, https://@@LAN_IP@@:@@HTTPS_PORT@@ {

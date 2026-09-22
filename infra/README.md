@@ -91,7 +91,8 @@ einem 12-s-Diktat. Der Dateiname des Uploads steht aber drin, deshalb dürfen di
 Schalter `-pr`/`--print-realtime`, `-pp` und `-ps` **nie** in die plist: `-pr`
 würde das Transkript nach stdout und damit ins Log schreiben (AGENTS.md: „Logs
 ohne Transkripttext"). `caddy.log` enthält nur Caddys Laufzeitmeldungen;
-Zugriffslogs sind bewusst abgeschaltet, damit keine Anfrage-URLs (und später
+Zugriffslogs und Caddys Fehlerlog (`http.log.error`, etwa bei 502) sind bewusst
+abgeschaltet, damit keine Anfrage-URLs (und später
 keine Kurzcodes) auf der Platte landen – ein `caddy-access.log` aus einer
 früheren Fassung dieser Skripte löscht `setup.sh` beim nächsten Lauf.
 
