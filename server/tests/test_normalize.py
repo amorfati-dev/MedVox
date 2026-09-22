@@ -31,6 +31,8 @@ def teeth(text: str) -> list[int]:
         ("Zahn drei sechs, drei Kanäle aufbereitet", "Zahn 36, 3 Kanäle aufbereitet", [36]),
         ("Kompositfüllung eins vier, drei Flächen", "Kompositfüllung 14, 3 Flächen", [14]),
         ("Rezession an drei sechs, zwei Millimeter", "Rezession an 36, 2 Millimeter", [36]),
+        ("Regio 36 Implantat inseriert", "Regio 36 Implantat inseriert", [36]),
+        ("Zahn 36 Wurzel frakturiert", "Zahn 36 Wurzel frakturiert", [36]),
         ("Karies. 36 okklusal", "Karies. 36 o", [36]),
         ("Zahn 36.", "Zahn 36.", [36]),
         ("36: Karies", "36: Karies", [36]),
@@ -202,6 +204,9 @@ def test_number_words_and_codes(raw, expected_text):
         "achtundzwanzig Zähne",
         "28 Zähne",
         "Kind 12 Jahre",
+        "Ibuprofen 600, 2-3 mal täglich",
+        "Unterkiefer links 2 Implantate",
+        "Oberkiefer rechts ein Implantat",
         "Stadium 3 Grad B",
     ],
 )

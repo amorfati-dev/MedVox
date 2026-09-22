@@ -135,9 +135,14 @@ def _surfaces(text: str) -> str:
 
 # --- Zähne ----------------------------------------------------------------------
 
-_UNIT_NOUN = (r"\s*(?:Zähne|Zaehne|Zahn|Jahre?n?|Tage?n?|Wochen?|Monate?n?|Millimeter|mm|Minuten?|Stunden?|Sekunden?"
-              r"|Prozent|%|mg|ml|Kanäle|Kanaele|Kanal|Wurzeln?|Sitzungen?|Grad|Uhr|Flächen|Implantate?)(?![^\W\d_])")
-_COUNT_NOUN = rf"(?:{_UNIT_NOUN}|\s*(?:Mal|x)(?![^\W\d_]))"
+_PLURAL_NOUN = (r"Zähne|Zaehne|Jahren?|Tagen?|Wochen|Monaten?|Minuten|Stunden|Sekunden|Kanäle|Kanaele|Wurzeln"
+                r"|Sitzungen|Flächen|Implantate|Millimeter|mm|Prozent|%|mg|ml|Grad|Uhr")
+_SINGULAR_NOUN = r"Zahn|Jahr|Tag|Woche|Monat|Minute|Stunde|Sekunde|Kanal|Wurzel|Sitzung|Fläche|Implantat"
+_UNIT_NOUN = rf"\s*(?:{_PLURAL_NOUN}|{_SINGULAR_NOUN})(?![^\W\d_])"
+_COUNT_WORD = r"\s*(?:[Mm]al|x)(?![^\W\d_])"
+_COUNT_NOUN = rf"(?:{_UNIT_NOUN}|{_COUNT_WORD})"
+# Hinter einer zweistelligen Zahl ist ein Zählwort immer Plural, der Singular nie eine Anzahl.
+_TOOTH_COUNT_NOUN = rf"(?:\s*(?:{_PLURAL_NOUN})(?![^\W\d_])|{_COUNT_WORD})"
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
 _QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
@@ -149,7 +154,7 @@ _UNIT_AFTER_RUN = re.compile(rf"{_COUNT_NOUN}|\s*-?\s*fach")
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(
-    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?!{_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
+    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?!{_TOOTH_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
 )
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
