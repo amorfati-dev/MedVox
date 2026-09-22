@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Im Entwicklungsbetrieb leitet Vite alle /api-Aufrufe an den lokalen
-// MedVox-Server weiter (server/: `make dev`).
+// Entwicklung: /api geht per Proxy an den lokalen MedVox-Server (server/: `make dev`).
+// Im Betrieb liegen App und API hinter Caddy auf derselben Origin.
 export default defineConfig({
   plugins: [react()],
   server: {
