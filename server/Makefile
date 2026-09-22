@@ -1,6 +1,6 @@
 # MedVox Server – Entwicklungsbefehle (benötigt `uv`, https://docs.astral.sh/uv/)
 
-.PHONY: sync test test-integration dev set-password
+.PHONY: sync test test-integration dev set-password catalog-check
 
 sync:
 	uv sync
@@ -18,3 +18,8 @@ dev: sync
 # Fragt ein Passwort ab und gibt den Wert für MEDVOX_PASSWORD_HASH aus.
 set-password: sync
 	uv run python -m medvox.auth
+
+# Katalog v1 und erweiterten Katalog gegen Schema und Fachregeln prüfen, Review-Tabellen ausgeben
+catalog-check: sync
+	uv run python -m medvox.catalog.validate
+	uv run python -m medvox.catalog.validate --catalog medvox/catalog/catalog_extended.json

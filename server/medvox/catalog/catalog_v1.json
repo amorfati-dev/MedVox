@@ -1,0 +1,2354 @@
+{
+  "meta": {
+    "name": "MedVox Katalog v1 (BEMA/GOZ/GOÄ, Alltagspositionen)",
+    "version": "1.0.0",
+    "stand": {
+      "BEMA": "KZBV, Stand 1. Januar 2026",
+      "GOZ": "GOZ 2012, Anlage 1 (Bundesrecht, gesetze-im-internet.de)",
+      "GOÄ": "GOÄ, Anlage Gebührenverzeichnis (Bundesrecht, gesetze-im-internet.de)"
+    },
+    "punktwert_cent": {
+      "GOZ": 5.62421,
+      "GOÄ": 5.82873
+    },
+    "punktwert_hinweis": "BEMA-Punktwerte sind regional (KZV/Kasse) und stehen nicht im Katalog.",
+    "sources": [
+      {
+        "system": "BEMA",
+        "name": "KZBV BEMA Gesamtfassung 2026-01-01",
+        "url": "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+      },
+      {
+        "system": "BEMA",
+        "name": "KZBV BEMA Kurzfassung 2026-01-01",
+        "url": "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      },
+      {
+        "system": "GOZ",
+        "name": "GOZ Anlage 1 (gesetze-im-internet.de)",
+        "url": "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
+      },
+      {
+        "system": "GOZ",
+        "name": "BZÄK GOZ 2012 PDF",
+        "url": "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      },
+      {
+        "system": "GOÄ",
+        "name": "GOÄ Anlage (gesetze-im-internet.de)",
+        "url": "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      },
+      {
+        "system": "GOÄ",
+        "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
+        "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
+      }
+    ],
+    "abgerufen": "2026-09-21"
+  },
+  "entries": [
+    {
+      "code": "Ä1",
+      "system": "BEMA",
+      "area": "Diagnostik",
+      "title": "Beratung",
+      "abbrev": "Ber",
+      "points": 9,
+      "keywords": [
+        "beratung",
+        "beratungsgespräch",
+        "telefonische beratung",
+        "aufklärungsgespräch",
+        "aufgeklärt",
+        "aufklärung"
+      ],
+      "rules": [
+        "nicht neben 01 in derselben Sitzung",
+        "nicht neben ATG, MHU, BEV, FU1",
+        "Privatpatient: GOÄ Ä1"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "01",
+      "system": "BEMA",
+      "area": "Diagnostik",
+      "title": "Eingehende Untersuchung",
+      "abbrev": "U",
+      "points": 18,
+      "keywords": [
+        "eingehende untersuchung",
+        "kontrolluntersuchung",
+        "untersuchung",
+        "befundaufnahme",
+        "recall",
+        "01",
+        "null eins"
+      ],
+      "rules": [
+        "einmal je Kalenderhalbjahr, frühestens nach 4 Monaten",
+        "nicht neben Ä1 in derselben Sitzung",
+        "nicht neben FU1/FU2 im selben Halbjahr",
+        "Privatpatient: GOZ 0010"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "04",
+      "system": "BEMA",
+      "area": "Diagnostik",
+      "title": "PSI (Parodontaler Screening-Index)",
+      "points": 12,
+      "keywords": [
+        "psi",
+        "parodontaler screening index",
+        "psi code",
+        "screening index",
+        "psi erhoben"
+      ],
+      "rules": [
+        "einmal in zwei Jahren",
+        "nicht während laufender PAR-Behandlung",
+        "bis 18 J. an Indexzähnen 11, 16, 26, 31, 36, 46; ab 18 J. alle Zähne",
+        "Privatpatient: GOZ 4005"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "8",
+      "system": "BEMA",
+      "area": "Diagnostik",
+      "title": "Sensibilitätsprüfung",
+      "abbrev": "ViPr",
+      "points": 6,
+      "keywords": [
+        "sensibilitätsprüfung",
+        "vitalitätsprüfung",
+        "vitalitätstest",
+        "kältetest",
+        "vipr",
+        "sensibilitätstest",
+        "vitalität positiv",
+        "vitalität negativ",
+        "sensibel",
+        "kälte positiv",
+        "kälte negativ",
+        "vipper",
+        "vitalitätsprobe",
+        "sensibilitätsprobe",
+        "kälteprobe",
+        "vitalität geprüft"
+      ],
+      "rules": [
+        "Leistung 'der Zähne': einmal je Sitzung, nicht je Zahn",
+        "auch bei Zahnersatz/Kronen auf dem Erfassungsschein",
+        "Privatpatient: GOZ 0070"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä925a",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Zahnfilm, bis 2 Aufnahmen",
+      "abbrev": "Rö2",
+      "points": 12,
+      "keywords": [
+        "zahnfilm",
+        "zahnfilme",
+        "röntgenbild",
+        "einzelzahnfilm",
+        "bissflügel",
+        "bitewing",
+        "rö2",
+        "röntgenaufnahme",
+        "zahnfilm angefertigt",
+        "kleines röntgenbild"
+      ],
+      "rules": [
+        "bis 2 Aufnahmen; 3–5: Ä925b, 6–8: Ä925c, mehr als 8: Ä925d",
+        "Beurteilung und schriftliche Befunddokumentation abgegolten",
+        "Privatpatient: GOÄ Ä5000 je Projektion"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä925b",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Zahnfilme, 3 bis 5 Aufnahmen",
+      "abbrev": "Rö5",
+      "points": 19,
+      "keywords": [
+        "rö5",
+        "drei zahnfilme",
+        "vier zahnfilme",
+        "fünf zahnfilme",
+        "drei aufnahmen",
+        "vier aufnahmen",
+        "fünf aufnahmen",
+        "bissflügel beidseits"
+      ],
+      "rules": [
+        "3–5 Aufnahmen"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä925c",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Zahnfilme, 6 bis 8 Aufnahmen",
+      "abbrev": "Rö8",
+      "points": 27,
+      "keywords": [
+        "rö8",
+        "sechs zahnfilme",
+        "sieben zahnfilme",
+        "acht zahnfilme",
+        "sechs aufnahmen",
+        "sieben aufnahmen",
+        "acht aufnahmen"
+      ],
+      "rules": [
+        "6–8 Aufnahmen"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä925d",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Röntgenstatus, mehr als 8 Aufnahmen",
+      "abbrev": "Stat",
+      "points": 34,
+      "keywords": [
+        "röntgenstatus",
+        "zahnfilmstatus",
+        "rö status",
+        "röntgen status",
+        "status aufnahmen"
+      ],
+      "rules": [
+        "mehr als 8 Aufnahmen"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä935d",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "OPG (Orthopantomogramm)",
+      "points": 36,
+      "keywords": [
+        "opg",
+        "orthopantomogramm",
+        "panoramaschichtaufnahme",
+        "panoramaaufnahme",
+        "opg angefertigt",
+        "ä935d",
+        "neun drei fünf d"
+      ],
+      "rules": [
+        "Privatpatient: GOÄ Ä5004"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä935a",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Teilaufnahme Schädel / Panoramaaufnahme eines Kiefers, eine Aufnahme",
+      "points": 21,
+      "keywords": [
+        "pan1",
+        "pan eins",
+        "viertelseite",
+        "viertelaufnahme",
+        "segmentaufnahme",
+        "panoramaaufnahme eines kiefers",
+        "ä935a",
+        "neun drei fünf a"
+      ],
+      "rules": [
+        "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c",
+        "nur ein Kiefer; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "Privatpatient: GOÄ Ä5002"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "40",
+      "system": "BEMA",
+      "area": "Anästhesie",
+      "title": "Infiltrationsanästhesie",
+      "abbrev": "I",
+      "points": 8,
+      "keywords": [
+        "infiltrationsanästhesie",
+        "infiltration",
+        "lokalanästhesie",
+        "örtliche betäubung",
+        "betäubung",
+        "terminalanästhesie",
+        "intraligamentäre anästhesie",
+        "intraligamentär",
+        "ila",
+        "anästhesie mit artikain",
+        "ultracain",
+        "artikain"
+      ],
+      "rules": [
+        "im Bereich von 2 Nachbarzähnen nur einmal je Sitzung",
+        "bei langen Eingriffen ein zweites Mal",
+        "intraligamentäre Anästhesie ebenfalls Nr. 40",
+        "Leitungsanästhesie: 41a",
+        "Privatpatient: GOZ 0090"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "41a",
+      "system": "BEMA",
+      "area": "Anästhesie",
+      "title": "Leitungsanästhesie, intraoral",
+      "abbrev": "L1",
+      "points": 12,
+      "keywords": [
+        "leitungsanästhesie",
+        "leitung",
+        "leitungsblock",
+        "mandibularblock",
+        "l1",
+        "leitungsanästhesie unterkiefer"
+      ],
+      "rules": [
+        "nur wenn Nr. 40 nicht ausreicht: im Unterkiefer in der Regel; im Oberkiefer bei Entzündung oder größeren Eingriffen (nicht bei 43–46, 49, 50)",
+        "bei lang dauernden Eingriffen ein zweites Mal",
+        "Privatpatient: GOZ 0100"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "13a",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Füllung, einflächig",
+      "abbrev": "F1",
+      "points": 33,
+      "keywords": [
+        "füllung",
+        "füllung gelegt",
+        "kompositfüllung",
+        "komposit",
+        "glasionomer",
+        "glasionomerzement",
+        "giz",
+        "adhäsivtechnik",
+        "einflächig",
+        "eine fläche",
+        "f1",
+        "dreizehn a",
+        "bulkfill",
+        "füllungstherapie"
+      ],
+      "rules": [
+        "plastische Füllung inkl. Unterfüllung, Matrize und Politur",
+        "Flächenzahl bestimmt a–d (surfaces_to_code)",
+        "Füllungslage angeben: m/o/d/v/l",
+        "seit 2025 auch Komposit adhäsiv (Frontzahn); Seitenzahn selbstadhäsiv/Bulkfill",
+        "Mehrkosten/Privatpatient: GOZ 2050–2120"
+      ],
+      "surfaces_to_code": {
+        "1": "13a",
+        "2": "13b",
+        "3": "13c",
+        "4": "13d"
+      },
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "13b",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Füllung, zweiflächig",
+      "abbrev": "F2",
+      "points": 41,
+      "keywords": [
+        "zweiflächig",
+        "zwei flächen",
+        "f2",
+        "dreizehn b"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 13a; Flächenzahl wählt die Ziffer"
+      ],
+      "surfaces_to_code": {
+        "1": "13a",
+        "2": "13b",
+        "3": "13c",
+        "4": "13d"
+      },
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "13c",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Füllung, dreiflächig",
+      "abbrev": "F3",
+      "points": 53,
+      "keywords": [
+        "dreiflächig",
+        "drei flächen",
+        "mod",
+        "f3",
+        "dreizehn c"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 13a; Flächenzahl wählt die Ziffer"
+      ],
+      "surfaces_to_code": {
+        "1": "13a",
+        "2": "13b",
+        "3": "13c",
+        "4": "13d"
+      },
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "13d",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Füllung, mehr als dreiflächig / Eckenaufbau",
+      "abbrev": "F4",
+      "points": 63,
+      "keywords": [
+        "vierflächig",
+        "mehr als dreiflächig",
+        "vier flächen",
+        "eckenaufbau",
+        "schneidekante",
+        "f4",
+        "dreizehn d"
+      ],
+      "rules": [
+        "mehr als 3 Flächen oder Eckenaufbau im Frontzahnbereich mit Schneidekante"
+      ],
+      "surfaces_to_code": {
+        "1": "13a",
+        "2": "13b",
+        "3": "13c",
+        "4": "13d"
+      },
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "11",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Provisorischer Verschluss / unvollendete Füllung",
+      "abbrev": "pV",
+      "points": 19,
+      "keywords": [
+        "provisorischer verschluss",
+        "provisorische füllung",
+        "provisorisch verschlossen",
+        "cavit",
+        "pv",
+        "unvollendete füllung",
+        "exkaviert und provisorisch verschlossen"
+      ],
+      "rules": [
+        "als alleinige Leistung; im Rahmen von 34 (Med) bereits enthalten",
+        "Privatpatient: GOZ 2020"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "12",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
+      "abbrev": "bMF",
+      "points": 10,
+      "keywords": [
+        "kofferdam",
+        "kofferdam gelegt",
+        "spanngummi",
+        "separieren",
+        "papillenblutung gestillt",
+        "retraktionsfaden",
+        "besondere maßnahmen",
+        "bmf"
+      ],
+      "rules": [
+        "je Sitzung, je Kieferhälfte oder Frontzahnbereich",
+        "Privatpatient: GOZ 2030/2040"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "25",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Indirekte Überkappung",
+      "abbrev": "Cp",
+      "points": 6,
+      "keywords": [
+        "indirekte überkappung",
+        "cp",
+        "caries profunda",
+        "karies profunda",
+        "indirekt überkappt",
+        "überkappung indirekt",
+        "kalziumhydroxid unterlage"
+      ],
+      "rules": [
+        "inkl. provisorischem/temporärem Verschluss",
+        "nur wenn dadurch die Devitalisierung vermeidbar ist",
+        "Privatpatient: GOZ 2330"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "26",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Direkte Überkappung",
+      "abbrev": "P",
+      "points": 6,
+      "keywords": [
+        "direkte überkappung",
+        "direkt überkappt",
+        "pulpa eröffnet",
+        "punktförmige eröffnung",
+        "mta überkappung"
+      ],
+      "rules": [
+        "je Zahn",
+        "Privatpatient: GOZ 2340"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "27",
+      "system": "BEMA",
+      "area": "Konservierend",
+      "title": "Pulpotomie",
+      "abbrev": "Pulp",
+      "points": 29,
+      "keywords": [
+        "pulpotomie",
+        "vitalamputation",
+        "pulpaamputation",
+        "pulpa amputiert"
+      ],
+      "rules": [
+        "v. a. Milchzähne und jugendliche bleibende Zähne",
+        "Privatpatient: vgl. GOZ 2380 (Milchzahn)"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "28",
+      "system": "BEMA",
+      "area": "Endodontie",
+      "title": "Vitalexstirpation, je Kanal",
+      "abbrev": "VitE",
+      "points": 18,
+      "keywords": [
+        "vitalexstirpation",
+        "exstirpation",
+        "vite",
+        "pulpaexstirpation",
+        "vitalex",
+        "pulpa exstirpiert",
+        "vital exstirpiert"
+      ],
+      "rules": [
+        "je Kanal",
+        "Trepanation des vitalen Zahnes ist enthalten (31 nur bei pulpatotem Zahn)",
+        "Privatpatient: GOZ 2360"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "31",
+      "system": "BEMA",
+      "area": "Endodontie",
+      "title": "Trepanation eines pulpatoten Zahnes",
+      "abbrev": "Trep1",
+      "points": 11,
+      "keywords": [
+        "trepanation",
+        "trepaniert",
+        "trep1",
+        "pulpatot",
+        "avitaler zahn eröffnet",
+        "gangrän"
+      ],
+      "rules": [
+        "nur bei pulpatotem/avitalem Zahn; bei vitaler Pulpa in 28 enthalten",
+        "Privatpatient: GOZ 2390"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "32",
+      "system": "BEMA",
+      "area": "Endodontie",
+      "title": "Wurzelkanalaufbereitung, je Kanal",
+      "abbrev": "WK",
+      "points": 29,
+      "keywords": [
+        "wurzelkanalaufbereitung",
+        "aufbereitung",
+        "kanalaufbereitung",
+        "wk",
+        "wurzelkanalbehandlung",
+        "wkb",
+        "endo",
+        "aufbereitet",
+        "maschinell aufbereitet",
+        "reziprok",
+        "elektrometrische längenbestimmung",
+        "endometrie"
+      ],
+      "rules": [
+        "je Kanal",
+        "elektrometrische Längenbestimmung ist enthalten (Privatpatient: GOZ 2400)",
+        "Privatpatient: GOZ 2410"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "34",
+      "system": "BEMA",
+      "area": "Endodontie",
+      "title": "Medikamentöse Einlage",
+      "abbrev": "Med",
+      "points": 15,
+      "keywords": [
+        "medikamentöse einlage",
+        "med einlage",
+        "med",
+        "kalziumhydroxid",
+        "calciumhydroxid",
+        "calciumhydroxideinlage",
+        "ledermix",
+        "chkm",
+        "einlage gewechselt",
+        "einlage mit kalziumhydroxid"
+      ],
+      "rules": [
+        "je Zahn und Sitzung; provisorischer Verschluss inklusive",
+        "nur zusammen mit 28, 29 oder 32",
+        "Privatpatient: GOZ 2430"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "35",
+      "system": "BEMA",
+      "area": "Endodontie",
+      "title": "Wurzelkanalfüllung, je Kanal",
+      "abbrev": "WF",
+      "points": 17,
+      "keywords": [
+        "wurzelfüllung",
+        "wurzelkanalfüllung",
+        "wf",
+        "wurzelkanal gefüllt",
+        "guttapercha",
+        "abgefüllt",
+        "wurzelgefüllt",
+        "thermoplastisch gefüllt",
+        "sealer"
+      ],
+      "rules": [
+        "je Kanal, inkl. provisorischem Verschluss",
+        "Privatpatient: GOZ 2440"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "43",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Extraktion, einwurzeliger Zahn",
+      "abbrev": "X1",
+      "points": 10,
+      "keywords": [
+        "extraktion",
+        "extrahiert",
+        "zahnentfernung",
+        "zahn entfernt",
+        "x1",
+        "gezogen",
+        "entfernung einwurzelig",
+        "wurzelrest entfernt",
+        "milchzahn extrahiert"
+      ],
+      "rules": [
+        "einwurzelig: alle Frontzähne, OK 5er, UK 4er und 5er, alle Milchfrontzähne",
+        "inkl. Wundversorgung",
+        "Wurzelrest nach der Nr. des zugehörigen Zahnes",
+        "mehrwurzelig: 44",
+        "Privatpatient: GOZ 3000"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "44",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Extraktion, mehrwurzeliger Zahn",
+      "abbrev": "X2",
+      "points": 15,
+      "keywords": [
+        "mehrwurzelig",
+        "x2",
+        "extraktion molar",
+        "molar entfernt",
+        "extraktion mehrwurzelig"
+      ],
+      "rules": [
+        "mehrwurzelig: alle Molaren, OK 4er, alle Milchmolaren",
+        "inkl. Wundversorgung",
+        "Privatpatient: GOZ 3010"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "45",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Extraktion, tieffrakturierter Zahn",
+      "abbrev": "X3",
+      "points": 40,
+      "keywords": [
+        "tieffrakturiert",
+        "tief frakturiert",
+        "tief frakturierter zahn",
+        "tief zerstört",
+        "x3",
+        "längsfraktur",
+        "frakturierter zahn entfernt"
+      ],
+      "rules": [
+        "inkl. Wundversorgung",
+        "Privatpatient: GOZ 3020"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "47a",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Osteotomie (Zahnentfernung durch Osteotomie)",
+      "abbrev": "Ost1",
+      "points": 58,
+      "keywords": [
+        "osteotomie",
+        "ost1",
+        "operative entfernung",
+        "operative zahnentfernung",
+        "aufklappung",
+        "osteotomiert",
+        "knochen abgetragen"
+      ],
+      "rules": [
+        "nicht retiniert/verlagert (sonst 48)",
+        "inkl. Wundversorgung",
+        "Privatpatient: GOZ 3030"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "48",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Osteotomie, retinierter/verlagerter Zahn",
+      "abbrev": "Ost2",
+      "points": 78,
+      "keywords": [
+        "retiniert",
+        "verlagert",
+        "ost2",
+        "weisheitszahn osteotomie",
+        "impaktiert",
+        "zahnkeim",
+        "retinierter weisheitszahn",
+        "verlagerter weisheitszahn"
+      ],
+      "rules": [
+        "auch Zahnkeim und impaktierter Wurzelrest",
+        "inkl. Wundversorgung",
+        "Privatpatient: GOZ 3040/3045"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "38",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Nachbehandlung nach chirurgischem Eingriff",
+      "abbrev": "N",
+      "points": 10,
+      "keywords": [
+        "nachbehandlung",
+        "wundkontrolle",
+        "fäden entfernt",
+        "fadenentfernung",
+        "nahtentfernung",
+        "fäden ex",
+        "tamponade",
+        "wunde gespült",
+        "alveolitis behandelt",
+        "wundnachsorge"
+      ],
+      "rules": [
+        "je Kieferhälfte oder Frontzahnbereich, je Sitzung, als selbständige Leistung",
+        "Privatpatient: GOZ 3290/3300"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "105",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Lokale Schleimhautbehandlung / Druckstelle",
+      "abbrev": "Mu",
+      "points": 8,
+      "keywords": [
+        "schleimhautbehandlung",
+        "druckstelle",
+        "prothesendruckstelle",
+        "chlorhexidin spülung",
+        "chx spülung",
+        "aphthe",
+        "mundschleimhaut behandelt",
+        "perikoronitis spülung",
+        "salbe aufgetragen",
+        "mu"
+      ],
+      "rules": [
+        "je Sitzung",
+        "Privatpatient: GOZ 4020"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "107",
+      "system": "BEMA",
+      "area": "Prophylaxe",
+      "title": "Entfernung harter Zahnbeläge (Zahnstein)",
+      "abbrev": "Zst",
+      "points": 16,
+      "keywords": [
+        "zahnstein",
+        "zahnsteinentfernung",
+        "zahnstein entfernt",
+        "zst",
+        "harte beläge entfernt",
+        "konkremente supragingival"
+      ],
+      "rules": [
+        "je Sitzung, einmal pro Kalenderjahr",
+        "Privatpatient: GOZ 4050/4055 je Zahn",
+        "PZR ist keine BEMA-Leistung (GOZ 1040)"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "IP1",
+      "system": "BEMA",
+      "area": "Prophylaxe",
+      "title": "Mundhygienestatus",
+      "points": 20,
+      "keywords": [
+        "ip1",
+        "ip eins",
+        "mundhygienestatus",
+        "mhs",
+        "plaqueindex",
+        "api erhoben",
+        "sbi erhoben",
+        "anfärben"
+      ],
+      "rules": [
+        "6.–17. Lebensjahr, einmal je Kalenderhalbjahr",
+        "Privatpatient/Erwachsene: GOZ 1000"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "IP2",
+      "system": "BEMA",
+      "area": "Prophylaxe",
+      "title": "Mundgesundheitsaufklärung",
+      "points": 17,
+      "keywords": [
+        "ip2",
+        "ip zwei",
+        "mundgesundheitsaufklärung",
+        "mundhygieneaufklärung",
+        "putztechnik gezeigt",
+        "zahnputzinstruktion",
+        "ernährungsberatung"
+      ],
+      "rules": [
+        "6.–17. Lebensjahr, einmal je Kalenderhalbjahr, Einzelunterweisung",
+        "Privatpatient/Erwachsene: GOZ 1010"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "IP4",
+      "system": "BEMA",
+      "area": "Prophylaxe",
+      "title": "Lokale Fluoridierung",
+      "points": 12,
+      "keywords": [
+        "ip4",
+        "ip vier",
+        "fluoridierung",
+        "fluoridiert",
+        "elmex gelee",
+        "fluoridlack",
+        "duraphat",
+        "touchiert",
+        "fluoridgel"
+      ],
+      "rules": [
+        "6.–17. Lebensjahr, einmal je Kalenderhalbjahr (hohes Kariesrisiko: zweimal)",
+        "Kleinkind bis 72. Monat: FLA",
+        "Privatpatient/Erwachsene: GOZ 1020"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "IP5",
+      "system": "BEMA",
+      "area": "Prophylaxe",
+      "title": "Fissurenversiegelung 6er/7er, je Zahn",
+      "points": 16,
+      "keywords": [
+        "ip5",
+        "ip fünf",
+        "fissurenversiegelung",
+        "versiegelung",
+        "versiegelt",
+        "fissuren versiegelt",
+        "sealer fissur"
+      ],
+      "rules": [
+        "je Zahn; nur kariesfreie bleibende Molaren 6 und 7, 6.–17. Lebensjahr",
+        "andere Zähne/Privatpatient: GOZ 2000"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Parodontalstatus (PAR-Status)",
+      "points": 44,
+      "keywords": [
+        "parodontalstatus",
+        "par status",
+        "par-status",
+        "parstatus",
+        "par antrag",
+        "parodontalbefund erhoben",
+        "par befund"
+      ],
+      "rules": [
+        "Befunderhebung zu Beginn der systematischen PAR-Therapie (Teil 4)",
+        "Privatpatient: GOZ 4000"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "ATG",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Parodontologisches Aufklärungs- und Therapiegespräch",
+      "points": 28,
+      "keywords": [
+        "atg",
+        "aufklärungs- und therapiegespräch",
+        "therapiegespräch",
+        "par aufklärung",
+        "par gespräch"
+      ],
+      "rules": [
+        "nicht neben Ä1 in derselben Sitzung"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "MHU",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Patientenindividuelle Mundhygieneunterweisung",
+      "points": 45,
+      "keywords": [
+        "mhu",
+        "mundhygieneunterweisung",
+        "patientenindividuelle mundhygieneunterweisung",
+        "mundhygieneinstruktion",
+        "mundhygiene instruiert"
+      ],
+      "rules": [
+        "im zeitlichen Zusammenhang mit AIT",
+        "in der UPT: UPTb",
+        "nicht neben Ä1"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "AITa",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+      "points": 14,
+      "keywords": [
+        "ait",
+        "ait a",
+        "aita",
+        "antiinfektiöse therapie",
+        "geschlossene kürettage",
+        "kürettage",
+        "scaling",
+        "subgingivale instrumentierung",
+        "geschlossenes vorgehen",
+        "scaling and root planing",
+        "srp",
+        "par behandlung"
+      ],
+      "rules": [
+        "je behandeltem einwurzeligen Zahn (Definition wie Nr. 43)",
+        "mehrwurzelig: AITb",
+        "Taschen ab 4 mm",
+        "Privatpatient: GOZ 4070"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "AITb",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+      "points": 26,
+      "keywords": [
+        "ait b",
+        "aitb"
+      ],
+      "rules": [
+        "je behandeltem mehrwurzeligen Zahn (Definition wie Nr. 44)",
+        "Privatpatient: GOZ 4075"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "BEVa",
+      "system": "BEMA",
+      "area": "PAR",
+      "title": "Befundevaluation nach AIT",
+      "points": 32,
+      "keywords": [
+        "bev",
+        "bev a",
+        "beva",
+        "befundevaluation",
+        "reevaluation",
+        "re-evaluation"
+      ],
+      "rules": [
+        "3–6 Monate nach Abschluss der AIT",
+        "nicht neben Ä1"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0010",
+      "system": "GOZ",
+      "area": "Diagnostik",
+      "title": "Eingehende Untersuchung",
+      "points": 100,
+      "keywords": [
+        "eingehende untersuchung privat",
+        "untersuchung goz",
+        "0010",
+        "null null eins null",
+        "privat untersuchung"
+      ],
+      "rules": [
+        "inkl. Parodontalbefund und Befundaufzeichnung",
+        "Kassenpatient: BEMA 01"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0070",
+      "system": "GOZ",
+      "area": "Diagnostik",
+      "title": "Vitalitätsprüfung, je Sitzung",
+      "points": 50,
+      "keywords": [
+        "vitalitätsprüfung privat",
+        "0070",
+        "sensibilitätsprüfung goz"
+      ],
+      "rules": [
+        "je Sitzung, inkl. Vergleichstest",
+        "Kassenpatient: BEMA 8"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0080",
+      "system": "GOZ",
+      "area": "Anästhesie",
+      "title": "Oberflächenanästhesie",
+      "points": 30,
+      "keywords": [
+        "oberflächenanästhesie",
+        "oberflächenanästhetikum",
+        "spray anästhesie",
+        "xylocain spray",
+        "0080"
+      ],
+      "rules": [
+        "je Kieferhälfte oder Frontzahnbereich"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0090",
+      "system": "GOZ",
+      "area": "Anästhesie",
+      "title": "Infiltrationsanästhesie",
+      "points": 60,
+      "keywords": [
+        "infiltrationsanästhesie privat",
+        "0090",
+        "null null neun null"
+      ],
+      "rules": [
+        "je Zahn; mehr als einmal je Zahn begründen",
+        "Anästhetikum gesondert berechenbar",
+        "Kassenpatient: BEMA 40"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0100",
+      "system": "GOZ",
+      "area": "Anästhesie",
+      "title": "Leitungsanästhesie, intraoral",
+      "points": 70,
+      "keywords": [
+        "leitungsanästhesie privat",
+        "0100",
+        "null eins null null"
+      ],
+      "rules": [
+        "Anästhetikum gesondert berechenbar",
+        "Kassenpatient: BEMA 41a"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2000",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Fissurenversiegelung, je Zahn",
+      "points": 90,
+      "keywords": [
+        "fissurenversiegelung privat",
+        "versiegelung prämolar",
+        "glattflächenversiegelung",
+        "2000",
+        "zwei null null null"
+      ],
+      "rules": [
+        "je Zahn, auch Glattflächen",
+        "Kassenpatient 6er/7er bis 17 J.: IP5"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2030",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Besondere Maßnahmen beim Präparieren/Füllen",
+      "points": 65,
+      "keywords": [
+        "besondere maßnahmen privat",
+        "separieren privat",
+        "2030",
+        "retraktionsfaden privat"
+      ],
+      "rules": [
+        "je Kieferhälfte oder Frontzahnbereich; je Sitzung höchstens einmal Präparieren + einmal Füllen",
+        "Kassenpatient: BEMA 12"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2040",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Kofferdam (Spanngummi)",
+      "points": 65,
+      "keywords": [
+        "kofferdam privat",
+        "spanngummi privat",
+        "2040",
+        "zwei null vier null"
+      ],
+      "rules": [
+        "je Kieferhälfte oder Frontzahnbereich",
+        "Kassenpatient: in BEMA 12 enthalten"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2060",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Kompositfüllung adhäsiv, einflächig",
+      "points": 527,
+      "keywords": [
+        "komposit adhäsiv",
+        "adhäsive kompositfüllung",
+        "kompositfüllung privat",
+        "mehrschichttechnik",
+        "zusatzleistung goz",
+        "einflächig adhäsiv",
+        "2060",
+        "zwei null sechs null",
+        "mehrkostenvereinbarung"
+      ],
+      "rules": [
+        "Adhäsivtechnik (Konditionieren), ggf. Mehrschichttechnik, inkl. Polieren",
+        "Flächenzahl wählt 2060/2080/2100/2120",
+        "Kassenpatient: Mehrkosten zu BEMA 13a–d"
+      ],
+      "surfaces_to_code": {
+        "1": "2060",
+        "2": "2080",
+        "3": "2100",
+        "4": "2120"
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2080",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Kompositfüllung adhäsiv, zweiflächig",
+      "points": 556,
+      "keywords": [
+        "zweiflächig adhäsiv",
+        "2080",
+        "zwei null acht null"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 2060"
+      ],
+      "surfaces_to_code": {
+        "1": "2060",
+        "2": "2080",
+        "3": "2100",
+        "4": "2120"
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2100",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Kompositfüllung adhäsiv, dreiflächig",
+      "points": 642,
+      "keywords": [
+        "dreiflächig adhäsiv",
+        "2100",
+        "zwei eins null null"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 2060"
+      ],
+      "surfaces_to_code": {
+        "1": "2060",
+        "2": "2080",
+        "3": "2100",
+        "4": "2120"
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2120",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Kompositfüllung adhäsiv, mehr als dreiflächig",
+      "points": 770,
+      "keywords": [
+        "vierflächig adhäsiv",
+        "2120",
+        "zwei eins zwei null",
+        "eckenaufbau adhäsiv"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 2060"
+      ],
+      "surfaces_to_code": {
+        "1": "2060",
+        "2": "2080",
+        "3": "2100",
+        "4": "2120"
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2197",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Adhäsive Befestigung",
+      "points": 130,
+      "keywords": [
+        "adhäsive befestigung",
+        "adhäsiv befestigt",
+        "adhäsiv eingesetzt",
+        "adhäsiv zementiert",
+        "2197",
+        "panavia",
+        "variolink"
+      ],
+      "rules": [
+        "je befestigtem Teil (Aufbau, Stift, Inlay, Krone, Teilkrone, Veneer)"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2330",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Indirekte Überkappung, je Kavität",
+      "points": 110,
+      "keywords": [
+        "indirekte überkappung privat",
+        "caries profunda privat",
+        "2330"
+      ],
+      "rules": [
+        "je Kavität, inkl. Exkavieren",
+        "Kassenpatient: BEMA 25"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2340",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Direkte Überkappung, je Kavität",
+      "points": 200,
+      "keywords": [
+        "direkte überkappung privat",
+        "2340",
+        "mta überkappung privat"
+      ],
+      "rules": [
+        "je Kavität, inkl. Exkavieren",
+        "Kassenpatient: BEMA 26"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2360",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Vitalexstirpation, je Kanal",
+      "points": 110,
+      "keywords": [
+        "vitalexstirpation privat",
+        "2360",
+        "zwei drei sechs null"
+      ],
+      "rules": [
+        "je Kanal, inkl. Exkavieren",
+        "Kassenpatient: BEMA 28"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2390",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Trepanation, als selbstständige Leistung",
+      "points": 65,
+      "keywords": [
+        "trepanation privat",
+        "2390",
+        "notfall trepanation"
+      ],
+      "rules": [
+        "nur als selbstständige Leistung",
+        "Kassenpatient: BEMA 31"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2400",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Elektrometrische Längenbestimmung",
+      "points": 70,
+      "keywords": [
+        "elektrometrische längenbestimmung privat",
+        "endometrie privat",
+        "längenbestimmung",
+        "2400",
+        "zwei vier null null",
+        "apexlocator"
+      ],
+      "rules": [
+        "je Wurzelkanal höchstens zweimal je Sitzung",
+        "Kassenpatient: in BEMA 32 enthalten"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2410",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Wurzelkanalaufbereitung, je Kanal",
+      "points": 392,
+      "keywords": [
+        "wurzelkanalaufbereitung privat",
+        "2410",
+        "zwei vier eins null",
+        "aufbereitung privat"
+      ],
+      "rules": [
+        "je Kanal, ggf. in mehreren Sitzungen; erneut nur nach definitiver Versorgung",
+        "Kassenpatient: BEMA 32"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2430",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Medikamentöse Einlage",
+      "points": 204,
+      "keywords": [
+        "medikamentöse einlage privat",
+        "2430",
+        "zwei vier drei null"
+      ],
+      "rules": [
+        "je Zahn und Sitzung, nur mit 2360, 2380 oder 2410",
+        "Kassenpatient: BEMA 34"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2440",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Wurzelkanalfüllung",
+      "points": 258,
+      "keywords": [
+        "wurzelfüllung privat",
+        "2440",
+        "zwei vier vier null"
+      ],
+      "rules": [
+        "je Wurzelkanal",
+        "Kassenpatient: BEMA 35"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3000",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Extraktion, einwurzeliger Zahn / Implantat",
+      "points": 70,
+      "keywords": [
+        "extraktion privat",
+        "3000",
+        "drei null null null",
+        "implantat entfernt"
+      ],
+      "rules": [
+        "einwurzeliger Zahn oder enossales Implantat",
+        "Kassenpatient: BEMA 43"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3010",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Extraktion, mehrwurzeliger Zahn",
+      "points": 110,
+      "keywords": [
+        "extraktion mehrwurzelig privat",
+        "3010",
+        "drei null eins null"
+      ],
+      "rules": [
+        "Kassenpatient: BEMA 44"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3030",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Osteotomie (Zahn/Implantat)",
+      "points": 350,
+      "keywords": [
+        "osteotomie privat",
+        "3030",
+        "drei null drei null"
+      ],
+      "rules": [
+        "Kassenpatient: BEMA 47a"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3040",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Osteotomie, retinierter/verlagerter Zahn",
+      "points": 540,
+      "keywords": [
+        "osteotomie retiniert privat",
+        "weisheitszahn osteotomie privat",
+        "3040",
+        "drei null vier null"
+      ],
+      "rules": [
+        "extrem verlagert mit gefährdeten Nachbarstrukturen: 3045",
+        "Kassenpatient: BEMA 48"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3290",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Kontrolle nach chirurgischem Eingriff",
+      "points": 55,
+      "keywords": [
+        "wundkontrolle privat",
+        "fäden entfernt privat",
+        "nachkontrolle nach op",
+        "3290",
+        "drei zwei neun null"
+      ],
+      "rules": [
+        "je Kieferhälfte oder Frontzahnbereich, als selbstständige Leistung",
+        "Nachbehandlung (Tamponieren): 3300",
+        "Kassenpatient: BEMA 38"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0500",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130)",
+      "points": 400,
+      "keywords": [
+        "zuschlag 0500",
+        "0500",
+        "null fünf null null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 250 bis 499 Punkten bewertet sind, oder zu den Leistungen nach den Nummern 4090 oder 4130",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0510",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (500–799 Punkte)",
+      "points": 750,
+      "keywords": [
+        "zuschlag 0510",
+        "0510",
+        "null fünf eins null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 500 bis 799 Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0520",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (800–1199 Punkte)",
+      "points": 1300,
+      "keywords": [
+        "zuschlag 0520",
+        "0520",
+        "null fünf zwei null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 800 bis 1199 Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0530",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (ab 1200 Punkte)",
+      "points": 2200,
+      "keywords": [
+        "zuschlag 0530",
+        "0530",
+        "null fünf drei null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 1200 und mehr Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "1020",
+      "system": "GOZ",
+      "area": "Prophylaxe",
+      "title": "Lokale Fluoridierung, je Sitzung",
+      "points": 50,
+      "keywords": [
+        "fluoridierung privat",
+        "1020",
+        "eins null zwei null",
+        "fluoridierung erwachsener"
+      ],
+      "rules": [
+        "mit Lack oder Gel, je Sitzung",
+        "nicht neben 1040 (in PZR enthalten)",
+        "Kassenpatient bis 17 J.: IP4"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "1040",
+      "system": "GOZ",
+      "area": "Prophylaxe",
+      "title": "Professionelle Zahnreinigung, je Zahn",
+      "points": 28,
+      "keywords": [
+        "professionelle zahnreinigung",
+        "pzr",
+        "zahnreinigung",
+        "prophylaxe sitzung",
+        "1040",
+        "airflow",
+        "beläge entfernt und poliert"
+      ],
+      "rules": [
+        "je Zahn, Implantat oder Brückenglied; inkl. Politur und Fluoridierung",
+        "nicht neben 1020, 4050, 4055, 4060, 4070, 4075, 4090, 4100",
+        "keine BEMA-Leistung (nur UPT)"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4005",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Gingival-/Parodontalindex (z. B. PSI)",
+      "points": 80,
+      "keywords": [
+        "psi privat",
+        "gingivalindex",
+        "parodontalindex",
+        "4005",
+        "vier null null fünf"
+      ],
+      "rules": [
+        "höchstens zweimal je Jahr",
+        "Kassenpatient: BEMA 04"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4050",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Zahnsteinentfernung, einwurzeliger Zahn",
+      "points": 10,
+      "keywords": [
+        "zahnstein privat",
+        "zahnsteinentfernung privat",
+        "beläge entfernt",
+        "4050",
+        "vier null fünf null"
+      ],
+      "rules": [
+        "je einwurzeligem Zahn/Implantat/Brückenglied; innerhalb 30 Tagen nur einmal",
+        "nicht neben 1040",
+        "Kassenpatient: BEMA 107 (je Sitzung)"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4055",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Zahnsteinentfernung, mehrwurzeliger Zahn",
+      "points": 13,
+      "keywords": [
+        "zahnstein mehrwurzelig",
+        "4055",
+        "vier null fünf fünf"
+      ],
+      "rules": [
+        "je mehrwurzeligem Zahn; innerhalb 30 Tagen nur einmal",
+        "nicht neben 1040"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä1",
+      "system": "GOÄ",
+      "area": "Diagnostik",
+      "title": "Beratung",
+      "points": 80,
+      "keywords": [
+        "beratung privat",
+        "ä1",
+        "ä eins",
+        "goä eins"
+      ],
+      "rules": [
+        "GOÄ Abschnitt B I, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "auch telefonisch",
+        "Kassenpatient: BEMA Ä1 (9 Punkte)"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5",
+      "system": "GOÄ",
+      "area": "Diagnostik",
+      "title": "Symptombezogene Untersuchung",
+      "points": 80,
+      "keywords": [
+        "symptombezogene untersuchung",
+        "ä5",
+        "ä fünf",
+        "schmerzpatient untersuchung",
+        "notfalluntersuchung"
+      ],
+      "rules": [
+        "GOÄ Abschnitt B I, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "für die eingehende Untersuchung stattdessen GOZ 0010"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5000",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Zahnfilm, je Projektion",
+      "points": 50,
+      "keywords": [
+        "zahnfilm privat",
+        "röntgenbild privat",
+        "ä5000",
+        "ä fünf null null null",
+        "bissflügel privat"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "je Projektion; mehrere Zähne auf einer Aufnahme nur einmal",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Kassenpatient: BEMA Ä925a–d"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5004",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "OPG (Panoramaschichtaufnahme)",
+      "points": 400,
+      "keywords": [
+        "opg privat",
+        "ä5004",
+        "ä fünf null null vier",
+        "panoramaschichtaufnahme privat"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Kassenpatient: BEMA Ä935d"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5002",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Panoramaaufnahme(n) eines Kiefers",
+      "points": 250,
+      "keywords": [
+        "pan1 privat",
+        "viertelseite privat",
+        "viertelaufnahme privat",
+        "segmentaufnahme privat",
+        "panoramaaufnahme eines kiefers privat",
+        "ä5002",
+        "ä fünf null null zwei"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
+        "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
+        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "Kassenpatient: BEMA Ä935a"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/go__1982/__5.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    }
+  ]
+}
