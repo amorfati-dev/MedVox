@@ -2,7 +2,7 @@
 
 import pytest
 
-from medvox.lexicon import ALIASES, NEVER_CORRECT, TERMS, Correction, correct, correct_token, levenshtein
+from medvox.lexicon import ALIASES, TERMS, Correction, correct, correct_token, levenshtein
 
 
 @pytest.mark.parametrize(
@@ -42,7 +42,9 @@ def test_correct_token(token, expected):
      "gelegt", "Kronen", "Zysten", "Füllungen", "Mode", "Karin", "bis", "sechs",
      "kariös", "kariöse", "Schmerz", "Schmerzen", "Faktor", "Funktion", "fester", "festen", "belegt", "GOÄ",
      "Grat", "Matrix", "Frontzähne", "Eckzähne", "Schneidezähne", "Weisheitszähne", "Provisorien",
-     "elektrometrisch", "medikamentös", "antiinfektiös"],
+     "elektrometrisch", "medikamentös", "antiinfektiös", "paar", "Part", "GIZ", "avital", "PBI",
+     "Kieferorthopäden", "Kanüle", "Kürette", "spülen", "füllen", "versiegeln", "eingliedern", "abformen",
+     "fluoridieren", "aufklären", "sondieren", "überweisen", "verordnen", "planen", "Schienen"],
 )
 def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
@@ -65,8 +67,9 @@ def test_codes_and_numbers_are_never_touched(token):
     assert corrections == []
 
 
-def test_whitelist_never_maps_onto_a_term():
-    assert [w for w in NEVER_CORRECT if correct_token(w)] == []
+def test_common_phrases_pass_through_the_fuzzy_path_unchanged():
+    raw = "Kontrolle in ein paar Tagen, Zahn 36 füllen, mit CHX spülen, Unterfüllung mit GIZ, Krone eingliedern"
+    assert correct(raw) == (raw, [])
 
 
 def test_terms_are_unique_ignoring_case():

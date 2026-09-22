@@ -120,8 +120,11 @@ def _number_words(text: str) -> str:
 # --- Codes ---------------------------------------------------------------------
 
 _AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
-_PREFIX_CODE = re.compile(rf"\b(GOZ|BEMA)\s+(\d(?:\s\d){{1,4}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
-_PSI_CODES = re.compile(r"\bPSI\s+(\d(?:[\s,/-]*\d)*)(?![\w\x01])")
+_PREFIX_CODE = re.compile(
+    rf"\b(GOZ|BEMA)\s+(?:Ziffer\s+|Nr\.?\s+)?(\d(?:\s\d){{1,4}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
+)
+_PSI_CODES = re.compile(r"\bPSI\s+(\d(?!\d)(?:[\s,/-]*\d(?!\d))*)(?![\w\x01])")
+_IP_CODE = re.compile(rf"\bIP\s*(\d)(?![\w{_NT}])")
 
 
 def _codes(text: str) -> str:
@@ -130,6 +133,7 @@ def _codes(text: str) -> str:
 
     text = _AE_CODE.sub(lambda m: "Ä" + join(m.group(1), m.group(2)), text)
     text = _PREFIX_CODE.sub(lambda m: f"{m.group(1)} " + join(m.group(2), m.group(3)), text)
+    text = _IP_CODE.sub(lambda m: "IP" + m.group(1) + _NT, text)
     return _PSI_CODES.sub(lambda m: "PSI " + re.sub(r"\d", lambda d: d.group() + _NT, m.group(1)), text)
 
 

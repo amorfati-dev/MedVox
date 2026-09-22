@@ -32,21 +32,21 @@ TERMS: tuple[str, ...] = (
     # Diagnostik
     "Untersuchung", "Befund", "Vitalitätsprüfung", "Kältetest", "Perkussion", "Perkussionstest",
     "Palpation", "Sondierung", "Sondierungstiefe", "Sondierungstiefen", "Zahnfilm", "Röntgen", "OPG",
-    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "Lockerungsgrad",
+    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "PBI", "Lockerungsgrad",
     "Furkation", "Funktion",
     # Befunde
     "Karies", "kariös", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
     "Perikoronitis", "Nekrose", "Fistel", "Abszess", "Zyste", "Längsfraktur", "Fraktur", "retiniert",
-    "verlagert", "Attrition", "Erosion", "Dentin", "Schmelz", "Pulpa", "apikal", "Aufbissbeschwerden",
+    "verlagert", "Attrition", "Erosion", "Dentin", "Schmelz", "Pulpa", "apikal", "avital", "Aufbissbeschwerden",
     "Hypersensibilität", "Schmerz", "Schmerzen",
     # Füllung
     "Füllung", "Kompositfüllung", "Komposit", "Amalgam", "Amalgamfüllung", "Adhäsivtechnik", "Adhäsiv",
-    "Bonding", "Ätzung", "Phosphorsäure", "Glasionomerzement", "Unterfüllung", "Aufbaufüllung", "Matrize", "Matrix",
+    "Bonding", "Ätzung", "Phosphorsäure", "Glasionomerzement", "GIZ", "Unterfüllung", "Aufbaufüllung", "Matrize", "Matrix",
     "Kofferdam", "einflächig", "zweiflächig", "dreiflächig", "mehrflächig", "Politur", "Okklusion",
     "Kontaktpunkt", "Fissurenversiegelung", "Versiegelung",
     # Endo
     "Trepanation", "Vitalexstirpation", "Wurzelkanalaufbereitung", "Wurzelkanalbehandlung", "Wurzelkanal",
-    "Wurzelkanäle", "Kanal", "Kanäle", "elektrometrisch", "Längenbestimmung", "medikamentös", "Einlage",
+    "Wurzelkanäle", "Kanal", "Kanäle", "Kanüle", "elektrometrisch", "Längenbestimmung", "medikamentös", "Einlage",
     "Kalziumhydroxid", "Wurzelfüllung", "Guttapercha", "provisorisch", "Verschluss",
     "Wurzelspitzenresektion", "Revision",
     # Chirurgie
@@ -60,7 +60,7 @@ TERMS: tuple[str, ...] = (
     "Stiftaufbau", "Prothese", "Unterfütterung",
     # Paro / Prophylaxe
     "Zahnreinigung", "Beläge", "Zahnstein", "Fluoridierung", "Elmex", "Mundhygieneinstruktion", "Mundhygiene",
-    "Kürettage", "UPT", "PZR", "PAR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
+    "Kürettage", "Kürette", "UPT", "PZR", "PAR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
     "Blutung", "Milchzahn", "Milchzähne", "IP",
     # Medikation / Verwaltung
     "Ibuprofen", "Amoxicillin", "Clindamycin", "Paracetamol", "Wiedervorlage", "verordnet", "Rezept",
@@ -71,7 +71,7 @@ TERMS: tuple[str, ...] = (
     "Schneidezähne", "Weisheitszahn", "Weisheitszähne",
     # Abrechnung, Sonstiges
     "BEMA", "GOZ", "GOÄ", "Faktor", "Zusatzleistung", "Ziffer", "Schienung", "Aufbissschiene", "Knirscherschiene",
-    "Kieferorthopädie",
+    "Kieferorthopädie", "Kieferorthopäde",
 )
 
 # Bekannte Verhörer, die für die Distanzregel zu weit entfernt sind
@@ -96,7 +96,7 @@ Nacht nahe nah Teil Zeit Sitzung Termin Woche Moment Belege grau medial digital 
 null eins zwei drei vier fünf sechs sieben acht neun zehn elf zwölf zwanzig dreißig hundert tausend
 erste ersten zweite zweiten dritte dritten vierte vierten fünften sechsten einmal zweimal dreimal
 Karte Kasse privat Code Nummer Ziffern Stück Seite Seiten oben unten hinten vorne mittig komplett
-fest fester festen festes festem belegt Grat
+fest fester festen festes festem belegt Grat paar Part
 """.split())
 
 _FOLDS = (("chs", "x"), ("ck", "k"), ("ph", "f"), ("th", "t"), ("ß", "ss"))
@@ -161,6 +161,8 @@ def correct_token(token: str) -> str | None:
     for term_folded, term in _TERMS_FOLDED.items():
         d = levenshtein(folded, term_folded, limit)
         if d > limit or (d == 2 and folded[0] != term_folded[0]):
+            continue
+        if folded.endswith("n") and term_folded.endswith(("ung", "et")):
             continue
         if d < best_distance:
             best, best_distance, ambiguous = term, d, False
