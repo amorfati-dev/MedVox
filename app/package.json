@@ -3,9 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "vite",
-    "dev:mock": "VITE_MOCK_API=1 vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --test test/",

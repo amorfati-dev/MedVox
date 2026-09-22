@@ -26,7 +26,7 @@ make test   # pytest
 make dev    # http://127.0.0.1:8000/api/v1/health
 ```
 
-App (benötigt Node ≥ 22.12 (oder 20.19+)):
+App (benötigt Node ≥ 22.18; `npm test` führt TypeScript direkt aus):
 
 ```sh
 cd app

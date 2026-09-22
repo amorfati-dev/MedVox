@@ -20,13 +20,13 @@ Aufbau in `src/`: `api.ts` (API-Client, deutsche Fehlermeldungen), `router.ts` (
 ```sh
 npm install
 npm run dev        # /api → http://127.0.0.1:8000 (Server: `make dev`)
-npm run dev:mock   # ohne Server: Dev-Mock der API in dev/mockApi.ts, Passwort „praxis“
 npm run typecheck
-npm test           # node --test (QR-Encoder, Router, Kurzcode-Format)
-npm run build      # dist/; VITE_API_BASE=https://medvox.local für eine andere API-Origin
+npm test           # node --test (QR-Encoder, Router, Kurzcode-Format), Node ≥ 22.18
+npm run build      # dist/
 ```
 
-Der Mock existiert nur, bis die Server-Endpunkte (Login, Transcribe, Transfer) gemerged sind; er landet nie im Build.
+Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb liefert Caddy App und API
+über dieselbe Origin (`https://medvox.local`), die App nutzt nur relative `/api/…`-Pfade.
 
 ## Manueller Test auf dem iPad
 
@@ -39,6 +39,7 @@ Der Mock existiert nur, bis die Server-Endpunkte (Login, Transcribe, Transfer) g
    antippen und die Freigabe erteilen. Wird das Mikrofon verweigert: *Einstellungen → Safari →
    Mikrofon* bzw. *Einstellungen → MedVox → Mikrofon* auf „Erlauben“ setzen.
 5. Anmelden, Aufnehmen, „Zahn drei sechs …“ diktieren, Stopp: Transkript erscheint in großer Schrift.
-   „Weiter“ hängt einen weiteren Abschnitt an; bei 60 s wird automatisch beendet und hochgeladen.
+   „Weiter“ hängt einen weiteren Abschnitt an; kurz vor 60 s wird automatisch beendet und hochgeladen.
+   „Aufnehmen“ aus dem Ruhezustand beginnt ein neues Diktat (nächster Patient).
 6. „An Rezeption senden“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.

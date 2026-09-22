@@ -1,5 +1,5 @@
 // "An Rezeption senden": legt einen Kurzcode an und zeigt ihn groß plus als QR-Code.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, ApiError, type TransferCreated } from "../api";
 import { QrCanvas } from "./QrCanvas";
 
@@ -14,6 +14,12 @@ export function TransferPanel({ transcript, codes }: Props) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TransferCreated | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Ein Kurzcode gehört genau zu dem Inhalt, mit dem er erzeugt wurde.
+  useEffect(() => {
+    setResult(null);
+    setError(null);
+  }, [transcript, codes]);
 
   const send = async () => {
     setBusy(true);

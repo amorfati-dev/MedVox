@@ -11,10 +11,6 @@ export type TranscribeResult = {
 export type TransferCreated = { code: string; expires_at: string };
 export type TransferData = { transcript: string; codes: string[]; created_at: string };
 
-// Leer = gleiche Origin (Caddy/Vite-Proxy); VITE_API_BASE für Builds gegen
-// eine andere Origin, z. B. https://medvox.local.
-export const API_BASE: string = (import.meta.env?.VITE_API_BASE ?? "").replace(/\/$/, "");
-
 export class ApiError extends Error {
   readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
 
@@ -36,7 +32,7 @@ const MESSAGES: Record<number, string> = {
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(API_BASE + path, { credentials: "include", ...init });
+    res = await fetch(path, init);
   } catch {
     throw new ApiError(0, "Server nicht erreichbar – WLAN und Praxis-Mac prüfen.");
   }

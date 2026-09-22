@@ -4,15 +4,9 @@ import { useEffect, useState } from "react";
 export type Route = "diktat" | "rezeption" | "check";
 
 export function routeFromPath(pathname: string): Route {
-  const p = pathname.replace(/\/+$/, "");
-  if (p === "/transfer") return "rezeption";
-  if (p === "/check") return "check";
+  if (pathname === "/transfer") return "rezeption";
+  if (pathname === "/check") return "check";
   return "diktat";
-}
-
-export function navigate(path: string): void {
-  window.history.pushState(null, "", path);
-  window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
 export function useRoute(): Route {

@@ -5,7 +5,7 @@ import { routeFromPath } from "../src/router.ts";
 test("routeFromPath ordnet die drei Ansichten zu", () => {
   assert.equal(routeFromPath("/"), "diktat");
   assert.equal(routeFromPath("/transfer"), "rezeption");
-  assert.equal(routeFromPath("/transfer/"), "rezeption");
+  assert.equal(routeFromPath("/transfer/"), "diktat");
   assert.equal(routeFromPath("/check"), "check");
   assert.equal(routeFromPath("/irgendwas"), "diktat");
 });

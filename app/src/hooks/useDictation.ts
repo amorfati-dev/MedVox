@@ -12,29 +12,33 @@ import {
   type LevelMeter,
 } from "./recorder";
 
-export const MAX_SECONDS = 60;
+export const MAX_SECONDS = 60; // Server-Limit pro Abschnitt
+// Automatischer Stopp knapp unter dem Server-Limit (Ticker-Raster, Anlaufzeit).
+export const AUTO_STOP_SECONDS = MAX_SECONDS - 1;
 
 export type DictationPhase = "bereit" | "aufnahme" | "sende";
 
 export type Dictation = {
   phase: DictationPhase;
   seconds: number; // Laufzeit des aktuellen Segments
-  remaining: number; // Sekunden bis zum harten Limit
+  remaining: number; // Sekunden bis zum automatischen Stopp
   level: number; // Pegel 0..1
+  uploading: boolean; // ein Abschnitt wird gerade transkribiert
   transcript: string;
   codes: string[];
   error: string | null;
   lastLatency: number | null;
   supported: boolean; // MediaRecorder mit passendem MIME vorhanden
-  start: () => Promise<void>;
+  start: () => Promise<void>; // neues Diktat: verwirft das bisherige Transkript
   stop: () => void; // beendet das Segment und lädt es hoch
-  next: () => Promise<void>; // "Weiter": Segment hochladen und sofort neues starten
+  next: () => void; // "Weiter": Segment hochladen, Aufnahme läuft auf demselben Stream weiter
   reset: () => void; // Transkript verwerfen
   setCodes: (codes: string[]) => void;
 };
 
 export function useDictation(): Dictation {
-  const [phase, setPhase] = useState<DictationPhase>("bereit");
+  const [recording, setRecording] = useState(false);
+  const [pending, setPending] = useState(0); // laufende Uploads
   const [seconds, setSeconds] = useState(0);
   const [level, setLevel] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -48,6 +52,8 @@ export function useDictation(): Dictation {
   const chunks = useRef<Blob[]>([]);
   const ticker = useRef<number | null>(null);
   const continueAfter = useRef(false);
+  const starting = useRef(false);
+  const uploads = useRef<Promise<void>>(Promise.resolve());
   const mime = useRef<string | null>(pickMimeType());
 
   const clearTimers = useCallback(() => {
@@ -63,6 +69,7 @@ export function useDictation(): Dictation {
     stopStream(stream.current);
     stream.current = null;
     recorder.current = null;
+    setRecording(false);
   }, [clearTimers]);
 
   useEffect(() => release, [release]);
@@ -72,7 +79,7 @@ export function useDictation(): Dictation {
       setError("Keine Audiodaten aufgenommen.");
       return;
     }
-    setPhase("sende");
+    setPending((n) => n + 1);
     try {
       const result = await api.transcribe(blob, filenameFor(blob.type || mime.current || ""));
       const text = result.transcript.trim();
@@ -81,73 +88,54 @@ export function useDictation(): Dictation {
       setLastLatency(result.latency_s);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Unbekannter Fehler beim Hochladen.");
+    } finally {
+      setPending((n) => n - 1);
     }
   }, []);
 
-  const start = useCallback(async () => {
-    if (recorder.current) return;
-    setError(null);
-    if (!mime.current) {
-      setError("Dieser Browser unterstützt keine Audioaufnahme (MediaRecorder fehlt).");
-      return;
-    }
-    const mic = await requestMicrophone();
-    if (!mic.ok) {
-      setError(MIC_MESSAGES[mic.error]);
-      return;
-    }
-    stream.current = mic.stream;
-    chunks.current = [];
-    let rec: MediaRecorder;
-    try {
-      rec = new MediaRecorder(mic.stream, { mimeType: mime.current });
-    } catch {
-      release();
-      setError("Aufnahme konnte nicht gestartet werden (MediaRecorder).");
-      return;
-    }
-    recorder.current = rec;
-    rec.ondataavailable = (ev) => {
-      if (ev.data.size > 0) chunks.current.push(ev.data);
-    };
-    rec.onstop = () => {
-      const blob = new Blob(chunks.current, { type: rec.mimeType || mime.current || "" });
+  // Ein Segment auf dem offenen Mikrofon-Stream aufnehmen; Uploads laufen nacheinander.
+  const startSegment = useCallback(
+    (mic: MediaStream): void => {
+      const rec = new MediaRecorder(mic, { mimeType: mime.current ?? undefined });
       chunks.current = [];
-      const again = continueAfter.current;
-      continueAfter.current = false;
-      release();
-      void upload(blob).then(() => {
-        setPhase("bereit");
-        if (again) void start();
-      });
-    };
-    rec.start(250);
-    meter.current = startLevelMeter(mic.stream, setLevel);
-    const startedAt = Date.now();
-    setSeconds(0);
-    setPhase("aufnahme");
-    ticker.current = window.setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      setSeconds(elapsed);
-      if (elapsed >= MAX_SECONDS && rec.state === "recording") {
-        rec.stop();
-        setError(`Aufnahme zu lang – bei ${MAX_SECONDS} Sekunden automatisch beendet und hochgeladen.`);
-      }
-    }, 250);
-  }, [release, upload]);
-
-  const stop = useCallback(() => {
-    const rec = recorder.current;
-    if (rec && rec.state === "recording") {
-      clearTimers();
-      rec.stop();
-    }
-  }, [clearTimers]);
-
-  const next = useCallback(async () => {
-    continueAfter.current = true;
-    stop();
-  }, [stop]);
+      rec.ondataavailable = (ev) => {
+        if (ev.data.size > 0) chunks.current.push(ev.data);
+      };
+      rec.onstop = () => {
+        const blob = new Blob(chunks.current, { type: rec.mimeType || mime.current || "" });
+        chunks.current = [];
+        const again = continueAfter.current;
+        continueAfter.current = false;
+        clearTimers();
+        uploads.current = uploads.current.then(() => upload(blob));
+        if (!again) {
+          release();
+          return;
+        }
+        try {
+          startSegment(mic);
+        } catch {
+          release();
+          setError("Aufnahme konnte nicht fortgesetzt werden (MediaRecorder).");
+        }
+      };
+      rec.start(250);
+      recorder.current = rec;
+      meter.current = startLevelMeter(mic, setLevel);
+      const startedAt = Date.now();
+      setSeconds(0);
+      setRecording(true);
+      ticker.current = window.setInterval(() => {
+        const elapsedMs = Date.now() - startedAt;
+        setSeconds(Math.floor(elapsedMs / 1000));
+        if (elapsedMs >= AUTO_STOP_SECONDS * 1000 && rec.state === "recording") {
+          rec.stop();
+          setError(`Zeitlimit erreicht – Abschnitt nach ${AUTO_STOP_SECONDS} Sekunden automatisch beendet und hochgeladen.`);
+        }
+      }, 250);
+    },
+    [clearTimers, release, upload],
+  );
 
   const reset = useCallback(() => {
     setTranscript("");
@@ -156,11 +144,48 @@ export function useDictation(): Dictation {
     setLastLatency(null);
   }, []);
 
+  const start = useCallback(async () => {
+    if (recorder.current || starting.current) return;
+    if (!mime.current) {
+      setError("Dieser Browser unterstützt keine Audioaufnahme (MediaRecorder fehlt).");
+      return;
+    }
+    starting.current = true;
+    try {
+      const mic = await requestMicrophone();
+      if (!mic.ok) {
+        setError(MIC_MESSAGES[mic.error]);
+        return;
+      }
+      stream.current = mic.stream;
+      reset();
+      try {
+        startSegment(mic.stream);
+      } catch {
+        release();
+        setError("Aufnahme konnte nicht gestartet werden (MediaRecorder).");
+      }
+    } finally {
+      starting.current = false;
+    }
+  }, [release, reset, startSegment]);
+
+  const stop = useCallback(() => {
+    const rec = recorder.current;
+    if (rec?.state === "recording") rec.stop();
+  }, []);
+
+  const next = useCallback(() => {
+    continueAfter.current = true;
+    stop();
+  }, [stop]);
+
   return {
-    phase,
+    phase: recording ? "aufnahme" : pending > 0 ? "sende" : "bereit",
     seconds,
-    remaining: Math.max(0, MAX_SECONDS - seconds),
+    remaining: Math.max(0, AUTO_STOP_SECONDS - seconds),
     level,
+    uploading: pending > 0,
     transcript,
     codes,
     error,

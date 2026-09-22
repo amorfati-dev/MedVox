@@ -1,6 +1,6 @@
 // Diktat-Ansicht: großer Aufnahmeknopf, Pegel und Countdown, Transkript in
 // gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api, joinCodes } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
@@ -11,9 +11,9 @@ type Props = { onLogout: () => void };
 
 export function Diktat({ onLogout }: Props) {
   const d = useDictation();
-  const [selected, setSelected] = useState<string[] | null>(null);
-  // Bis der Behandler abwählt, gelten alle vorgeschlagenen Ziffern.
-  const activeCodes = selected ?? d.codes;
+  // Abgewählte Ziffern merken; neu vorgeschlagene gelten damit automatisch als gewählt.
+  const [deselected, setDeselected] = useState<ReadonlySet<string>>(() => new Set());
+  const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
 
@@ -25,9 +25,21 @@ export function Diktat({ onLogout }: Props) {
     }
   };
 
+  const toggleCode = (code: string) =>
+    setDeselected((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(code)) next.add(code);
+      return next;
+    });
+
+  const startNew = () => {
+    setDeselected(new Set());
+    void d.start();
+  };
+
   const clear = () => {
     d.reset();
-    setSelected(null);
+    setDeselected(new Set());
   };
 
   return (
@@ -52,7 +64,7 @@ export function Diktat({ onLogout }: Props) {
           type="button"
           className={recording ? "record record-active" : "record"}
           disabled={!d.supported || sending}
-          onClick={recording ? d.stop : d.start}
+          onClick={recording ? d.stop : startNew}
           aria-label={recording ? "Aufnahme beenden" : "Aufnahme starten"}
         >
           {sending ? "Transkribiere …" : recording ? "Stopp" : "Aufnehmen"}
@@ -72,6 +84,7 @@ export function Diktat({ onLogout }: Props) {
             Weiter (Abschnitt hochladen, neuen starten)
           </button>
         )}
+        {recording && d.uploading && <p className="muted">Vorheriger Abschnitt wird transkribiert …</p>}
         {d.error && (
           <p role="alert" className="error">
             {d.error}
@@ -95,7 +108,7 @@ export function Diktat({ onLogout }: Props) {
 
       <section className="card">
         <h2>Ziffern</h2>
-        <CodeChips all={d.codes} selected={activeCodes} onChange={setSelected} />
+        <CodeChips all={d.codes} active={activeCodes} onToggle={toggleCode} />
         <div className="actions">
           <CopyButton label="Ziffern kopieren" text={joinCodes(activeCodes)} />
         </div>
