@@ -1,8 +1,8 @@
 # Project agent memory
 
 MedVox: lokale Diktat-Transkription mit BEMA/GOZ-Vorschlägen für eine Zahnarztpraxis.
-Zwei Pakete: `server/` (Python 3.12, FastAPI) und `app/` (Vite + React + TypeScript).
-Befehle und Arbeitspakete: `README.md`; Server-Targets: `server/Makefile`; App-Skripte: `app/package.json`.
+Drei Teile: `server/` (Python 3.12, FastAPI), `app/` (Vite + React + TypeScript) und `infra/` (bash-Skripte für die launchd-Dienste auf dem Praxis-Mac).
+Befehle und Arbeitspakete: `README.md`; Server-Targets: `server/Makefile`; App-Skripte: `app/package.json`; Praxis-Mac: `infra/README.md`.
 
 ## Leitplanken
 

@@ -16,11 +16,11 @@ if launchd_running "$CADDY_LABEL"; then ok "läuft"; else warn "nicht aktiv"; st
 
 log "Zertifikat-Inhalt ($CERT)"
 if [[ -f "$CERT" ]]; then
-  sans="$(openssl x509 -in "$CERT" -noout -ext subjectAltName | tail -n +2 | tr -d ' ')"
-  echo "   SANs: $sans"
+  echo "   SANs: $(cert_sans "$CERT")"
   echo "   gültig bis: $(openssl x509 -in "$CERT" -noout -enddate | cut -d= -f2)"
-  [[ "$sans" == *"DNS:medvox.local"* ]] && ok "SAN medvox.local" || { warn "SAN medvox.local fehlt"; status=1; }
-  [[ "$sans" == *"IPAddress:$LAN_IP"* ]] && ok "SAN $LAN_IP" || { warn "SAN $LAN_IP fehlt (IP geändert? setup.sh --renew)"; status=1; }
+  sans="$(cert_san_list "$CERT")"
+  [[ "$sans" == *"DNS:medvox.local,"* ]] && ok "SAN medvox.local" || { warn "SAN medvox.local fehlt"; status=1; }
+  [[ "$sans" == *"IPAddress:$LAN_IP,"* ]] && ok "SAN $LAN_IP" || { warn "SAN $LAN_IP fehlt (IP geändert? infra/tls/setup.sh erneut ausführen)"; status=1; }
 else
   warn "Zertifikat fehlt"; status=1
 fi
@@ -40,11 +40,11 @@ case "$code" in
   200|404) ok "Caddy antwortet (HTTP $code über medvox.local → $LAN_IP)" ;;
   *) warn "unerwartet: $code"; status=1 ;;
 esac
-code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/health" 2>&1 || true)"
+code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
 case "$code" in
-  200) ok "/api → Backend erreichbar (HTTP 200)" ;;
+  200) ok "/api/v1/health → Backend erreichbar (HTTP 200)" ;;
   502) ok "/api wird weitergeleitet, Backend auf $API_UPSTREAM läuft noch nicht (HTTP 502 – normal vor WP-2)" ;;
-  *) warn "/api: HTTP $code"; status=1 ;;
+  *) warn "/api/v1/health: HTTP $code"; status=1 ;;
 esac
 
 echo

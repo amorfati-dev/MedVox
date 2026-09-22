@@ -10,16 +10,12 @@
 	# Kein Let's Encrypt, keine Internetverbindung: Zertifikate kommen von mkcert.
 	auto_https disable_redirects
 	admin off
-	log {
-		output file "@@LOG@@" {
-			roll_size 5MiB
-			roll_keep 3
-		}
-		level INFO
-	}
+	# Kein `log`-Block: die Laufzeitmeldungen gehen nach stderr und landen über
+	# launchd in ~/Library/Logs/MedVox/caddy.log. Bewusst keine Zugriffslogs –
+	# damit stehen weder Anfrage-URLs noch Kurzcodes auf der Platte.
 }
 
-https://medvox.local:@@HTTPS_PORT@@, https://@@LAN_IP@@:@@HTTPS_PORT@@, https://localhost:@@HTTPS_PORT@@ {
+https://medvox.local:@@HTTPS_PORT@@, https://@@LAN_IP@@:@@HTTPS_PORT@@ {
 	tls "@@CERT@@" "@@KEY@@"
 
 	encode gzip

@@ -37,6 +37,7 @@ else
 fi
 
 log "Log (letzte 15 Zeilen): $LOG"
+rotate_log "$LOG"
 if [[ -f "$LOG" ]]; then tail -n 15 "$LOG"; else warn "noch kein Log"; fi
 
 echo

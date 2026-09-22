@@ -78,6 +78,19 @@ tail -f ~/Library/Logs/MedVox/whisper-server.log
 tail -f ~/Library/Logs/MedVox/caddy.log
 ```
 
+**Was in den Logs steht – und was nicht.** `whisper-server.log` enthält den
+Start-Banner von whisper/ggml, die `system_info`-Zeile und pro Anfrage eine
+Zeile `operator(): processing 'diktat.wav' (… samples, … sec), 8 threads, …,
+lang = de, …`. **Kein erkannter Text** – nachgemessen auf dem Praxis-Mac mit
+einem 12-s-Diktat. Der Dateiname des Uploads steht aber drin, deshalb dürfen die
+Schalter `-pr`/`--print-realtime`, `-pp` und `-ps` **nie** in die plist: `-pr`
+würde das Transkript nach stdout und damit ins Log schreiben (AGENTS.md: „Logs
+ohne Transkripttext"). Die Datei wird von `install.sh` und `status.sh` bei über
+5 MiB nach `.1`/`.2`/`.3` gesichert und geleert, wächst also nicht unbegrenzt.
+`caddy.log` enthält nur Caddys Laufzeitmeldungen; Zugriffslogs sind bewusst
+abgeschaltet, damit keine Anfrage-URLs (und später keine Kurzcodes) auf der
+Platte landen.
+
 Neustart eines Dienstes: `launchctl kickstart -k gui/$(id -u)/de.medvox.whisper-server` (bzw. `…/de.medvox.caddy`).
 
 Nach einem Neustart des Macs (Abnahmekriterium 6): anmelden, 20 Sekunden warten, `infra/whisper/status.sh` – muss grün sein, ohne dass etwas von Hand gestartet wird.
@@ -91,7 +104,7 @@ infra/whisper/install.sh    # schreibt die plist neu und startet den Dienst (~10
 infra/whisper/smoke.sh      # gegenprüfen
 ```
 
-Gleiches gilt, wenn Port oder Threads geändert werden sollen: `infra/whisper/de.medvox.whisper-server.plist.template` anpassen, `install.sh` erneut ausführen.
+Gleiches gilt für die Thread-Zahl: `infra/whisper/de.medvox.whisper-server.plist.template` anpassen, `install.sh` erneut ausführen. Die Ports liegen fest in `infra/common.sh`.
 
 ## 8. Wenn sich die LAN-IP ändert
 
@@ -102,15 +115,20 @@ Optional, damit die Adresse `https://medvox.local` statt der IP funktioniert: de
 ## 9. Deinstallieren
 
 ```bash
-infra/whisper/uninstall.sh          # Dienst weg, Build und Modell bleiben (--purge löscht auch die)
-infra/tls/uninstall.sh              # Caddy-Dienst weg, Zertifikate bleiben (--purge löscht auch die)
+infra/whisper/uninstall.sh          # Dienst weg, Build und Modell bleiben
+launchctl bootout gui/$(id -u)/de.medvox.caddy \
+  && rm -f ~/Library/LaunchAgents/de.medvox.caddy.plist   # Caddy-Dienst weg
 mkcert -uninstall                   # Praxis-CA aus dem macOS-Schlüsselbund entfernen
 ```
 
+Was die Skripte angelegt haben, liegt danach noch in
+`~/Library/Application Support/MedVox/` und kann von Hand gelöscht werden.
+
 ## Technische Notizen
 
-- Port 443 braucht auf macOS keine Root-Rechte (seit 10.14 dürfen Benutzerprozesse Ports < 1024 binden), deshalb läuft Caddy als normaler Benutzeragent auf 443 – kein `:8443` in der Adresse. Anderer Port: `CADDY_HTTPS_PORT=8443 infra/tls/setup.sh`.
+- Die Ports stehen fest: whisper-server auf `127.0.0.1:8178`, Caddy auf 443. Port 443 braucht auf macOS keine Root-Rechte (seit 10.14 dürfen Benutzerprozesse Ports < 1024 binden), deshalb läuft Caddy als normaler Benutzeragent auf 443 – kein `:8443` in der Adresse.
 - Caddy leitet `http://<IP>` auf HTTPS um, hält `admin off` (kein Admin-API-Port) und setzt `Cache-Control: no-store`.
-- whisper-server wird auf dem in `install.sh` festgelegten Commit von whisper.cpp gebaut (Stand der Messungen im Plan). Neuer Stand: `WHISPER_REF=<commit> infra/whisper/install.sh` – baut neu.
-- Pfad zur gebauten App für Caddy: standardmäßig `<repo>/app/dist`; anders: `MEDVOX_APP_DIST=/pfad infra/tls/setup.sh`.
+- whisper-server wird auf dem in `install.sh` festgelegten Commit von whisper.cpp gebaut (Stand der Messungen im Plan).
+- Pfad zur gebauten App für Caddy: `<repo>/app/dist`.
+- Die Zertifikatsprüfung liest die SANs aus `openssl x509 -noout -text`: das mit macOS gelieferte `/usr/bin/openssl` (LibreSSL) kennt `-ext subjectAltName` nicht.
 - Vom Backend (WP-2) aus: `POST http://127.0.0.1:8178/inference` mit `file=@audio.wav` (16 kHz mono), `language=de`, `response_format=json` → `{"text": "…"}`. Der Prompt ist im Dienst gesetzt; ein `prompt=`-Feld in der Anfrage überschreibt ihn.

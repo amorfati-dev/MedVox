@@ -3,33 +3,24 @@
 # medvox.local + aktuelle LAN-IP, Caddy als Reverse-Proxy auf Port 443 als
 # launchd-Agent. Idempotent.
 #
-#   infra/tls/setup.sh              # komplett (fragt einmal nach dem Mac-Passwort:
-#                                   #   mkcert trägt die CA in den macOS-Schlüsselbund ein)
-#   infra/tls/setup.sh --no-trust   # ohne Schlüsselbund-Eintrag (z. B. für Tests/CI)
-#   infra/tls/setup.sh --renew      # Zertifikat neu ausstellen (z. B. nach IP-Wechsel)
+#   infra/tls/setup.sh   # fragt einmal nach dem Mac-Passwort: mkcert trägt die
+#                        # CA in den macOS-Schlüsselbund ein
 #
-# Umgebungsvariablen: CADDY_HTTPS_PORT (Standard 443), MEDVOX_APP_DIST
-# (Standard <repo>/app/dist), MEDVOX_LAN_IP (Standard: automatisch ermittelt).
+# Erneut ausführen, wenn sich die LAN-IP geändert hat – das Zertifikat wird
+# automatisch neu ausgestellt. Umgebungsvariable: MEDVOX_LAN_IP (Standard:
+# automatisch ermittelt).
 
 source "$(dirname "$0")/../common.sh"
 
-TRUST=1; RENEW=0
-for arg in "$@"; do
-  case "$arg" in
-    --no-trust) TRUST=0 ;;
-    --renew) RENEW=1 ;;
-    *) die "Unbekannte Option: $arg" ;;
-  esac
-done
+[[ $# -eq 0 ]] || die "Unbekannte Option: $1"
 
 CERT="$MEDVOX_TLS/cert.pem"
 KEY="$MEDVOX_TLS/key.pem"
 ROOT="$MEDVOX_TLS/rootCA.pem"
 CADDYFILE="$MEDVOX_CADDY/Caddyfile"
 CADDY_LOG="$MEDVOX_LOGS/caddy.log"
-ACCESS_LOG="$MEDVOX_LOGS/caddy-access.log"
 PLIST="$LAUNCH_AGENTS/$CADDY_LABEL.plist"
-APP_DIST="${MEDVOX_APP_DIST:-$REPO_DIR/app/dist}"
+APP_DIST="$REPO_DIR/app/dist"
 
 # --- 1. Werkzeuge -----------------------------------------------------------
 log "Voraussetzungen prüfen"
@@ -50,26 +41,23 @@ if [[ -f "$CAROOT/rootCA.pem" ]]; then
 else
   log "Erzeuge Praxis-CA (mkcert)"
 fi
-if (( TRUST )); then
-  log "CA im macOS-Schlüsselbund eintragen (mkcert -install, fragt ggf. nach Passwort)"
-  mkcert -install
-else
-  # Ohne -install legt mkcert die CA beim ersten Zertifikat an.
-  warn "--no-trust: CA wird NICHT im macOS-Schlüsselbund eingetragen"
-fi
+log "CA im macOS-Schlüsselbund eintragen (mkcert -install, fragt ggf. nach Passwort)"
+mkcert -install
 cp "$CAROOT/rootCA.pem" "$ROOT" 2>/dev/null || true
 
 # --- 3. Zertifikat ----------------------------------------------------------
-needs_cert=$RENEW
+needs_cert=0
 [[ -f "$CERT" && -f "$KEY" ]] || needs_cert=1
 if (( ! needs_cert )); then
   # Neu ausstellen, wenn die IP nicht mehr im Zertifikat steht oder es in < 30 Tagen abläuft.
-  openssl x509 -in "$CERT" -noout -ext subjectAltName 2>/dev/null | grep -q "IP Address:$LAN_IP\b" || needs_cert=1
+  sans="$(cert_san_list "$CERT")"
+  [[ "$sans" == *"IPAddress:$LAN_IP,"* ]] || needs_cert=1
+  [[ "$sans" == *"DNS:medvox.local,"* ]] || needs_cert=1
   openssl x509 -in "$CERT" -noout -checkend $((30*24*3600)) >/dev/null 2>&1 || needs_cert=1
 fi
 if (( needs_cert )); then
-  log "Stelle Zertifikat aus: medvox.local, $LAN_IP, localhost, 127.0.0.1"
-  ( cd "$MEDVOX_TLS" && mkcert -cert-file cert.pem -key-file key.pem medvox.local "$LAN_IP" localhost 127.0.0.1 )
+  log "Stelle Zertifikat aus: medvox.local, $LAN_IP"
+  ( cd "$MEDVOX_TLS" && mkcert -cert-file cert.pem -key-file key.pem medvox.local "$LAN_IP" )
   chmod 600 "$KEY"
   cp "$CAROOT/rootCA.pem" "$ROOT"
   ok "Zertifikat: $CERT (gültig bis $(openssl x509 -in "$CERT" -noout -enddate | cut -d= -f2))"
@@ -87,8 +75,7 @@ render_template "$INFRA_DIR/tls/Caddyfile" "$CADDYFILE" \
   "CERT=$CERT" \
   "KEY=$KEY" \
   "API_UPSTREAM=$API_UPSTREAM" \
-  "APP_DIST=$APP_DIST" \
-  "LOG=$ACCESS_LOG"
+  "APP_DIST=$APP_DIST"
 caddy validate --config "$CADDYFILE" --adapter caddyfile >/dev/null 2>&1 \
   || { caddy validate --config "$CADDYFILE" --adapter caddyfile; die "Caddyfile ungültig"; }
 
@@ -112,7 +99,7 @@ else
 fi
 
 # --- 5. Anleitung für die Geräte -------------------------------------------
-URL="https://$LAN_IP"; [[ "$CADDY_HTTPS_PORT" != "443" ]] && URL="$URL:$CADDY_HTTPS_PORT"
+URL="https://$LAN_IP"
 cat <<TXT
 
 ════════════════════════════════════════════════════════════════════════

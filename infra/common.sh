@@ -7,7 +7,7 @@ set -euo pipefail
 # bash ≥ 5.2 würde '&' im Ersetzungstext von ${var//a/b} sonst als Treffer deuten.
 shopt -u patsub_replacement 2>/dev/null || true
 
-MEDVOX_HOME="${MEDVOX_HOME:-$HOME/Library/Application Support/MedVox}"
+MEDVOX_HOME="$HOME/Library/Application Support/MedVox"
 MEDVOX_MODELS="$MEDVOX_HOME/models"
 MEDVOX_TLS="$MEDVOX_HOME/tls"
 MEDVOX_CADDY="$MEDVOX_HOME/caddy"
@@ -18,11 +18,11 @@ WHISPER_SRC="$MEDVOX_HOME/whisper.cpp"
 WHISPER_BIN="$WHISPER_SRC/build/bin/whisper-server"
 WHISPER_MODEL="$MEDVOX_MODELS/ggml-large-v3-turbo.bin"
 WHISPER_HOST="127.0.0.1"
-WHISPER_PORT="${WHISPER_PORT:-8178}"
+WHISPER_PORT="8178"
 WHISPER_LABEL="de.medvox.whisper-server"
 
 CADDY_LABEL="de.medvox.caddy"
-CADDY_HTTPS_PORT="${CADDY_HTTPS_PORT:-443}"
+CADDY_HTTPS_PORT="443"
 API_UPSTREAM="127.0.0.1:8000"
 
 INFRA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -47,17 +47,35 @@ brew_ensure() {
   fi
 }
 
-# Aktuelle LAN-IPv4 des Macs (erste aktive Schnittstelle, bevorzugt en0).
+# Aktuelle LAN-IPv4 des Macs. Zuerst die Schnittstelle der Standardroute – das
+# ist die, über die iPad und Rezeptions-PC den Mac erreichen; erst danach en0…en5
+# (z. B. wenn gerade keine Standardroute gesetzt ist).
 lan_ip() {
-  local ip=""
+  local ip="" iface
+  iface="$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
+  if [[ -n "$iface" ]]; then
+    ip="$(ipconfig getifaddr "$iface" 2>/dev/null || true)"
+    [[ -n "$ip" ]] && { echo "$ip"; return 0; }
+  fi
   for iface in en0 en1 en2 en3 en4 en5; do
     ip="$(ipconfig getifaddr "$iface" 2>/dev/null || true)"
     [[ -n "$ip" ]] && { echo "$ip"; return 0; }
   done
-  ip="$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
-  [[ -n "$ip" ]] && ip="$(ipconfig getifaddr "$ip" 2>/dev/null || true)"
-  [[ -n "$ip" ]] && { echo "$ip"; return 0; }
   return 1
+}
+
+# cert_sans <zertifikat> – gibt die SAN-Liste als "DNS:…, IP Address:…" aus.
+# Bewusst über `-text`: das macOS-eigene /usr/bin/openssl (LibreSSL) kennt
+# `-ext subjectAltName` nicht.
+cert_sans() {
+  openssl x509 -in "$1" -noout -text 2>/dev/null \
+    | awk '/X509v3 Subject Alternative Name/{getline; gsub(/^ +| +$/, ""); print; exit}' || true
+}
+
+# cert_san_list <zertifikat> – SANs ohne Leerzeichen, mit abschließendem Komma,
+# damit `*"IPAddress:$ip,"*` eine ganze IP trifft und nicht nur deren Anfang.
+cert_san_list() {
+  printf '%s,\n' "$(cert_sans "$1" | tr -d ' ')"
 }
 
 # xml_escape – für Werte, die in eine launchd-plist geschrieben werden.
@@ -114,6 +132,20 @@ wait_for_port() {
     sleep 1
   done
   return 1
+}
+
+# rotate_log <datei> – begrenzt ein Dienst-Log auf 5 MiB: darüber wird der
+# Inhalt nach .1 (.2, .3) gesichert und die Datei geleert. Geleert statt
+# umbenannt, damit der laufende launchd-Dienst weiter in dieselbe Datei schreibt.
+rotate_log() {
+  local f="$1" max=$((5 * 1024 * 1024))
+  [[ -f "$f" ]] || return 0
+  (( $(stat -f %z "$f") > max )) || return 0
+  rm -f "$f.3"
+  if [[ -f "$f.2" ]]; then mv "$f.2" "$f.3"; fi
+  if [[ -f "$f.1" ]]; then mv "$f.1" "$f.2"; fi
+  cp "$f" "$f.1"
+  : > "$f"
 }
 
 # Schreibt eine 1-Sekunde lange, stumme 16-kHz-Mono-WAV-Datei nach $1.

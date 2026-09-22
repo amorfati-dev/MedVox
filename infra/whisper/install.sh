@@ -16,7 +16,7 @@ source "$(dirname "$0")/../common.sh"
 
 WHISPER_REPO="https://github.com/ggml-org/whisper.cpp"
 # Fester Stand, mit dem die Messungen im Plan gemacht wurden (2026-09-18).
-WHISPER_REF="${WHISPER_REF:-5670d5c0bbcb148feabef84400a07cfca9aa3b30}"
+WHISPER_REF="5670d5c0bbcb148feabef84400a07cfca9aa3b30"
 MODEL_SRC="${1:-}"
 PROMPT_FILE="$INFRA_DIR/whisper/prompt.txt"
 TEMPLATE="$INFRA_DIR/whisper/$WHISPER_LABEL.plist.template"
@@ -98,6 +98,7 @@ plutil -lint "$PLIST" >/dev/null || die "plist ist ungültig"
 
 log "Dienst (neu) laden"
 launchd_unload "$WHISPER_LABEL"
+rotate_log "$LOG"
 launchd_load "$PLIST"
 if wait_for_port "$WHISPER_PORT" 60; then
   ok "whisper-server läuft auf http://$WHISPER_HOST:$WHISPER_PORT"
