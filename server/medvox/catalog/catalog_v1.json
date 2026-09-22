@@ -42,6 +42,11 @@
         "system": "GOÄ",
         "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
         "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
+      },
+      {
+        "system": "GOÄ",
+        "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
+        "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
       }
     ],
     "abgerufen": "2026-09-21"
@@ -326,8 +331,9 @@
       ],
       "rules": [
         "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c",
-        "nur ein Kiefer; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
-        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "vollständige Darstellung beider Kiefer (OPG): Ä935d",
+        "amtlich nennt Ä935a auch die Zähne des Ober- und Unterkiefers derselben Seite; ob eine Halbseitenaufnahme beider Kiefer hier oder unter Ä935d fällt, ist offen",
+        "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Privatpatient: GOÄ Ä5002"
       ],
       "sources": [
@@ -2285,11 +2291,12 @@
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
         "je Projektion; mehrere Zähne auf einer Aufnahme nur einmal",
-        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä925a–d"
       ],
       "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/go__1982/__5.html"
       ],
       "review": {
         "status": "draft"
@@ -2309,11 +2316,12 @@
       ],
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä935d"
       ],
       "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/go__1982/__5.html"
       ],
       "review": {
         "status": "draft"
@@ -2336,10 +2344,10 @@
       ],
       "rules": [
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
+        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
-        "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
-        "offen: der amtliche Text nennt den Viertel-/Segmentfall (Pan1, ein Kiefer einer Seite) nicht ausdrücklich; Zuordnung der Viertelseite zu dieser Ziffer ist vom Behandler noch zu bestätigen",
+        "vollständige Darstellung beider Kiefer in einer Schichtaufnahme (OPG): Ä5004",
+        "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Kassenpatient: BEMA Ä935a"
       ],
       "sources": [
