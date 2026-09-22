@@ -1,4 +1,4 @@
-"""Prüft catalog_v1.json gegen schema.json und fachliche Regeln, druckt die Review-Tabelle.
+"""Prüft einen Katalog (Standard: catalog_v1.json) gegen schema.json und fachliche Regeln, druckt die Review-Tabelle.
 
 Aufruf:  python -m medvox.catalog.validate [--catalog PFAD] [--schema PFAD] [--quiet]
 Exit 0 = gültig, Exit 1 = Fehler (werden einzeln aufgelistet).
@@ -142,7 +142,7 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
 
     for (system, kw), codes in kw_owner.items():
         if len(codes) > 1:
-            errors.append(f"{system}: Keyword {kw!r} bei mehreren Ziffern {codes} (Extraktor braucht Eindeutigkeit)")
+            errors.append(f"{system}: Keyword {kw!r} bei mehreren Ziffern {codes} (exakt gleiches Keyword)")
     cross = defaultdict(set)
     for (system, kw), codes in kw_owner.items():
         cross[kw].add(system)

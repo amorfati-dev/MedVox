@@ -1,4 +1,4 @@
-"""Katalog v1: Validierung läuft durch, und der Validator findet echte Fehler."""
+"""Katalog v1 und erweiterter Katalog: Validierung läuft durch, und der Validator findet echte Fehler."""
 import copy
 import json
 import subprocess
@@ -13,10 +13,19 @@ if str(SERVER_DIR) not in sys.path:
 
 from medvox.catalog import validate as v  # noqa: E402
 
+EXTENDED_PATH = v.CATALOG_PATH.with_name("catalog_extended.json")
+
 
 @pytest.fixture(scope="module")
 def catalog():
     errors, _infos, catalog = v.validate()
+    assert errors == []
+    return catalog
+
+
+@pytest.fixture(scope="module")
+def extended():
+    errors, _infos, catalog = v.validate(EXTENDED_PATH)
     assert errors == []
     return catalog
 
@@ -30,8 +39,23 @@ def _errors_for(catalog: dict) -> list[str]:
     return errors
 
 
-def test_catalog_is_valid(catalog):
-    assert len(catalog["entries"]) >= 60
+def test_catalog_v1_is_a_mini_catalog(catalog):
+    assert 60 <= len(catalog["entries"]) <= 80
+
+
+def test_extended_catalog_merges_cleanly_with_v1(catalog, extended):
+    """Phase-2-Vollimport: beide Dateien zusammen verletzen keine Fachregel (Ziffern, Keywords, Familien)."""
+    merged = {"meta": catalog["meta"], "entries": catalog["entries"] + extended["entries"]}
+    assert _errors_for(merged) == []
+    assert len(merged["entries"]) > len(catalog["entries"])
+
+
+def test_cli_validates_extended_catalog():
+    proc = subprocess.run(
+        [sys.executable, "-m", "medvox.catalog.validate", "--quiet", "--catalog", str(EXTENDED_PATH)],
+        cwd=SERVER_DIR, capture_output=True, text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
 
 
 def test_cli_exits_zero_and_prints_table():
@@ -49,10 +73,20 @@ def test_review_table_lists_every_code(catalog):
         assert f"  {e['code']:<7}" in table
 
 
-def test_every_entry_has_verified_points_and_source(catalog):
-    for e in catalog["entries"]:
-        assert e["points"] is not None, e["code"]
-        assert all(url.startswith("https://") for url in e["sources"])
+def test_every_entry_cites_an_https_source(catalog, extended):
+    for e in catalog["entries"] + extended["entries"]:
+        assert all(url.startswith("https://") for url in e["sources"]), e["code"]
+
+
+def test_null_points_are_valid_and_listed_for_review(catalog):
+    unverified = copy.deepcopy(catalog)
+    entry = unverified["entries"][3]
+    entry["points"] = None
+    assert _errors_for(unverified) == []
+    table = v.review_table(unverified)
+    assert f"  {entry['code']:<7}    ?  " in table
+    assert table.rstrip().endswith(f"Punkte nicht verifiziert (bitte prüfen): {entry['system']} {entry['code']}")
+    assert v.review_table(catalog).rstrip().endswith("Punkte nicht verifiziert (bitte prüfen): keine")
 
 
 def test_detects_duplicate_code(catalog):
@@ -65,9 +99,10 @@ def test_detects_schema_violation(catalog):
     broken = copy.deepcopy(catalog)
     broken["entries"][0]["points"] = "33"
     assert any("points" in err for err in _errors_for(broken))
-    broken = copy.deepcopy(catalog)
-    broken["entries"][0]["keywords"].append("Großgeschrieben")
-    assert any("keywords" in err for err in _errors_for(broken))
+    for capitalised in ("Großgeschrieben", "Überkappung", "ärztliche Beratung"):
+        broken = copy.deepcopy(catalog)
+        broken["entries"][0]["keywords"].append(capitalised)
+        assert any("keywords" in err for err in _errors_for(broken)), capitalised
 
 
 def test_detects_keyword_collision_within_system(catalog):
@@ -84,16 +119,17 @@ def test_detects_broken_surface_family(catalog):
     assert any("unbekannte Ziffer 13x" in err for err in _errors_for(broken))
 
 
-def test_surface_families(catalog):
+def test_surface_families(catalog, extended):
     by = {(e["system"], e["code"]): e for e in catalog["entries"]}
     assert by[("BEMA", "13a")]["surfaces_to_code"] == {"1": "13a", "2": "13b", "3": "13c", "4": "13d"}
     assert by[("GOZ", "2060")]["surfaces_to_code"] == {"1": "2060", "2": "2080", "3": "2100", "4": "2120"}
-    assert by[("GOZ", "2050")]["surfaces_to_code"] == {"1": "2050", "2": "2070", "3": "2090", "4": "2110"}
+    by_ext = {(e["system"], e["code"]): e for e in extended["entries"]}
+    assert by_ext[("GOZ", "2050")]["surfaces_to_code"] == {"1": "2050", "2": "2070", "3": "2090", "4": "2110"}
 
 
-def test_old_repo_errors_are_not_reproduced(catalog):
+def test_old_repo_errors_are_not_reproduced(catalog, extended):
     """Report Abschnitt 4: diese Ziffern waren im Alt-Repo erfunden oder falsch belegt."""
-    by = {(e["system"], e["code"]): e for e in catalog["entries"]}
+    by = {(e["system"], e["code"]): e for e in catalog["entries"] + extended["entries"]}
     for invented in ("42", "28a", "28b", "50", "60", "70", "80", "90", "P200", "P201", "IP3"):
         assert ("BEMA", invented) not in by
     assert by[("BEMA", "40")]["title"].startswith("Infiltrationsanästhesie")
