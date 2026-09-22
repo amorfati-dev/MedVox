@@ -39,7 +39,9 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
    antippen und die Freigabe erteilen. Wird das Mikrofon verweigert: *Einstellungen → Safari →
    Mikrofon* bzw. *Einstellungen → MedVox → Mikrofon* auf „Erlauben“ setzen.
 5. Anmelden, Aufnehmen, „Zahn drei sechs …“ diktieren, Stopp: Transkript erscheint in großer Schrift.
-   „Weiter“ hängt einen weiteren Abschnitt an; kurz vor 60 s wird automatisch beendet und hochgeladen.
-   „Aufnehmen“ aus dem Ruhezustand beginnt ein neues Diktat (nächster Patient).
+   „Weiter“ hängt einen weiteren Abschnitt an. Kurz vor 60 s wird der Abschnitt automatisch beendet und
+   hochgeladen; die App zeigt dann das bisherige Transkript mit „Weiter“ (nächsten Abschnitt anhängen)
+   und „Neues Diktat“ (zurücksetzen, nächster Patient). „Aufnehmen“ aus dem Ruhezustand beginnt immer
+   ein neues Diktat.
 6. „An Rezeption senden“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.

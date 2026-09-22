@@ -16,6 +16,7 @@ export function Diktat({ onLogout }: Props) {
   const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
+  const resumable = d.phase === "fortsetzbar";
 
   const logout = async () => {
     try {
@@ -64,10 +65,10 @@ export function Diktat({ onLogout }: Props) {
           type="button"
           className={recording ? "record record-active" : "record"}
           disabled={!d.supported || sending}
-          onClick={recording ? d.stop : startNew}
-          aria-label={recording ? "Aufnahme beenden" : "Aufnahme starten"}
+          onClick={recording ? d.stop : resumable ? d.resume : startNew}
+          aria-label={recording ? "Aufnahme beenden" : resumable ? "Diktat fortsetzen" : "Aufnahme starten"}
         >
-          {sending ? "Transkribiere …" : recording ? "Stopp" : "Aufnehmen"}
+          {sending ? "Transkribiere …" : recording ? "Stopp" : resumable ? "Weiter" : "Aufnehmen"}
         </button>
         <div className="meter" aria-hidden="true">
           <div className="meter-fill" style={{ width: `${Math.round(d.level * 100)}%` }} />
@@ -77,8 +78,15 @@ export function Diktat({ onLogout }: Props) {
             ? `${d.seconds} s · noch ${d.remaining} s`
             : sending
               ? "Audio wird auf dem Praxis-Mac transkribiert …"
-              : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
+              : resumable
+                ? "Zeitlimit erreicht – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
+                : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
         </p>
+        {resumable && (
+          <button type="button" className="btn" onClick={startNew}>
+            Neues Diktat (nächster Patient)
+          </button>
+        )}
         {recording && (
           <button type="button" className="btn" onClick={d.next}>
             Weiter (Abschnitt hochladen, neuen starten)

@@ -16,7 +16,9 @@ export const MAX_SECONDS = 60; // Server-Limit pro Abschnitt
 // Automatischer Stopp knapp unter dem Server-Limit (Ticker-Raster, Anlaufzeit).
 export const AUTO_STOP_SECONDS = MAX_SECONDS - 1;
 
-export type DictationPhase = "bereit" | "aufnahme" | "sende";
+// "fortsetzbar": nach dem automatischen Stopp bleibt das Transkript erhalten,
+// „Weiter“ hängt an, „Neues Diktat“ beginnt neu.
+export type DictationPhase = "bereit" | "aufnahme" | "sende" | "fortsetzbar";
 
 export type Dictation = {
   phase: DictationPhase;
@@ -30,6 +32,7 @@ export type Dictation = {
   lastLatency: number | null;
   supported: boolean; // MediaRecorder mit passendem MIME vorhanden
   start: () => Promise<void>; // neues Diktat: verwirft das bisherige Transkript
+  resume: () => Promise<void>; // nach dem automatischen Stopp: nächsten Abschnitt anhängen
   stop: () => void; // beendet das Segment und lädt es hoch
   next: () => void; // "Weiter": Segment hochladen, Aufnahme läuft auf demselben Stream weiter
   reset: () => void; // Transkript verwerfen
@@ -39,6 +42,7 @@ export type Dictation = {
 export function useDictation(): Dictation {
   const [recording, setRecording] = useState(false);
   const [pending, setPending] = useState(0); // laufende Uploads
+  const [resumable, setResumable] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [level, setLevel] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -125,12 +129,13 @@ export function useDictation(): Dictation {
       const startedAt = Date.now();
       setSeconds(0);
       setRecording(true);
+      setResumable(false);
       ticker.current = window.setInterval(() => {
         const elapsedMs = Date.now() - startedAt;
         setSeconds(Math.floor(elapsedMs / 1000));
         if (elapsedMs >= AUTO_STOP_SECONDS * 1000 && rec.state === "recording") {
           rec.stop();
-          setError(`Zeitlimit erreicht – Abschnitt nach ${AUTO_STOP_SECONDS} Sekunden automatisch beendet und hochgeladen.`);
+          setResumable(true);
         }
       }, 250);
     },
@@ -142,33 +147,42 @@ export function useDictation(): Dictation {
     setCodes([]);
     setError(null);
     setLastLatency(null);
+    setResumable(false);
   }, []);
 
-  const start = useCallback(async () => {
-    if (recorder.current || starting.current) return;
-    if (!mime.current) {
-      setError("Dieser Browser unterstützt keine Audioaufnahme (MediaRecorder fehlt).");
-      return;
-    }
-    starting.current = true;
-    try {
-      const mic = await requestMicrophone();
-      if (!mic.ok) {
-        setError(MIC_MESSAGES[mic.error]);
+  // Mikrofon holen und das erste Segment starten; `append` behält das Transkript.
+  const begin = useCallback(
+    async (append: boolean) => {
+      if (recorder.current || starting.current) return;
+      if (!mime.current) {
+        setError("Dieser Browser unterstützt keine Audioaufnahme (MediaRecorder fehlt).");
         return;
       }
-      stream.current = mic.stream;
-      reset();
+      starting.current = true;
       try {
-        startSegment(mic.stream);
-      } catch {
-        release();
-        setError("Aufnahme konnte nicht gestartet werden (MediaRecorder).");
+        const mic = await requestMicrophone();
+        if (!mic.ok) {
+          setError(MIC_MESSAGES[mic.error]);
+          return;
+        }
+        stream.current = mic.stream;
+        if (append) setError(null);
+        else reset();
+        try {
+          startSegment(mic.stream);
+        } catch {
+          release();
+          setError("Aufnahme konnte nicht gestartet werden (MediaRecorder).");
+        }
+      } finally {
+        starting.current = false;
       }
-    } finally {
-      starting.current = false;
-    }
-  }, [release, reset, startSegment]);
+    },
+    [release, reset, startSegment],
+  );
+
+  const start = useCallback(() => begin(false), [begin]);
+  const resume = useCallback(() => begin(true), [begin]);
 
   const stop = useCallback(() => {
     const rec = recorder.current;
@@ -181,7 +195,7 @@ export function useDictation(): Dictation {
   }, [stop]);
 
   return {
-    phase: recording ? "aufnahme" : pending > 0 ? "sende" : "bereit",
+    phase: recording ? "aufnahme" : pending > 0 ? "sende" : resumable ? "fortsetzbar" : "bereit",
     seconds,
     remaining: Math.max(0, AUTO_STOP_SECONDS - seconds),
     level,
@@ -192,6 +206,7 @@ export function useDictation(): Dictation {
     lastLatency,
     supported: mime.current !== null,
     start,
+    resume,
     stop,
     next,
     reset,
