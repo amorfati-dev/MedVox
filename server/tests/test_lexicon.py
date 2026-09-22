@@ -48,6 +48,11 @@ def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
 
 
+def test_par_is_not_rewritten_to_pzr():
+    raw = "PAR-Status erhoben, PAR-Behandlung geplant"
+    assert correct(raw) == (raw, [])
+
+
 def test_common_dental_sentence_is_not_rewritten():
     raw = "Zahn 36 kariös, fester Sitz der Prothese, GOZ 2100 Faktor 2,3, Schmerz bei Perkussion"
     assert correct(raw) == (raw, [])

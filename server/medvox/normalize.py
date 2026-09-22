@@ -163,7 +163,7 @@ _DIGIT_RUN = re.compile(rf"(?<![\w{_NT}.])\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(
-    rf"(?<![\w{_NT}])\d\d(?![\w{_NT}])(?!{_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
+    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?!{_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
 )
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")

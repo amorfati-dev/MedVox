@@ -163,6 +163,9 @@ def test_number_words_and_codes(raw, expected_text):
         "Ibuprofen 600",
         "Nachkontrolle am 15.04.",
         "Termin 14:30 Uhr",
+        "Nachkontrolle am 15.11.",
+        "Termin 14:15",
+        "am 15.11.2026",
         "Spülung 15-20 Minuten",
         "Kontrolle in 14-21 Tagen",
         "PSI 3 3 2 2 3 3",
@@ -182,6 +185,12 @@ def test_four_digit_block_only_splits_into_two_valid_teeth():
     assert normalize("2100").text == "2100"
     assert normalize("2060").text == "2060"
     assert normalize("1626").text == "16, 26"
+
+
+def test_sentence_punctuation_next_to_a_tooth_keeps_it():
+    assert teeth("Karies. 36 okklusal") == [36]
+    assert teeth("Zahn 36.") == [36]
+    assert teeth("36: Karies") == [36]
 
 
 def test_prepositions_are_not_merged_with_surfaces_or_teeth():

@@ -60,7 +60,7 @@ TERMS: tuple[str, ...] = (
     "Stiftaufbau", "Prothese", "Unterfütterung",
     # Paro / Prophylaxe
     "Zahnreinigung", "Beläge", "Zahnstein", "Fluoridierung", "Elmex", "Mundhygieneinstruktion", "Mundhygiene",
-    "Kürettage", "UPT", "PZR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
+    "Kürettage", "UPT", "PZR", "PAR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
     "Blutung", "Milchzahn", "Milchzähne", "IP",
     # Medikation / Verwaltung
     "Ibuprofen", "Amoxicillin", "Clindamycin", "Paracetamol", "Wiedervorlage", "verordnet", "Rezept",
