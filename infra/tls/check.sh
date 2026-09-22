@@ -10,6 +10,7 @@ status=0
 LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || true)}"
 [[ -n "$LAN_IP" ]] || die "Keine LAN-IP gefunden"
 [[ -f "$ROOT" ]] || die "Praxis-CA fehlt ($ROOT) – infra/tls/setup.sh ausführen"
+rotate_log "$CADDY_LOG"
 
 log "launchd: $CADDY_LABEL"
 if launchd_running "$CADDY_LABEL"; then ok "läuft"; else warn "nicht aktiv"; status=1; fi
@@ -37,16 +38,17 @@ log "HTTP über die Kette (curl --cacert)"
 code="$(curl -sS --cacert "$ROOT" --resolve "medvox.local:$CADDY_HTTPS_PORT:$LAN_IP" -o /dev/null -w '%{http_code}' \
   "https://medvox.local:$CADDY_HTTPS_PORT/" 2>&1 || true)"
 case "$code" in
-  200|404) ok "Caddy antwortet (HTTP $code über medvox.local → $LAN_IP)" ;;
+  200) ok "Caddy antwortet (HTTP 200 über medvox.local → $LAN_IP)" ;;
+  404) warn "PWA noch nicht gebaut (WP-4): Caddy antwortet, liefert aber keine App (HTTP 404)" ;;
   *) warn "unerwartet: $code"; status=1 ;;
 esac
 code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
 case "$code" in
   200) ok "/api/v1/health → Backend erreichbar (HTTP 200)" ;;
-  502) ok "/api wird weitergeleitet, Backend auf $API_UPSTREAM läuft noch nicht (HTTP 502 – normal vor WP-2)" ;;
+  502) warn "Backend noch nicht installiert (WP-2): /api wird weitergeleitet, aber $API_UPSTREAM antwortet nicht (HTTP 502)" ;;
   *) warn "/api/v1/health: HTTP $code"; status=1 ;;
 esac
 
 echo
-if (( status == 0 )); then ok "HTTPS im LAN ist in Ordnung"; else warn "HTTPS hat Probleme"; fi
+if (( status == 0 )); then ok "TLS-Kette und Caddy sind in Ordnung – offene Punkte stehen als Warnung oben"; else warn "HTTPS hat Probleme"; fi
 exit $status

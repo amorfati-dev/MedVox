@@ -12,6 +12,8 @@ MEDVOX_MODELS="$MEDVOX_HOME/models"
 MEDVOX_TLS="$MEDVOX_HOME/tls"
 MEDVOX_CADDY="$MEDVOX_HOME/caddy"
 MEDVOX_LOGS="$HOME/Library/Logs/MedVox"
+WHISPER_LOG="$MEDVOX_LOGS/whisper-server.log"
+CADDY_LOG="$MEDVOX_LOGS/caddy.log"
 LAUNCH_AGENTS="$HOME/Library/LaunchAgents"
 
 WHISPER_SRC="$MEDVOX_HOME/whisper.cpp"

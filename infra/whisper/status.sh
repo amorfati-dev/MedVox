@@ -3,7 +3,7 @@
 # stummen 1-s-WAV und die letzten Log-Zeilen. Exit-Code 0 = gesund.
 
 source "$(dirname "$0")/../common.sh"
-LOG="$MEDVOX_LOGS/whisper-server.log"
+LOG="$WHISPER_LOG"
 status=0
 
 log "launchd: $WHISPER_LABEL"

@@ -69,6 +69,11 @@ infra/whisper/smoke.sh    # spricht ein Diktat mit der Mac-Stimme "Anna" und pr�
 infra/tls/check.sh        # Zertifikat-SANs, TLS-Kette über die LAN-IP, Caddy antwortet
 ```
 
+`check.sh` prüft die TLS-Kette und Caddy – nicht das Backend und nicht die PWA.
+Fehlt das Backend (HTTP 502) oder die gebaute App (HTTP 404), erscheint eine
+Warnzeile („Backend noch nicht installiert (WP-2)" bzw. „PWA noch nicht gebaut
+(WP-4)"), der Exit-Code bleibt aber 0.
+
 Von Hand:
 
 ```bash
@@ -85,11 +90,14 @@ lang = de, …`. **Kein erkannter Text** – nachgemessen auf dem Praxis-Mac mit
 einem 12-s-Diktat. Der Dateiname des Uploads steht aber drin, deshalb dürfen die
 Schalter `-pr`/`--print-realtime`, `-pp` und `-ps` **nie** in die plist: `-pr`
 würde das Transkript nach stdout und damit ins Log schreiben (AGENTS.md: „Logs
-ohne Transkripttext"). Die Datei wird von `install.sh` und `status.sh` bei über
-5 MiB nach `.1`/`.2`/`.3` gesichert und geleert, wächst also nicht unbegrenzt.
-`caddy.log` enthält nur Caddys Laufzeitmeldungen; Zugriffslogs sind bewusst
-abgeschaltet, damit keine Anfrage-URLs (und später keine Kurzcodes) auf der
-Platte landen.
+ohne Transkripttext"). `caddy.log` enthält nur Caddys Laufzeitmeldungen;
+Zugriffslogs sind bewusst abgeschaltet, damit keine Anfrage-URLs (und später
+keine Kurzcodes) auf der Platte landen – ein `caddy-access.log` aus einer
+früheren Fassung dieser Skripte löscht `setup.sh` beim nächsten Lauf.
+
+Beide Logs sind auf 5 MiB gedeckelt: darüber wird der Inhalt nach `.1` (`.2`,
+`.3`) gesichert und die Datei geleert – `whisper-server.log` von `install.sh`
+und `status.sh`, `caddy.log` von `setup.sh` und `check.sh`.
 
 Neustart eines Dienstes: `launchctl kickstart -k gui/$(id -u)/de.medvox.whisper-server` (bzw. `…/de.medvox.caddy`).
 

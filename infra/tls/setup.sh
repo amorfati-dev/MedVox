@@ -18,7 +18,6 @@ CERT="$MEDVOX_TLS/cert.pem"
 KEY="$MEDVOX_TLS/key.pem"
 ROOT="$MEDVOX_TLS/rootCA.pem"
 CADDYFILE="$MEDVOX_CADDY/Caddyfile"
-CADDY_LOG="$MEDVOX_LOGS/caddy.log"
 PLIST="$LAUNCH_AGENTS/$CADDY_LABEL.plist"
 APP_DIST="$REPO_DIR/app/dist"
 
@@ -29,6 +28,9 @@ brew_ensure mkcert
 brew_ensure caddy
 mkdir -p "$MEDVOX_TLS" "$MEDVOX_CADDY" "$MEDVOX_LOGS" "$LAUNCH_AGENTS"
 chmod 700 "$MEDVOX_TLS"
+# Zugriffslogs sind abgeschaltet; eine ältere Fassung dieser Skripte hat noch
+# welche geschrieben (Anfrage-URLs, Client-IPs) – diese Altlast kommt weg.
+rm -f "$MEDVOX_LOGS"/caddy-access*.log
 
 LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || true)}"
 [[ -n "$LAN_IP" ]] || die "Keine LAN-IP gefunden. Ist der Mac im Praxis-WLAN/LAN? (Alternativ: MEDVOX_LAN_IP=… setzen)"
@@ -91,6 +93,7 @@ plutil -lint "$PLIST" >/dev/null || die "plist ist ungültig"
 
 log "Caddy (neu) laden"
 launchd_unload "$CADDY_LABEL"
+rotate_log "$CADDY_LOG"
 launchd_load "$PLIST"
 if wait_for_port "$CADDY_HTTPS_PORT" 20; then
   ok "Caddy lauscht auf https://$LAN_IP:$CADDY_HTTPS_PORT"

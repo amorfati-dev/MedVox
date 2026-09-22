@@ -21,7 +21,7 @@ MODEL_SRC="${1:-}"
 PROMPT_FILE="$INFRA_DIR/whisper/prompt.txt"
 TEMPLATE="$INFRA_DIR/whisper/$WHISPER_LABEL.plist.template"
 PLIST="$LAUNCH_AGENTS/$WHISPER_LABEL.plist"
-LOG="$MEDVOX_LOGS/whisper-server.log"
+LOG="$WHISPER_LOG"
 
 [[ "$(uname -s)" == "Darwin" ]] || die "Dieses Skript ist für macOS (Apple Silicon) gedacht."
 [[ -f "$PROMPT_FILE" ]] || die "Prompt-Datei fehlt: $PROMPT_FILE"
