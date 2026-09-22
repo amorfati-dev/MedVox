@@ -222,7 +222,9 @@ def _collect_teeth(text: str) -> list[ToothRef]:
             run.append(hits[i + 1])
             i += 1
         i += 1
-        count = bool(re.match(_TOOTH_COUNT_NOUN, text[run[-1][1] :])) and not _MARKER_BEFORE_RUN.search(text, 0, run[0][0])
+        count = bool(re.match(_TOOTH_COUNT_NOUN, text[run[-1][1] :])) and not _MARKER_BEFORE_RUN.search(
+            text, 0, run[-1][0]
+        )
         numbers: list[int] = []
         for k, (start, _end, fdi) in enumerate(run):
             if k and text[run[k - 1][1] : start].strip() == "-":
