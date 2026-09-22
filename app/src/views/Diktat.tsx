@@ -98,10 +98,15 @@ export function Diktat({ onLogout }: Props) {
               ? "Audio wird auf dem Praxis-Mac transkribiert …"
               : resumable
                 ? d.waiting > 0
-                  ? `Unterbrochen – „Weiter“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`} und nimmt weiter auf.`
+                  ? `Unterbrochen – „Erneut senden“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`}, „Weiter“ überträgt und nimmt weiter auf.`
                   : "Unterbrochen – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
                 : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
         </p>
+        {d.retryable && (
+          <button type="button" className="btn" onClick={d.retry}>
+            Erneut senden
+          </button>
+        )}
         {resumable && (
           <button type="button" className="btn" onClick={clear}>
             Neues Diktat (nächster Patient)

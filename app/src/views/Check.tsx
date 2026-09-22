@@ -36,15 +36,11 @@ export function Check() {
   };
 
   const https = window.isSecureContext;
-  const standalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as unknown as { standalone?: boolean }).standalone === true;
   const hasRecorder = typeof MediaRecorder !== "undefined";
   const mimes = hasRecorder ? MIME_CANDIDATES.filter((m) => MediaRecorder.isTypeSupported(m)) : [];
 
   const rows: Array<[string, Result]> = [
     ["HTTPS / sicherer Kontext", { ok: https, text: https ? `ja (${window.location.origin})` : "nein – Aufnahme wird nicht funktionieren" }],
-    ["Als App installiert", { ok: standalone ? true : null, text: standalone ? "ja (Home-Bildschirm)" : "nein (im Browser geöffnet)" }],
     ["MediaRecorder", { ok: hasRecorder && mimes.length > 0, text: mimes.length ? mimes.join(", ") : hasRecorder ? "vorhanden, aber kein passendes Audioformat" : "fehlt" }],
     ["Mikrofon", mic],
     ["Server-Health", health],
@@ -75,9 +71,6 @@ export function Check() {
         <button type="button" className="btn btn-primary" onClick={testMic}>
           Mikrofon testen
         </button>
-        <p className="muted">
-          Browser: {navigator.userAgent}
-        </p>
       </section>
     </main>
   );

@@ -8,7 +8,7 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 |---|---|
 | `/` | Diktat: Anmeldung, Aufnahmeknopf, Pegel/Countdown, Transkript, Ziffern-Chips, Kopieren, „An Rezeption senden“ (Kurzcode + QR) |
 | `/transfer` | Rezeption: Kurzcode eingeben (oder per QR-Link `?code=…`), Text/Ziffern/beides kopieren – ohne Anmeldung |
-| `/check` | Gerätetest: HTTPS, Installiert-als-App, MediaRecorder-Formate, Mikrofon, Server-Health |
+| `/check` | Gerätetest: HTTPS, MediaRecorder-Formate, Mikrofon, Server-Health |
 
 Aufbau in `src/`: `api.ts` (API-Client, deutsche Fehlermeldungen), `router.ts` (Pfad-Switch),
 `hooks/useDictation.ts` + `hooks/recorder.ts` (MediaRecorder, MIME `audio/mp4` vor `audio/webm`,
@@ -52,6 +52,8 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
    Ruhezustand beginnt immer ein neues Diktat. Antwortet der Server mit „nicht angemeldet“ (Sitzung
    abgelaufen), erscheint die Anmeldung; Transkript und noch nicht übertragene Abschnitte bleiben
    erhalten. Nach der Anmeldung steht das Diktat wieder als „fortsetzbar“ bereit: „Weiter“ überträgt die
-   wartenden Abschnitte in Aufnahmereihenfolge und nimmt weiter auf.
+   wartenden Abschnitte in Aufnahmereihenfolge und nimmt weiter auf. Auch jeder andere Fehler beim
+   Übertragen (z. B. Whisper nicht bereit, WLAN weg) behält den Abschnitt: die Meldung erscheint mit
+   „Erneut senden“; verworfen wird ein Abschnitt nur über „Verwerfen“ bzw. „Neues Diktat“.
 6. „An Rezeption senden“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.
