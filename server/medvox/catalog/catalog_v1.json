@@ -308,23 +308,17 @@
       "system": "BEMA",
       "area": "Röntgen",
       "title": "Teilaufnahme Schädel / Panoramaaufnahme eines Kiefers, eine Aufnahme",
-      "abbrev": "Rö5",
       "points": 21,
       "keywords": [
         "pan1",
         "pan eins",
-        "halbseitenaufnahme",
-        "halbseite",
-        "teilpanorama",
-        "panorama einer seite",
         "panoramaaufnahme eines kiefers",
         "ä935a",
         "neun drei fünf a"
       ],
       "rules": [
-        "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c; beide Kiefer komplett (OPG): Ä935d",
-        "Halbseitentechnik: Ober- und Unterkiefer derselben Seite",
-        "Darstellung beider Kiefer schließt gleichzeitigen Röntgenstatus aus",
+        "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c",
+        "nur ein Kiefer; Aufnahme, die beide Kiefer darstellt (OPG): Ä935d",
         "Privatpatient: GOÄ Ä5002"
       ],
       "sources": [
@@ -1986,14 +1980,13 @@
       "title": "Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130)",
       "points": 400,
       "keywords": [
-        "zuschlag chirurgie",
         "zuschlag 0500",
         "0500",
-        "null fünf null null",
-        "operationszuschlag"
+        "null fünf null null"
       ],
       "rules": [
         "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
         "gilt für zahnärztlich-chirurgische Leistungen, die mit 250 bis 499 Punkten bewertet sind, oder zu den Leistungen nach den Nummern 4090 oder 4130",
         "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
         "nur zum einfachen Gebührensatz berechenbar",
@@ -2021,6 +2014,7 @@
       ],
       "rules": [
         "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
         "gilt für zahnärztlich-chirurgische Leistungen, die mit 500 bis 799 Punkten bewertet sind",
         "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
         "nur zum einfachen Gebührensatz berechenbar",
@@ -2048,6 +2042,7 @@
       ],
       "rules": [
         "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
         "gilt für zahnärztlich-chirurgische Leistungen, die mit 800 bis 1199 Punkten bewertet sind",
         "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
         "nur zum einfachen Gebührensatz berechenbar",
@@ -2075,6 +2070,7 @@
       ],
       "rules": [
         "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "Zuschlagsstufe (0500/0510/0520/0530) richtet sich nach der Punktzahl der höchstbewerteten chirurgischen Leistung der Sitzung; der Extraktor (WP-8) muss sie daraus bestimmen, nie raten",
         "gilt für zahnärztlich-chirurgische Leistungen, die mit 1200 und mehr Punkten bewertet sind",
         "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
         "nur zum einfachen Gebührensatz berechenbar",
@@ -2322,8 +2318,6 @@
       "points": 250,
       "keywords": [
         "pan1 privat",
-        "halbseitenaufnahme privat",
-        "teilpanorama privat",
         "panoramaaufnahme eines kiefers privat",
         "ä5002",
         "ä fünf null null zwei"
@@ -2332,7 +2326,7 @@
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
         "nur Einfachsatz (1,0)",
         "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
-        "beide Kiefer in einer Schichtaufnahme (OPG): Ä5004",
+        "Aufnahme, die beide Kiefer darstellt (OPG): Ä5004",
         "Kassenpatient: BEMA Ä935a"
       ],
       "sources": [
