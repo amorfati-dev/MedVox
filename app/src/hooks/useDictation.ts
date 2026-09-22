@@ -31,6 +31,8 @@ export type Dictation = {
   error: string | null;
   lastLatency: number | null;
   supported: boolean; // MediaRecorder mit passendem MIME vorhanden
+  sessionLost: boolean; // Server antwortete 401; Transkript und offene Abschnitte bleiben erhalten
+  relogin: () => void; // nach erneuter Anmeldung: zurückgehaltene Abschnitte hochladen
   start: () => Promise<void>; // neues Diktat: verwirft das bisherige Transkript
   resume: () => Promise<void>; // nach dem automatischen Stopp: nächsten Abschnitt anhängen
   stop: () => void; // beendet das Segment und lädt es hoch
@@ -43,6 +45,7 @@ export function useDictation(): Dictation {
   const [recording, setRecording] = useState(false);
   const [pending, setPending] = useState(0); // laufende Uploads
   const [resumable, setResumable] = useState(false);
+  const [sessionLost, setSessionLost] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [level, setLevel] = useState(0);
   const [transcript, setTranscript] = useState("");
@@ -58,6 +61,7 @@ export function useDictation(): Dictation {
   const continueAfter = useRef(false);
   const starting = useRef(false);
   const uploads = useRef<Promise<void>>(Promise.resolve());
+  const held = useRef<Blob[]>([]); // Abschnitte, deren Upload mit 401 scheiterte
   const mime = useRef<string | null>(pickMimeType());
 
   const clearTimers = useCallback(() => {
@@ -91,11 +95,27 @@ export function useDictation(): Dictation {
       setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
       setLastLatency(result.latency_s);
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        held.current.push(blob);
+        setSessionLost(true);
+        if (recorder.current?.state === "recording") {
+          continueAfter.current = false;
+          recorder.current.stop();
+        }
+        return;
+      }
       setError(e instanceof ApiError ? e.message : "Unbekannter Fehler beim Hochladen.");
     } finally {
       setPending((n) => n - 1);
     }
   }, []);
+
+  const relogin = useCallback(() => {
+    const blobs = held.current;
+    held.current = [];
+    setSessionLost(false);
+    for (const blob of blobs) uploads.current = uploads.current.then(() => upload(blob));
+  }, [upload]);
 
   // Ein Segment auf dem offenen Mikrofon-Stream aufnehmen; Uploads laufen nacheinander.
   const startSegment = useCallback(
@@ -205,6 +225,8 @@ export function useDictation(): Dictation {
     error,
     lastLatency,
     supported: mime.current !== null,
+    sessionLost,
+    relogin,
     start,
     resume,
     stop,

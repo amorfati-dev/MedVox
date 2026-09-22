@@ -65,6 +65,10 @@ a {
   color: var(--danger);
   font-weight: 600;
 }
+.notice {
+  color: var(--primary);
+  font-weight: 600;
+}
 .card {
   background: var(--card);
   border: 1px solid var(--line);

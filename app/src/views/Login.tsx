@@ -2,9 +2,9 @@
 import { useState, type FormEvent } from "react";
 import { api, ApiError } from "../api";
 
-type Props = { onLogin: () => void };
+type Props = { onLogin: () => void; notice?: string };
 
-export function Login({ onLogin }: Props) {
+export function Login({ onLogin, notice }: Props) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,11 @@ export function Login({ onLogin }: Props) {
     <main className="page narrow">
       <h1>MedVox</h1>
       <p className="muted">Lokale Diktat-Transkription für die Praxis.</p>
+      {notice && (
+        <p role="status" className="notice">
+          {notice}
+        </p>
+      )}
       <form onSubmit={submit} className="card">
         <label htmlFor="password">Praxis-Passwort</label>
         <input

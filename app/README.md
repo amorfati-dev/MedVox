@@ -15,6 +15,13 @@ Aufbau in `src/`: `api.ts` (API-Client, deutsche Fehlermeldungen), `router.ts` (
 60-s-Limit, „Weiter“-Abschnitte), `qr/encode.ts` (eigener QR-Encoder, Byte-Modus, Stufe L, Version 1–5),
 `views/`, `components/`. Der Service Worker (`public/sw.js`) cached nur die App-Hülle, nie `/api/` oder Audio.
 
+Icons: `public/icon.svg` ist die Quelle; `public/apple-touch-icon.png` (180×180, iPadOS nimmt kein SVG als
+Home-Bildschirm-Icon) wird daraus einmalig ohne abgerundete Ecken gerendert – iPadOS rundet selbst:
+
+```sh
+sed 's/ rx="96"//' public/icon.svg > /tmp/icon.svg && sips -s format png -z 180 180 /tmp/icon.svg --out public/apple-touch-icon.png
+```
+
 ## Entwicklung
 
 ```sh
@@ -41,7 +48,9 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
 5. Anmelden, Aufnehmen, „Zahn drei sechs …“ diktieren, Stopp: Transkript erscheint in großer Schrift.
    „Weiter“ hängt einen weiteren Abschnitt an. Kurz vor 60 s wird der Abschnitt automatisch beendet und
    hochgeladen; die App zeigt dann das bisherige Transkript mit „Weiter“ (nächsten Abschnitt anhängen)
-   und „Neues Diktat“ (zurücksetzen, nächster Patient). „Aufnehmen“ aus dem Ruhezustand beginnt immer
-   ein neues Diktat.
+   und „Neues Diktat“ (setzt nur zurück; die Aufnahme beginnt erst mit „Aufnehmen“). „Aufnehmen“ aus dem
+   Ruhezustand beginnt immer ein neues Diktat. Antwortet der Server mit „nicht angemeldet“ (Sitzung
+   abgelaufen), erscheint die Anmeldung; Transkript und noch nicht transkribierte Abschnitte bleiben
+   erhalten und werden nach der Anmeldung weiterverarbeitet.
 6. „An Rezeption senden“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.

@@ -6,6 +6,7 @@ import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
 import { TransferPanel } from "../components/TransferPanel";
 import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
+import { Login } from "./Login";
 
 type Props = { onLogout: () => void };
 
@@ -17,6 +18,7 @@ export function Diktat({ onLogout }: Props) {
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
+  const [transferUnauthorized, setTransferUnauthorized] = useState(false);
 
   const logout = async () => {
     try {
@@ -42,6 +44,19 @@ export function Diktat({ onLogout }: Props) {
     d.reset();
     setDeselected(new Set());
   };
+
+  // Sitzung abgelaufen: Anmeldung anzeigen, Diktat bleibt im Speicher.
+  if (d.sessionLost || transferUnauthorized) {
+    return (
+      <Login
+        notice="Sitzung abgelaufen – bitte erneut anmelden. Das aktuelle Diktat bleibt erhalten."
+        onLogin={() => {
+          setTransferUnauthorized(false);
+          d.relogin();
+        }}
+      />
+    );
+  }
 
   return (
     <main className="page">
@@ -83,7 +98,7 @@ export function Diktat({ onLogout }: Props) {
                 : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
         </p>
         {resumable && (
-          <button type="button" className="btn" onClick={startNew}>
+          <button type="button" className="btn" onClick={clear}>
             Neues Diktat (nächster Patient)
           </button>
         )}
@@ -122,7 +137,7 @@ export function Diktat({ onLogout }: Props) {
         </div>
       </section>
 
-      <TransferPanel transcript={d.transcript} codes={activeCodes} />
+      <TransferPanel transcript={d.transcript} codes={activeCodes} onUnauthorized={() => setTransferUnauthorized(true)} />
     </main>
   );
 }

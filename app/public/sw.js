@@ -1,7 +1,7 @@
 // MedVox Service Worker: cached nur die App-Hülle (HTML, JS, CSS, Icon).
 // API-Antworten und Audio werden nie gecacht.
 const CACHE = "medvox-shell-v1";
-const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon.svg"];
+const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon.svg", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));

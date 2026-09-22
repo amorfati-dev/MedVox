@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { api, ApiError, type TransferCreated } from "../api";
 import { QrCanvas } from "./QrCanvas";
 
-type Props = { transcript: string; codes: string[] };
+type Props = { transcript: string; codes: string[]; onUnauthorized: () => void };
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
 }
 
-export function TransferPanel({ transcript, codes }: Props) {
+export function TransferPanel({ transcript, codes, onUnauthorized }: Props) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TransferCreated | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +27,10 @@ export function TransferPanel({ transcript, codes }: Props) {
     try {
       setResult(await api.createTransfer(transcript, codes));
     } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        onUnauthorized();
+        return;
+      }
       setError(e instanceof ApiError ? e.message : "Übergabe fehlgeschlagen.");
     } finally {
       setBusy(false);
