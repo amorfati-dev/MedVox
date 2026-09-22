@@ -12,7 +12,7 @@ import json
 import secrets
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from medvox import db
@@ -26,7 +26,7 @@ def new_code() -> str:
 
 
 def iso(ts: float) -> str:
-    return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat(timespec="seconds")
+    return datetime.fromtimestamp(ts, tz=UTC).isoformat(timespec="seconds")
 
 
 @dataclass(frozen=True)

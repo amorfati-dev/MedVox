@@ -104,8 +104,8 @@ def _main() -> None:
         sys.exit("Das Passwort muss mindestens 8 Zeichen haben.")
     if first != getpass.getpass("Wiederholen: "):
         sys.exit("Die Eingaben stimmen nicht überein.")
-    print("\nIn die Umgebung des Servers übernehmen (z. B. server/.env):\n")
-    print(f"MEDVOX_PASSWORD_HASH='{hash_password(first)}'")
+    print("\nVor `make dev` in der Shell des Servers setzen:\n")
+    print(f"export MEDVOX_PASSWORD_HASH='{hash_password(first)}'")
 
 
 if __name__ == "__main__":
