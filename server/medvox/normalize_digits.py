@@ -3,8 +3,10 @@
 Ein Lauf aus Einzelziffern ("3 6", "3-6", "1, 6, 2, 6", "3, 5, 6") wird an den
 Kommas in Items zerlegt:
 
-1. Ein Item aus zwei Einzelziffern mit Leerzeichen/Bindestrich ("3 6", "3-6")
-   ist ein Zahnpaar, egal was nach dem nächsten Komma folgt.
+1. Ein Item aus genau zwei Einzelziffern mit Leerzeichen/Bindestrich ("3 6",
+   "3-6") ist ein Zahnpaar, egal was nach dem nächsten Komma folgt. Drei oder
+   mehr mit Bindestrich verbundene Ziffern sind nie Zähne ("1-1-1"), ebenso
+   wenig eine ungerade Ziffernreihe ("4 5 4").
 2. Ein Item aus einer Einzelziffer vor einem Einheiten-/Zählwort ("3 Kanäle",
    "6 mm") ist eine Anzahl und wird nie gepaart; ebenso ein Bindestrich-Bereich
    ("2-3 Tagen").
@@ -77,6 +79,8 @@ def pair_digit_run(run: str, unit_follows: bool) -> str:
         singles = len(item) == 1
     joined: set[int] = set()
     for n, group in enumerate(groups):
+        if len(group) % 2 or (len(group) > 2 and any("-" in seps[k] for k in group[:-1])):
+            continue
         if n == len(groups) - 1 and unit_follows and not (len(group) == 2 and not seps[group[0]].strip()):
             continue
         joined |= _pair_left_to_right(digits, group)
