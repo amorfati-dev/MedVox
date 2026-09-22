@@ -145,7 +145,12 @@
         "vitalität negativ",
         "sensibel",
         "kälte positiv",
-        "kälte negativ"
+        "kälte negativ",
+        "vipper",
+        "vitalitätsprobe",
+        "sensibilitätsprobe",
+        "kälteprobe",
+        "vitalität geprüft"
       ],
       "rules": [
         "Leistung 'der Zähne': einmal je Sitzung, nicht je Zahn",
@@ -289,6 +294,38 @@
       ],
       "rules": [
         "Privatpatient: GOÄ Ä5004"
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä935a",
+      "system": "BEMA",
+      "area": "Röntgen",
+      "title": "Teilaufnahme Schädel / Panoramaaufnahme eines Kiefers, eine Aufnahme",
+      "abbrev": "Rö5",
+      "points": 21,
+      "keywords": [
+        "pan1",
+        "pan eins",
+        "halbseitenaufnahme",
+        "halbseite",
+        "teilpanorama",
+        "panorama einer seite",
+        "panoramaaufnahme eines kiefers",
+        "ä935a",
+        "neun drei fünf a"
+      ],
+      "rules": [
+        "eine Aufnahme; 2 Aufnahmen: Ä935b, mehr als 2: Ä935c; beide Kiefer komplett (OPG): Ä935d",
+        "Halbseitentechnik: Ober- und Unterkiefer derselben Seite",
+        "Darstellung beider Kiefer schließt gleichzeitigen Röntgenstatus aus",
+        "Privatpatient: GOÄ Ä5002"
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1417,59 +1454,6 @@
       }
     },
     {
-      "code": "1020",
-      "system": "GOZ",
-      "area": "Prophylaxe",
-      "title": "Lokale Fluoridierung, je Sitzung",
-      "points": 50,
-      "keywords": [
-        "fluoridierung privat",
-        "1020",
-        "eins null zwei null",
-        "fluoridierung erwachsener"
-      ],
-      "rules": [
-        "mit Lack oder Gel, je Sitzung",
-        "nicht neben 1040 (in PZR enthalten)",
-        "Kassenpatient bis 17 J.: IP4"
-      ],
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "1040",
-      "system": "GOZ",
-      "area": "Prophylaxe",
-      "title": "Professionelle Zahnreinigung, je Zahn",
-      "points": 28,
-      "keywords": [
-        "professionelle zahnreinigung",
-        "pzr",
-        "zahnreinigung",
-        "prophylaxe sitzung",
-        "1040",
-        "airflow",
-        "beläge entfernt und poliert"
-      ],
-      "rules": [
-        "je Zahn, Implantat oder Brückenglied; inkl. Politur und Fluoridierung",
-        "nicht neben 1020, 4050, 4055, 4060, 4070, 4075, 4090, 4100",
-        "keine BEMA-Leistung (nur UPT)"
-      ],
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
       "code": "2000",
       "system": "GOZ",
       "area": "Konservierend",
@@ -1996,6 +1980,169 @@
       }
     },
     {
+      "code": "0500",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130)",
+      "points": 400,
+      "keywords": [
+        "zuschlag chirurgie",
+        "zuschlag 0500",
+        "0500",
+        "null fünf null null",
+        "operationszuschlag"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 250 bis 499 Punkten bewertet sind, oder zu den Leistungen nach den Nummern 4090 oder 4130",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0510",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (500–799 Punkte)",
+      "points": 750,
+      "keywords": [
+        "zuschlag 0510",
+        "0510",
+        "null fünf eins null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 500 bis 799 Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0520",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (800–1199 Punkte)",
+      "points": 1300,
+      "keywords": [
+        "zuschlag 0520",
+        "0520",
+        "null fünf zwei null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 800 bis 1199 Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "0530",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Zuschlag zu chirurgischen Leistungen (ab 1200 Punkte)",
+      "points": 2200,
+      "keywords": [
+        "zuschlag 0530",
+        "0530",
+        "null fünf drei null"
+      ],
+      "rules": [
+        "Zuschlag – nur zusätzlich zu einer chirurgischen Leistung berechenbar, nie allein",
+        "gilt für zahnärztlich-chirurgische Leistungen, die mit 1200 und mehr Punkten bewertet sind",
+        "Zuordnung nach der chirurgischen Leistung mit der höchsten Punktzahl; nur einmal je Sitzung",
+        "nur zum einfachen Gebührensatz berechenbar",
+        "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
+        "GOZ Anlage 1, Abschnitt L"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "1020",
+      "system": "GOZ",
+      "area": "Prophylaxe",
+      "title": "Lokale Fluoridierung, je Sitzung",
+      "points": 50,
+      "keywords": [
+        "fluoridierung privat",
+        "1020",
+        "eins null zwei null",
+        "fluoridierung erwachsener"
+      ],
+      "rules": [
+        "mit Lack oder Gel, je Sitzung",
+        "nicht neben 1040 (in PZR enthalten)",
+        "Kassenpatient bis 17 J.: IP4"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "1040",
+      "system": "GOZ",
+      "area": "Prophylaxe",
+      "title": "Professionelle Zahnreinigung, je Zahn",
+      "points": 28,
+      "keywords": [
+        "professionelle zahnreinigung",
+        "pzr",
+        "zahnreinigung",
+        "prophylaxe sitzung",
+        "1040",
+        "airflow",
+        "beläge entfernt und poliert"
+      ],
+      "rules": [
+        "je Zahn, Implantat oder Brückenglied; inkl. Politur und Fluoridierung",
+        "nicht neben 1020, 4050, 4055, 4060, 4070, 4075, 4090, 4100",
+        "keine BEMA-Leistung (nur UPT)"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
       "code": "4005",
       "system": "GOZ",
       "area": "PAR",
@@ -2159,6 +2306,34 @@
         "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
         "Steigerungsfaktor Abschnitt O: Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä935d"
+      ],
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5002",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Panoramaaufnahme(n) eines Kiefers",
+      "points": 250,
+      "keywords": [
+        "pan1 privat",
+        "halbseitenaufnahme privat",
+        "teilpanorama privat",
+        "panoramaaufnahme eines kiefers privat",
+        "ä5002",
+        "ä fünf null null zwei"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "nur Einfachsatz (1,0)",
+        "Ober- und Unterkiefer getrennt aufgenommen: je Kiefer berechenbar",
+        "beide Kiefer in einer Schichtaufnahme (OPG): Ä5004",
+        "Kassenpatient: BEMA Ä935a"
       ],
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html"

@@ -5,7 +5,7 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
 
 | Datei | Zweck |
 |---|---|
-| `catalog_v1.json` | die 60–80 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
+| `catalog_v1.json` | die 60–84 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
 | `catalog_extended.json` | weitere geprüfte Positionen (Prothetik, PAR-Chirurgie, UPT, Kinder-Früherkennung …), gleiches Schema; wird nicht geladen, Saat für den Vollimport in Phase 2 |
 | `schema.json` | JSON-Schema für beide Dateien |
 | `validate.py` | prüft Schema + Fachregeln, druckt die Review-Tabelle (`cd server && make catalog-check` prüft beide Kataloge) |
@@ -58,3 +58,10 @@ nach der BEMA-Definition (einwurzelig: Frontzähne, OK 5er, UK 4er und 5er; mehr
 2. `cd server && make catalog-check` – die Review-Tabelle zeigt Ziffer, Punkte (`?` = null), Kurztext,
    Keyword-Zahl, Status und listet alle Ziffern mit `null` unter „Punkte nicht verifiziert“.
 3. `cd server && uv run pytest tests/test_catalog.py`.
+
+## Hinweise für Phase 2
+
+- Kassenpatienten erbringen häufig Zuzahlungen als Privatleistung (z. B. GOZ-Kompositfüllungen
+  statt BEMA 13a–d). Ein Kassenpatient wird also **nicht** immer rein nach BEMA abgerechnet;
+  ein Behandlungsfall kann BEMA- und GOZ-Positionen mischen. Extraktor (WP-8) und Oberfläche
+  dürfen nicht annehmen, dass „Kassenpatient" gleich „nur BEMA" bedeutet.
