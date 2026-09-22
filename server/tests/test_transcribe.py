@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import logging
+from dataclasses import replace
 from pathlib import Path
 
 import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 from medvox import transcribe
-from medvox.settings import Settings
-from tests.conftest import WHISPER_TEXT, FakeWhisper, make_wav
+from medvox.main import create_app
+from medvox.settings import FALLBACK_PROMPT, Settings
+from tests.conftest import PASSWORD, WHISPER_TEXT, FakeWhisper, make_wav
 
 URL = "/api/v1/transcribe"
 
@@ -36,7 +40,7 @@ def test_happy_path_wav(logged_in: TestClient, whisper: FakeWhisper) -> None:
 
 
 def test_webm_goes_through_ffmpeg(logged_in: TestClient, settings: Settings) -> None:
-    # Der Fake-ffmpeg kopiert die Eingabe; ein 44,1-kHz-WAV erzwingt den Konvertierungspfad.
+    # Der Fake-ffmpeg kopiert WAV-Eingaben unverändert durch.
     response = _upload(logged_in, make_wav(seconds=1.0, rate=44100), "audio/webm;codecs=opus")
     assert response.status_code == 200
     assert response.json()["duration_s"] == 1.0
@@ -92,7 +96,7 @@ def test_no_temp_files_remain(logged_in: TestClient, settings: Settings, whisper
 
 
 def test_temp_files_removed_on_ffmpeg_missing(settings: Settings, whisper: FakeWhisper) -> None:
-    bad = Settings(**{**settings.__dict__, "ffmpeg": str(Path(settings.ffmpeg).parent / "fehlt")})
+    bad = replace(settings, ffmpeg=str(Path(settings.ffmpeg).parent / "fehlt"))
     client = httpx.Client(transport=httpx.MockTransport(whisper))
     try:
         transcribe.transcribe_bytes(client, bad, make_wav(rate=8000), "audio/wav")
@@ -106,5 +110,34 @@ def test_temp_files_removed_on_ffmpeg_missing(settings: Settings, whisper: FakeW
 def test_media_type_normalisation() -> None:
     assert transcribe.media_type("audio/webm;codecs=opus") == "audio/webm"
     assert transcribe.media_type("AUDIO/MP4") == "audio/mp4"
+    assert transcribe.media_type("audio/x-m4a") is None
+    assert transcribe.media_type("audio/x-wav") is None
     assert transcribe.media_type("text/plain") is None
     assert transcribe.media_type(None) is None
+
+
+def test_missing_prompt_file_warns_at_startup(
+    settings: Settings, whisper: FakeWhisper, caplog: pytest.LogCaptureFixture
+) -> None:
+    caplog.set_level(logging.WARNING, logger="medvox.settings")
+    with TestClient(create_app(settings, transport=httpx.MockTransport(whisper))) as tc:
+        assert any("FALLBACK_PROMPT" in r.message for r in caplog.records)
+        tc.post("/api/v1/login", json={"password": PASSWORD})
+        _upload(tc, make_wav())
+    inference = [r for r in whisper.requests if r.url.path == "/inference"]
+    assert FALLBACK_PROMPT.encode() in inference[0].content
+
+
+def test_prompt_file_is_used_without_warning(
+    settings: Settings, whisper: FakeWhisper, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    prompt = tmp_path / "prompt.txt"
+    prompt.write_text("Zahnarzt-Diktat aus Datei.\n", encoding="utf-8")
+    caplog.set_level(logging.WARNING, logger="medvox.settings")
+    with_file = replace(settings, whisper_prompt_file=prompt)
+    with TestClient(create_app(with_file, transport=httpx.MockTransport(whisper))) as tc:
+        tc.post("/api/v1/login", json={"password": PASSWORD})
+        _upload(tc, make_wav())
+    assert not [r for r in caplog.records if "FALLBACK_PROMPT" in r.message]
+    inference = [r for r in whisper.requests if r.url.path == "/inference"]
+    assert b"Zahnarzt-Diktat aus Datei." in inference[0].content

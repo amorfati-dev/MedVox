@@ -5,12 +5,16 @@ Alle Werte haben Voreinstellungen für den Praxis-Mac; siehe server/README.md.
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 
-# Standard-Prompt, falls infra/whisper/prompt.txt (WP-1) nicht vorhanden ist.
+log = logging.getLogger("medvox.settings")
+
+# Standard-Prompt, falls infra/whisper/prompt.txt (WP-1) nicht vorhanden ist;
+# Übergangslösung bis WP-1 gemergt ist, der Server warnt beim Start deutlich.
 FALLBACK_PROMPT = (
     "Zahnarzt-Diktat. Zahn drei sechs mesial okklusal distal, Karies profunda, "
     "Kompositfüllung Adhäsivtechnik, Kofferdam, Infiltrationsanästhesie, "
@@ -49,6 +53,8 @@ class Settings:
     max_upload_bytes: int = 10 * 1024 * 1024
     max_duration_s: float = 60.0
     transfer_lookups_per_min: int = 10
+    login_attempts_per_min: int = 10
+    purge_interval_s: float = 5 * 60
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -68,9 +74,16 @@ class Settings:
 
     @cached_property
     def whisper_prompt(self) -> str:
-        """Inhalt der Prompt-Datei (einmal gelesen), sonst FALLBACK_PROMPT."""
+        """Inhalt der Prompt-Datei (einmal gelesen), sonst FALLBACK_PROMPT mit Warnung."""
         try:
             text = self.whisper_prompt_file.read_text(encoding="utf-8").strip()
         except OSError:
             text = ""
-        return text or FALLBACK_PROMPT
+        if text:
+            return text
+        log.warning(
+            "WHISPER_PROMPT_FILE %s fehlt oder ist leer – FALLBACK_PROMPT aus "
+            "medvox/settings.py wird verwendet",
+            self.whisper_prompt_file,
+        )
+        return FALLBACK_PROMPT

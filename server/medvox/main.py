@@ -6,6 +6,7 @@ Konfiguration über Umgebungsvariablen: `medvox/settings.py`, server/README.md.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -14,8 +15,20 @@ import httpx
 from fastapi import FastAPI
 
 from medvox import __version__, db, routes_auth, routes_transcribe, routes_transfer
+from medvox.ratelimit import RateLimiter
 from medvox.settings import Settings
-from medvox.transfer import RateLimiter
+
+log = logging.getLogger("medvox.main")
+
+
+async def purge_loop(settings: Settings) -> None:
+    """Löscht abgelaufene Transfers und Sitzungen periodisch, unabhängig von Zugriffen (WP-11)."""
+    while True:
+        await asyncio.sleep(settings.purge_interval_s)
+        try:
+            await asyncio.to_thread(db.purge_expired_at, settings.db_path)
+        except Exception:
+            log.exception("Periodisches Aufräumen fehlgeschlagen")
 
 
 def create_app(
@@ -27,15 +40,20 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.init_db(settings.db_path)
+        db.purge_expired_at(settings.db_path)
+        settings.whisper_prompt
         app.state.http = httpx.Client(transport=transport)
+        sweep = asyncio.create_task(purge_loop(settings))
         try:
             yield
         finally:
+            sweep.cancel()
             app.state.http.close()
 
     app = FastAPI(title="MedVox Server", version=__version__, lifespan=lifespan)
     app.state.settings = settings
     app.state.transfer_limiter = RateLimiter(settings.transfer_lookups_per_min)
+    app.state.login_limiter = RateLimiter(settings.login_attempts_per_min)
     app.include_router(routes_transcribe.router)
     app.include_router(routes_auth.router)
     app.include_router(routes_transfer.router)

@@ -7,7 +7,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from medvox import auth
+from medvox import auth, ratelimit
 
 log = logging.getLogger("medvox.auth")
 router = APIRouter(prefix="/api/v1")
@@ -25,6 +25,8 @@ def _is_https(request: Request) -> bool:
 @router.post("/login", status_code=204, response_class=Response)
 def login(body: LoginRequest, request: Request, response: Response) -> Response:
     settings = request.app.state.settings
+    limiter: ratelimit.RateLimiter = request.app.state.login_limiter
+    limiter.check(request, "Zu viele Anmeldeversuche. Bitte eine Minute warten.")
     if not settings.password_hash:
         log.error("MEDVOX_PASSWORD_HASH ist nicht gesetzt (make set-password)")
         raise HTTPException(status_code=503, detail="Auf dem Server ist kein Passwort konfiguriert.")

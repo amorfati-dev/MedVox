@@ -21,14 +21,7 @@ from medvox.settings import Settings
 log = logging.getLogger("medvox.transcribe")
 
 # Erlaubte Content-Types der Aufnahme (Safari: audio/mp4, Chrome: audio/webm).
-ACCEPTED_TYPES = {
-    "audio/mp4": ".m4a",
-    "audio/x-m4a": ".m4a",
-    "audio/webm": ".webm",
-    "audio/wav": ".wav",
-    "audio/x-wav": ".wav",
-    "audio/wave": ".wav",
-}
+ACCEPTED_TYPES = {"audio/mp4": ".m4a", "audio/webm": ".webm", "audio/wav": ".wav"}
 FFMPEG_TIMEOUT_S = 30.0
 
 
@@ -109,19 +102,15 @@ def call_whisper(client: httpx.Client, settings: Settings, wav_path: Path) -> st
 def transcribe_bytes(
     client: httpx.Client, settings: Settings, audio: bytes, content_type: str
 ) -> Transcription:
-    """Vollständiger Ablauf für eine Aufnahme; räumt Temp-Dateien immer auf."""
+    """Vollständiger Ablauf für eine Aufnahme (immer über ffmpeg); räumt Temp-Dateien auf."""
     suffix = ACCEPTED_TYPES[content_type]
     started = time.monotonic()
     tmp_dir = Path(tempfile.mkdtemp(prefix="medvox-", dir=settings.tmp_dir))
     src, wav = tmp_dir / f"in{suffix}", tmp_dir / "out.wav"
     try:
         src.write_bytes(audio)
-        info = wav_info(src)
-        if info and info[:3] == (16000, 1, 2):
-            wav = src  # bereits im Zielformat, ffmpeg nicht nötig
-        else:
-            convert_to_wav(settings.ffmpeg, src, wav)
-            info = wav_info(wav)
+        convert_to_wav(settings.ffmpeg, src, wav)
+        info = wav_info(wav)
         duration = info[3] if info else 0.0
         if duration > settings.max_duration_s:
             raise TranscribeError(

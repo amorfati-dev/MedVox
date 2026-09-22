@@ -11,7 +11,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from medvox import transfer
+from medvox import ratelimit, transfer
 from medvox.auth import require_session
 
 log = logging.getLogger("medvox.transfer")
@@ -34,15 +34,6 @@ class TransferRead(BaseModel):
     created_at: str
 
 
-def client_ip(request: Request) -> str:
-    """Client-IP; hinter dem lokalen Reverse-Proxy (Caddy) aus X-Forwarded-For."""
-    direct = request.client.host if request.client else "unbekannt"
-    forwarded = request.headers.get("x-forwarded-for", "")
-    if direct in ("127.0.0.1", "::1", "testclient") and forwarded:
-        return forwarded.split(",")[0].strip()
-    return direct
-
-
 @router.post("/transfer", response_model=TransferCreated, dependencies=[Depends(require_session)])
 def create(body: TransferCreate, request: Request) -> TransferCreated:
     settings = request.app.state.settings
@@ -55,11 +46,8 @@ def create(body: TransferCreate, request: Request) -> TransferCreated:
 
 @router.get("/transfer/{code}", response_model=TransferRead)
 def read(code: str, request: Request) -> TransferRead:
-    limiter: transfer.RateLimiter = request.app.state.transfer_limiter
-    if not limiter.allow(client_ip(request)):
-        raise HTTPException(
-            status_code=429, detail="Zu viele Abrufe. Bitte eine Minute warten."
-        )
+    limiter: ratelimit.RateLimiter = request.app.state.transfer_limiter
+    limiter.check(request, "Zu viele Abrufe. Bitte eine Minute warten.")
     entry = transfer.get_transfer(request.app.state.settings.db_path, code)
     if entry is None:
         raise HTTPException(status_code=404, detail="Kein Diktat unter diesem Code (oder abgelaufen).")

@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import httpx
 from fastapi.testclient import TestClient
 
@@ -47,9 +49,19 @@ def test_forged_cookie_is_rejected(client: TestClient) -> None:
 
 def test_login_without_configured_hash(settings: Settings) -> None:
     app = create_app(
-        Settings(**{**settings.__dict__, "password_hash": ""}),
+        replace(settings, password_hash=""),
         transport=httpx.MockTransport(lambda r: httpx.Response(200)),
     )
     with TestClient(app) as tc:
         response = tc.post("/api/v1/login", json={"password": PASSWORD})
     assert response.status_code == 503
+
+
+def test_login_rate_limit_per_ip(client: TestClient, settings: Settings) -> None:
+    for _ in range(settings.login_attempts_per_min):
+        assert client.post("/api/v1/login", json={"password": "falsch"}).status_code == 401
+    limited = client.post("/api/v1/login", json={"password": PASSWORD})
+    assert limited.status_code == 429
+    assert "Anmeldeversuche" in limited.json()["detail"]
+    other = TestClient(client.app, client=("192.168.1.50", 1234))  # eigenes Fenster je IP
+    assert other.post("/api/v1/login", json={"password": PASSWORD}).status_code == 204

@@ -61,7 +61,7 @@ def create_session(db_path: Path, ttl_s: int) -> str:
     token = secrets.token_urlsafe(32)
     now = time.time()
     with db.connect(db_path) as conn:
-        conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (now,))
+        db.purge_expired(conn, now)
         conn.execute(
             "INSERT INTO sessions (token, created_at, expires_at) VALUES (?, ?, ?)",
             (token, now, now + ttl_s),
