@@ -153,7 +153,7 @@ def _surfaces(text: str) -> str:
 _TOOTH_COUNT_NOUN = rf"(?:\s*(?:{_PLURAL_NOUN})(?![^\W\d_])|{_COUNT_WORD})"
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
-# Eine Quadrantenangabe wird nur dann zum Zahn, wenn ein Markerwort davor steht
+# Eine Quadrantenangabe wird nur dann zum Zahn, wenn "Zahn"/"Regio" davor steht
 # ("Zahn sieben" ist nie "sieben Zähne") oder hinter der Ziffer nichts mehr steht,
 # ein Satzzeichen, eine Fläche, eine weitere Zahnangabe, ein Befund oder eine
 # Behandlung folgt; jedes andere Wort ist eine Anzahl ("zwei Kronen").
@@ -166,8 +166,8 @@ _TREATMENT = (r"extrahiert|Extraktion|Osteotomie|Wurzelkanalbehandlung|Wurzelkan
 _TOOTH_CONTEXT = (rf"(?:\s*$|\s*[,.;:!?]|\s*[modblpi]+{_SF}|\s*\d"
                   rf"|\s+(?:{_FINDING}|{_TREATMENT})(?![^\W\d_]))")
 _QUAD_THEN_DIGIT = re.compile(
-    rf"{_QUAD}\s+(?P<zahn>(?:Zahn|Regio|an)\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})"
-    rf"(?(zahn)|(?={_TOOTH_CONTEXT}))", re.I
+    rf"{_QUAD}\s+(?P<zahn>(?:Zahn|Regio)\s+)?(?P<d>[1-8])(?![\w{_NT}])"
+    rf"(?(zahn)(?!{_TOOTH_COUNT_NOUN})|(?!{_COUNT_NOUN})(?={_TOOTH_CONTEXT}))", re.I
 )
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
 _DIGIT_RUN = re.compile(
@@ -260,7 +260,7 @@ DEMO = (
     "Drei sechs, drei sieben okklusal Karies, BEMA dreizehn a zweimal, Zusatzleistung GOZ zwei null sechs null.",
     "Professionelle Zahnreinigung, achtundzwanzig Zähne. Ibuprofen sechshundert verordnet.",
     "Zahn 3-6 Mesial Occlusal Distal Caries Profunda. 36-37 Occlusal Caries, BEMA 13a 2x, GOZ 2060.",
-    "Fissurenversiegelung 1, 6, 2, 6 und 1626. Oberkiefer rechts sechs, im vierten Quadranten Zahn sieben.",
+    "Fissurenversiegelung 1 6, 2 6 und 1626. Oberkiefer rechts sechs, im vierten Quadranten Zahn sieben.",
 )
 
 

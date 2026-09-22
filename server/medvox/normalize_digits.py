@@ -1,18 +1,13 @@
 """Ziffernfolgen des Normalisierers zu FDI-Zähnen paaren (WP-5).
 
-Ein Lauf aus Einzelziffern ("3 6", "3-6", "1, 6, 2, 6", "3, 5, 6") wird an den
-Kommas in Items zerlegt:
-
-1. Ein Item aus genau zwei Einzelziffern mit Leerzeichen/Bindestrich ("3 6",
-   "3-6") ist ein Zahnpaar, egal was nach dem nächsten Komma folgt. Drei oder
-   mehr mit Bindestrich verbundene Ziffern sind nie Zähne ("1-1-1"), ebenso
-   wenig eine ungerade Ziffernreihe ("4 5 4").
-2. Ein Item aus einer Einzelziffer vor einem Einheiten-/Zählwort ("3 Kanäle",
-   "6 mm") ist eine Anzahl und wird nie gepaart; ebenso ein Bindestrich-Bereich
-   ("2-3 Tagen").
-3. Nur eine Folge kommagetrennter Einzelziffern ohne Einheit dahinter paart
-   über die Kommas hinweg ("1, 6, 2, 6" -> 16, 26); folgt eine Einheit, ist die
-   ganze Folge eine Messwertliste ("3, 5, 6 mm").
+Ein Lauf aus Einzelziffern wird an den Aufzählungskommas (Komma mit Leerzeichen)
+in Items zerlegt. Gepaart wird nur innerhalb eines Items aus genau zwei
+Einzelziffern, die ein Leerzeichen, ein Bindestrich oder ein Komma ohne
+Leerzeichen verbindet ("3 6", "3-6", "3,6"); über ein Aufzählungskomma hinweg
+wird nie gepaart. Damit bleiben Messwertreihen ("Sondierungstiefen 3 2 3 2 2 3"),
+Dosierungsschemata ("1-1-1") und Aufzählungen ("1, 6, 2, 6") unverändert. Vor
+einem Einheitenwort paart nur das Leerzeichen-Paar, damit "2-3 Tagen" ein
+Bereich und "3,5 mm" ein Messwert bleibt.
 """
 
 from __future__ import annotations
@@ -46,42 +41,21 @@ def expand_range(first: int, last: int) -> list[int]:
 _SEPARATOR = re.compile(r"(\s*,\s*|\s*-\s*|\s+)")
 
 
-def _pair_left_to_right(digits: list[str], group: list[int]) -> set[int]:
-    """Indizes, deren Ziffer mit der folgenden zu einem FDI-Zahn verschmilzt."""
-    joined: set[int] = set()
-    j = 0
-    while j + 1 < len(group):
-        if is_fdi(int(digits[group[j]] + digits[group[j + 1]])):
-            joined.add(group[j])
-            j += 2
-        else:
-            j += 1
-    return joined
-
-
 def pair_digit_run(run: str, unit_follows: bool) -> str:
-    """Einzelziffern eines Laufs nach den Modulregeln paaren (``unit_follows``: Einheit direkt dahinter)."""
+    """Einzelziffern eines Laufs paaren (``unit_follows``: Einheitenwort direkt dahinter)."""
     parts = _SEPARATOR.split(run)
     digits, seps = parts[0::2], parts[1::2]
     items: list[list[int]] = [[0]]
     for k, sep in enumerate(seps):
-        if "," in sep:
+        if "," in sep and sep != ",":
             items.append([])
         items[-1].append(k + 1)
-    # Aufeinanderfolgende Einzelziffer-Items bilden eine Gruppe (Regel 3), jedes andere Item steht allein.
-    groups: list[list[int]] = []
-    singles = False
-    for item in items:
-        if singles and len(item) == 1:
-            groups[-1].append(item[0])
-        else:
-            groups.append(item)
-        singles = len(item) == 1
     joined: set[int] = set()
-    for n, group in enumerate(groups):
-        if len(group) % 2 or (len(group) > 2 and any("-" in seps[k] for k in group[:-1])):
+    for n, item in enumerate(items):
+        if len(item) != 2:
             continue
-        if n == len(groups) - 1 and unit_follows and not (len(group) == 2 and not seps[group[0]].strip()):
+        if unit_follows and n == len(items) - 1 and seps[item[0]].strip():
             continue
-        joined |= _pair_left_to_right(digits, group)
+        if is_fdi(int(digits[item[0]] + digits[item[1]])):
+            joined.add(item[0])
     return "".join(d + ("" if k in joined else seps[k] if k < len(seps) else "") for k, d in enumerate(digits))

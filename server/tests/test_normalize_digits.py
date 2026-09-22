@@ -23,8 +23,10 @@ def test_expand_range_across_the_arch_and_fallback():
         ("3 6", False, "36"),
         ("3-6", False, "36"),
         ("3,6", False, "36"),
-        ("1, 6, 2, 6", False, "16, 26"),
-        ("1 6 2 6", False, "16 26"),
+        ("3,5", True, "3,5"),
+        ("1, 6, 2, 6", False, "1, 6, 2, 6"),  # über ein Komma hinweg wird nie gepaart
+        ("1 6 2 6", False, "1 6 2 6"),
+        ("3 2 3 2 2 3", False, "3 2 3 2 2 3"),  # Sechs-Punkt-Messung
         ("3 6, 3 7, 4", True, "36, 37, 4"),  # Regel 1: Paare bleiben Paare, die Anzahl vor der Einheit nicht
         ("3 6, 3", True, "36, 3"),
         ("3, 5, 6", True, "3, 5, 6"),  # Regel 3: Messwertliste vor einer Einheit
@@ -36,9 +38,9 @@ def test_expand_range_across_the_arch_and_fallback():
         ("1-0-1", False, "1-0-1"),
         ("4 5 4", False, "4 5 4"),  # ungerade Messwertreihe
         ("3-6", False, "36"),
-        ("3 6, 1, 6", False, "36, 16"),
+        ("3 6, 1, 6", False, "36, 1, 6"),
         ("3 9", False, "3 9"),  # kein FDI-Zahn
-        ("2, 9, 1, 6", False, "2, 9, 16"),
+        ("2, 9, 1, 6", False, "2, 9, 1, 6"),
     ],
 )
 def test_pair_digit_run_rules(run, unit_follows, expected):
