@@ -1,0 +1,54 @@
+#!/bin/bash
+# Prüft die HTTPS-Kette über die LAN-IP: Zertifikat wird von der Praxis-CA
+# (rootCA.pem) beglaubigt, SANs enthalten medvox.local und die LAN-IP, Caddy
+# antwortet. Exit 0 = alles in Ordnung.
+
+source "$(dirname "$0")/../common.sh"
+CERT="$MEDVOX_TLS/cert.pem"
+ROOT="$MEDVOX_TLS/rootCA.pem"
+status=0
+LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || true)}"
+[[ -n "$LAN_IP" ]] || die "Keine LAN-IP gefunden"
+[[ -f "$ROOT" ]] || die "Praxis-CA fehlt ($ROOT) – infra/tls/setup.sh ausführen"
+rotate_log "$CADDY_LOG"
+
+log "launchd: $CADDY_LABEL"
+if launchd_running "$CADDY_LABEL"; then ok "läuft"; else warn "nicht aktiv"; status=1; fi
+
+log "Zertifikat-Inhalt ($CERT)"
+if [[ -f "$CERT" ]]; then
+  echo "   SANs: $(cert_sans "$CERT")"
+  echo "   gültig bis: $(openssl x509 -in "$CERT" -noout -enddate | cut -d= -f2)"
+  sans="$(cert_san_list "$CERT")"
+  [[ "$sans" == *"DNS:medvox.local,"* ]] && ok "SAN medvox.local" || { warn "SAN medvox.local fehlt"; status=1; }
+  [[ "$sans" == *"IPAddress:$LAN_IP,"* ]] && ok "SAN $LAN_IP" || { warn "SAN $LAN_IP fehlt (IP geändert? infra/tls/setup.sh erneut ausführen)"; status=1; }
+else
+  warn "Zertifikat fehlt"; status=1
+fi
+
+log "TLS-Handshake mit https://$LAN_IP:$CADDY_HTTPS_PORT gegen rootCA.pem"
+out="$(openssl s_client -connect "$LAN_IP:$CADDY_HTTPS_PORT" -servername medvox.local -CAfile "$ROOT" -verify_return_error </dev/null 2>&1 || true)"
+if grep -q "Verify return code: 0 (ok)" <<<"$out"; then
+  ok "Kette gültig: $(grep -m1 'issuer=' <<<"$out" | sed 's/^ *//')"
+else
+  warn "Kette ungültig:"; grep -E 'Verify return code|error|verify' <<<"$out" | head -5; status=1
+fi
+
+log "HTTP über die Kette (curl --cacert)"
+code="$(curl -sS --cacert "$ROOT" --resolve "medvox.local:$CADDY_HTTPS_PORT:$LAN_IP" -o /dev/null -w '%{http_code}' \
+  "https://medvox.local:$CADDY_HTTPS_PORT/" 2>&1 || true)"
+case "$code" in
+  200) ok "Caddy antwortet (HTTP 200 über medvox.local → $LAN_IP)" ;;
+  404) warn "PWA noch nicht gebaut (WP-4): Caddy antwortet, liefert aber keine App (HTTP 404)" ;;
+  *) warn "unerwartet: $code"; status=1 ;;
+esac
+code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
+case "$code" in
+  200) ok "/api/v1/health → Backend erreichbar (HTTP 200)" ;;
+  502) warn "Backend noch nicht installiert (WP-2): /api wird weitergeleitet, aber $API_UPSTREAM antwortet nicht (HTTP 502)" ;;
+  *) warn "/api/v1/health: HTTP $code"; status=1 ;;
+esac
+
+echo
+if (( status == 0 )); then ok "TLS-Kette und Caddy sind in Ordnung – offene Punkte stehen als Warnung oben"; else warn "HTTPS hat Probleme"; fi
+exit $status

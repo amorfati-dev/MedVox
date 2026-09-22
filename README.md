@@ -15,6 +15,7 @@ Cloud-Prototyp-Version liegt nur noch in der Git-Historie.
 |---|---|---|
 | `server/` | Python 3.12, FastAPI | API auf dem Praxis-Mac: Transkription (whisper.cpp), Normalisierung, Katalog-Regeln, Kurzcode-Transfer |
 | `app/` | Vite + React + TypeScript (ohne UI-Framework) | PWA für iPad/iPhone und Rezeptions-Browser |
+| `infra/` | Shell + launchd | Dienste auf dem Praxis-Mac: whisper-server und LAN-HTTPS (Caddy, eigene CA) – Anleitung in [`infra/README.md`](infra/README.md) |
 
 ## Entwicklung
 
@@ -34,6 +35,13 @@ npm install
 npm run dev        # http://localhost:5173, /api wird an den Server weitergeleitet
 npm run typecheck
 npm run build
+```
+
+Praxis-Mac einrichten (whisper-server, LAN-HTTPS): siehe [`infra/README.md`](infra/README.md).
+
+```sh
+infra/whisper/install.sh   # Spracherkennung als launchd-Dienst (WP-1)
+infra/tls/setup.sh         # Praxis-CA, Zertifikat, Caddy auf 443 (WP-3)
 ```
 
 ## Struktur
