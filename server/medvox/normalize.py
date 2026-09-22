@@ -174,6 +174,7 @@ _DIGIT_RUN = re.compile(
     rf"(?<![\w{_NT}.])(?<![Ff]aktor )(?<![Ff]aktor \d,)\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])"
 )
 _UNIT_AFTER_RUN = re.compile(rf"{_COUNT_NOUN}|\s*-?\s*fach")
+_MARKER_BEFORE_RUN = re.compile(r"(?:Zahn|Regio)\s+$", re.I)
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(
@@ -240,7 +241,14 @@ def normalize(text: str) -> NormalizedText:
     text = _codes(text)
     text = _surfaces(text)
     text = _quadrants(text)
-    text = _DIGIT_RUN.sub(lambda m: pair_digit_run(m.group(), bool(_UNIT_AFTER_RUN.match(m.string, m.end()))), text)
+    text = _DIGIT_RUN.sub(
+        lambda m: pair_digit_run(
+            m.group(),
+            bool(_UNIT_AFTER_RUN.match(m.string, m.end())),
+            bool(_MARKER_BEFORE_RUN.search(m.string, 0, m.start())),
+        ),
+        text,
+    )
     text = _FOUR_DIGITS.sub(_split_four, text)
     text = _TOOTH_RANGE.sub(_range, text)
     teeth = _collect_teeth(text)

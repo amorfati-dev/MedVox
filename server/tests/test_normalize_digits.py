@@ -45,3 +45,13 @@ def test_expand_range_across_the_arch_and_fallback():
 )
 def test_pair_digit_run_rules(run, unit_follows, expected):
     assert pair_digit_run(run, unit_follows) == expected
+
+
+@pytest.mark.parametrize(
+    "run, expected",
+    [("3 6 3 7", "36 37"), ("3 6", "36"), ("3 5 6", "3 5 6"), ("1 6 9 9", "1 6 9 9"),
+     ("3-6 3-7", "3-6 3-7")],
+)
+def test_longer_runs_pair_only_after_a_tooth_marker(run, expected):
+    assert pair_digit_run(run, False, marker_before=True) == expected
+    assert pair_digit_run(run, False) == (expected if len(run) <= 3 else run)

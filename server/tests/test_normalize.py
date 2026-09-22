@@ -53,6 +53,8 @@ def test_single_tooth_forms(raw, expected_text, expected_teeth):
         ("Fissurenversiegelung 1 6, 2 6", "Fissurenversiegelung 16, 26", [16, 26]),
         ("Fissurenversiegelung 1, 6, 2, 6", "Fissurenversiegelung 1, 6, 2, 6", []),
         ("Sondierungstiefen 3 2 3 2 2 3", "Sondierungstiefen 3 2 3 2 2 3", []),
+        ("Zahn drei sechs drei sieben Karies", "Zahn 36 37 Karies", [36, 37]),
+        ("1 6 2 6", "1 6 2 6", []),
         ("Sondierungstiefen 3, 2, 3, 2, 2, 3", "Sondierungstiefen 3, 2, 3, 2, 2, 3", []),
         ("Fissurenversiegelung eins sechs, zwei sechs, drei sechs und vier sechs, IP fünf",
          "Fissurenversiegelung 16, 26, 36 und 46, IP5", [16, 26, 36, 46]),

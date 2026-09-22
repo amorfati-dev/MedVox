@@ -8,6 +8,10 @@ wird nie gepaart. Damit bleiben Messwertreihen ("Sondierungstiefen 3 2 3 2 2 3")
 Dosierungsschemata ("1-1-1") und Aufzählungen ("1, 6, 2, 6") unverändert. Vor
 einem Einheitenwort paart nur das Leerzeichen-Paar, damit "2-3 Tagen" ein
 Bereich und "3,5 mm" ein Messwert bleibt.
+
+Einzige Ausnahme für längere Läufe: steht unmittelbar davor ein Zahnmarker
+("Zahn drei sechs drei sieben"), wird ein leerzeichengetrennter Lauf mit gerader
+Ziffernzahl gepaart, sofern jedes Paar eine gültige FDI-Nummer ergibt.
 """
 
 from __future__ import annotations
@@ -41,7 +45,14 @@ def expand_range(first: int, last: int) -> list[int]:
 _SEPARATOR = re.compile(r"(\s*,\s*|\s*-\s*|\s+)")
 
 
-def pair_digit_run(run: str, unit_follows: bool) -> str:
+def _pairs_after_marker(digits: list[str], seps: list[str], item: list[int]) -> bool:
+    """Ganzer Lauf hinter einem Zahnmarker: gerade Ziffernzahl, nur Leerzeichen, lauter FDI-Paare."""
+    if len(item) % 2 or any(seps[k].strip() for k in item[:-1]):
+        return False
+    return all(is_fdi(int(digits[item[k]] + digits[item[k + 1]])) for k in range(0, len(item), 2))
+
+
+def pair_digit_run(run: str, unit_follows: bool, marker_before: bool = False) -> str:
     """Einzelziffern eines Laufs paaren (``unit_follows``: Einheitenwort direkt dahinter)."""
     parts = _SEPARATOR.split(run)
     digits, seps = parts[0::2], parts[1::2]
@@ -52,6 +63,10 @@ def pair_digit_run(run: str, unit_follows: bool) -> str:
         items[-1].append(k + 1)
     joined: set[int] = set()
     for n, item in enumerate(items):
+        if len(item) > 2:
+            if marker_before and _pairs_after_marker(digits, seps, item):
+                joined |= {item[k] for k in range(0, len(item), 2)}
+            continue
         if len(item) != 2:
             continue
         if unit_follows and n == len(items) - 1 and seps[item[0]].strip():
