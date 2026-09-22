@@ -38,8 +38,11 @@ class NormalizedText:
 
 # --- Zahlwörter ---------------------------------------------------------------
 
-_PLURAL_NOUN = (r"Zähne|Zaehne|Jahren?|Tagen?|Wochen|Monaten?|Minuten|Stunden|Sekunden|Kanäle|Kanaele|Wurzeln"
-                r"|Sitzungen|Flächen|Implantate|Millimeter|mm|Prozent|%|mg|ml|Grad|Uhr")
+# Dauer- und Messwörter beenden eine Zahnreihe immer, Objektwörter nur ohne "Zahn"/"Regio" davor.
+_DURATION_NOUN = (r"Jahren?|Tagen?|Wochen|Monaten?|Minuten|Stunden|Sekunden|Millimeter|mm|Prozent|%|mg|ml"
+                  r"|Grad|Uhr")
+_OBJECT_NOUN = r"Zähne|Zaehne|Kanäle|Kanaele|Wurzeln|Sitzungen|Flächen|Implantate"
+_PLURAL_NOUN = rf"{_DURATION_NOUN}|{_OBJECT_NOUN}"
 _SINGULAR_NOUN = r"Zahn|Jahr|Tag|Woche|Monat|Minute|Stunde|Sekunde|Kanal|Wurzel|Sitzung|Fläche|Implantat"
 _UNIT_NOUN = rf"\s*(?:{_PLURAL_NOUN}|{_SINGULAR_NOUN})(?![^\W\d_])"
 _COUNT_WORD = r"\s*(?:[Mm]al|x)(?![^\W\d_])"
@@ -153,10 +156,8 @@ def _surfaces(text: str) -> str:
 _TOOTH_COUNT_NOUN = rf"(?:\s*(?:{_PLURAL_NOUN})(?![^\W\d_])|{_COUNT_WORD})"
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
-# Eine Quadrantenangabe wird nur dann zum Zahn, wenn "Zahn"/"Regio" davor steht
-# ("Zahn sieben" ist nie "sieben Zähne") oder hinter der Ziffer nichts mehr steht,
-# ein Satzzeichen, eine Fläche, eine weitere Zahnangabe, ein Befund oder eine
-# Behandlung folgt; jedes andere Wort ist eine Anzahl ("zwei Kronen").
+# Eine Quadrantenangabe wird nur dann zum Zahn, wenn "Zahn"/"Regio" davor steht oder hinter der Ziffer
+# Satzende, Satzzeichen, Fläche, Zahnangabe, Befund oder Behandlung folgt ("zwei Kronen" bleibt Anzahl).
 _FINDING = (r"Karies|Sekundärkaries|kariös\w*|Pulpitis|Parodontitis|Gingivitis|Perikoronitis|Nekrose|Fistel"
             r"|Abszess|Zyste|Längsfraktur|Fraktur|Sprung|Sprünge|Attrition|Erosion|Rezession|Blutung"
             r"|retiniert|verlagert|avital|vital|profunda|media|apikal|Aufbissbeschwerden|Hypersensibilität"
@@ -175,15 +176,12 @@ _DIGIT_RUN = re.compile(
 )
 _UNIT_AFTER_RUN = re.compile(rf"{_COUNT_NOUN}|\s*-?\s*fach")
 _MARKER_BEFORE_RUN = re.compile(r"(?:Zahn|Regio)\s+$", re.I)
+_ALWAYS_COUNT = re.compile(rf"\s*(?:{_DURATION_NOUN})(?![^\W\d_])|{_COUNT_WORD}")
 # Ein Mess- oder Indexwort im selben Satz hebt den Zahnmarker auf: danach sind Ziffernreihen Messwerte.
-_MEASURE_IN_CLAUSE = re.compile(
-    r"(?:Sondierungstiefen?|Taschentiefen?|Rezession|Lockerungsgrad|BOP|PSI)(?![^\W\d_])[^.;:!?]*$", re.I
-)
+_MEASURE_IN_CLAUSE = re.compile(r"(?:Sondierungstiefen?|Taschentiefen?|Rezession|Lockerungsgrad|BOP|PSI)(?![^\W\d_])[^.;:!?]*$", re.I)
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
-_TOOTH = re.compile(
-    rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
-)
+_TOOTH = re.compile(rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})")
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
 _SURFACES_BEFORE = re.compile(rf"([modblpi]{{1,5}}){_SF}\s+(?:Zahn\s+)?$")
@@ -222,9 +220,9 @@ def _collect_teeth(text: str) -> list[ToothRef]:
             run.append(hits[i + 1])
             i += 1
         i += 1
-        count = bool(re.match(_TOOTH_COUNT_NOUN, text[run[-1][1] :])) and not _MARKER_BEFORE_RUN.search(
-            text, 0, run[-1][0]
-        )
+        rest = text[run[-1][1] :]
+        marked = _MARKER_BEFORE_RUN.search(text, 0, run[0][0]) and not _ALWAYS_COUNT.match(rest)
+        count = bool(re.match(_TOOTH_COUNT_NOUN, rest)) and not marked
         numbers: list[int] = []
         for k, (start, _end, fdi) in enumerate(run):
             if k and text[run[k - 1][1] : start].strip() == "-":
