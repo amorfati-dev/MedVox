@@ -82,8 +82,11 @@ deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefas
 korrigierte Text ist das, was der Behandler liest und ins PVS kopiert.
 
 `normalize` erzeugt die maschinenlesbare Form für den Regel-Extraktor: gesprochene Ziffernpaare
-und alle Whisper-Schreibweisen werden zu FDI-Nummern ("drei sechs", "3-6", "3,6", "1, 6, 2, 6" →
-36 / 16, 26; "36-37" und "17 bis 27" sind Bereiche), Quadrantenangaben werden aufgelöst
+und alle Whisper-Schreibweisen werden zu FDI-Nummern ("drei sechs", "3-6", "3,6" → 36;
+"1626" → 16, 26; "36-37" und "17 bis 27" sind Bereiche). Gepaart werden nur zwei Einzelziffern;
+längere Läufe nur direkt hinter "Zahn"/"Regio" ("Zahn 1 6 2 6" → 16, 26), sodass Messwertreihen
+("Sondierungstiefen 3 2 3 2 2 3"), Dosierungsschemata ("1-1-1") und Kommalisten ("1, 6, 2, 6")
+unverändert bleiben. Quadrantenangaben werden aufgelöst
 ("Oberkiefer rechts sechs" → 16), Flächen werden zu Buchstaben ("mesial okklusal distal" →
 "mod"), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
 sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und Anzahlen ("28 Zähne")
