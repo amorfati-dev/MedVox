@@ -15,6 +15,8 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
+from medvox.normalize_digits import expand_range, is_fdi, pair_digit_run
+
 # Interne Marker, vor der Rückgabe entfernt. _NT ("no tooth") hängt hinter einer
 # Zahl, die nie als Zahn gelesen werden darf (Anzahlen, zusammengefügte Codes,
 # PSI-Codes); _SF markiert ein Token als normalisierte Flächenabkürzung.
@@ -32,32 +34,6 @@ class ToothRef:
 class NormalizedText:
     text: str
     teeth: list[ToothRef] = field(default_factory=list)
-
-
-# --- FDI ---------------------------------------------------------------------
-
-
-def is_fdi(number: int) -> bool:
-    """True für bleibende (11-48) und Milchzahn-FDI-Nummern (51-85)."""
-    quadrant, tooth = divmod(number, 10)
-    return (1 <= quadrant <= 4 and 1 <= tooth <= 8) or (5 <= quadrant <= 8 and 1 <= tooth <= 5)
-
-
-def _arch(fdi: int) -> list[int]:
-    """Alle Zähne des Kiefers (OK/UK, bleibend/Milch) in FDI-Reihenfolge."""
-    quadrant = fdi // 10
-    right, left = {1: (1, 2), 2: (1, 2), 3: (4, 3), 4: (4, 3), 5: (5, 6), 6: (5, 6), 7: (8, 7), 8: (8, 7)}[quadrant]
-    last = 8 if quadrant <= 4 else 5
-    return [right * 10 + t for t in range(last, 0, -1)] + [left * 10 + t for t in range(1, last + 1)]
-
-
-def expand_range(first: int, last: int) -> list[int]:
-    """Zähne von ``first`` bis ``last`` entlang des Kiefers ("17 bis 27" -> 14 Zähne)."""
-    arch = _arch(first)
-    if last not in arch:
-        return [first, last]
-    i, j = arch.index(first), arch.index(last)
-    return arch[i : j + 1] if i <= j else arch[j : i + 1][::-1]
 
 
 # --- Zahlwörter ---------------------------------------------------------------
@@ -167,9 +143,9 @@ _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
 _QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
 _DIGIT_RUN = re.compile(
-    rf"(?<![\w{_NT}.])(?<![Ff]aktor )(?<![Ff]aktor \d,)\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+"
-    rf"(?![\w{_NT}])(?!{_COUNT_NOUN})(?!\s*-?\s*fach)(?!(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))*{_UNIT_NOUN})"
+    rf"(?<![\w{_NT}.])(?<![Ff]aktor )(?<![Ff]aktor \d,)\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])"
 )
+_UNIT_AFTER_RUN = re.compile(rf"{_COUNT_NOUN}|\s*-?\s*fach")
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
 _TOOTH = re.compile(
@@ -191,24 +167,6 @@ def _quadrant(m: re.Match) -> int:
 def _quadrants(text: str) -> str:
     text = _QUAD_THEN_DIGIT.sub(lambda m: f"{m.group('zahn') or ''}{_quadrant(m)}{m.group('d')}", text)
     return _DIGIT_THEN_QUAD.sub(lambda m: f"{_quadrant(m)}{m.group('d')}", text)
-
-
-def _pair_digits(m: re.Match) -> str:
-    """"1 6, 2 6" -> "16, 26": Einzelziffern von links nach rechts paaren, wenn sie einen FDI-Zahn bilden."""
-    parts = re.split(r"(\D+)", m.group())
-    digits, seps = parts[0::2], parts[1::2]
-    out: list[str] = []
-    i = 0
-    while i < len(digits):
-        if i + 1 < len(digits) and is_fdi(int(digits[i] + digits[i + 1])):
-            out.append(digits[i] + digits[i + 1])
-            out.append(seps[i + 1] if i + 1 < len(seps) else "")
-            i += 2
-        else:
-            out.append(digits[i])
-            out.append(seps[i] if i < len(seps) else "")
-            i += 1
-    return "".join(out)
 
 
 def _split_four(m: re.Match) -> str:
@@ -254,7 +212,7 @@ def normalize(text: str) -> NormalizedText:
     text = _codes(text)
     text = _surfaces(text)
     text = _quadrants(text)
-    text = _DIGIT_RUN.sub(_pair_digits, text)
+    text = _DIGIT_RUN.sub(lambda m: pair_digit_run(m.group(), bool(_UNIT_AFTER_RUN.match(m.string, m.end()))), text)
     text = _FOUR_DIGITS.sub(_split_four, text)
     text = _TOOTH_RANGE.sub(_range, text)
     teeth = _collect_teeth(text)

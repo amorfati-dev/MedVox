@@ -2,7 +2,7 @@
 
 import pytest
 
-from medvox.normalize import ToothRef, expand_range, is_fdi, normalize, number_value
+from medvox.normalize import ToothRef, normalize, number_value
 
 
 def teeth(text: str) -> list[int]:
@@ -28,6 +28,9 @@ def teeth(text: str) -> list[int]:
         ("Milchzahn fünf fünf kariös", "Milchzahn 55 kariös", [55]),
         ("GOZ zwei null acht null zwei sechs", "GOZ 2080 26", [26]),
         ("GOZ 2100 Faktor 2,3, 1, 6", "GOZ 2100 Faktor 2,3, 16", [16]),
+        ("Zahn drei sechs, drei Kanäle aufbereitet", "Zahn 36, 3 Kanäle aufbereitet", [36]),
+        ("Kompositfüllung eins vier, drei Flächen", "Kompositfüllung 14, 3 Flächen", [14]),
+        ("Rezession an drei sechs, zwei Millimeter", "Rezession an 36, 2 Millimeter", [36]),
         ("Karies. 36 okklusal", "Karies. 36 o", [36]),
         ("Zahn 36.", "Zahn 36.", [36]),
         ("36: Karies", "36: Karies", [36]),
@@ -52,6 +55,7 @@ def test_single_tooth_forms(raw, expected_text, expected_teeth):
         ("PSI drei drei zwei zwei drei drei drei sechs okklusal", "PSI 3 3 2 2 3 3 36 o", [36]),
         ("PSI drei, drei sechs Karies", "PSI 3, 36 Karies", [36]),
         ("drei sechs, drei sieben, zwei mesial", "36, 37, 2 m", [36, 37]),
+        ("Kürettage drei sechs, drei sieben, vier Sitzungen", "Kürettage 36, 37, 4 Sitzungen", [36, 37]),
         ("Drei sechs, drei sieben okklusal Karies", "36, 37 o Karies", [36, 37]),
         ("36, 37 okklusal, Karies", "36, 37 o, Karies", [36, 37]),
         ("36-37 okklusal Karies", "36-37 o Karies", [36, 37]),
@@ -273,18 +277,6 @@ def test_d12_planned_extraction_keeps_both_references():
 
 
 # --- Hilfsfunktionen --------------------------------------------------------------------
-
-def test_is_fdi():
-    assert all(is_fdi(n) for n in (11, 18, 21, 28, 31, 38, 41, 48, 51, 55, 65, 75, 85))
-    assert not any(is_fdi(n) for n in (0, 10, 19, 20, 29, 30, 49, 50, 56, 86, 90, 100))
-
-
-def test_expand_range_across_the_arch_and_fallback():
-    assert expand_range(36, 37) == [36, 37]
-    assert expand_range(37, 36) == [37, 36]
-    assert expand_range(13, 23) == [13, 12, 11, 21, 22, 23]
-    assert expand_range(16, 46) == [16, 46]  # verschiedene Kiefer: nur die Endpunkte
-
 
 @pytest.mark.parametrize(
     "word, expected",
