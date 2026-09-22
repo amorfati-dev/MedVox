@@ -41,6 +41,8 @@ def create_app(
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.init_db(settings.db_path)
         db.purge_expired_at(settings.db_path)
+        # Prompt-Datei bewusst schon beim Start lesen, damit die Warnung bei fehlender
+        # Datei (FALLBACK_PROMPT) sofort im Log steht und nicht erst beim ersten Diktat.
         settings.whisper_prompt
         app.state.http = httpx.Client(transport=transport)
         sweep = asyncio.create_task(purge_loop(settings))

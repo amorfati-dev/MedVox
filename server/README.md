@@ -59,7 +59,8 @@ kommt, sonst direkt vom Peer.
 
 Fehler tragen eine deutsche Meldung in `{"detail": "…"}`: 400 unlesbare oder leere
 Aufnahme, 401 nicht angemeldet, 413 zu groß oder zu lang, 415 falscher Typ,
-502 whisper-server meldet Fehler, 503 whisper-server nicht erreichbar.
+500 ffmpeg fehlt oder Konvertierung zu langsam, 502 whisper-server meldet Fehler,
+503 whisper-server nicht erreichbar.
 Kurzcodes bestehen aus 6 Zeichen ohne 0/O/1/I und sind innerhalb der TTL mehrfach abrufbar.
 
 ## Module

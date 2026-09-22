@@ -57,7 +57,7 @@ class Settings:
     purge_interval_s: float = 5 * 60
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         tmp = os.environ.get("MEDVOX_TMP_DIR")
         return cls(
             whisper_url=os.environ.get("WHISPER_URL", cls.whisper_url).rstrip("/"),
