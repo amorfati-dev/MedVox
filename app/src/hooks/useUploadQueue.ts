@@ -19,7 +19,6 @@ export type UploadQueue = {
   lastLatency: number | null;
   error: string | null;
   setError: (message: string | null) => void;
-  setCodes: (codes: string[]) => void;
   enqueue: (blob: Blob, fallbackMime: string) => void;
   resume: () => void; // angehaltene Warteschlange fortsetzen
   dropSegment: () => void; // nur den wartenden Abschnitt verwerfen
@@ -69,6 +68,7 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
           setTranscript((prev) => (prev && text ? `${prev} ${text}` : prev || text));
           setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
           setLastLatency(result.latency_s);
+          setError(null);
         } catch (e) {
           if (mine !== epoch.current) continue;
           const unauthorized = e instanceof ApiError && e.status === 401;
@@ -143,7 +143,6 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
     lastLatency,
     error,
     setError,
-    setCodes,
     enqueue,
     resume,
     dropSegment,

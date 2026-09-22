@@ -43,7 +43,6 @@ export type Dictation = {
   stop: () => void; // beendet das Segment und lädt es hoch
   next: () => void; // "Weiter": Segment hochladen, Aufnahme läuft auf demselben Stream weiter
   reset: () => void; // Transkript und offene Abschnitte verwerfen
-  setCodes: (codes: string[]) => void;
 };
 
 export function useDictation(): Dictation {
@@ -229,6 +228,5 @@ export function useDictation(): Dictation {
     stop,
     next,
     reset,
-    setCodes: uploads.setCodes,
   };
 }
