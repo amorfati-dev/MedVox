@@ -1,4 +1,4 @@
-"""WP-5: normaliser cases built from the report's test set (Anhang B) and the raw whisper.cpp outputs (Anhang C)."""
+"""WP-5: Normalisierer-Fälle aus dem Testset des Reports (Anhang B) und den rohen whisper.cpp-Ausgaben (Anhang C)."""
 
 import pytest
 
@@ -9,7 +9,7 @@ def teeth(text: str) -> list[int]:
     return [t.fdi for t in normalize(text).teeth]
 
 
-# --- spoken digit pairs and Whisper-written forms ------------------------------
+# --- gesprochene Ziffernpaare und Whisper-Schreibweisen -------------------------
 
 @pytest.mark.parametrize(
     "raw, expected_text, expected_teeth",
@@ -59,7 +59,7 @@ def test_comma_separated_digits_are_never_merged_into_four_digit_block():
     assert "1626" not in normalize("Fissurenversiegelung 1, 6, 2, 6").text
 
 
-# --- quadrant phrases ---------------------------------------------------------------
+# --- Quadrantenangaben --------------------------------------------------------------
 
 @pytest.mark.parametrize(
     "raw, expected_text, expected_teeth",
@@ -72,6 +72,8 @@ def test_comma_separated_digits_are_never_merged_into_four_digit_block():
         ("im vierten Quadranten Zahn sieben", "Zahn 47", [47]),
         ("Zahn sechs im zweiten Quadranten", "Zahn 26", [26]),
         ("im dritten Quadranten 6 Karies", "36 Karies", [36]),
+        ("Oberkiefer rechts drei Zähne fehlen", "Oberkiefer rechts 3 Zähne fehlen", []),
+        ("Unterkiefer links 2 Implantate", "Unterkiefer links 2 Implantate", []),
     ],
 )
 def test_quadrant_phrases(raw, expected_text, expected_teeth):
@@ -84,7 +86,7 @@ def test_quadrant_phrase_without_digit_is_left_alone():
     assert normalize("Sondierung im ersten Quadranten").text == "Sondierung im ersten Quadranten"
 
 
-# --- surfaces --------------------------------------------------------------------------
+# --- Flächen ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize(
     "raw, expected_text, expected_teeth",
@@ -99,6 +101,8 @@ def test_quadrant_phrase_without_digit_is_left_alone():
         ("24 bukkal und 25 vestibulär, 34 lingual", "24 b und 25 b, 34 l",
          [ToothRef(24, "b"), ToothRef(25, "b"), ToothRef(34, "l")]),
         ("Karies an der distalen Fläche 16", "Karies an der d Fläche 16", [ToothRef(16, "")]),
+        ("36 mesial und distal Karies", "36 md Karies", [ToothRef(36, "md")]),
+        ("Termin Mo 36", "Termin Mo 36", [ToothRef(36, "")]),
     ],
 )
 def test_surfaces(raw, expected_text, expected_teeth):
@@ -111,7 +115,7 @@ def test_surfaces_of_a_list_apply_to_every_tooth():
     assert normalize("36, 37 okklusal Karies").teeth == [ToothRef(36, "o"), ToothRef(37, "o")]
 
 
-# --- number words and codes -------------------------------------------------------
+# --- Zahlwörter und Codes ---------------------------------------------------------
 
 @pytest.mark.parametrize(
     "raw, expected_text",
@@ -124,6 +128,11 @@ def test_surfaces_of_a_list_apply_to_every_tooth():
         ("BEMA Ziffer Ä neun drei fünf d", "BEMA Ziffer Ä935d"),
         ("Ä 935 d", "Ä935d"),
         ("Ä935d", "Ä935d"),
+        ("Ä eins", "Ä1"),
+        ("Ä 5", "Ä5"),
+        ("BEMA 13 2 mal", "BEMA 13 2 mal"),
+        ("GOZ 2100 2 x", "GOZ 2100 2 x"),
+        ("GOZ 2060 3 Flächen", "GOZ 2060 3 Flächen"),
         ("Ibuprofen sechshundert verordnet", "Ibuprofen 600 verordnet"),
         ("Amoxicillin tausend", "Amoxicillin 1000"),
         ("Professionelle Zahnreinigung, achtundzwanzig Zähne", "Professionelle Zahnreinigung, 28 Zähne"),
@@ -152,7 +161,10 @@ def test_number_words_and_codes(raw, expected_text):
         "BEMA Ziffer Ä935d",
         "BEMA 13a zweimal",
         "Ibuprofen 600",
-        "Nr. 13 und Pos. 2430",
+        "Nachkontrolle am 15.04.",
+        "Termin 14:30 Uhr",
+        "Spülung 15-20 Minuten",
+        "Kontrolle in 14-21 Tagen",
         "PSI 3 3 2 2 3 3",
         "Sondierungstiefe 3,5 mm",
         "in 2-3 Tagen",
@@ -178,7 +190,7 @@ def test_prepositions_are_not_merged_with_surfaces_or_teeth():
     assert result.teeth == [ToothRef(36, "")]
 
 
-# --- whole dictations from Anhang B / C ------------------------------------------------
+# --- ganze Diktate aus Anhang B / C ----------------------------------------------------
 
 def test_d01_spoken():
     result = normalize(
@@ -239,7 +251,7 @@ def test_d12_planned_extraction_keeps_both_references():
     assert [t.fdi for t in result.teeth] == [48, 48]
 
 
-# --- helpers ----------------------------------------------------------------------------
+# --- Hilfsfunktionen --------------------------------------------------------------------
 
 def test_is_fdi():
     assert all(is_fdi(n) for n in (11, 18, 21, 28, 31, 38, 41, 48, 51, 55, 65, 75, 85))
@@ -250,7 +262,7 @@ def test_expand_range_across_the_arch_and_fallback():
     assert expand_range(36, 37) == [36, 37]
     assert expand_range(37, 36) == [37, 36]
     assert expand_range(13, 23) == [13, 12, 11, 21, 22, 23]
-    assert expand_range(16, 46) == [16, 46]  # different arches: endpoints only
+    assert expand_range(16, 46) == [16, 46]  # verschiedene Kiefer: nur die Endpunkte
 
 
 @pytest.mark.parametrize(

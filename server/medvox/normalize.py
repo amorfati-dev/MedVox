@@ -1,10 +1,11 @@
-"""Deterministic normaliser for German dental dictations (WP-5).
+"""Deterministischer Normalisierer für deutsche Zahnarzt-Diktate (WP-5).
 
-Turns a (lexicon-corrected) transcript into the machine-facing form the rule
-extractor works on: spoken and Whisper-written tooth forms -> FDI numbers,
-surface words -> m/o/d/b/l/p/i, German number words -> digits, BEMA/GOZ/Ä
-codes joined. Pure function, no I/O. ``python -m medvox.normalize --demo``
-prints the report's test dictations for a manual check.
+Wandelt ein (lexikon-korrigiertes) Transkript in die maschinenlesbare Form für
+den Regel-Extraktor: gesprochene und von Whisper geschriebene Zahnformen ->
+FDI-Nummern, Flächenwörter -> m/o/d/b/l/p/i, deutsche Zahlwörter -> Ziffern,
+BEMA/GOZ/Ä-Codes zusammengefügt. Reine Funktion, ohne I/O.
+``python -m medvox.normalize --demo`` gibt die Testdiktate des Reports zur
+manuellen Prüfung aus.
 """
 
 from __future__ import annotations
@@ -13,9 +14,9 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
-# Internal markers, stripped before returning. _NT ("no tooth") is glued behind
-# a number that must never be read as a tooth (count words, joined codes, PSI
-# codes); _SF marks a token that is a normalised surface abbreviation.
+# Interne Marker, vor der Rückgabe entfernt. _NT ("no tooth") hängt hinter einer
+# Zahl, die nie als Zahn gelesen werden darf (Anzahlen, zusammengefügte Codes,
+# PSI-Codes); _SF markiert ein Token als normalisierte Flächenabkürzung.
 _NT = "\x01"
 _SF = "\x02"
 
@@ -23,7 +24,7 @@ _SF = "\x02"
 @dataclass(frozen=True)
 class ToothRef:
     fdi: int
-    surfaces: str = ""  # e.g. "mod"; "" when no surface was dictated
+    surfaces: str = ""  # z. B. "mod"; "" wenn keine Fläche diktiert wurde
 
 
 @dataclass
@@ -36,13 +37,13 @@ class NormalizedText:
 
 
 def is_fdi(number: int) -> bool:
-    """True for permanent (11-48) and deciduous (51-85) FDI tooth numbers."""
+    """True für bleibende (11-48) und Milchzahn-FDI-Nummern (51-85)."""
     quadrant, tooth = divmod(number, 10)
     return (1 <= quadrant <= 4 and 1 <= tooth <= 8) or (5 <= quadrant <= 8 and 1 <= tooth <= 5)
 
 
 def _arch(fdi: int) -> list[int]:
-    """All teeth of the arch (upper/lower, permanent/deciduous) in FDI order."""
+    """Alle Zähne des Kiefers (OK/UK, bleibend/Milch) in FDI-Reihenfolge."""
     quadrant = fdi // 10
     right, left = {1: (1, 2), 2: (1, 2), 3: (4, 3), 4: (4, 3), 5: (5, 6), 6: (5, 6), 7: (8, 7), 8: (8, 7)}[quadrant]
     last = 8 if quadrant <= 4 else 5
@@ -50,7 +51,7 @@ def _arch(fdi: int) -> list[int]:
 
 
 def expand_range(first: int, last: int) -> list[int]:
-    """Teeth from ``first`` to ``last`` along the arch ("17 bis 27" -> 14 teeth)."""
+    """Zähne von ``first`` bis ``last`` entlang des Kiefers ("17 bis 27" -> 14 Zähne)."""
     arch = _arch(first)
     if last not in arch:
         return [first, last]
@@ -58,7 +59,7 @@ def expand_range(first: int, last: int) -> list[int]:
     return arch[i : j + 1] if i <= j else arch[j : i + 1][::-1]
 
 
-# --- number words -------------------------------------------------------------
+# --- Zahlwörter ---------------------------------------------------------------
 
 _UNITS = {"null": 0, "ein": 1, "eins": 1, "zwei": 2, "zwo": 2, "drei": 3, "vier": 4, "fünf": 5,
           "fuenf": 5, "sechs": 6, "sieben": 7, "acht": 8, "neun": 9}
@@ -80,7 +81,7 @@ _WORD = re.compile(r"[^\W\d_]+")
 
 
 def number_value(word: str) -> tuple[int, bool] | None:
-    """(value, is_single_digit_word) for a German number word, else None."""
+    """(Wert, ist_einzelnes_Ziffernwort) für ein deutsches Zahlwort, sonst None."""
     m = _NUMBER_WORD.fullmatch(word.lower())
     if not m or not any(m.groupdict().values()):
         return None
@@ -110,18 +111,16 @@ def _number_words(text: str) -> str:
         if parsed is None:
             return word
         value, single = parsed
-        # Only spoken single digits ("drei sechs") may form teeth; "achtundzwanzig" never does.
+        # Nur gesprochene Einzelziffern ("drei sechs") dürfen Zähne bilden; "achtundzwanzig" nie.
         return str(value) if single else f"{value}{_NT}"
 
     return _WORD.sub(repl, text)
 
 
-# --- codes ---------------------------------------------------------------------
+# --- Codes ---------------------------------------------------------------------
 
-_AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s*\d){{1,3}}){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
-_PREFIX_CODE = re.compile(
-    rf"\b(GOZ|BEMA|Ziffer|Nr\.?|Pos\.?|Position|Code)\s+(\d(?:\s*\d){{0,4}}){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)"
-)
+_AE_CODE = re.compile(rf"\bÄ\s*(\d(?:\s\d){{0,3}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
+_PREFIX_CODE = re.compile(rf"\b(GOZ|BEMA)\s+(\d(?:\s\d){{1,4}}|\d+){_NT}*(?:\s*([a-kA-K]))?(?![^\W\d_]|\d)")
 _PSI_CODES = re.compile(r"\bPSI\s+(\d(?:[\s,/-]*\d)*)(?![\w\x01])")
 
 
@@ -134,38 +133,38 @@ def _codes(text: str) -> str:
     return _PSI_CODES.sub(lambda m: "PSI " + re.sub(r"\d", lambda d: d.group() + _NT, m.group(1)), text)
 
 
-# --- surfaces --------------------------------------------------------------------
+# --- Flächen ---------------------------------------------------------------------
 
 _SURFACE_WORDS = {"mesial": "m", "okklusal": "o", "occlusal": "o", "distal": "d", "bukkal": "b",
                   "buccal": "b", "vestibulär": "b", "vestibulaer": "b", "lingual": "l",
                   "palatinal": "p", "inzisal": "i", "incisal": "i"}
-_SURFACE_ABBR = {"mo", "om", "od", "do", "mod", "mob", "mol", "mop", "dob", "dol", "dop", "modb", "modl", "modp"}
 _SURFACE_WORD = re.compile(rf"\b({_alt(_SURFACE_WORDS)})(?:e|en|er|es|em)?\b", re.I)
-_SURFACE_ABBR_RE = re.compile(r"(?<![^\W\d_])([modblpiMODBLPI]{2,4})(?![^\W\d_])")
-_SURFACE_RUN = re.compile(rf"[modblpi]{{1,5}}{_SF}(?:(?:\s*,\s*|\s+)[modblpi]{{1,5}}{_SF})+")
+_SURFACE_MOD = re.compile(r"(?<![^\W\d_])mod(?![^\W\d_])", re.I)
+_SURFACE_RUN = re.compile(rf"[modblpi]{{1,5}}{_SF}(?:(?:\s*,\s*|\s+und\s+|\s+)[modblpi]{{1,5}}{_SF})+")
 
 
 def _surfaces(text: str) -> str:
     text = _SURFACE_WORD.sub(lambda m: _SURFACE_WORDS[m.group(1).lower()] + _SF, text)
-    text = _SURFACE_ABBR_RE.sub(
-        lambda m: m.group(1).lower() + _SF if m.group(1).lower() in _SURFACE_ABBR else m.group(1), text
-    )
-    # "m o, d" (one token per dictated word) -> "mod"
-    return _SURFACE_RUN.sub(lambda m: re.sub(r"[^a-z]", "", m.group()) + _SF, text)
+    text = _SURFACE_MOD.sub("mod" + _SF, text)
+    # "m o, d" bzw. "m und d" (ein Token je diktiertem Wort) -> "mod" / "md"
+    return _SURFACE_RUN.sub(lambda m: "".join(re.findall(rf"([modblpi]+){_SF}", m.group())) + _SF, text)
 
 
-# --- teeth ----------------------------------------------------------------------
+# --- Zähne ----------------------------------------------------------------------
 
 _COUNT_NOUN = (r"\s*(?:Zähne|Zaehne|Zahn|Jahre?n?|Tage?n?|Wochen?|Monate?n?|Millimeter|mm|Minuten?|Stunden?"
-               r"|Sekunden?|Prozent|%|mg|ml|Kanäle|Kanaele|Kanal|Wurzeln?|Sitzungen?|Grad|Uhr|Flächen|Mal|x)(?![^\W\d_])")
+               r"|Sekunden?|Prozent|%|mg|ml|Kanäle|Kanaele|Kanal|Wurzeln?|Sitzungen?|Grad|Uhr|Flächen|Implantate?|Mal|x)"
+               r"(?![^\W\d_])")
 _QUAD = (r"(?:(?P<jaw>Ober|Unter)kiefer\s+(?P<side>rechts|links)"
          r"|(?:im\s+|in\s+|des\s+|der\s+)?(?P<ord>erst|zweit|dritt|viert)(?:e|er|en|em|es)\s+Quadrant(?:en)?)")
-_QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])", re.I)
+_QUAD_THEN_DIGIT = re.compile(rf"{_QUAD}\s+(?P<zahn>Zahn\s+)?(?P<d>[1-8])(?![\w{_NT}])(?!{_COUNT_NOUN})", re.I)
 _DIGIT_THEN_QUAD = re.compile(rf"(?<![\w{_NT}])(?P<d>[1-8])\s+(?:im\s+|in\s+)?{_QUAD}", re.I)
 _DIGIT_RUN = re.compile(rf"(?<![\w{_NT}.])\d(?:(?:\s*,\s*|\s*-\s*|\s+)\d(?![\w{_NT}]))+(?![\w{_NT}])(?!{_COUNT_NOUN})")
 _FOUR_DIGITS = re.compile(rf"(?<![\w{_NT}])(\d\d)(\d\d)(?![\w{_NT}])")
 _TOOTH_RANGE = re.compile(rf"(?<![\w{_NT}])(\d\d)\s*(?:-|bis)\s*(\d\d)(?![\w{_NT}])")
-_TOOTH = re.compile(rf"(?<![\w{_NT}])\d\d(?![\w{_NT}])(?!{_COUNT_NOUN})")
+_TOOTH = re.compile(
+    rf"(?<![\w{_NT}])\d\d(?![\w{_NT}])(?!{_COUNT_NOUN})(?![.:]\d)(?!\s*-\s*\d+{_COUNT_NOUN})"
+)
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
 _SURFACES_BEFORE = re.compile(rf"([modblpi]{{1,5}}){_SF}\s+(?:Zahn\s+)?$")
@@ -185,7 +184,7 @@ def _quadrants(text: str) -> str:
 
 
 def _pair_digits(m: re.Match) -> str:
-    """"1 6, 2 6" -> "16, 26": pair single digits left to right when they form an FDI tooth."""
+    """"1 6, 2 6" -> "16, 26": Einzelziffern von links nach rechts paaren, wenn sie einen FDI-Zahn bilden."""
     parts = re.split(r"(\D+)", m.group())
     digits, seps = parts[0::2], parts[1::2]
     out: list[str] = []
@@ -235,7 +234,7 @@ def _collect_teeth(text: str) -> list[ToothRef]:
     return teeth
 
 
-# --- pipeline -------------------------------------------------------------------
+# --- Pipeline -------------------------------------------------------------------
 
 
 def normalize(text: str) -> NormalizedText:
@@ -272,10 +271,10 @@ DEMO = (
 def main(argv: list[str] | None = None) -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Normalise a German dental dictation.")
-    parser.add_argument("text", nargs="*", help="dictation text (omit with --demo)")
-    parser.add_argument("--demo", action="store_true", help="run the built-in example dictations")
-    parser.add_argument("--raw", action="store_true", help="skip the lexicon correction step")
+    parser = argparse.ArgumentParser(description="Normalisiert ein deutsches Zahnarzt-Diktat.")
+    parser.add_argument("text", nargs="*", help="Diktattext (entfällt bei --demo)")
+    parser.add_argument("--demo", action="store_true", help="die eingebauten Beispieldiktate ausführen")
+    parser.add_argument("--raw", action="store_true", help="Lexikon-Korrektur überspringen")
     args = parser.parse_args(argv)
     for dictation in DEMO if args.demo else [" ".join(args.text)]:
         if not args.raw:

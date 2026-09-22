@@ -1,10 +1,11 @@
-"""Curated German dental lexicon with fuzzy correction of Whisper output (WP-6).
+"""Kuratiertes deutsches Dental-Lexikon mit Fuzzy-Korrektur der Whisper-Ausgabe (WP-6).
 
-``correct(text)`` fixes tokens that are within a small Levenshtein distance of
-a lexicon term ("Artikein" -> "Artikain") and known mishearings ("Psycho" ->
-"PSI", "bis Registrat" -> "Bissregistrat"). Common German words are never
-corrected, codes and numbers are never touched, and every correction is
-returned so the UI can show it. Runs before ``normalize``. Pure, no I/O.
+``correct(text)`` korrigiert Tokens, die innerhalb einer kleinen Levenshtein-
+Distanz zu einem Lexikon-Begriff liegen ("Artikein" -> "Artikain"), sowie
+bekannte Verhörer ("Psycho" -> "PSI", "bis Registrat" -> "Bissregistrat").
+Häufige deutsche Wörter werden nie korrigiert, Codes und Zahlen nie angefasst,
+und jede Korrektur wird zurückgegeben, damit die UI sie anzeigen kann. Läuft
+vor ``normalize``. Rein, ohne I/O.
 """
 
 from __future__ import annotations
@@ -17,12 +18,13 @@ from dataclasses import dataclass
 class Correction:
     original: str
     corrected: str
-    start: int  # character offsets into the input text
+    start: int  # Zeichen-Offsets im Eingabetext
     end: int
 
 
-# Terms in their canonical spelling (seeded from the report's test set and error
-# list). Tokens equal to a term, ignoring case, are never changed.
+# Begriffe in kanonischer Schreibweise (aus Testset und Fehlerliste des
+# Reports). Tokens, die einem Begriff bis auf Groß-/Kleinschreibung gleichen,
+# werden nie verändert.
 TERMS: tuple[str, ...] = (
     # Anästhesie
     "Artikain", "Lidocain", "Mepivacain", "Infiltrationsanästhesie", "Leitungsanästhesie",
@@ -31,21 +33,21 @@ TERMS: tuple[str, ...] = (
     "Untersuchung", "Befund", "Vitalitätsprüfung", "Kältetest", "Perkussion", "Perkussionstest",
     "Palpation", "Sondierung", "Sondierungstiefe", "Sondierungstiefen", "Zahnfilm", "Röntgen", "OPG",
     "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "Lockerungsgrad",
-    "Furkation",
+    "Furkation", "Funktion",
     # Befunde
-    "Karies", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
+    "Karies", "kariös", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
     "Perikoronitis", "Nekrose", "Fistel", "Abszess", "Zyste", "Längsfraktur", "Fraktur", "retiniert",
     "verlagert", "Attrition", "Erosion", "Dentin", "Schmelz", "Pulpa", "apikal", "Aufbissbeschwerden",
-    "Hypersensibilität",
+    "Hypersensibilität", "Schmerz", "Schmerzen",
     # Füllung
     "Füllung", "Kompositfüllung", "Komposit", "Amalgam", "Amalgamfüllung", "Adhäsivtechnik", "Adhäsiv",
-    "Bonding", "Ätzung", "Phosphorsäure", "Glasionomerzement", "Unterfüllung", "Aufbaufüllung", "Matrize",
+    "Bonding", "Ätzung", "Phosphorsäure", "Glasionomerzement", "Unterfüllung", "Aufbaufüllung", "Matrize", "Matrix",
     "Kofferdam", "einflächig", "zweiflächig", "dreiflächig", "mehrflächig", "Politur", "Okklusion",
     "Kontaktpunkt", "Fissurenversiegelung", "Versiegelung",
     # Endo
     "Trepanation", "Vitalexstirpation", "Wurzelkanalaufbereitung", "Wurzelkanalbehandlung", "Wurzelkanal",
-    "Wurzelkanäle", "Kanal", "Kanäle", "elektrometrische", "Längenbestimmung", "medikamentöse", "Einlage",
-    "Kalziumhydroxid", "Wurzelfüllung", "Guttapercha", "provisorisch", "provisorischer", "Verschluss",
+    "Wurzelkanäle", "Kanal", "Kanäle", "elektrometrisch", "Längenbestimmung", "medikamentös", "Einlage",
+    "Kalziumhydroxid", "Wurzelfüllung", "Guttapercha", "provisorisch", "Verschluss",
     "Wurzelspitzenresektion", "Revision",
     # Chirurgie
     "Extraktion", "Osteotomie", "Wundversorgung", "Naht", "Nahtentfernung", "Wundkontrolle", "Nachkontrolle",
@@ -54,34 +56,34 @@ TERMS: tuple[str, ...] = (
     # Prothetik
     "Präparation", "Stufenpräparation", "Vollkeramikkrone", "Krone", "Kronen", "Teilkrone", "Brücke", "Veneer",
     "Inlay", "Onlay", "Abformung", "Polyether", "Silikon", "Alginat", "Bissregistrat", "Bissnahme",
-    "Provisorium", "Kunststoff", "eingegliedert", "Eingliederung", "Farbnahme", "Zementierung", "Zement",
+    "Provisorium", "Provisorien", "Kunststoff", "eingegliedert", "Eingliederung", "Farbnahme", "Zementierung", "Zement",
     "Stiftaufbau", "Prothese", "Unterfütterung",
     # Paro / Prophylaxe
     "Zahnreinigung", "Beläge", "Zahnstein", "Fluoridierung", "Elmex", "Mundhygieneinstruktion", "Mundhygiene",
-    "Kürettage", "UPT", "PZR", "antiinfektiöse", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
+    "Kürettage", "UPT", "PZR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
     "Blutung", "Milchzahn", "Milchzähne", "IP",
     # Medikation / Verwaltung
     "Ibuprofen", "Amoxicillin", "Clindamycin", "Paracetamol", "Wiedervorlage", "verordnet", "Rezept",
     # Flächen und Lage
     "mesial", "distal", "okklusal", "bukkal", "vestibulär", "lingual", "palatinal", "inzisal", "zervikal",
     "approximal", "MOD", "Oberkiefer", "Unterkiefer", "Quadrant", "Quadranten", "Molar", "Molaren",
-    "Prämolar", "Prämolaren", "Frontzahn", "Eckzahn", "Schneidezahn", "Weisheitszahn",
+    "Prämolar", "Prämolaren", "Frontzahn", "Frontzähne", "Eckzahn", "Eckzähne", "Schneidezahn",
+    "Schneidezähne", "Weisheitszahn", "Weisheitszähne",
     # Abrechnung, Sonstiges
-    "BEMA", "GOZ", "Zusatzleistung", "Ziffer", "Schienung", "Aufbissschiene", "Knirscherschiene",
+    "BEMA", "GOZ", "GOÄ", "Faktor", "Zusatzleistung", "Ziffer", "Schienung", "Aufbissschiene", "Knirscherschiene",
     "Kieferorthopädie",
 )
 
-# Known mishearings that are too far for the distance rule (lower-cased token
-# windows of one or two words -> replacement).
+# Bekannte Verhörer, die für die Distanzregel zu weit entfernt sind
+# (kleingeschriebene Token-Fenster aus ein oder zwei Wörtern -> Ersatz).
 ALIASES: dict[tuple[str, ...], str] = {
-    ("psycho",): "PSI", ("goetz",): "GOZ", ("götz",): "GOZ", ("gotz",): "GOZ",
+    ("psycho",): "PSI", ("goetz",): "GOZ", ("götz",): "GOZ",
     ("bis", "registrat"): "Bissregistrat", ("biss", "registrat"): "Bissregistrat",
-    ("composite",): "Komposit", ("kofferdamm",): "Kofferdam", ("caries",): "Karies",
-    ("occlusal",): "okklusal", ("preparation",): "Präparation", ("perichoronitis",): "Perikoronitis",
+    ("composite",): "Komposit",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
 }
 
-# Common German words that must never be "corrected" into a term.
+# Häufige deutsche Wörter, die nie zu einem Begriff "korrigiert" werden dürfen.
 NEVER_CORRECT: frozenset[str] = frozenset("""
 der die das den dem des ein eine einer einem einen und oder mit ohne bei in im am an auf aus für von vom
 zu zum zur nach vor über unter bis seit wegen durch gegen um als wie ist sind war waren wird werden wurde
@@ -94,13 +96,14 @@ Nacht nahe nah Teil Zeit Sitzung Termin Woche Moment Belege grau medial digital 
 null eins zwei drei vier fünf sechs sieben acht neun zehn elf zwölf zwanzig dreißig hundert tausend
 erste ersten zweite zweiten dritte dritten vierte vierten fünften sechsten einmal zweimal dreimal
 Karte Kasse privat Code Nummer Ziffern Stück Seite Seiten oben unten hinten vorne mittig komplett
+fest fester festen festes festem belegt Grat
 """.split())
 
 _FOLDS = (("chs", "x"), ("ck", "k"), ("ph", "f"), ("th", "t"), ("ß", "ss"))
 
 
 def _fold(word: str) -> str:
-    """Lower-case with German spellings that Whisper swaps merged ("Sechstant" ~ "Sextant")."""
+    """Kleinschreibung, wobei von Whisper vertauschte Schreibweisen zusammenfallen ("Sechstant" ~ "Sextant")."""
     word = word.lower()
     for old, new in _FOLDS:
         word = word.replace(old, new)
@@ -112,11 +115,11 @@ _TERMS_FOLDED: dict[str, str] = {_fold(t): t for t in TERMS}
 _NEVER_LOWER = frozenset(w.lower() for w in NEVER_CORRECT)
 _INFLECTIONS = ("e", "en", "er", "es", "em", "n", "s")
 _TOKEN = re.compile(r"\w+")
-_L_CODE = re.compile(r"^[Ll](\d{3}[a-z]?)$")  # "L935d" -> "Ä935d" (Whisper drops the umlaut)
+_L_CODE = re.compile(r"^[Ll](\d{3}[a-z]?)$")  # "L935d" -> "Ä935d" (Whisper verliert den Umlaut)
 
 
 def levenshtein(a: str, b: str, limit: int) -> int:
-    """Edit distance, capped at ``limit + 1`` for speed."""
+    """Editierdistanz, aus Geschwindigkeitsgründen bei ``limit + 1`` gekappt."""
     if abs(len(a) - len(b)) > limit:
         return limit + 1
     prev = list(range(len(b) + 1))
@@ -131,7 +134,7 @@ def levenshtein(a: str, b: str, limit: int) -> int:
 
 
 def _max_distance(token: str) -> int:
-    """Short tokens get little slack; 3-letter tokens only when written as an abbreviation."""
+    """Kurze Tokens bekommen wenig Spielraum; 3-Buchstaben-Tokens nur als Abkürzung in Großschreibung."""
     if len(token) <= 3:
         return 1 if token.isupper() else 0
     return 1 if len(token) <= 5 else 2
@@ -142,7 +145,7 @@ def _is_inflection(low: str, term_low: str) -> bool:
 
 
 def correct_token(token: str) -> str | None:
-    """Canonical spelling for a single misheard token, or None to leave it alone."""
+    """Kanonische Schreibweise für ein einzelnes verhörtes Token, sonst None."""
     low = token.lower()
     if low in _NEVER_LOWER or low in _TERMS_LOWER:
         return None
@@ -167,7 +170,7 @@ def correct_token(token: str) -> str | None:
 
 
 def correct(text: str) -> tuple[str, list[Correction]]:
-    """Return the corrected text and every correction applied (offsets refer to ``text``)."""
+    """Korrigierter Text und alle angewandten Korrekturen (Offsets beziehen sich auf ``text``)."""
     tokens = [(m.start(), m.end(), m.group()) for m in _TOKEN.finditer(text)]
     corrections: list[Correction] = []
     i = 0

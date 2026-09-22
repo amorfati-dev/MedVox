@@ -1,4 +1,4 @@
-"""WP-6: dental lexicon and fuzzy correction, cases from the report's error list (7.3) and Anhang C."""
+"""WP-6: Dental-Lexikon und Fuzzy-Korrektur, Fälle aus der Fehlerliste des Reports (7.3) und Anhang C."""
 
 import pytest
 
@@ -29,7 +29,7 @@ from medvox.lexicon import ALIASES, NEVER_CORRECT, TERMS, Correction, correct, c
         ("Sondierungstiefe", None),
         ("Artikain", None),
         ("okklusal", None),
-        ("Distal", None),  # only the case differs: no correction
+        ("Distal", None),  # nur die Schreibung unterscheidet sich: keine Korrektur
     ],
 )
 def test_correct_token(token, expected):
@@ -39,10 +39,18 @@ def test_correct_token(token, expected):
 @pytest.mark.parametrize(
     "token",
     ["in", "am", "mit", "hat", "Zahn", "Zähne", "Nacht", "Teil", "medial", "digital", "Moment", "OP",
-     "gelegt", "Kronen", "Zysten", "Füllungen", "Mode", "Karin", "bis", "sechs"],
+     "gelegt", "Kronen", "Zysten", "Füllungen", "Mode", "Karin", "bis", "sechs",
+     "kariös", "kariöse", "Schmerz", "Schmerzen", "Faktor", "Funktion", "fester", "festen", "belegt", "GOÄ",
+     "Grat", "Matrix", "Frontzähne", "Eckzähne", "Schneidezähne", "Weisheitszähne", "Provisorien",
+     "elektrometrisch", "medikamentös", "antiinfektiös"],
 )
 def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
+
+
+def test_common_dental_sentence_is_not_rewritten():
+    raw = "Zahn 36 kariös, fester Sitz der Prothese, GOZ 2100 Faktor 2,3, Schmerz bei Perkussion"
+    assert correct(raw) == (raw, [])
 
 
 @pytest.mark.parametrize("token", ["36", "13a", "2100", "2x", "Ä935d", "3,6", "2060"])
@@ -62,7 +70,7 @@ def test_terms_are_unique_ignoring_case():
 
 
 def test_ambiguous_match_is_skipped():
-    # "Anlay" is one edit away from both "Inlay" and "Onlay"
+    # "Anlay" ist je eine Änderung von "Inlay" und "Onlay" entfernt
     assert correct_token("Anlay") is None
 
 
