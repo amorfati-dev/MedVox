@@ -32,7 +32,7 @@ TERMS: tuple[str, ...] = (
     # Diagnostik
     "Untersuchung", "Befund", "Vitalitätsprüfung", "Kältetest", "Perkussion", "Perkussionstest",
     "Palpation", "Sondierung", "Sondierungstiefe", "Sondierungstiefen", "Zahnfilm", "Röntgen", "OPG",
-    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "PBI", "Lockerungsgrad",
+    "OPT", "Orthopantomogramm", "Bissflügel", "PSI", "Sextant", "Sextanten", "BOP", "PBI", "SBI", "API", "Lockerungsgrad",
     "Furkation", "Funktion",
     # Befunde
     "Karies", "kariös", "profunda", "media", "Sekundärkaries", "Pulpitis", "Parodontitis", "Gingivitis",
@@ -97,6 +97,7 @@ null eins zwei drei vier fünf sechs sieben acht neun zehn elf zwölf zwanzig dr
 erste ersten zweite zweiten dritte dritten vierte vierten fünften sechsten einmal zweimal dreimal
 Karte Kasse privat Code Nummer Ziffern Stück Seite Seiten oben unten hinten vorne mittig komplett
 fest fester festen festes festem belegt Grat paar Part denken viral virale
+Nervus alveolaris lingualis buccalis palatinus mandibularis maxillaris mentalis infraorbitalis inferior
 """.split())
 
 _FOLDS = (("chs", "x"), ("ck", "k"), ("ph", "f"), ("th", "t"), ("ß", "ss"))
@@ -113,7 +114,7 @@ def _fold(word: str) -> str:
 _TERMS_LOWER: dict[str, str] = {t.lower(): t for t in TERMS}
 _TERMS_FOLDED: dict[str, str] = {_fold(t): t for t in TERMS}
 _NEVER_LOWER = frozenset(w.lower() for w in NEVER_CORRECT)
-_INFLECTIONS = ("e", "en", "er", "es", "em", "n", "s")
+_INFLECTIONS = ("e", "en", "er", "es", "em", "n", "s", "is", "us")
 _TOKEN = re.compile(r"\w+")
 _L_CODE = re.compile(r"^[Ll](\d{3}[a-z]?)$")  # "L935d" -> "Ä935d" (Whisper verliert den Umlaut)
 

@@ -47,10 +47,17 @@ def test_correct_token(token, expected):
      "elektrometrisch", "medikamentös", "antiinfektiös", "paar", "Part", "GIZ", "avital", "PBI",
      "Kieferorthopäden", "Kanüle", "Kürette", "spülen", "füllen", "versiegeln", "eingliedern", "abformen",
      "fluoridieren", "aufklären", "sondieren", "überweisen", "verordnen", "planen", "Schienen", "vital",
-     "Vital", "Sprung", "Sprünge", "denken", "viral", "virale"],
+     "Vital", "Sprung", "Sprünge", "denken", "viral", "virale", "alveolaris", "lingualis", "buccalis",
+     "palatinus", "mandibularis", "maxillaris", "mentalis", "infraorbitalis", "Nervus", "inferior",
+     "SBI", "PBI", "API"],
 )
 def test_common_words_and_inflections_are_never_corrected(token):
     assert correct_token(token) is None
+
+
+def test_anatomical_phrases_keep_their_meaning():
+    raw = "Leitungsanästhesie am Nervus alveolaris inferior, Nervus lingualis geschont, SBI 20 Prozent"
+    assert correct(raw) == (raw, [])
 
 
 def test_par_is_not_rewritten_to_pzr():

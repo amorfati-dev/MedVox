@@ -29,7 +29,9 @@ def test_expand_range_across_the_arch_and_fallback():
         ("3 6, 3", True, "36, 3"),
         ("3, 5, 6", True, "3, 5, 6"),  # Regel 3: Messwertliste vor einer Einheit
         ("2,3", True, "2,3"),
-        ("3 6", True, "3 6"),  # Regel 2: direkt vor einer Einheit wird nicht gepaart
+        ("3 6", True, "36"),  # Regel 1 schlägt die Einheit: ein Ziffernpaar bleibt ein Zahn
+        ("2-3", True, "2-3"),  # Regel 2: Bindestrich-Bereich vor einer Einheit ist eine Anzahl
+        ("3 5 6", True, "3 5 6"),
         ("3 6, 1, 6", False, "36, 16"),
         ("3 9", False, "3 9"),  # kein FDI-Zahn
         ("2, 9, 1, 6", False, "2, 9, 16"),
