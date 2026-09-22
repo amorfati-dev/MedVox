@@ -1,7 +1,7 @@
 // Diktat-Ansicht: großer Aufnahmeknopf, Pegel und Countdown, Transkript in
 // gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
 import { useMemo, useState } from "react";
-import { api, joinCodes } from "../api";
+import { api, ApiError, joinCodes } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
 import { TransferPanel } from "../components/TransferPanel";
@@ -18,13 +18,19 @@ export function Diktat({ onLogout }: Props) {
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
-  const [transferUnauthorized, setTransferUnauthorized] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const logout = async () => {
+    setLogoutError(null);
     try {
       await api.logout();
-    } finally {
       onLogout();
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        onLogout();
+        return;
+      }
+      setLogoutError(e instanceof ApiError ? e.message : "Abmelden fehlgeschlagen.");
     }
   };
 
@@ -45,15 +51,12 @@ export function Diktat({ onLogout }: Props) {
     setDeselected(new Set());
   };
 
-  // Sitzung abgelaufen: Anmeldung anzeigen, Diktat bleibt im Speicher.
-  if (d.sessionLost || transferUnauthorized) {
+  // Sitzung abgelaufen: Anmeldung anzeigen, Diktat und offene Abschnitte bleiben im Speicher.
+  if (d.sessionLost) {
     return (
       <Login
         notice="Sitzung abgelaufen – bitte erneut anmelden. Das aktuelle Diktat bleibt erhalten."
-        onLogin={() => {
-          setTransferUnauthorized(false);
-          d.relogin();
-        }}
+        onLogin={d.relogin}
       />
     );
   }
@@ -94,7 +97,9 @@ export function Diktat({ onLogout }: Props) {
             : sending
               ? "Audio wird auf dem Praxis-Mac transkribiert …"
               : resumable
-                ? "Zeitlimit erreicht – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
+                ? d.waiting > 0
+                  ? `Unterbrochen – „Weiter“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`} und nimmt weiter auf.`
+                  : "Unterbrochen – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
                 : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
         </p>
         {resumable && (
@@ -113,6 +118,11 @@ export function Diktat({ onLogout }: Props) {
             {d.error}
           </p>
         )}
+        {logoutError && (
+          <p role="alert" className="error">
+            {logoutError}
+          </p>
+        )}
       </section>
 
       <section className="card">
@@ -123,7 +133,7 @@ export function Diktat({ onLogout }: Props) {
         {d.lastLatency !== null && <p className="muted">Transkription in {d.lastLatency.toFixed(1)} s.</p>}
         <div className="actions">
           <CopyButton label="Text kopieren" text={d.transcript} primary />
-          <button type="button" className="btn" disabled={!d.transcript} onClick={clear}>
+          <button type="button" className="btn" disabled={!d.transcript || recording || d.uploading} onClick={clear}>
             Verwerfen
           </button>
         </div>
@@ -137,7 +147,7 @@ export function Diktat({ onLogout }: Props) {
         </div>
       </section>
 
-      <TransferPanel transcript={d.transcript} codes={activeCodes} onUnauthorized={() => setTransferUnauthorized(true)} />
+      <TransferPanel transcript={d.transcript} codes={activeCodes} onUnauthorized={d.sessionExpired} />
     </main>
   );
 }

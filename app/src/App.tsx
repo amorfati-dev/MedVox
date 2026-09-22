@@ -2,7 +2,7 @@
 // Rezeption (/transfer) und Gerätetest (/check) sind ohne Anmeldung nutzbar.
 import { useEffect, useState } from "react";
 import { api, ApiError } from "./api";
-import { useRoute } from "./router";
+import { routeFromPath } from "./router";
 import { Check } from "./views/Check";
 import { Diktat } from "./views/Diktat";
 import { Login } from "./views/Login";
@@ -11,7 +11,7 @@ import { Rezeption } from "./views/Rezeption";
 type Session = "prüfe" | "angemeldet" | "abgemeldet" | "server-weg";
 
 export function App() {
-  const route = useRoute();
+  const route = routeFromPath(window.location.pathname);
   const [session, setSession] = useState<Session>("prüfe");
 
   useEffect(() => {

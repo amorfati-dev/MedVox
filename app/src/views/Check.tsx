@@ -10,7 +10,6 @@ const pending: Result = { ok: null, text: "prüfe …" };
 export function Check() {
   const [health, setHealth] = useState<Result>(pending);
   const [mic, setMic] = useState<Result>({ ok: null, text: "noch nicht getestet" });
-  const [session, setSession] = useState<Result>(pending);
 
   useEffect(() => {
     api
@@ -23,12 +22,6 @@ export function Check() {
         ),
       )
       .catch((e: unknown) => setHealth({ ok: false, text: e instanceof ApiError ? e.message : "Fehler" }));
-    api
-      .session()
-      .then(() => setSession({ ok: true, text: "angemeldet" }))
-      .catch((e: unknown) =>
-        setSession({ ok: false, text: e instanceof ApiError && e.status === 401 ? "nicht angemeldet" : "Fehler" }),
-      );
   }, []);
 
   const testMic = async () => {
@@ -55,7 +48,6 @@ export function Check() {
     ["MediaRecorder", { ok: hasRecorder && mimes.length > 0, text: mimes.length ? mimes.join(", ") : hasRecorder ? "vorhanden, aber kein passendes Audioformat" : "fehlt" }],
     ["Mikrofon", mic],
     ["Server-Health", health],
-    ["Sitzung", session],
   ];
 
   return (
