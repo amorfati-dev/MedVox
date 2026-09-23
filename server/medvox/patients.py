@@ -173,7 +173,8 @@ def save_dictation(
         else:
             expires = row["expires_at"]
             conn.execute(
-                "UPDATE dictations SET patient_id = ?, revision = revision + 1, updated_at = ?, data_json = ?"
+                "UPDATE dictations SET patient_id = ?, revision = revision + 1, saved_revision = revision + 1,"
+                " updated_at = ?, data_json = ?"
                 " WHERE id = ?",
                 (patient_id, now, payload, dictation_id),
             )
@@ -246,7 +247,8 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
 
     Rückgabe: Zeitpunkt, zu dem das Diktat schon vorher geschlossen wurde (Büro, Löschen, Ablauf
     oder ein anderer Kurzcode) – dann darf der Code nichts mehr herausgeben; sonst None.
-    Unverändert: löschen wie „übertragen“ im Büro. Danach geändert (oder beim Anlegen des Codes
+    Unverändert (`revision` = Revision des letzten Speicherns vom iPad; Zuordnen im Büro und
+    frühere Abhol-Vermerke zählen nicht als Änderung): löschen wie „übertragen“ im Büro. Danach geändert (oder beim Anlegen des Codes
     noch nicht gespeichert): offen lassen, mit Vermerk der Abholzeit und neuer Revision, damit
     das Büro die Änderung bewusst prüft. Noch gar nicht gespeichert: Grabstein, damit das
     spätere Speichern abgelehnt wird statt ein zweites offenes Diktat anzulegen.
@@ -254,10 +256,10 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
     tomb = conn.execute("SELECT closed_at FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone()
     if tomb is not None:
         return float(tomb["closed_at"])
-    row = conn.execute("SELECT patient_id, revision FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+    row = conn.execute("SELECT patient_id, saved_revision FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
     if row is None:
         conn.execute("INSERT INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
-    elif revision is not None and row["revision"] == revision:
+    elif revision is not None and row["saved_revision"] == revision:
         db.bury(conn, "id = ?", (dictation_id,), now)
         if row["patient_id"] is not None:
             conn.execute(

@@ -83,6 +83,32 @@ def test_changed_after_the_code_stays_open_with_a_note(logged_in: TestClient, se
     assert done["items"] == [] and done["transferred"] == 1  # im Büro wie gewohnt abschließbar
 
 
+def test_second_code_after_the_correction_closes_it(logged_in: TestClient, settings: Settings) -> None:
+    # Code A, danach korrigiert, A abgeholt (Korrektur bleibt offen); dann Code B für die Korrektur.
+    saved = put(logged_in, "diktat-0001", "4711").json()
+    code_a = code_for(logged_in, saved, codes=["36,13c"])
+    changed = put(logged_in, "diktat-0001", "4711", adopted=["2100@36"]).json()
+    reception = TestClient(logged_in.app)
+    assert reception.get(f"{TRANSFER}/{code_a}").status_code == 200
+    assert patient(logged_in, "4711")["dictations"] == 1
+
+    code_b = code_for(logged_in, changed, codes=["36,13c,2100"])  # Revision, die das iPad kennt
+    read = reception.get(f"{TRANSFER}/{code_b}")
+    assert read.status_code == 200 and read.json()["codes"] == ["36,13c,2100"]
+    state = patient(logged_in, "4711")
+    assert state["dictations"] == 0 and state["transferred"] == 1
+    assert tombstones(settings.db_path) == ["diktat-0001"]
+
+
+def test_code_after_office_reassignment_still_closes(logged_in: TestClient) -> None:
+    saved = put(logged_in, "diktat-0001", "4711").json()
+    code = code_for(logged_in, saved)
+    other = logged_in.post(PATIENTS, json={"number": "4712"}).json()["id"]
+    logged_in.post(f"{PATIENTS}/{other}/dictations", json={"dictation_id": "diktat-0001"})  # Inhalt unverändert
+    assert TestClient(logged_in.app).get(f"{TRANSFER}/{code}").status_code == 200
+    assert patient(logged_in, "4712")["dictations"] == 0 and patient(logged_in, "4712")["transferred"] == 1
+
+
 def test_code_after_office_transfer_is_refused(logged_in: TestClient) -> None:
     saved = put(logged_in, "diktat-0001", "4711").json()
     code = code_for(logged_in, saved)

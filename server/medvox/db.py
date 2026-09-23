@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS dictations (
     id          TEXT PRIMARY KEY,
     patient_id  INTEGER,
     revision    INTEGER NOT NULL DEFAULT 1,
+    saved_revision  INTEGER NOT NULL DEFAULT 1,  -- Revision, die das letzte Speichern vom iPad lieferte
     created_at  REAL NOT NULL,
     updated_at  REAL NOT NULL,
     expires_at  REAL NOT NULL,

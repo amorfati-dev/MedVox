@@ -86,7 +86,8 @@ noch läuft). Beides steht in den Spalten `transfers.dictation_id` und `transfer
 `positions_json`); `transfers.handed_over_at` merkt sich den ersten Abruf. Der erste Abruf
 `GET /transfer/{code}`:
 
-- Diktat unverändert (gleiche Revision): geschlossen wie „übertragen“ im Büro – Inhalt gelöscht,
+- Diktat unverändert (Revision wie beim letzten Speichern vom iPad, Spalte `dictations.saved_revision`;
+  Zuordnen im Büro und Abhol-Vermerke zählen nicht als Änderung): geschlossen wie „übertragen“ im Büro – Inhalt gelöscht,
   Grabstein gesetzt, beim Patienten Zeit und Anzahl vermerkt.
 - Diktat danach geändert (oder beim Anlegen noch nicht gespeichert): der Code liefert seinen Stand,
   das Diktat bleibt offen und speicherbar, bekommt `handed_over_at` (Abholzeit, sonst nichts) und
