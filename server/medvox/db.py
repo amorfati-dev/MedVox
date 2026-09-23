@@ -1,9 +1,10 @@
-"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen und Transfer-Codes.
+"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen, Transfer-Codes und Diktate je Patient.
 
-Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; Transkripte
-liegen nur als Transfer-Eintrag bis zum Ablauf der TTL darin. `secure_delete`
-sorgt dafür, dass SQLite gelöschte Zeilen in der Datei überschreibt statt sie
-in freien Seiten liegen zu lassen (WP-11).
+Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; ein Patient ist nur die
+Evident-Patientennummer. Transkripte liegen als Transfer-Eintrag bis zum Ablauf der TTL darin
+und als Diktat eines Patienten, bis es als übertragen markiert ist – höchstens 24 Stunden
+(`medvox/patients.py`). `secure_delete` sorgt dafür, dass SQLite gelöschte Zeilen in der Datei
+überschreibt statt sie in freien Seiten liegen zu lassen (WP-11).
 """
 
 from __future__ import annotations
@@ -28,6 +29,28 @@ CREATE TABLE IF NOT EXISTS transfers (
     expires_at  REAL NOT NULL,
     patient_type    TEXT,
     positions_json  TEXT NOT NULL DEFAULT '[]'
+);
+-- Patient = nur die Evident-Nummer. Die Zeile bleibt nach „übertragen“ ohne Inhalt stehen,
+-- damit die Liste den Zustand zeigt; sie läuft ab, wenn ihr jüngstes Diktat abliefe.
+-- AUTOINCREMENT: eine gelöschte ID wird nie an einen anderen Patienten vergeben.
+CREATE TABLE IF NOT EXISTS patients (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    number              TEXT NOT NULL UNIQUE,
+    created_at          REAL NOT NULL,
+    updated_at          REAL NOT NULL,
+    expires_at          REAL NOT NULL,
+    transferred_at      REAL,
+    transferred_count   INTEGER NOT NULL DEFAULT 0
+);
+-- Ein Diktat (Transkript, Vorschläge, Auswahl); ID vom iPad, patient_id NULL = „ohne Patient“.
+CREATE TABLE IF NOT EXISTS dictations (
+    id          TEXT PRIMARY KEY,
+    patient_id  INTEGER,
+    revision    INTEGER NOT NULL DEFAULT 1,
+    created_at  REAL NOT NULL,
+    updated_at  REAL NOT NULL,
+    expires_at  REAL NOT NULL,
+    data_json   TEXT NOT NULL
 );
 """
 
@@ -67,10 +90,14 @@ def connect(path: Path) -> Iterator[sqlite3.Connection]:
 
 
 def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
-    """Entfernt abgelaufene Sitzungen und Transfer-Einträge (WP-11)."""
+    """Entfernt abgelaufene Sitzungen, Transfer-Einträge, Diktate und Patienten (WP-11)."""
     now = time.time() if now is None else now
     conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (now,))
     conn.execute("DELETE FROM transfers WHERE expires_at <= ?", (now,))
+    conn.execute("DELETE FROM dictations WHERE expires_at <= ?", (now,))
+    conn.execute("DELETE FROM patients WHERE expires_at <= ?", (now,))
+    # Diktate eines gelöschten Patienten nie verwaist stehen lassen.
+    conn.execute("DELETE FROM dictations WHERE patient_id IS NOT NULL AND patient_id NOT IN (SELECT id FROM patients)")
 
 
 def purge_expired_at(path: Path) -> None:

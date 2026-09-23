@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 import httpx
 from fastapi import FastAPI
 
-from medvox import __version__, db, routes_auth, routes_transcribe, routes_transfer
+from medvox import __version__, db, routes_auth, routes_patients, routes_transcribe, routes_transfer
 from medvox.ratelimit import RateLimiter
 from medvox.settings import Settings
 
@@ -22,7 +22,7 @@ log = logging.getLogger("medvox.main")
 
 
 async def purge_loop(settings: Settings) -> None:
-    """Löscht abgelaufene Transfers und Sitzungen periodisch, unabhängig von Zugriffen (WP-11)."""
+    """Löscht abgelaufene Transfers, Sitzungen und Patientendiktate periodisch, unabhängig von Zugriffen (WP-11)."""
     while True:
         await asyncio.sleep(settings.purge_interval_s)
         try:
@@ -59,6 +59,7 @@ def create_app(
     app.include_router(routes_transcribe.router)
     app.include_router(routes_auth.router)
     app.include_router(routes_transfer.router)
+    app.include_router(routes_patients.router)
     return app
 
 
