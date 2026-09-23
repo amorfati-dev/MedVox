@@ -17,7 +17,7 @@ import { useDictation } from "../hooks/useDictation";
 import { usePatientType } from "../hooks/usePatientType";
 import { useSelection } from "../hooks/useSelection";
 import { useTransfer } from "../hooks/useTransfer";
-import { countGroups, uniquePlanned } from "../result";
+import { countGroups, positionsOf, uniquePlanned } from "../result";
 import { formatSeconds, plural, uiState } from "../status";
 import { Login } from "./Login";
 
@@ -31,7 +31,11 @@ export function Diktat({ onLogout }: Props) {
   const sel = useSelection(d.codes, d.suggestions);
   const plans = useMemo(() => uniquePlanned(d.planned), [d.planned]);
   const counts = useMemo(() => countGroups(sel.groups, plans), [sel.groups, plans]);
-  const transfer = useTransfer(d.transcript, sel.evident, d.sessionExpired);
+  const details = useMemo(
+    () => (d.resultType ? { patient_type: d.resultType, positions: positionsOf(sel.groups) } : null),
+    [d.resultType, sel.groups],
+  );
+  const transfer = useTransfer(d.transcript, sel.evident, details, d.sessionExpired);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";

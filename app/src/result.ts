@@ -3,7 +3,7 @@
 // gemeinsamen Rahmen, Optionen (`alternative`) unter ihrer Leistung. Reine Funktionen, getestet in
 // test/result.test.ts gegen die Anhang-B-Diktate.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
-import { codeOf, evidentLines, isToothless, type Suggestion } from "./api.ts";
+import { codeOf, evidentLines, isToothless, type Suggestion, type TransferPosition } from "./api.ts";
 
 // bema/goz wie vom Server; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
 export type Tag = "bema" | "goz" | "kassenanteil" | "zuzahlung";
@@ -203,4 +203,24 @@ export function countGroups(groups: Group[], planned: Suggestion[]): Counts {
     }
   }
   return counts;
+}
+
+// Gewählte Positionen für die Rezeption (E6): Zahn, Ziffer, Art – übernommene Optionen als Zuzahlung.
+export function positionsOf(groups: Group[]): TransferPosition[] {
+  const result: TransferPosition[] = [];
+  const add = (s: Suggestion, kind: Tag) => result.push({ tooth: s.teeth[0] ?? null, code: s.code, kind });
+  const row = (r: Row) => {
+    if (r.selected) add(r.s, r.tag);
+    for (const o of r.options) if (o.adopted) add(o.s, "zuzahlung");
+  };
+  for (const g of groups) {
+    for (const item of g.items) {
+      if ("row" in item) row(item.row);
+      else if ("frame" in item) {
+        if (item.frame.basis) row(item.frame.basis);
+        row(item.frame.copay);
+      } else if (item.option.adopted) add(item.option.s, "zuzahlung");
+    }
+  }
+  return result;
 }

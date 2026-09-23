@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import type { Suggestion, TranscribeResult } from "../src/api.ts";
-import { billable, buildGroups, copyLines, countGroups, optionKey, type Group, type Item } from "../src/result.ts";
+import { billable, buildGroups, copyLines, countGroups, optionKey, positionsOf, type Group, type Item } from "../src/result.ts";
 
 type Golden = Record<string, Record<string, { evident: string[]; numbers: string[] }>>;
 const fixtures = JSON.parse(readFileSync(new URL("./fixtures/anhang-b.json", import.meta.url), "utf8")) as Record<
@@ -139,4 +139,18 @@ test("Gleiche Ziffer am selben Zahn aus zwei Abschnitten steht einmal, mit der h
   assert.deepEqual(g.items.map(sketch), ["13c+[2100?]", "25", "40", "12"]);
   const row = g.items[1];
   assert.ok("row" in row && row.row.count === 2);
+});
+
+test("positionsOf: Patient zahlt/Kasse zahlt für die Rezeption, nur gewählte und übernommene Positionen", () => {
+  const r = fixtures["abnahme-kasse"];
+  assert.deepEqual(positionsOf(groupsOf("abnahme-kasse", r.codes.filter((c) => c !== "12"), new Set(["2100@36"]))), [
+    { tooth: 36, code: "13c", kind: "bema" },
+    { tooth: 36, code: "2100", kind: "zuzahlung" },
+    { tooth: 36, code: "25", kind: "bema" },
+    { tooth: 46, code: "8", kind: "bema" },
+    { tooth: 46, code: "13a", kind: "kassenanteil" },
+    { tooth: 46, code: "2150", kind: "zuzahlung" },
+    { tooth: null, code: "40", kind: "bema" },
+    { tooth: null, code: "107", kind: "bema" },
+  ]);
 });

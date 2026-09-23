@@ -25,9 +25,18 @@ CREATE TABLE IF NOT EXISTS transfers (
     transcript  TEXT NOT NULL,
     codes_json  TEXT NOT NULL,
     created_at  REAL NOT NULL,
-    expires_at  REAL NOT NULL
+    expires_at  REAL NOT NULL,
+    patient_type    TEXT,
+    positions_json  TEXT NOT NULL DEFAULT '[]'
 );
 """
+
+# Spalten, die nach der ersten Installation dazukamen: (Name, Definition). Bestehende Datenbanken
+# bekommen sie beim Start per ALTER TABLE; alte Einträge gelten als ohne Angabe.
+ADDED_TRANSFER_COLUMNS = [
+    ("patient_type", "TEXT"),
+    ("positions_json", "TEXT NOT NULL DEFAULT '[]'"),
+]
 
 
 def init_db(path: Path) -> None:
@@ -35,6 +44,10 @@ def init_db(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with connect(path) as conn:
         conn.executescript(SCHEMA)
+        present = {row["name"] for row in conn.execute("PRAGMA table_info(transfers)")}
+        for name, definition in ADDED_TRANSFER_COLUMNS:
+            if name not in present:
+                conn.execute(f"ALTER TABLE transfers ADD COLUMN {name} {definition}")
 
 
 @contextmanager

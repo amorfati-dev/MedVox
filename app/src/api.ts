@@ -30,8 +30,20 @@ export type TranscribeResult = {
   notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
+// Art einer übergebenen Position; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
+export type PositionKind = "bema" | "goz" | "zuzahlung" | "kassenanteil";
+// Übergebene Position, nur zur Anzeige an der Rezeption (kopiert wird `codes`).
+export type TransferPosition = { tooth: number | null; code: string; kind: PositionKind };
+export type TransferDetails = { patient_type: PatientType; positions: TransferPosition[] };
 // `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,l1,13a"), siehe evidentLines.
-export type TransferData = { transcript: string; codes: string[]; created_at: string };
+// `patient_type`/`positions` fehlen bei Einträgen älterer iPad-Versionen.
+export type TransferData = {
+  transcript: string;
+  codes: string[];
+  created_at: string;
+  patient_type?: PatientType | null;
+  positions?: TransferPosition[];
+};
 
 export class ApiError extends Error {
   readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
@@ -95,8 +107,8 @@ export const api = {
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
-  createTransfer: (transcript: string, codes: string[]) =>
-    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes })),
+  createTransfer: (transcript: string, codes: string[], details?: TransferDetails) =>
+    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes, ...details })),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
 };

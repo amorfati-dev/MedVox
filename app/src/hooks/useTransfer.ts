@@ -1,6 +1,6 @@
 // „An Rezeption“: legt einen Kurzcode für Transkript und Evident-Zeilen an.
 import { useEffect, useRef, useState } from "react";
-import { api, ApiError, type TransferCreated } from "../api";
+import { api, ApiError, type TransferCreated, type TransferDetails } from "../api";
 
 export type Transfer = {
   busy: boolean;
@@ -9,7 +9,13 @@ export type Transfer = {
   send: () => Promise<void>;
 };
 
-export function useTransfer(transcript: string, codes: string[], onUnauthorized: () => void): Transfer {
+// `details`: Patiententyp und Art je Position, nur zur Anzeige an der Rezeption (E6).
+export function useTransfer(
+  transcript: string,
+  codes: string[],
+  details: TransferDetails | null,
+  onUnauthorized: () => void,
+): Transfer {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<TransferCreated | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,14 +27,14 @@ export function useTransfer(transcript: string, codes: string[], onUnauthorized:
     version.current += 1;
     setResult(null);
     setError(null);
-  }, [transcript, codes]);
+  }, [transcript, codes, details]);
 
   const send = async () => {
     const sent = version.current;
     setBusy(true);
     setError(null);
     try {
-      const created = await api.createTransfer(transcript, codes);
+      const created = await api.createTransfer(transcript, codes, details ?? undefined);
       if (sent !== version.current) return;
       setResult(created);
     } catch (e) {

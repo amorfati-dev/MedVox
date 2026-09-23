@@ -81,7 +81,8 @@ def test_expired_rows_are_purged_at_startup(settings: Settings) -> None:
     past = time.time() - 60
     with db.connect(db_path) as conn:
         conn.execute(
-            "INSERT INTO transfers VALUES (?, ?, ?, ?, ?)", ("ALTALT", "wochenende", "[]", past, past)
+            "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+            ("ALTALT", "wochenende", "[]", past, past),
         )
         conn.execute("INSERT INTO sessions VALUES (?, ?, ?)", ("token-alt", past, past))
     assert _stored_codes(db_path) == ["ALTALT"] and _stored_sessions(db_path) == 1
@@ -136,3 +137,55 @@ def test_rate_limiter_window() -> None:
 def test_code_alphabet_is_unambiguous() -> None:
     assert not set("0O1I") & set(transfer.CODE_ALPHABET)
     assert len(transfer.new_code()) == transfer.CODE_LENGTH
+
+
+def test_patient_type_and_positions_roundtrip(logged_in: TestClient) -> None:
+    # E6: Rezeption sieht Patiententyp und Art je Position; kopiert wird weiter nur `codes`.
+    body = {
+        **BODY,
+        "codes": ["46,8,13a,2150"],
+        "patient_type": "kasse",
+        "positions": [
+            {"tooth": 46, "code": "8", "kind": "bema"},
+            {"tooth": 46, "code": "13a", "kind": "kassenanteil"},
+            {"tooth": 46, "code": "2150", "kind": "zuzahlung"},
+            {"tooth": None, "code": "107", "kind": "bema"},
+        ],
+    }
+    code = logged_in.post(URL, json=body).json()["code"]
+    read = TestClient(logged_in.app).get(f"{URL}/{code}").json()
+    assert read["codes"] == ["46,8,13a,2150"]
+    assert read["patient_type"] == "kasse"
+    assert read["positions"] == body["positions"]
+
+
+def test_old_ipad_without_details_still_works(logged_in: TestClient) -> None:
+    code = logged_in.post(URL, json=BODY).json()["code"]
+    read = TestClient(logged_in.app).get(f"{URL}/{code}").json()
+    assert read["patient_type"] is None and read["positions"] == []
+
+
+def test_invalid_details_rejected(logged_in: TestClient) -> None:
+    assert logged_in.post(URL, json={**BODY, "patient_type": "gesetzlich"}).status_code == 422
+    bad_kind = {**BODY, "positions": [{"tooth": 36, "code": "13a", "kind": "rabatt"}]}
+    assert logged_in.post(URL, json=bad_kind).status_code == 422
+    bad_tooth = {**BODY, "positions": [{"tooth": 99, "code": "13a", "kind": "bema"}]}
+    assert logged_in.post(URL, json=bad_tooth).status_code == 422
+
+
+def test_existing_database_gets_new_columns(settings: Settings) -> None:
+    # Installierte Datenbank von vor E6: Tabelle ohne die neuen Spalten, ein laufender Eintrag.
+    db_path: Path = settings.db_path
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            "CREATE TABLE transfers (code TEXT PRIMARY KEY, transcript TEXT NOT NULL,"
+            " codes_json TEXT NOT NULL, created_at REAL NOT NULL, expires_at REAL NOT NULL)"
+        )
+        now = time.time()
+        conn.execute("INSERT INTO transfers VALUES (?, ?, ?, ?, ?)", ("ALTNEU", "vorher", '["36,13a"]', now, now + 60))
+    db.init_db(db_path)
+    db.init_db(db_path)  # idempotent
+    entry = transfer.get_transfer(db_path, "ALTNEU")
+    assert entry is not None and entry.codes == ["36,13a"]
+    assert entry.patient_type is None and entry.positions == []

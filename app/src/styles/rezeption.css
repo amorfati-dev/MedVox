@@ -1,4 +1,17 @@
 /* Rezeption (/transfer), Gerätetest (/check), Anmeldung. */
+.page.wide {
+  max-width: 1280px;
+}
+.topbar h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.small {
+  font-size: var(--fs-small);
+}
+.mono {
+  font-family: var(--mono);
+}
 .code-input {
   font-size: 2rem;
   letter-spacing: 0.3em;
@@ -6,25 +19,158 @@
   text-transform: uppercase;
   font-family: var(--mono);
 }
-.checks {
+
+/* Rezeption am PC: links Code, rechts Diktat */
+.rezeption-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .rezeption-grid {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+}
+.rezeption-grid .card {
+  margin: 0;
+}
+.placeholder {
+  display: flex;
+  align-items: center;
+  min-height: 200px;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.section-head h2 {
+  margin: 0;
+}
+.rezeption .transcript {
+  font-size: 1.2rem;
+}
+.rezeption .codes-lines {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.copay-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 12px;
+  margin: 8px 0 4px;
+  font-size: var(--fs-small);
 }
-.checks th,
-.checks td {
+.copay-table caption {
   text-align: left;
-  padding: 8px 6px;
+  font-weight: 700;
+  color: var(--privat);
+  padding-bottom: 6px;
+}
+.copay-table th,
+.copay-table td {
+  text-align: left;
+  padding: 6px 10px;
   border-bottom: 1px solid var(--line);
-  vertical-align: top;
 }
-.checks th {
-  white-space: nowrap;
-  width: 40%;
+.copay-table th {
+  color: var(--ink-2);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
-.checks .ok {
+.copay-kassenanteil td:first-child {
+  border-left: 5px solid var(--kasse);
+}
+.copay-zuzahlung td:first-child {
+  border-left: 5px solid var(--privat);
+}
+.copay-zuzahlung .mono {
+  color: var(--privat);
+  font-weight: 700;
+}
+
+/* Gerätetest: Banner und Kacheln */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.banner .icon {
+  width: 30px;
+  height: 30px;
+}
+.banner-ok {
+  background: var(--ok-bg);
   color: var(--ok);
 }
-.checks .bad {
+.banner-err {
+  background: var(--err-bg);
   color: var(--err);
+}
+.banner-open {
+  background: var(--busy-bg);
+  color: var(--busy);
+}
+.tiles {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 16px;
+  display: grid;
+  gap: 10px;
+}
+.tile {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+.tile > .icon {
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+}
+.tile h2 {
+  margin: 0 0 2px;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.05rem;
+}
+.tile p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tile-ok > .icon {
+  color: var(--ok);
+}
+.tile-bad {
+  border-color: var(--err);
+  background: var(--err-bg);
+}
+.tile-bad > .icon,
+.tile-bad p {
+  color: var(--err);
+}
+.tile-level {
+  height: 10px;
+  margin-top: 8px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.tile-level div {
+  height: 100%;
+  background: var(--ok);
+  transition: width 60ms linear;
 }
