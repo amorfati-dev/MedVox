@@ -45,5 +45,7 @@ def test_real_whisper_hears_tooth_36(tmp_path: Path) -> None:
     print(f"\nTranskript: {body['transcript']!r}  ({body['duration_s']} s Audio, {body['latency_s']} s)")
     text = body["transcript"].lower()
     assert "36" in text or "drei sechs" in text
-    assert body["codes"] == []
+    # Der Regel-Extraktor (WP-8) schlägt für die dreiflächige Füllung an 36 BEMA 13c vor.
+    assert "13c" in body["codes"]
+    assert any(s["code"] == "13c" and s["teeth"] == [36] for s in body["suggestions"])
     assert list(tmp_dir.iterdir()) == []

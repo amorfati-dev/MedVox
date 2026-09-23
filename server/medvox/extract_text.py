@@ -19,7 +19,8 @@ from medvox.normalize_digits import expand_range
 _SENTENCE_END = re.compile(r"[.;!?](?=\s|$)")
 _COMMA = re.compile(",")
 _TOOTH_TOKEN = re.compile(r"(?<![\w.])(\d\d)(?:\s*-\s*(\d\d))?(?!\w)")
-_GROUP_GAP = re.compile(r"(?:\s*[modblpi]{1,5})?\s*(?:,|und|-|bis)?\s*")
+# "36 o, Zahn 37 mod": ein wiederholtes "Zahn" nach Komma/"und" gehört noch zur Aufzählung.
+_GROUP_GAP = re.compile(r"(?:\s*[modblpi]{1,5})?\s*(?:(?:,|und)\s*zahn|,|und|-|bis)?\s*")
 _TRAILING_SURFACES = re.compile(r"\s*,?\s*[modblpi]{1,5}\b")
 # Zwischen Leistung und nachfolgender Zahnnummer erlaubt: "Extraktion 47", "Vitalitätsprüfung an 16".
 _LEAD_IN = re.compile(r"\s*(?:(?:an|am|bei|von|regio|zahn|zaehne|den|der|des|dem|im|in|fuer)\s+)*")
