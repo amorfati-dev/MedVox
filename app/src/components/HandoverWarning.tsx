@@ -24,6 +24,16 @@ export function HandoverWarning({ earlier, current }: Props) {
       ))}
       <p>Neu seitdem:</p>
       <EvidentLines lines={diff.added} />
+      {diff.changed.length > 0 && (
+        <>
+          <p>Anzahl geändert:</p>
+          <ul className="codes-lines">
+            {diff.changed.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </>
+      )}
       {diff.removed.length > 0 && (
         <>
           <p>Abgeholt, aber nicht mehr im Diktat – in Evident prüfen:</p>

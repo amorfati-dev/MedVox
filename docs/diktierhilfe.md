@@ -119,7 +119,8 @@ steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht. Wurde 
 Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den Stand des Codes ab;
 die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Schon an der
 Rezeption abgeholt" mit Uhrzeit, den damals übergebenen Zeilen und dem, was seitdem **neu** ist –
-nur das nachtragen; „Als übertragen markieren" zeigt diese Warnung vorher noch einmal. Wird für
+nur das nachtragen (hat sich nur eine Anzahl geändert, steht es ausdrücklich da, z. B. „36: wf
+jetzt 3× statt 2× – 1× nachtragen"); „Als übertragen markieren" zeigt diese Warnung vorher noch einmal. Wird für
 die Korrektur ein zweiter Kurzcode abgeholt, zeigt die Rezeption dieselbe Warnung über den
 Ziffern. Hat das
 Büro das Diktat schon übertragen, zeigt die Rezeption beim Code nur „Dieses Diktat wurde bereits
