@@ -57,14 +57,17 @@ export function billableCodes(active: string[], suggestions: Suggestion[], adopt
   return [...active, ...new Set(extra.map((s) => s.code))];
 }
 
-// Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl.
+// Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl. Eine übernommene Option
+// bringt nur sich selbst an ihrem Zahn mit, nie eine abgewählte Position mit derselben Ziffer.
 export function copyLines(
   suggestions: Suggestion[],
   active: string[],
   adopted: ReadonlySet<string>,
   shortForms = true,
 ): string[] {
-  return evidentLines(billable(suggestions, adopted), billableCodes(active, suggestions, adopted), shortForms);
+  const chosen = new Set(active.map(codeOf));
+  const kept = adopted.size === 0 ? suggestions : suggestions.filter((s) => s.alternative || chosen.has(s.code));
+  return evidentLines(billable(kept, adopted), billableCodes(active, suggestions, adopted), shortForms);
 }
 
 // „Zuzahlung zu BEMA 13a/13b/13c/13d: …“ → ["13a", "13b", "13c", "13d"]

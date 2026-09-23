@@ -135,7 +135,7 @@ export function Diktat({ onLogout }: Props) {
         )}
         {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
           <p className="notice">
-            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „Aufnehmen“ beginnt ein neues Diktat als{" "}
+            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „{state === "fertig" ? "Neu" : "Aufnehmen"}“ beginnt ein neues Diktat als{" "}
             {PATIENT_LABEL[patientType]}.
           </p>
         )}

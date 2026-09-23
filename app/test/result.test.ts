@@ -154,3 +154,23 @@ test("positionsOf: Patient zahlt/Kasse zahlt für die Rezeption, nur gewählte u
     { tooth: null, code: "107", kind: "bema" },
   ]);
 });
+
+test("Übernommene Option bringt eine abgewählte Position mit derselben Ziffer nicht zurück (d06 + d01)", () => {
+  const d06 = fixtures["d06-kasse"];
+  const d01 = fixtures["d01-kasse"];
+  const suggestions = [...d06.suggestions, ...d01.suggestions];
+  const active = [...d06.codes, ...d01.codes].filter((c) => c !== "2100");
+  const adopted = new Set(["2100@36"]);
+  const lines = copyLines(suggestions, active, adopted);
+  assert.deepEqual(lines, ["14,13c", "36,13c,2100,25,40,12"]);
+  assert.deepEqual(copyLines(suggestions, active, adopted, false), ["14,13c", "36,13c,2100,25,40,12"]);
+  const groups = buildGroups(suggestions, active, adopted, lines);
+  const at14 = groups.find((g) => g.tooth === 14)!;
+  const frame = at14.items[0];
+  assert.ok("frame" in frame && !frame.frame.copay.selected);
+  assert.equal(at14.line, "14,13c");
+  assert.deepEqual(
+    positionsOf(groups).filter((p) => p.code === "2100"),
+    [{ tooth: 36, code: "2100", kind: "zuzahlung" }],
+  );
+});

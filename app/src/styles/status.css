@@ -53,13 +53,13 @@
 .status-aufnahme {
   background: var(--rec);
   border-color: var(--rec);
-  color: #fff;
+  color: var(--on-rec);
 }
 .rec-dot {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--on-rec);
   animation: pulse 1.2s ease-in-out infinite;
 }
 .status-clock {
@@ -75,7 +75,7 @@
   height: 12px;
   margin-top: 10px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--on-rec-track);
   overflow: hidden;
 }
 .level {
@@ -85,7 +85,7 @@
 .level-fill {
   position: relative;
   height: 100%;
-  background: #fff;
+  background: var(--on-rec);
 }
 .level-fill {
   transition: width 60ms linear;
@@ -95,7 +95,7 @@
   top: 0;
   bottom: 0;
   right: 0;
-  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.55) 0 4px, transparent 4px 9px);
+  background: repeating-linear-gradient(135deg, var(--on-rec-hatch) 0 4px, transparent 4px 9px);
 }
 
 /* Aufnahmeknopf: Kreis ⇄ Quadrat */
@@ -117,12 +117,12 @@
   border-radius: 50%;
   border: none;
   background: var(--rec);
-  color: #fff;
+  color: var(--on-rec);
   font: inherit;
   font-size: 1.1rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(198, 40, 40, 0.3);
+  box-shadow: var(--rec-shadow);
   -webkit-tap-highlight-color: transparent;
   transition: border-radius 150ms ease;
 }
