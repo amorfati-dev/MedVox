@@ -184,8 +184,8 @@ _TOOTH = re.compile(rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?![.:]\d)(?!\s
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
 _SURFACES_BEFORE = re.compile(rf"([modblpi]{{1,5}}){_SF}\s+(?:Zahn\s+)?$")
-# "Zahn 36, GOZ 2170, modb": Flächen weiter hinten im Satz, bis zum nächsten Zahn und nicht direkt vor ihm
-_SURFACES_LATER = re.compile(rf"[^.;:!?]*?(?<![^\W\d_])([modblpi]{{1,5}}){_SF}(?!\s+(?:Zahn\s+)?$)")
+# "Zahn 36, GOZ 2170, modb": Flächen weiter hinten im Satz, bis zum nächsten Zahn und nicht vor ihm ("m an 37")
+_SURFACES_LATER = re.compile(rf"[^.;:!?]*?(?<![^\W\d_])([modblpi]{{1,5}}){_SF}(?!\s+(?i:(?:a[nm]|bei|vo[nm]|zum?|regio|de[sr]|Z[aä]hne?s?)\s+)*$)")
 
 
 def _quadrant(m: re.Match) -> int:

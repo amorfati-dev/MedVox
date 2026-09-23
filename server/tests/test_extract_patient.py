@@ -189,6 +189,13 @@ def test_inlay_basis_uses_surfaces_separated_from_the_tooth_by_commas():
     assert all(s.decide == () for s in result.suggestions)
 
 
+def test_surface_before_a_later_tooth_is_not_taken_by_the_earlier_one():
+    result = run("Zahn drei sechs Kompositfüllung, Karies mesial an drei sieben.", "kasse")
+    (filling,) = [s for s in result.suggestions if not s.alternative]
+    assert (filling.code, filling.teeth) == ("13a", (36,))
+    assert any(f.startswith("Flächenzahl nicht diktiert") for f in filling.decide)
+
+
 @pytest.mark.parametrize("spelling", ["Bucal", "bukal"])
 def test_inlay_basis_counts_whisper_spellings_of_bukkal(spelling):
     # Live-Befund: Whisper schreibt gesprochenes "bukkal" als "Bucal".

@@ -145,6 +145,7 @@ def test_quadrant_phrases(raw, expected_text, expected_teeth):
         ("Zahn drei sechs, GOZ 2170, mesial, okklusal, distal, bukkal.", "Zahn 36, GOZ 2170, modb.",
          [ToothRef(36, "modb")]),
         ("Zahn 36 Füllung, okklusal Zahn 37.", "Zahn 36 Füllung, o Zahn 37.", [ToothRef(36, ""), ToothRef(37, "o")]),
+        ("Zahn 36 Füllung, Karies mesial an 37.", "Zahn 36 Füllung, Karies m an 37.", [ToothRef(36, ""), ToothRef(37, "")]),
         ("36 Füllung, 37 mod.", "36 Füllung, 37 mod.", [ToothRef(36, ""), ToothRef(37, "mod")]),
         ("Zahn 36, Inlay. Distal Karies.", "Zahn 36, Inlay. d Karies.", [ToothRef(36, "")]),
         ("Zahn 11 palatinal, 21 inzisal", "Zahn 11 p, 21 i", [ToothRef(11, "p"), ToothRef(21, "i")]),
