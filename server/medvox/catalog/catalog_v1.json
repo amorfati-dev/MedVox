@@ -210,6 +210,9 @@
         "nicht neben ATG, MHU, BEV, FU1",
         "Privatpatient: GOÄ Ä1"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -246,6 +249,11 @@
         "nicht neben FU1/FU2 im selben Halbjahr",
         "Privatpatient: GOZ 0010"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -279,6 +287,11 @@
         "bis 18 J. an Indexzähnen 11, 16, 26, 31, 36, 46; ab 18 J. alle Zähne",
         "Privatpatient: GOZ 4005"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -323,6 +336,11 @@
         "auch bei Zahnersatz/Kronen auf dem Erfassungsschein",
         "Privatpatient: GOZ 0070"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -361,6 +379,9 @@
         "Beurteilung und schriftliche Befunddokumentation abgegolten",
         "Privatpatient: GOÄ Ä5000 je Projektion"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -396,6 +417,9 @@
       "rules": [
         "3–5 Aufnahmen"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -430,6 +454,9 @@
       "rules": [
         "6–8 Aufnahmen"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -462,6 +489,9 @@
       "rules": [
         "mehr als 8 Aufnahmen"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -496,6 +526,9 @@
       "rules": [
         "Privatpatient: GOÄ Ä5004"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -534,6 +567,9 @@
         "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Privatpatient: GOÄ Ä5002"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOÄ",
@@ -576,6 +612,9 @@
         "Leitungsanästhesie: 41a",
         "Privatpatient: GOZ 0090"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -612,6 +651,9 @@
         "bei lang dauernden Eingriffen ein zweites Mal",
         "Privatpatient: GOZ 0100"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -656,6 +698,9 @@
         "seit 2025 auch Komposit adhäsiv (Frontzahn); Seitenzahn selbstadhäsiv/Bulkfill",
         "Mehrkosten/Privatpatient: GOZ 2050–2120"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "13a",
         "2": "13b",
@@ -693,6 +738,9 @@
       "rules": [
         "Materialwörter stehen bei 13a; Flächenzahl wählt die Ziffer"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "13a",
         "2": "13b",
@@ -731,6 +779,9 @@
       "rules": [
         "Materialwörter stehen bei 13a; Flächenzahl wählt die Ziffer"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "13a",
         "2": "13b",
@@ -771,6 +822,9 @@
       "rules": [
         "mehr als 3 Flächen oder Eckenaufbau im Frontzahnbereich mit Schneidekante"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "13a",
         "2": "13b",
@@ -812,6 +866,9 @@
         "als alleinige Leistung; im Rahmen von 34 (Med) bereits enthalten",
         "Privatpatient: GOZ 2020"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -832,6 +889,7 @@
       "area": "Konservierend",
       "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
       "abbrev": "bMF",
+      "evident": "bmf",
       "points": 10,
       "keywords": [
         "kofferdam",
@@ -847,6 +905,11 @@
         "je Sitzung, je Kieferhälfte oder Frontzahnbereich",
         "Privatpatient: GOZ 2030/2040"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 1
+      },
+      "max_per_status": "bestaetigt",
       "equivalent": [
         {
           "system": "GOZ",
@@ -886,6 +949,9 @@
         "nur wenn dadurch die Devitalisierung vermeidbar ist",
         "Privatpatient: GOZ 2330"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -918,6 +984,11 @@
         "je Zahn",
         "Privatpatient: GOZ 2340"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -949,6 +1020,9 @@
         "v. a. Milchzähne und jugendliche bleibende Zähne",
         "Privatpatient: GOZ 2350"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -984,6 +1058,11 @@
         "Trepanation des vitalen Zahnes ist enthalten (31 nur bei pulpatotem Zahn)",
         "Privatpatient: GOZ 2360"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1017,6 +1096,9 @@
         "nur bei pulpatotem/avitalem Zahn; bei vitaler Pulpa in 28 enthalten",
         "Privatpatient: GOZ 2390"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1055,6 +1137,11 @@
         "elektrometrische Längenbestimmung ist keine BEMA-Leistung (keine Abrechnungsbestimmung zu Nr. 32): beim Kassenpatienten Zuzahlung GOZ 2400 nach Vereinbarung",
         "Privatpatient: GOZ 2410"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1093,6 +1180,11 @@
         "nur zusammen mit 28, 29 oder 32",
         "Privatpatient: GOZ 2430"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1130,6 +1222,11 @@
         "je Kanal, inkl. provisorischem Verschluss",
         "Privatpatient: GOZ 2440"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1169,6 +1266,9 @@
         "mehrwurzelig: 44",
         "Privatpatient: GOZ 3000"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1202,6 +1302,9 @@
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3010"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1236,6 +1339,9 @@
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3020"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1272,6 +1378,9 @@
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3030"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1308,6 +1417,9 @@
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3040/3045"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1345,6 +1457,11 @@
         "je Kieferhälfte oder Frontzahnbereich, je Sitzung, als selbständige Leistung",
         "Privatpatient: GOZ 3290/3300"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1387,6 +1504,11 @@
         "je Sitzung",
         "Privatpatient: GOZ 4020"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1421,6 +1543,11 @@
         "Privatpatient: GOZ 4050/4055 je Zahn",
         "PZR ist keine BEMA-Leistung (GOZ 1040)"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1460,6 +1587,11 @@
         "6.–17. Lebensjahr, einmal je Kalenderhalbjahr",
         "Privatpatient/Erwachsene: GOZ 1000"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1494,6 +1626,11 @@
         "6.–17. Lebensjahr, einmal je Kalenderhalbjahr, Einzelunterweisung",
         "Privatpatient/Erwachsene: GOZ 1000"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1531,6 +1668,11 @@
         "Kleinkind bis 72. Monat: FLA",
         "Privatpatient/Erwachsene: GOZ 1020"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1564,6 +1706,11 @@
         "je Zahn; nur kariesfreie bleibende Molaren 6 und 7, 6.–17. Lebensjahr",
         "andere Zähne/Privatpatient: GOZ 2000"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1597,6 +1744,9 @@
         "Befunderhebung zu Beginn der systematischen PAR-Therapie (Teil 4)",
         "Privatpatient: GOZ 4000"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1627,6 +1777,9 @@
       "rules": [
         "nicht neben Ä1 in derselben Sitzung"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1653,6 +1806,9 @@
         "in der UPT: UPTb",
         "nicht neben Ä1"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1694,6 +1850,11 @@
         "Taschen ab 4 mm",
         "Privatpatient: GOZ 4070"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1723,6 +1884,11 @@
         "je behandeltem mehrwurzeligen Zahn (Definition wie Nr. 44)",
         "Privatpatient: GOZ 4075"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1756,6 +1922,9 @@
         "3–6 Monate nach Abschluss der AIT",
         "nicht neben Ä1"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "GOZ",
@@ -1788,6 +1957,9 @@
         "inkl. Parodontalbefund und Befundaufzeichnung",
         "Kassenpatient: BEMA 01"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -1828,6 +2000,11 @@
         "je Sitzung, inkl. Vergleichstest",
         "Kassenpatient: BEMA 8"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -1869,6 +2046,11 @@
       "rules": [
         "je Kieferhälfte oder Frontzahnbereich"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -1903,6 +2085,9 @@
         "Anästhetikum gesondert berechenbar",
         "Kassenpatient: BEMA 40"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -1945,6 +2130,9 @@
         "Anästhetikum gesondert berechenbar",
         "Kassenpatient: BEMA 41a"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -1988,6 +2176,11 @@
         "je Zahn, auch Glattflächen",
         "Kassenpatient 6er/7er bis 17 J.: IP5"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2027,6 +2220,9 @@
         "je Kavität",
         "Kassenpatient: BEMA 11"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2069,6 +2265,11 @@
         "je Kieferhälfte oder Frontzahnbereich; je Sitzung höchstens einmal Präparieren + einmal Füllen",
         "Kassenpatient: BEMA 12"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2112,6 +2313,11 @@
         "je Kieferhälfte oder Frontzahnbereich",
         "Kassenpatient: in BEMA 12 enthalten"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2158,6 +2364,9 @@
         "Flächenzahl wählt 2060/2080/2100/2120",
         "Kassenpatient: Mehrkosten zu BEMA 13a–d"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2060",
         "2": "2080",
@@ -2204,6 +2413,9 @@
       "rules": [
         "Materialwörter stehen bei 2060"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2060",
         "2": "2080",
@@ -2250,6 +2462,9 @@
       "rules": [
         "Materialwörter stehen bei 2060"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2060",
         "2": "2080",
@@ -2297,6 +2512,9 @@
       "rules": [
         "Materialwörter stehen bei 2060"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2060",
         "2": "2080",
@@ -2349,6 +2567,9 @@
         "Onlay: 2170 oder Teilkrone 2220 (Arztentscheidung)",
         "Laborkosten gesondert"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2150",
         "2": "2160",
@@ -2392,6 +2613,9 @@
       "rules": [
         "Materialwörter stehen bei 2150"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2150",
         "2": "2160",
@@ -2437,6 +2661,9 @@
       "rules": [
         "Materialwörter stehen bei 2150"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "surfaces_to_code": {
         "1": "2150",
         "2": "2160",
@@ -2485,6 +2712,9 @@
       "rules": [
         "je befestigtem Teil (Aufbau, Stift, Inlay, Krone, Teilkrone, Veneer)"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "zuzahlung": {
         "allowed": true,
         "basis": [
@@ -2522,6 +2752,9 @@
         "je Kavität, inkl. Exkavieren",
         "Kassenpatient: BEMA 25"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2562,6 +2795,9 @@
         "je Kavität, inkl. Exkavieren",
         "Kassenpatient: BEMA 26"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2603,6 +2839,9 @@
         "einschließlich Exkavieren",
         "Kassenpatient: BEMA 27"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2643,6 +2882,11 @@
         "je Kanal, inkl. Exkavieren",
         "Kassenpatient: BEMA 28"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2683,6 +2927,9 @@
         "nur als selbstständige Leistung",
         "Kassenpatient: BEMA 31"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2728,6 +2975,11 @@
         "je Wurzelkanal höchstens zweimal je Sitzung",
         "Kassenpatient: keine BEMA-Leistung, neben BEMA 32 als Zuzahlung nach Vereinbarung"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": true,
         "basis": [
@@ -2764,6 +3016,11 @@
         "je Kanal, ggf. in mehreren Sitzungen; erneut nur nach definitiver Versorgung",
         "Kassenpatient: BEMA 32"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2805,6 +3062,11 @@
         "je Zahn und Sitzung, nur mit 2360, 2380 oder 2410; provisorischer Verschluss inklusive",
         "Kassenpatient: BEMA 34"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2843,6 +3105,11 @@
         "je Wurzelkanal",
         "Kassenpatient: BEMA 35"
       ],
+      "max_per": {
+        "unit": "kanal",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2884,6 +3151,9 @@
         "einwurzeliger Zahn oder enossales Implantat",
         "Kassenpatient: BEMA 43"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2923,6 +3193,9 @@
       "rules": [
         "Kassenpatient: BEMA 44"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -2963,6 +3236,9 @@
       "rules": [
         "Kassenpatient: BEMA 45"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3004,6 +3280,9 @@
       "rules": [
         "Kassenpatient: BEMA 47a"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3045,6 +3324,9 @@
         "extrem verlagert mit gefährdeten Nachbarstrukturen: 3045",
         "Kassenpatient: BEMA 48"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3088,6 +3370,11 @@
         "Nachbehandlung (Tamponieren): 3300; nicht neben 3300 in derselben Sitzung",
         "Kassenpatient: BEMA 38"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3131,6 +3418,11 @@
         "Kontrolle ohne Behandlung: 3290; nicht neben 3290 in derselben Sitzung",
         "Kassenpatient: BEMA 38"
       ],
+      "max_per": {
+        "unit": "kieferhaelfte",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3176,6 +3468,11 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3214,6 +3511,11 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3252,6 +3554,11 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3290,6 +3597,11 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3325,6 +3637,11 @@
         "nicht neben 1040 (in PZR enthalten)",
         "Kassenpatient bis 17 J.: IP4"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3364,6 +3681,11 @@
         "Dauer mindestens 25 Minuten; einmal je Jahr",
         "Kassenpatient: IP1/IP2"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3416,6 +3738,11 @@
         "nicht neben 1020, 4050, 4055, 4060, 4070, 4075, 4090, 4100",
         "keine BEMA-Leistung (nur UPT)"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": true,
         "basis": [],
@@ -3449,6 +3776,11 @@
         "höchstens zweimal je Jahr",
         "Kassenpatient: BEMA 4"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3496,6 +3828,11 @@
         "höchstens zweimal je Jahr",
         "Kassenpatient: BEMA 04"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 2
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3538,6 +3875,11 @@
         "je Sitzung",
         "Kassenpatient: BEMA 105"
       ],
+      "max_per": {
+        "unit": "sitzung",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3581,6 +3923,11 @@
         "nicht neben 1040",
         "Kassenpatient: BEMA 107 (je Sitzung)"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3621,6 +3968,11 @@
         "je mehrwurzeligem Zahn; innerhalb 30 Tagen nur einmal",
         "nicht neben 1040"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3663,6 +4015,11 @@
         "je einwurzeligem Zahn/Implantat, geschlossenes Vorgehen",
         "Kassenpatient: AITa"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3702,6 +4059,11 @@
         "je mehrwurzeligem Zahn, geschlossenes Vorgehen",
         "Kassenpatient: AITb"
       ],
+      "max_per": {
+        "unit": "zahn",
+        "count": 1
+      },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3743,6 +4105,9 @@
         "auch telefonisch",
         "Kassenpatient: BEMA Ä1 (9 Punkte)"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3783,6 +4148,9 @@
         "GOÄ Abschnitt B I, für Zahnärzte über § 6 Abs. 2 GOZ",
         "für die eingehende Untersuchung stattdessen GOZ 0010"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "zuzahlung": {
         "allowed": false,
         "basis": [
@@ -3819,6 +4187,9 @@
         "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä925a–d"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3878,6 +4249,9 @@
         "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä935d"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",
@@ -3926,6 +4300,9 @@
         "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Kassenpatient: BEMA Ä935a"
       ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
       "equivalent": [
         {
           "system": "BEMA",

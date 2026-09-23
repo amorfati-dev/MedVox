@@ -124,6 +124,11 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
             errors.append(f"{label}: Ziffernformat passt nicht zum System")
         if "abbrev" in e and e["system"] != "BEMA":
             errors.append(f"{label}: 'abbrev' gibt es nur bei BEMA")
+        limit = e.get("max_per")
+        if limit and (limit["unit"] == "unbegrenzt") == ("count" in limit):
+            errors.append(f"{label}: max_per braucht 'count' genau dann, wenn 'unit' nicht 'unbegrenzt' ist")
+        if ("max_per_status" in e) != bool(limit and "count" in limit):
+            errors.append(f"{label}: max_per_status gehört genau zu einer Höchstzahl mit 'count'")
         for kw in e["keywords"]:
             if kw != kw.strip() or "  " in kw:
                 errors.append(f"{label}: Keyword {kw!r} hat überflüssige Leerzeichen")

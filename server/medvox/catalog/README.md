@@ -28,6 +28,8 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
   "points": 53,                        // BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punktzahl; null = nicht verifiziert
   "keywords": ["dreiflächig", "mod"],  // Auslösewörter, wie diktiert; klein geschrieben; kein Duplikat je System
   "rules": ["je Kanal", "..."],        // Freitext-Hinweise: Einheit, Alter, Gegenstück im anderen System
+  "max_per": {"unit": "kieferhaelfte", "count": 1},   // Höchstzahl laut amtlichem Text (s. u.)
+  "max_per_status": "bestaetigt",      // nur mit count: "vorschlag" (wirkt nicht) oder "bestaetigt" (wirkt)
   "surfaces_to_code": {"1": "13a", "2": "13b", "3": "13c", "4": "13d"},   // nur Füllungs-Familien
   "equivalent": [{"system": "GOZ", "code": "2100"}],   // Paar derselben Leistung im anderen System, beidseitig;
                                        //   optional "note": Unterschied, den der Behandler prüfen muss
@@ -54,6 +56,18 @@ einer Datei (`validate.py` prüft beides). Mehrere Paare sind erlaubt, wenn eine
 aufgeteilt ist (BEMA 12 = GOZ 2030 oder 2040, BEMA 107 = GOZ 4050/4055 je Zahn, Ä925a–d = GOÄ Ä5000);
 dann entscheidet das diktierte Wort. `zuzahlung` ist ein Vorschlag zur Prüfung durch den Behandler, keine
 Rechtsberatung: `allowed: false` mit Begründung, wo die übliche Praxis umstritten oder nicht belegbar ist.
+
+Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
+(je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche` – oder `unbegrenzt` ohne `count`, wo
+der amtliche Text keine Grenze nennt (nie eine erfinden). Jeder v1-Eintrag trägt das Feld, geprüft gegen
+KZBV-Gesamtfassung bzw. GOZ-Text; Grenzen über längere Zeiträume („einmal je Kalenderhalbjahr“,
+„höchstens zweimal je Jahr“) gelten mit derselben Anzahl je Sitzung. Jede Höchstzahl mit `count` trägt
+`max_per_status`: `vorschlag` = aus dem amtlichen Text gelesen, wartet auf die Bestätigung des Behandlers;
+`bestaetigt` = vom Behandler bestätigt. Der Extraktor begrenzt die Anzahl nur bei `bestaetigt`
+(`extract_limits.py`), bisher nur BEMA 12; ein Vorschlag ändert an den Vorschlägen nichts, bis der
+Behandler ihn bestätigt (ein Wechsel auf `bestaetigt` je Eintrag). Bereiche aus der FDI-Nummer: Frontzahnbereich = 13–23 bzw. 33–43,
+Kieferhälfte = Seitenzähne 4–8 eines Quadranten (KZVB-Abrechnungsmappe zu BEMA 12). Im erweiterten
+Katalog fehlt das Feld noch (gilt als ungeprüft/unbegrenzt).
 
 Füllungs-Familien: die Materialwörter (füllung, komposit, …) stehen nur bei der einflächigen Ziffer
 (13a, 2060; im erweiterten Katalog 2050, 2150); die Flächenzahl wählt über `surfaces_to_code` die

@@ -3,7 +3,15 @@
 // gemeinsamen Rahmen, Optionen (`alternative`) unter ihrer Leistung. Reine Funktionen, getestet in
 // test/result.test.ts gegen die Anhang-B-Diktate.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
-import { codeOf, evidentLines, isToothless, type Suggestion, type TransferPosition } from "./api.ts";
+import {
+  codeOf,
+  evidentBlocks,
+  isToothless,
+  joinBlocks,
+  type EvidentBlocks,
+  type Suggestion,
+  type TransferPosition,
+} from "./api.ts";
 
 // bema/goz wie vom Server; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
 export type Tag = "bema" | "goz" | "kassenanteil" | "zuzahlung";
@@ -30,7 +38,7 @@ export type Item = { row: Row } | { frame: Frame } | { option: Option };
 
 export type Group = {
   tooth: number | null; // null = ohne Zahn
-  line: string | null; // die kopierte Evident-Zeile dieses Zahns (ohne führendes Komma), null = nichts gewählt
+  lines: string[]; // kopierte Evident-Zeilen dieses Zahns (ohne führendes Komma): Kasse, dann Privat; [] = nichts gewählt
   items: Item[];
 };
 
@@ -57,17 +65,28 @@ export function billableCodes(active: string[], suggestions: Suggestion[], adopt
   return [...active, ...new Set(extra.map((s) => s.code))];
 }
 
-// Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl. Eine übernommene Option
-// bringt nur sich selbst an ihrem Zahn mit, nie eine abgewählte Position mit derselben Ziffer.
+// Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl, Kassen- und Privatblock
+// getrennt („Kassenleistungen kopieren“, „Privatleistungen kopieren“). Eine übernommene Option bringt
+// nur sich selbst an ihrem Zahn mit, nie eine abgewählte Position mit derselben Ziffer.
+export function copyBlocks(
+  suggestions: Suggestion[],
+  active: string[],
+  adopted: ReadonlySet<string>,
+  shortForms = true,
+): EvidentBlocks {
+  const chosen = new Set(active.map(codeOf));
+  const kept = adopted.size === 0 ? suggestions : suggestions.filter((s) => s.alternative || chosen.has(s.code));
+  return evidentBlocks(billable(kept, adopted), billableCodes(active, suggestions, adopted), shortForms);
+}
+
+// Beide Blöcke als eine Zeilenliste („Ziffern kopieren“): Kasse, Leerzeile, Privat.
 export function copyLines(
   suggestions: Suggestion[],
   active: string[],
   adopted: ReadonlySet<string>,
   shortForms = true,
 ): string[] {
-  const chosen = new Set(active.map(codeOf));
-  const kept = adopted.size === 0 ? suggestions : suggestions.filter((s) => s.alternative || chosen.has(s.code));
-  return evidentLines(billable(kept, adopted), billableCodes(active, suggestions, adopted), shortForms);
+  return joinBlocks(copyBlocks(suggestions, active, adopted, shortForms));
 }
 
 // „Zuzahlung zu BEMA 13a/13b/13c/13d: …“ → ["13a", "13b", "13c", "13d"]
@@ -81,7 +100,7 @@ function tagOf(s: Suggestion): Tag {
   return s.kind;
 }
 
-// `lines`: Evident-Zeilen der aktuellen Auswahl (copyLines), für die leise Zeile im Blockkopf.
+// `lines`: Evident-Zeilen der aktuellen Auswahl (copyLines), für die leisen Zeilen im Blockkopf.
 export function buildGroups(
   suggestions: Suggestion[],
   active: string[],
@@ -122,18 +141,14 @@ export function buildGroups(
   const ordered = [...groups.entries()].sort(([a], [b]) => Number(a === null) - Number(b === null));
   return ordered.map(([tooth, { rows }]) => ({
     tooth,
-    line: lineFor(tooth, lines),
+    lines: linesFor(tooth, lines),
     items: framed(rows),
   }));
 }
 
-function lineFor(tooth: number | null, lines: string[]): string | null {
-  const line =
-    tooth === null
-      ? lines.find(isToothless)
-      : lines.find((l) => !isToothless(l) && l.split(",")[0] === String(tooth));
-  if (!line) return null;
-  return isToothless(line) ? line.slice(1) : line;
+function linesFor(tooth: number | null, lines: string[]): string[] {
+  const own = lines.filter((l) => (tooth === null ? isToothless(l) : l !== "" && l.split(",")[0] === String(tooth)));
+  return own.map((l) => (isToothless(l) ? l.slice(1) : l));
 }
 
 // Zuzahlung und ihre BEMA-Basis am selben Zahn in einen Rahmen: bevorzugt der Kassenanteil, der die

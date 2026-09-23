@@ -189,3 +189,32 @@
   font-weight: 700;
   color: var(--warn);
 }
+
+/* Kassen- und Privatblock der Evident-Zeilen (Kassenpatient: Privatblock zuletzt) */
+.codes-label {
+  margin: 12px 0 4px;
+  font-size: var(--fs-small);
+  font-weight: 800;
+}
+.codes-label-kasse {
+  color: var(--kasse);
+}
+.codes-label-privat {
+  color: var(--privat);
+}
+.codes-label-privat + .codes-lines {
+  padding-left: 12px;
+  border-left: 4px solid var(--privat);
+}
+.copy-preview {
+  margin-bottom: 18px;
+}
+.copy-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tap-gap);
+}
+.copy-preview-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
