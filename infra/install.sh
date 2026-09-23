@@ -7,8 +7,10 @@
 # Idempotent: prüft die Voraussetzungen, richtet Spracherkennung (whisper-server),
 # Backend (de.medvox.server), App und HTTPS (Caddy) ein und prüft am Ende alles.
 # Erneut ausführen nach jedem Update des Repos – es wird nur nachgezogen, was fehlt.
-# Einzige Rückfrage: das Mac-Passwort, falls mkcert die Praxis-CA erstmals in den
-# Schlüsselbund einträgt, und das MedVox-Passwort, falls noch keines gesetzt ist.
+# Rückfragen: das Mac-Passwort (sudo), wenn mkcert die Praxis-CA erstmals in den
+# System-Schlüsselbund einträgt – deshalb nicht unbeaufsichtigt starten; bricht der Lauf
+# dort ab, ein zweites `make install` schließt ab – und das MedVox-Passwort, falls noch
+# keines gesetzt ist.
 
 source "$(dirname "$0")/common.sh"
 MODEL="${1:-${MODEL:-}}"
@@ -53,7 +55,7 @@ log "2/4 Backend (de.medvox.server)"
 log "3/4 App (PWA)"
 "$INFRA_DIR/app/install.sh"
 
-log "4/4 HTTPS im Praxis-LAN (Caddy, Zertifikat)"
+log "4/4 HTTPS im Praxis-LAN (Caddy, Zertifikat) – beim ersten Mal fragt mkcert nach dem Mac-Passwort"
 "$INFRA_DIR/tls/setup.sh"
 
 # --- 3. Passwort ------------------------------------------------------------

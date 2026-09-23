@@ -7,9 +7,13 @@ Ausgabe mit aufschreiben.
 
 **Vorbereitung (einmalig):**
 
-- [ ] Im Repo-Verzeichnis auf dem Praxis-Mac: `make install` – endet mit
-      „Alles in Ordnung." und der Adresse `https://<LAN-IP>`.
+- [ ] Im Repo-Verzeichnis auf dem Praxis-Mac: `make install` – am Terminal bleiben: beim
+      ersten Mal fragt der Zertifikatsschritt nach dem **Mac-Passwort**. Abgebrochen? Einfach
+      `make install` noch einmal. Endet mit „Alles in Ordnung." und der Adresse `https://<LAN-IP>`.
       Adresse: ______________________
+- [ ] Im Router eine **feste IP (DHCP-Reservierung)** für den Mac eingetragen – die Adresse, die
+      `make status` zeigt (`infra/README.md`, Abschnitt 8). Ändert sie sich doch einmal:
+      `make install` stellt das Zertifikat für die neue Adresse aus.
 - [ ] `make set-password` – eigenes Passwort gesetzt (mind. 8 Zeichen).
 - [ ] Praxis-CA auf iPad und Rezeptions-PC installiert (`infra/README.md`, Abschnitte 3 und 4).
 - [ ] Ruhezustand am Netzteil aus (`infra/README.md`, Abschnitt 5); `make status` zeigt keinen

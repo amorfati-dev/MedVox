@@ -17,7 +17,7 @@ Alles, was die Skripte anlegen, liegt in `~/Library/Application Support/MedVox/`
 1. **Xcode Command Line Tools:** im Terminal `xcode-select --install` – Dialog bestätigen, ein paar Minuten warten.
 2. **Homebrew:** falls `brew --version` nichts ausgibt, den Befehl von <https://brew.sh> ausführen.
 3. `brew install ffmpeg uv node` (Node ≥ 22.18). `make install` prüft alles und nennt genau, was fehlt.
-4. Mac ist im Praxis-WLAN/LAN und hat eine feste IP-Adresse (im Router: „DHCP-Reservierung" für den Mac – sonst ändert sich die Adresse und das Zertifikat passt nicht mehr, siehe Abschnitt 7).
+4. Mac ist im Praxis-WLAN/LAN und hat eine feste IP-Adresse (im Router: „DHCP-Reservierung" für den Mac – sonst ändert sich die Adresse und das Zertifikat passt nicht mehr, siehe Abschnitt 8).
 5. Repo geklont, Terminal im Repo-Verzeichnis (`cd ~/medvox` o. ä.).
 
 ## 2. Installieren – ein Befehl
@@ -34,8 +34,12 @@ Das Skript (`infra/install.sh`) prüft die Voraussetzungen, dann der Reihe nach:
 2. **Backend** (`infra/server/install.sh`): `server/` nach `…/MedVox/server` kopieren,
    Python-Pakete mit `uv` installieren, Dienst `de.medvox.server` laden.
 3. **App** (`infra/app/install.sh`): `npm ci && npm run build`, Ergebnis nach `…/MedVox/app`.
-4. **HTTPS** (`infra/tls/setup.sh`): Praxis-CA, Zertifikat, Caddy. Fragt beim allerersten
-   Mal nach dem **Mac-Passwort** (mkcert trägt die CA in den Schlüsselbund ein).
+4. **HTTPS** (`infra/tls/setup.sh`): Praxis-CA, Zertifikat, Caddy. Beim allerersten Mal
+   fragt `mkcert -install` im Terminal nach dem **Mac-Passwort** (sudo – die Praxis-CA kommt in
+   den System-Schlüsselbund). Dieser Schritt läuft deshalb nicht unbeaufsichtigt: am Terminal
+   bleiben und das Passwort eingeben. Bricht der Lauf dort ab (Passwort nicht eingegeben,
+   Fenster geschlossen), einfach **`make install` noch einmal** ausführen – die CA ist dann
+   eingetragen, der zweite Lauf fragt nicht mehr und schließt die Installation ab.
 5. **Passwort**: ist noch keines gesetzt, fragt es jetzt danach (`make set-password`).
 6. **Prüfung** (`make status`) und Ausgabe der Adressen für iPad und Rezeptions-PC.
 
@@ -129,9 +133,23 @@ infra/whisper/smoke.sh      # gegenprüfen
 
 Gleiches gilt für die Thread-Zahl: `infra/whisper/de.medvox.whisper-server.plist.template` anpassen, `install.sh` erneut ausführen. Die Ports liegen fest in `infra/common.sh`.
 
-## 8. Wenn sich die LAN-IP ändert
+## 8. Feste LAN-IP – und wenn sie sich doch ändert
 
-`make install` (oder nur `infra/tls/setup.sh`) erneut ausführen: erkennt die neue IP, stellt ein neues Zertifikat aus (gleiche Praxis-CA – auf den Geräten muss **nichts** neu installiert werden) und lädt Caddy neu. `infra/tls/check.sh` warnt, wenn die IP nicht mehr im Zertifikat steht.
+Das Zertifikat gilt für genau eine IP-Adresse. Während der Entwicklung hat der Mac seine
+Adresse dreimal gewechselt (192.168.0.119 → .120 → .97); jedes Mal waren iPad und Rezeption
+danach ohne Verbindung. Deshalb **im Router eine feste Adresse für den Mac reservieren**
+(„DHCP-Reservierung", bei der FRITZ!Box: *Heimnetz → Netzwerk → Gerät bearbeiten → „Diesem
+Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen"*). Dabei die Adresse nehmen, die der
+Mac gerade hat (`make status` zeigt sie), dann bleibt das Zertifikat gültig.
+
+Ändert sich die Adresse trotzdem (`make status` meldet „passt nicht zur LAN-IP"), stellt ein
+Befehl das Zertifikat neu aus:
+
+```bash
+make install
+```
+
+Er (bzw. nur `infra/tls/setup.sh`) erkennt die neue IP, stellt ein neues Zertifikat aus (gleiche Praxis-CA – auf den Geräten muss **nichts** neu installiert werden) und lädt Caddy neu. `infra/tls/check.sh` warnt, wenn die IP nicht mehr im Zertifikat steht.
 
 Optional, damit die Adresse `https://medvox.local` statt der IP funktioniert: dem Mac den Bonjour-Namen `medvox` geben – *Systemeinstellungen → Allgemein → Info → Name* auf „medvox" (oder `sudo scutil --set LocalHostName medvox`). iPad und Windows (ab 10) lösen `medvox.local` dann per Bonjour/mDNS auf.
 
