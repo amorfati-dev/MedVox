@@ -3,7 +3,7 @@
 // Wunsch das Kürzel (Initialen) zum Wiederfinden in Evident; leer lässt ein vorhandenes stehen.
 import { useEffect, useState } from "react";
 import { api, ApiError, type PatientSummary } from "../api";
-import { clock, LABEL_MAX, NUMBER_MAX, normalizeLabel, normalizeNumber, pickable } from "../patients";
+import { clock, finishLabel, LABEL_LETTERS, LABEL_MAX, NUMBER_MAX, normalizeLabel, normalizeNumber, pickable } from "../patients";
 import { plural } from "../status";
 import { Icon } from "./Icon";
 
@@ -41,7 +41,7 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
   const press = (key: string) => {
     if (key === "OK") {
       const known = open?.find((p) => p.number === digits)?.label ?? null;
-      if (digits) onChoose(digits, label.trim() || known);
+      if (digits) onChoose(digits, finishLabel(label) ?? known);
     } else if (key === "⌫") setDigits((d) => d.slice(0, -1));
     else setDigits((d) => normalizeNumber(d + key));
   };
@@ -103,7 +103,7 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
               ))}
             </div>
             <p className="muted small">
-              Patientennummer aus Evident, höchstens {NUMBER_MAX} Ziffern; dazu auf Wunsch nur die Initialen – keine Namen.
+              Patientennummer aus Evident, höchstens {NUMBER_MAX} Ziffern; dazu auf Wunsch nur die Initialen (höchstens {LABEL_LETTERS} Buchstaben, z. B. M.K.) – keine Namen.
             </p>
           </div>
           <div className="picker-list">

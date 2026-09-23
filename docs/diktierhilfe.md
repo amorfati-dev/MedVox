@@ -171,9 +171,9 @@ dieselbe Warnung über den Ziffern. Hat das Büro das Diktat schon übertragen, 
 beim Code nur „Dieses Diktat wurde bereits am … übertragen … – nicht erneut in Evident eintragen"
 und keine Ziffern.
 
-**Datenschutz – Kürzel zur Nummer:** das Feld „Kürzel" ist freiwillig und nimmt nur Buchstaben,
-Punkt und Bindestrich auf, höchstens 12 Zeichen (keine Ziffern, also kein Geburtsdatum). Gedacht sind
-Initialen, **keine Namen**. Das ist vertretbar, weil keine neue Datenkategorie entsteht: die
+**Datenschutz – Kürzel zur Nummer:** das Feld „Kürzel" ist freiwillig und nimmt nur Initialen auf:
+höchstens 4 Buchstaben, getrennt nur durch Punkt, Leerzeichen oder Bindestrich („MK", „M. K.",
+„A-B.") – keine Ziffern (also kein Geburtsdatum) und **keine Namen**; „Mueller" lehnt der Praxis-Mac ab. Das ist vertretbar, weil keine neue Datenkategorie entsteht: die
 Evident-Nummer ist schon ein Personenbezug, und Initialen machen ihn für uns nur lesbarer. Das Kürzel
 liegt nur auf dem Praxis-Mac, nie in der Cloud, nie in Protokollen, Fehlermeldungen oder im
 Kopiertext für Evident, und es wird gelöscht wie der Inhalt: beim Übertragen (Büro oder Kurzcode),

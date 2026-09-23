@@ -9,10 +9,11 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
+import unicodedata
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, Field
 
 from medvox import attribution, dentists, patients
 from medvox.auth import require_session
@@ -27,34 +28,36 @@ NUMBER_PATTERN = r"^[0-9]{1,12}$"  # Evident-Patientennummer, nur Ziffern
 DictationId = Annotated[str, Path(pattern=r"^[A-Za-z0-9-]{8,64}$")]
 Text = Annotated[str, Field(max_length=2_000)]
 Code = Annotated[str, Field(max_length=64)]
-LABEL_MAX = 12
+# Initialen: höchstens 4 Buchstaben, je einer mit Punkt dahinter, getrennt nur durch Punkt, Leerzeichen, Bindestrich
+LABEL_PATTERN = re.compile(r"[^\W\d_]\.?(?:[ -]?[^\W\d_]\.?){0,3}")
+LABEL_INVALID = "Kürzel: nur Initialen, höchstens 4 Buchstaben, z. B. „M.K.“ – keine Namen, keine Ziffern."
 
 
-def _clean_label(raw: object) -> str | None:
-    """Kürzel (Initialen, z. B. „M.K.“): nur Buchstaben, Punkt, Bindestrich, Leerzeichen, höchstens 12 Zeichen.
+def _label(raw: str | None) -> str | None:
+    """Kürzel (Initialen, z. B. „MK“, „M. K.“, „A-B.“); leer = kein Kürzel, alles andere 422.
 
-    Bereinigt statt abgelehnt, damit das Kürzel nie in einer Fehlermeldung zurückkommt; leer = kein Kürzel.
+    Geprüft in der Route statt im Modell, damit das abgelehnte Kürzel nie in der Fehlermeldung zurückkommt.
     """
-    if not isinstance(raw, str):
+    text = re.sub(r"\s+", " ", unicodedata.normalize("NFC", raw or "")).strip()
+    if not text:
         return None
-    text = re.sub(r"\s+", " ", "".join(c for c in raw if c.isalpha() or c in " .-"))
-    return text.strip()[:LABEL_MAX].strip() or None
+    if not LABEL_PATTERN.fullmatch(text):
+        raise HTTPException(status_code=422, detail=LABEL_INVALID)
+    return text
 
 
-Label = Annotated[str | None, BeforeValidator(_clean_label)]
 CLOSED = "Dieses Diktat wurde bereits übertragen (oder ist gelöscht bzw. älter als 24 Stunden) – bitte ein neues Diktat beginnen."
 
 
 class PatientCreate(BaseModel):
     number: str = Field(pattern=NUMBER_PATTERN)
-    label: Label = None  # Kürzel; None = bisheriges behalten
 
 
 class DictationIn(BaseModel):
     """Stand eines Diktats vom iPad: dieselben Felder wie die Antwort von /transcribe plus Auswahl."""
 
     patient: str | None = Field(default=None, pattern=NUMBER_PATTERN)  # None = Zuordnung behalten
-    patient_label: Label = None  # Kürzel des Patienten (nur zum Wiederfinden, nie in den Kopierzeilen)
+    patient_label: str | None = None  # Kürzel des Patienten (nur zum Wiederfinden, nie in den Kopierzeilen)
     transcript: str = Field(default="", max_length=50_000)
     patient_type: Literal["kasse", "privat"] | None = None
     codes: list[Code] = Field(default_factory=list, max_length=200)
@@ -117,6 +120,7 @@ class TransferredIn(BaseModel):
 
 class AssignIn(BaseModel):
     dictation_id: str = Field(pattern=r"^[A-Za-z0-9-]{8,64}$")
+    label: str | None = None  # Kürzel des Patienten; None = bisheriges behalten
 
 
 class DentistIn(BaseModel):
@@ -160,7 +164,7 @@ def _names(request: Request) -> dict[int, str]:
 
 @router.post("/patients", response_model=PatientOut)
 def create(body: PatientCreate, request: Request) -> PatientOut:
-    return _patient_out(patients.create_patient(_db(request), body.number, body.label), _names(request))
+    return _patient_out(patients.create_patient(_db(request), body.number), _names(request))
 
 
 @router.get("/patients", response_model=PatientList)
@@ -180,7 +184,7 @@ def get(patient_id: int, request: Request) -> PatientDetail:
 @router.post("/patients/{patient_id}/dictations", response_model=DictationOut)
 def append(patient_id: int, body: AssignIn, request: Request) -> DictationOut:
     """Hängt ein gespeichertes Diktat (z. B. „ohne Patient“) an diesen Patienten."""
-    moved = patients.assign_dictation(_db(request), body.dictation_id, patient_id)
+    moved = patients.assign_dictation(_db(request), body.dictation_id, patient_id, _label(body.label))
     if moved is None:
         raise HTTPException(status_code=404, detail="Diktat oder Patient nicht gefunden.")
     return _dictation_out(moved, _names(request))
@@ -205,10 +209,9 @@ def delete(patient_id: int, request: Request) -> Response:
 def save(dictation_id: DictationId, body: DictationIn, request: Request) -> DictationOut:
     """Speichert den Stand eines Diktats (anlegen oder ersetzen); 410, wenn es schon übertragen ist."""
     data = body.model_dump(exclude={"patient", "patient_label", "dentist_id"})
+    label = _label(body.patient_label)
     try:
-        saved = patients.save_dictation(
-            _db(request), dictation_id, data, body.patient, body.dentist_id, label=body.patient_label
-        )
+        saved = patients.save_dictation(_db(request), dictation_id, data, body.patient, body.dentist_id, label=label)
     except patients.DictationClosed:
         raise HTTPException(status_code=410, detail=CLOSED) from None
     log.info("Diktat gespeichert (%d Zeichen, %d Ziffern)", len(body.transcript), len(body.codes))

@@ -75,10 +75,10 @@ export function Patienten({ onLogout }: Props) {
     setAssigning(null);
     if (number === null || number === d.patient) return;
     void act(async () => {
-      const patient = await api.createPatient(number, label);
-      await api.appendDictation(patient.id, d.id);
+      const patient = await api.createPatient(number);
+      const moved = await api.appendDictation(patient.id, d.id, label);
       setSelected({ kind: "patient", id: patient.id });
-      setMessage(`Diktat Patient ${patientName(number, patient.label)} zugeordnet.`);
+      setMessage(`Diktat Patient ${patientName(number, moved.patient_label)} zugeordnet.`);
     });
   };
 

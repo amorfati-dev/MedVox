@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { evidentText, type PatientSummary, type StoredDictation, type TranscribeResult } from "../src/api.ts";
 import {
   dictationCopy,
+  finishLabel,
   normalizeLabel,
   normalizeNumber,
   patientName,
@@ -105,11 +106,21 @@ test("Patientennummer: nur Ziffern, höchstens 12", () => {
   assert.equal(normalizeNumber("12345678901234"), "123456789012");
 });
 
-test("Kürzel: nur Buchstaben, Punkt, Bindestrich, höchstens 12, keine Ziffern", () => {
-  assert.equal(normalizeLabel("M.K."), "M.K.");
+test("Kürzel: nur Initialen, höchstens 4 Buchstaben, keine Ziffern", () => {
+  for (const ok of ["MK", "M.K.", "M. K.", "A-B.", "Ö.Ü.", "A. B. C. D."]) assert.equal(normalizeLabel(ok), ok);
   assert.equal(normalizeLabel("  Ö.  Ü-1980"), "Ö. Ü-");
-  assert.equal(normalizeLabel("Max Mustermann"), "Max Musterma");
+  assert.equal(normalizeLabel("Mueller"), "Muel");
+  assert.equal(normalizeLabel("Max Musterma"), "Max M");
+  assert.equal(normalizeLabel("M..K"), "M.K");
   assert.equal(normalizeLabel("<b>"), "b");
+  assert.equal(normalizeLabel("U\u0308"), "Ü");
+});
+
+test("Kürzel zum Speichern: ohne Trenner am Ende, leer = keins", () => {
+  assert.equal(finishLabel("M. K. "), "M. K.");
+  assert.equal(finishLabel("A-"), "A");
+  assert.equal(finishLabel("  "), null);
+  assert.equal(finishLabel("1980"), null);
 });
 
 test("Nummer mit Kürzel für Texte, ohne Kürzel nur die Nummer", () => {

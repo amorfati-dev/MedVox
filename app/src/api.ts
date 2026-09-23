@@ -143,11 +143,13 @@ export const api = {
   deleteDictation: (id: string) =>
     request<void>(`/api/v1/dictations/${encodeURIComponent(id)}`, { method: "DELETE" }),
   listPatients: () => request<PatientList>("/api/v1/patients"),
-  createPatient: (number: string, label: string | null = null) =>
-    request<PatientSummary>("/api/v1/patients", json("POST", label ? { number, label } : { number })),
+  createPatient: (number: string) => request<PatientSummary>("/api/v1/patients", json("POST", { number })),
   getPatient: (id: number) => request<PatientDetail>(`/api/v1/patients/${id}`),
-  appendDictation: (patientId: number, dictationId: string) =>
-    request<StoredDictation>(`/api/v1/patients/${patientId}/dictations`, json("POST", { dictation_id: dictationId })),
+  appendDictation: (patientId: number, dictationId: string, label: string | null = null) =>
+    request<StoredDictation>(
+      `/api/v1/patients/${patientId}/dictations`,
+      json("POST", label ? { dictation_id: dictationId, label } : { dictation_id: dictationId }),
+    ),
   markTransferred: (patientId: number, seen: StoredDictation[]) =>
     request<PatientDetail>(
       `/api/v1/patients/${patientId}/transferred`,

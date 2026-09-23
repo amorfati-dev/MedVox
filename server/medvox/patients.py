@@ -141,12 +141,12 @@ def _get_dictation(conn: sqlite3.Connection, dictation_id: str) -> Dictation | N
     return None if row is None else _dictations(conn, [row])[0]
 
 
-def create_patient(db_path: Path, number: str, label: str | None = None, now: float | None = None) -> Patient:
-    """Legt den Patienten an oder liefert den vorhandenen mit dieser Nummer (Kürzel wie `_patient_id`)."""
+def create_patient(db_path: Path, number: str, now: float | None = None) -> Patient:
+    """Legt den Patienten an oder liefert den vorhandenen mit dieser Nummer."""
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
-        patient = _get_patient(conn, _patient_id(conn, number, now, label))
+        patient = _get_patient(conn, _patient_id(conn, number, now))
     assert patient is not None
     return patient
 
@@ -235,8 +235,13 @@ def save_dictation(
     return saved
 
 
-def assign_dictation(db_path: Path, dictation_id: str, patient_id: int, now: float | None = None) -> Dictation | None:
-    """Hängt ein vorhandenes Diktat (z. B. „ohne Patient“) an diesen Patienten; None, wenn eins fehlt."""
+def assign_dictation(
+    db_path: Path, dictation_id: str, patient_id: int, label: str | None = None, now: float | None = None
+) -> Dictation | None:
+    """Hängt ein vorhandenes Diktat (z. B. „ohne Patient“) an diesen Patienten; None, wenn eins fehlt.
+
+    `label` (Kürzel) erst nach dem Aufräumen setzen, sonst löscht es `db.drop_labels` gleich wieder.
+    """
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
@@ -247,6 +252,8 @@ def assign_dictation(db_path: Path, dictation_id: str, patient_id: int, now: flo
             "UPDATE dictations SET patient_id = ?, revision = revision + 1, updated_at = ? WHERE id = ?",
             (patient_id, now, dictation_id),
         )
+        if label:
+            conn.execute("UPDATE patients SET label = ? WHERE id = ?", (label, patient_id))
         _touch(conn, patient_id, row["expires_at"], now, row["dentist_id"])
         return _get_dictation(conn, dictation_id)
 

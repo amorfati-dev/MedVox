@@ -41,6 +41,8 @@ def test_label_is_optional(logged_in: TestClient) -> None:
     put(logged_in, "diktat-0001", "4711")
     assert by_number(logged_in, "4711")["label"] is None
     assert logged_in.post(PATIENTS, json={"number": "4712"}).json()["label"] is None
+    put(logged_in, "diktat-0002", "4713", "   ")
+    assert by_number(logged_in, "4713")["label"] is None
 
 
 def test_label_saved_with_the_dictation(logged_in: TestClient) -> None:
@@ -53,11 +55,10 @@ def test_label_saved_with_the_dictation(logged_in: TestClient) -> None:
     assert item["patient_label"] == "M.K." and item["patient"] == "4711"
 
 
-def test_label_on_create_and_kept_without_one(logged_in: TestClient) -> None:
-    created = logged_in.post(PATIENTS, json={"number": "4711", "label": "A. Sch."}).json()
-    assert created["label"] == "A. Sch."
+def test_label_kept_without_one(logged_in: TestClient) -> None:
+    put(logged_in, "diktat-0000", "4711", "A. S.")
     put(logged_in, "diktat-0001", "4711")  # Nummer am Tastenfeld ohne Kürzel: bleibt
-    assert by_number(logged_in, "4711")["label"] == "A. Sch."
+    assert by_number(logged_in, "4711")["label"] == "A. S."
     put(logged_in, "diktat-0002", "4711", "A.S.")  # neues Kürzel ersetzt das alte
     assert by_number(logged_in, "4711")["label"] == "A.S."
 
@@ -72,22 +73,44 @@ def test_label_follows_the_unassigned_dictation(logged_in: TestClient) -> None:
 @pytest.mark.parametrize(
     ("raw", "stored"),
     [
+        ("MK", "MK"),
         ("  m.k.  ", "m.k."),
+        ("M.  K.", "M. K."),
+        ("A-B.", "A-B."),
         ("Ö.-Ü.", "Ö.-Ü."),
-        ("M.K. 1980", "M.K."),  # keine Ziffern (Geburtsjahr)
-        ("Max  Mustermann", "Max Musterma"),  # höchstens 12 Zeichen
-        ("<b>", "b"),
-        ("   ", None),
-        ("123", None),
+        ("U\u0308.", "Ü."),
+        ("A. B. C. D.", "A. B. C. D."),
     ],
 )
-def test_label_is_cleaned_not_rejected(logged_in: TestClient, raw: str, stored: str | None) -> None:
-    created = logged_in.post(PATIENTS, json={"number": "4711", "label": raw})
-    assert created.status_code == 200 and created.json()["label"] == stored
+def test_label_accepts_initials(logged_in: TestClient, raw: str, stored: str) -> None:
+    saved = put(logged_in, "diktat-0001", "4711", raw)
+    assert saved["patient_label"] == stored
+
+
+@pytest.mark.parametrize(
+    "raw", ["Mueller", "Max Musterma", "ABCDE", "M.K. 1980", "M..K.", "M--K", ".MK", "<b>", "123"]
+)
+def test_label_rejects_anything_but_initials(logged_in: TestClient, raw: str) -> None:
+    response = logged_in.put(f"{DICTATIONS}/diktat-0001", json={**DICTATION, "patient": "4711", "patient_label": raw})
+    assert response.status_code == 422 and raw not in response.text
+    assert logged_in.get(PATIENTS).json()["patients"] == []  # nichts gespeichert
+
+
+def test_label_set_when_office_assigns_to_transferred_patient(logged_in: TestClient) -> None:
+    done(logged_in, put(logged_in, "diktat-0001", "4711", "M.K."))
+    loose = put(logged_in, "diktat-0002")
+    patient = logged_in.post(PATIENTS, json={"number": "4711"}).json()
+    body = {"dictation_id": loose["id"], "label": "M. K."}
+    moved = logged_in.post(f"{PATIENTS}/{patient['id']}/dictations", json=body).json()
+    assert moved["patient_label"] == "M. K."
+    assert by_number(logged_in, "4711")["label"] == "M. K."
+    body["label"] = "Mueller"
+    rejected = logged_in.post(f"{PATIENTS}/{patient['id']}/dictations", json=body)
+    assert rejected.status_code == 422 and "Mueller" not in rejected.text
 
 
 def test_label_gone_after_transfer(logged_in: TestClient, settings: Settings) -> None:
-    saved = put(logged_in, "diktat-0001", "4711", "Geheim.K.")
+    saved = put(logged_in, "diktat-0001", "4711", "G.K.")
     after = done(logged_in, saved)
     assert after["label"] is None and after["transferred"] == 1
     assert by_number(logged_in, "4711")["label"] is None
@@ -121,7 +144,6 @@ def test_label_expires_with_the_patient(logged_in: TestClient, settings: Setting
 
 def test_logs_without_label(logged_in: TestClient, caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.DEBUG)
-    saved = put(logged_in, "diktat-0001", "987654", "Zq.Xy.")
-    logged_in.post(PATIENTS, json={"number": "987655", "label": "Zq.Xy."})
+    saved = put(logged_in, "diktat-0001", "987654", "Z.X.")
     done(logged_in, saved)
-    assert "Diktat gespeichert" in caplog.text and "Zq.Xy." not in caplog.text
+    assert "Diktat gespeichert" in caplog.text and "Z.X." not in caplog.text

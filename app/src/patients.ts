@@ -11,15 +11,31 @@ export function normalizeNumber(raw: string): string {
   return raw.replace(/\D/g, "").slice(0, NUMBER_MAX);
 }
 
-// Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident: Buchstaben, Punkt, Bindestrich,
-// Leerzeichen, höchstens 12 Zeichen – keine Ziffern (wie der Server bereinigt). Nie in den Kopierzeilen.
-export const LABEL_MAX = 12;
+// Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident: höchstens 4 Buchstaben, je einer mit
+// Punkt dahinter, getrennt nur durch Punkt, Leerzeichen oder Bindestrich („MK“, „M. K.“, „A-B.“) – keine
+// Namen, keine Ziffern (wie der Server prüft). Beim Tippen: alles andere fällt weg. Nie in den Kopierzeilen.
+export const LABEL_LETTERS = 4;
+export const LABEL_MAX = 11; // „A. B. C. D.“
 export function normalizeLabel(raw: string): string {
-  return raw
-    .replace(/[^\p{L} .-]/gu, "")
-    .replace(/\s+/g, " ")
-    .trimStart()
-    .slice(0, LABEL_MAX);
+  let out = "";
+  let letters = 0;
+  for (const c of raw.normalize("NFC")) {
+    const last = out.at(-1) ?? "";
+    if (/\p{L}/u.test(c)) {
+      if (letters === LABEL_LETTERS) break;
+      out += c;
+      letters += 1;
+    } else if (c === "." && /\p{L}/u.test(last)) out += c;
+    else if ((c === "-" || /\s/.test(c)) && letters < LABEL_LETTERS && (last === "." || /\p{L}/u.test(last))) {
+      out += c === "-" ? "-" : " ";
+    }
+  }
+  return out;
+}
+
+// Kürzel zum Speichern: ohne Trenner am Ende, leer = keins.
+export function finishLabel(raw: string): string | null {
+  return normalizeLabel(raw).replace(/[ -]+$/, "") || null;
 }
 
 // Nummer mit Kürzel für Texte und Vorlesen („4711 · M.K.“); ohne Kürzel nur die Nummer.
