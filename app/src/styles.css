@@ -205,6 +205,10 @@ input {
   list-style: none;
   padding: 0;
 }
+.chip-short {
+  font-weight: 400;
+  opacity: 0.7;
+}
 .toothless-hint {
   font-family: system-ui, sans-serif;
   font-size: 0.95rem;

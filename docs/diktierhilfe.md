@@ -64,13 +64,21 @@ Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie
 mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):
 
 ```
-36,Ä925a,41a,13b
+36,Ä925a,l1,13b
 46,44
 01,107
 ```
 
-Eine Ziffer mit Anzahl steht so oft da, wie sie erbracht wurde: drei Kanäle an 11 → `11,32,32,32`.
-Die Ziffern sind so geschrieben wie im Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`).
+Evident nimmt eine Mischung aus Ziffern und Kurzformen: steht im Katalog eine Evident-Kurzform
+(Feld `evident`), wird sie statt der Ziffer kopiert (`l1` statt 41a), sonst die Ziffer.
+Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a, GOZ 3030), opg
+(Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002) – eine private Osteotomie an 48 kopiert als
+`48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte
+Positionen stehen einmal mit Anzahl, hinter Kurzform wie Ziffer: drei Kanäle an 36 → `36,wf*3`,
+`11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen).
+Die Chips zeigen beides („41a · l1").
+„Nur Ziffern" kopiert dieselben Zeilen nur mit amtlichen Ziffern (`36,35*3`), so geschrieben wie im
+Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption gibt es nur „Ziffern kopieren".
 
 ## Bekannte Grenzen (ehrlich)
 

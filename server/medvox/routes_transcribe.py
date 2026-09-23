@@ -43,6 +43,7 @@ class SuggestionOut(BaseModel):
     planned: bool
     alternative: bool
     kind: str  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
+    evident: str | None = None  # Evident-Kurzform ("l1"), sonst None – dann gilt die Ziffer
 
 
 class TranscribeResponse(BaseModel):
@@ -60,6 +61,7 @@ def _out(s: Suggestion) -> SuggestionOut:
     return SuggestionOut(
         code=s.code, system=s.system, title=s.title, points=s.points, teeth=list(s.teeth), count=s.count,
         reason=s.reason, decide=list(s.decide), planned=s.planned, alternative=s.alternative, kind=s.kind,
+        evident=s.evident,
     )
 
 

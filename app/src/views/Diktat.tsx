@@ -1,7 +1,7 @@
 // Diktat-Ansicht: Schalter Kasse/Privat, großer Aufnahmeknopf, Pegel und Countdown,
 // Transkript in gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
 import { useMemo, useState } from "react";
-import { api, ApiError, evidentLines, evidentText } from "../api";
+import { api, ApiError, evidentLines, evidentOf, evidentText } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
@@ -21,6 +21,9 @@ export function Diktat({ onLogout }: Props) {
   const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
   // Kopier- und Übergabeformat für Evident: je Zahn eine Zeile, Zahn vorn.
   const evident = useMemo(() => evidentLines(d.suggestions, activeCodes), [d.suggestions, activeCodes]);
+  // Dieselben Zeilen nur mit amtlichen Ziffern („Nur Ziffern“) und die Kurzformen für die Chips.
+  const numbers = useMemo(() => evidentLines(d.suggestions, activeCodes, false), [d.suggestions, activeCodes]);
+  const forms = useMemo(() => evidentOf(d.suggestions), [d.suggestions]);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
@@ -174,10 +177,11 @@ export function Diktat({ onLogout }: Props) {
             {PATIENT_LABEL[patientType]}.
           </p>
         )}
-        <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} onToggle={toggleCode} />
+        <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} forms={forms} onToggle={toggleCode} />
         {evident.length > 0 && <EvidentLines lines={evident} />}
         <div className="actions">
           <CopyButton label="Ziffern kopieren" text={evidentText(evident)} />
+          <CopyButton label="Nur Ziffern" text={evidentText(numbers)} />
         </div>
       </section>
 

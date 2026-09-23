@@ -22,6 +22,9 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
                                        //   Endodontie, Chirurgie, Prophylaxe, PAR, Prothetik)
   "title": "Füllung, dreiflächig",     // eigener Kurztext, kein amtlicher Volltext (Lizenz)
   "abbrev": "F3",                      // optional, nur BEMA: amtliche Kurzbezeichnung
+  // "evident": "l1",                  // optional: Kurzform, die Evident statt der Ziffer erwartet (41a → l1);
+                                       //   nur vom Behandler im Praxisbetrieb bestätigt, klein, nie aus abbrev
+                                       //   abgeleitet (13c hat keine); Liste: docs/diktierhilfe.md
   "points": 53,                        // BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punktzahl; null = nicht verifiziert
   "keywords": ["dreiflächig", "mod"],  // Auslösewörter, wie diktiert; klein geschrieben; kein Duplikat je System
   "rules": ["je Kanal", "..."],        // Freitext-Hinweise: Einheit, Alter, Gegenstück im anderen System
