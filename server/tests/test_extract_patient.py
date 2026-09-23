@@ -176,6 +176,20 @@ def test_private_co_payment_filling_has_no_bema_basis(dictation):
     assert [s.code for s in result.suggestions if s.system == "BEMA"] == []
 
 
+def test_inlay_basis_follows_surfaces_dictated_at_the_tooth():
+    result = run("GOZ 2170 drei sechs mesial okklusal distal bukkal.", "kasse")
+    assert billable_codes(result.suggestions) == ["13d", "2170"]
+    assert all(s.decide == () for s in result.suggestions)
+
+
+def test_basis_decide_hint_names_bema_codes():
+    result = run("Mehrschichttechnik drei sechs.", "kasse")
+    basis, goz = [s for s in result.suggestions if not s.alternative]
+    assert (basis.code, goz.code) == ("13a", "2060")
+    assert "Flächenzahl nicht diktiert – 13a–13d nach Flächenzahl der Zuzahlung wählen" in basis.decide
+    assert not any("2060" in f for f in basis.decide)
+
+
 def test_bema_basis_is_not_added_twice_or_for_planned_fillings():
     dictated = run("Drei sechs okklusal, BEMA 13a, Zusatzleistung GOZ 2060.", "kasse")
     assert billable_codes(dictated.suggestions) == ["13a", "2060"]

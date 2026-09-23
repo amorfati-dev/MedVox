@@ -71,11 +71,19 @@ def co_payment_basis(catalog: Catalog, ctx: TextContext, drafts: list[Draft]) ->
         if basis and not any(o.entry.system == "BEMA" and o.entry.code in d.entry.co_payment.basis
                              and o.fdi == d.fdi for o in drafts):
             words = ", ".join(dict.fromkeys(ctx.original(t.hit.start, t.hit.end) for t in d.hits))
-            share = Draft(basis, d.fdi, False, list(d.hits), d.count, d.context, list(d.decide), surfaces=d.surfaces)
+            decide = [_bema_terms(f, basis) for f in d.decide]
+            share = Draft(basis, d.fdi, False, list(d.hits), d.count, d.context, decide, surfaces=d.surfaces)
             share.reason = f"Kassenanteil: Basis der Zuzahlung {d.entry.label} – wegen: {words}"
             result.append(share)
         result.append(d)
     return result
+
+
+def _bema_terms(flag: str, basis: Entry) -> str:
+    """GOZ-Ziffernbereich im Hinweis der Zuzahlung durch den BEMA-Bereich der Basis ersetzen."""
+    if flag.startswith("Flächenzahl nicht diktiert") and basis.family:
+        return f"Flächenzahl nicht diktiert – {basis.family[0]}–{basis.family[3]} nach Flächenzahl der Zuzahlung wählen"
+    return flag
 
 
 def _basis(catalog: Catalog, d: Draft) -> Entry | None:

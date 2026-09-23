@@ -139,7 +139,9 @@ class Builder:
             flag = None
             if len(chosen) == 1:
                 count = next(iter(chosen))
-                if dictated and min(dictated, 4) != count:
+                if dictated and family[min(dictated, 4) - 1] == family[count - 1]:
+                    count = min(dictated, 4)
+                elif dictated:
                     flag = f"Flächen „{tooth.surfaces}“ an {tooth.fdi} diktiert, Ziffer nach {count} Flächen gewählt – prüfen"
             elif dictated:
                 count = dictated
