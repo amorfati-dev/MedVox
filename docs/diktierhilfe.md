@@ -120,10 +120,12 @@ Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den S
 die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Schon an der
 Rezeption abgeholt" mit Uhrzeit, den damals übergebenen Zeilen und dem, was seitdem **neu** ist –
 nur das nachtragen (hat sich nur eine Anzahl geändert, steht es ausdrücklich da, z. B. „36: wf
-jetzt 3× statt 2× – 1× nachtragen"); „Als übertragen markieren" zeigt diese Warnung vorher noch
-einmal. Wird für die Korrektur ein zweiter Kurzcode abgeholt, zeigt die Rezeption dieselbe
-Warnung über den Ziffern. Hat das Büro das Diktat schon übertragen, zeigt die Rezeption beim Code nur „Dieses Diktat wurde bereits
-am … übertragen … – nicht erneut in Evident eintragen" und keine Ziffern.
+jetzt 3× statt 2× – 1× nachtragen"; beim Kassenpatienten wie beim Kopieren getrennt nach Kasse
+und Privat, erst die Kassenzeilen eintragen); „Als übertragen markieren" zeigt diese Warnung
+vorher noch einmal. Wird für die Korrektur ein zweiter Kurzcode abgeholt, zeigt die Rezeption
+dieselbe Warnung über den Ziffern. Hat das Büro das Diktat schon übertragen, zeigt die Rezeption
+beim Code nur „Dieses Diktat wurde bereits am … übertragen … – nicht erneut in Evident eintragen"
+und keine Ziffern.
 
 **„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
 das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann
