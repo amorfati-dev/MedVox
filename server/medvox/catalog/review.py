@@ -13,6 +13,12 @@ def _label(e: dict) -> str:
     return f"{e['system']} {e['code']}"
 
 
+def _marked(e: dict) -> str:
+    """Ziffer plus Prüfvermerk aus ``review.note`` („neu, bitte prüfen“ bei neu nach v1 geholten Positionen)."""
+    note = e["review"].get("note")
+    return f"{_label(e)} **({note})**" if note else _label(e)
+
+
 def pairs(catalog: dict) -> list[tuple[dict, dict, str | None]]:
     """(BEMA-Eintrag, GOZ/GOÄ-Eintrag, Hinweis) je hinterlegtem Paar, nach Fachbereich der BEMA-Seite."""
     by_key = {(e["system"], e["code"]): e for e in catalog["entries"]}
@@ -57,7 +63,10 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 - **Zuzahlung „ja“:** der Extraktor schlägt die Privatleistung auch beim Kassenpatienten vor, als
   `zuzahlung` markiert. „nein“: beim Kassenpatienten nie (Kassenleistung, umstritten oder nicht belegt).
 - **BEMA-Bezug:** bei „ja“ die BEMA-Position, neben der sie üblich ist (– = eigenständige Privatleistung),
-  bei „nein“ die Kassenleistung, die sie abdeckt.
+  bei „nein“ die Kassenleistung, die sie abdeckt. Bei Mehrkosten-Füllung und Inlay schlägt der Extraktor
+  die BEMA-Basis nach Flächenzahl mit vor (Kassenanteil).
+- **neu, bitte prüfen:** Position, die für den Patiententyp aus dem erweiterten Katalog nach v1 geholt wurde
+  und noch nicht in der geprüften Fassung stand.
 """
 
 
@@ -76,7 +85,7 @@ def markdown(parts: list[tuple[str, dict]]) -> str:
         out += [f"## {heading}", "", "### Paare BEMA ↔ GOZ/GOÄ", "",
                 "| ☐ | BEMA | Kurztext | Privat | Kurztext | Hinweis | Quelle |", "|---|---|---|---|---|---|---|"]
         for bema, other, note in pairs(catalog):
-            out.append(f"| ☐ | {bema['code']} | {bema['title']} | {_label(other)} | {other['title']} | {note or ''} | "
+            out.append(f"| ☐ | {bema['code']} | {bema['title']} | {_marked(other)} | {other['title']} | {note or ''} | "
                        f"{cite(bema['sources'][:1] + other['sources'][:1] + pair_sources)} |")
         for area in AREAS:
             rows = [e for e in co_payments(catalog) if e["area"] == area]
@@ -87,7 +96,7 @@ def markdown(parts: list[tuple[str, dict]]) -> str:
                     "|---|---|---|---|---|---|---|"]
             for e in rows:
                 z = e["zuzahlung"]
-                out.append(f"| ☐ | {'ja' if z['allowed'] else 'nein'} | {_label(e)} | {e['title']} | "
+                out.append(f"| ☐ | {'ja' if z['allowed'] else 'nein'} | {_marked(e)} | {e['title']} | "
                            f"{', '.join(z['basis']) or '–'} | {z['note']} | {cite(z['sources'])} |")
         out.append("")
     out += ["## Quellen", ""] + [f"- Q{n}: [{names.get(url, url)}]({url})" for url, n in refs.items()]

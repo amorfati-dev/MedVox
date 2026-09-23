@@ -5,6 +5,7 @@ Eine Leistung hat oft ein Paar im anderen System (Katalogfeld ``equivalent``: Os
 
 - ``kasse``: BEMA. GOZ/GOÄ nur, wenn die Position auf der Zuzahlungs-Liste steht
   (``zuzahlung.allowed``); eine sonst diktierte Privatziffer wird auf ihr BEMA-Paar umgestellt.
+  Eine Mehrkosten-Füllung oder ein Inlay bringt ihre BEMA-Basis mit: die zahlt die Kasse.
 - ``privat``: nur GOZ/GOÄ. BEMA-Fundstellen werden auf ihr Privat-Paar umgestellt.
 
 Umgestellt wird schon an der Fundstelle, bevor der Builder Flächenzahl, Zahnentfernung und
@@ -23,6 +24,7 @@ from medvox.extract_build import Draft, Tagged
 from medvox.extract_catalog import Catalog, Entry, related
 from medvox.extract_match import Hit
 from medvox.extract_rules import private_only
+from medvox.extract_text import TextContext
 
 PATIENT_TYPES = ("kasse", "privat")
 PATIENT_LABEL = {"kasse": "Kassenpatient", "privat": "Privatpatient"}
@@ -56,6 +58,35 @@ def _pick(catalog: Catalog, hit: Hit) -> Entry | None:
     if len(options) > 1 and not hit.code_word:
         options = [e for e in options if any(related(hit.keyword, k) for k in e.keywords)] or options
     return options[0] if options else None
+
+
+def co_payment_basis(catalog: Catalog, ctx: TextContext, drafts: list[Draft]) -> list[Draft]:
+    """Kassenpatient: vor jede erbrachte Mehrkosten-Füllung/Inlay (GOZ-Füllungsfamilie) ihre BEMA-Basis als Kassenanteil.
+
+    Nur, wenn am Zahn nicht schon eine der Basis-Ziffern erbracht ist; die Ziffer folgt der Flächenzahl.
+    """
+    result: list[Draft] = []
+    for d in drafts:
+        basis = _basis(catalog, d)
+        if basis and not any(o.entry.system == "BEMA" and o.entry.code in d.entry.co_payment.basis
+                             and o.fdi == d.fdi for o in drafts):
+            words = ", ".join(dict.fromkeys(ctx.original(t.hit.start, t.hit.end) for t in d.hits))
+            share = Draft(basis, d.fdi, False, list(d.hits), d.count, d.context, list(d.decide), surfaces=d.surfaces)
+            share.reason = f"Kassenanteil: Basis der Zuzahlung {d.entry.label} – wegen: {words}"
+            result.append(share)
+        result.append(d)
+    return result
+
+
+def _basis(catalog: Catalog, d: Draft) -> Entry | None:
+    """BEMA-Basis nach Flächenzahl (2080 -> 13b, Inlay 2170 dreiflächig -> 13c)."""
+    if d.planned or d.alternative_to is not None or not d.entry.family or not catalog.co_payment_allowed(d.entry):
+        return None
+    basis = d.entry.co_payment.basis
+    if len(basis) <= 1:
+        return catalog.get("BEMA", basis[0]) if basis else None
+    surfaces = d.surfaces or d.entry.family.index(d.entry.code) + 1
+    return catalog.get("BEMA", basis[min(surfaces, len(basis)) - 1])
 
 
 def _translated(d: Draft) -> list:

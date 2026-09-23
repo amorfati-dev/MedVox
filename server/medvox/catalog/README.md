@@ -5,7 +5,7 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
 
 | Datei | Zweck |
 |---|---|
-| `catalog_v1.json` | die 60–100 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
+| `catalog_v1.json` | die 60–96 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
 | `catalog_extended.json` | weitere geprüfte Positionen (Prothetik, PAR-Chirurgie, UPT, Kinder-Früherkennung …), gleiches Schema; wird nicht geladen, Saat für den Vollimport in Phase 2 |
 | `schema.json` | JSON-Schema für beide Dateien |
 | `validate.py` | prüft Schema + Fachregeln, druckt die Review-Tabelle (`cd server && make catalog-check` prüft beide Kataloge) |
@@ -35,7 +35,7 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
     "sources": ["https://..."]         //   Beleg(e), stehen in meta.sources (system "Zuzahlung")
   },
   "sources": ["https://..."],          // Quelle(n), gegen die Ziffer/Kurztext/Punkte geprüft wurden
-  "review": {"status": "draft"}        // draft | confirmed (+ optional date, note)
+  "review": {"status": "draft"}        // draft | confirmed (+ optional date, note; note erscheint in PRUEFLISTE.md)
 }
 ```
 
@@ -90,7 +90,14 @@ SGB V), gleichartiger Zahnersatz (§ 55 Abs. 4) und Leistungen außerhalb der Ka
 Vereinbarung (§ 8 Abs. 7 BMV-Z). `allowed: false` steht auch dort, wo nur eine kommerzielle Quelle trägt
 (0080, 4050/4055) oder die Bedingung („erst ab der 4. Einlage“) nicht aus dem Diktat folgt – dann nennt die Notiz
 die Ausnahme. Eine Zuzahlung wird dem Kassenpatienten nur zusätzlich angeboten (`alternative`), wenn sie das Paar
-der erbrachten BEMA-Position ist und deren Ziffer als Basis nennt (Mehrkostenfüllung zu 13a–d).
+der erbrachten BEMA-Position ist und deren Ziffer als Basis nennt (Mehrkostenfüllung zu 13a–d). Umgekehrt bringt
+eine als GOZ diktierte Mehrkosten-Füllung oder ein Inlay (GOZ 2060–2120, 2150–2170) beim Kassenpatienten ihre
+BEMA-Basis nach Flächenzahl mit (2080 → 13b, 2170 dreiflächig → 13c), denn die zahlt die Kasse.
+
+Für den Patiententyp wurden die GOZ-Paare von v1-BEMA-Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020,
+4070/4075) und die Inlays 2150–2170 nach v1 geholt; sie tragen `review.note` „neu, bitte prüfen“, das
+`PRUEFLISTE.md` hinter der Ziffer zeigt. Eigenständige Privatleistungen ohne Paar (GOZ 2420, DVT GOÄ 5370/5377)
+bleiben im erweiterten Katalog, bis der Behandler sie für v1 freigibt.
 
 Bewusst nicht aufgenommen, weil ohne eigene Gebührennummer (nur Analogberechnung nach § 6 Abs. 1 GOZ) oder
 beim Kassenpatienten nicht vereinbarungsfähig:

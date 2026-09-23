@@ -2043,7 +2043,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -2368,7 +2369,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -2410,7 +2412,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -2454,7 +2457,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -2614,7 +2618,8 @@
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -2769,41 +2774,6 @@
           "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
           "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung",
           "https://www.zaek-berlin.de/presse/meldungen/meldungen-detail/article/goz-frage-des-monats-24.html"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "2420",
-      "system": "GOZ",
-      "area": "Endodontie",
-      "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
-      "points": 70,
-      "keywords": [
-        "ultraschallaktivierung",
-        "elektrophysikalisch",
-        "schallaktivierte spülung",
-        "2420",
-        "laser endo"
-      ],
-      "rules": [
-        "je Kanal, zusätzlich zu 2410"
-      ],
-      "zuzahlung": {
-        "allowed": true,
-        "basis": [
-          "32"
-        ],
-        "note": "Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal).",
-        "sources": [
-          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
-          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung"
         ]
       },
       "sources": [
@@ -3009,7 +2979,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3174,7 +3145,8 @@
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3413,7 +3385,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3495,7 +3468,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3578,7 +3552,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3701,7 +3676,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3739,7 +3715,8 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft"
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     },
     {
@@ -3960,76 +3937,6 @@
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html",
         "https://www.gesetze-im-internet.de/go__1982/__5.html"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "Ä5370",
-      "system": "GOÄ",
-      "area": "Röntgen",
-      "title": "Computergesteuerte Tomographie im Kopfbereich (DVT)",
-      "points": 2000,
-      "keywords": [
-        "dvt",
-        "digitale volumentomographie",
-        "digitale volumentomografie",
-        "dvt angefertigt",
-        "3d röntgen",
-        "ä5370",
-        "ä fünf drei sieben null"
-      ],
-      "rules": [
-        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
-        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
-        "computergesteuerte Analyse mit 3D-Rekonstruktion: Zuschlag Ä5377",
-        "Kassenpatient: keine BEMA-Leistung"
-      ],
-      "zuzahlung": {
-        "allowed": true,
-        "basis": [],
-        "note": "DVT ist keine BEMA-Leistung; beim Kassenpatienten nur als Privatleistung nach GOÄ 5370 (+ ggf. 5377).",
-        "sources": [
-          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
-          "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/D/DVT.pdf",
-          "https://www.gesetze-im-internet.de/goz_1987/__6.html"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "Ä5377",
-      "system": "GOÄ",
-      "area": "Röntgen",
-      "title": "Zuschlag computergesteuerte Analyse mit 3D-Rekonstruktion",
-      "points": 800,
-      "keywords": [
-        "3d rekonstruktion",
-        "3d analyse",
-        "ä5377",
-        "ä fünf drei sieben sieben"
-      ],
-      "rules": [
-        "Zuschlag zu Ä5370, nur zum einfachen Gebührensatz",
-        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ"
-      ],
-      "zuzahlung": {
-        "allowed": true,
-        "basis": [],
-        "note": "Zuschlag für computergesteuerte 3D-Analyse zur privaten DVT; nur zum einfachen Satz.",
-        "sources": [
-          "https://www.gesetze-im-internet.de/go__1982/anlage.html",
-          "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/D/DVT.pdf"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
       ],
       "review": {
         "status": "draft"

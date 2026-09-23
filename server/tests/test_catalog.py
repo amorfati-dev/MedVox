@@ -41,10 +41,20 @@ def _errors_for(catalog: dict) -> list[str]:
 
 def test_catalog_v1_is_a_mini_catalog(catalog):
     # Vorgabe des Behandlers: 60-80 Alltagspositionen. Die Obergrenze liegt hoeher, weil er im Review
-    # sechs Positionen ausdruecklich fuer v1 nachgefordert hat (Ae935a/Ae5002, GOZ 0500-0530) und die
-    # Patiententyp-Umschaltung GOZ-Paare zu v1-BEMA-Positionen sowie Zuzahlungsleistungen aus dem
-    # erweiterten Katalog nach v1 geholt hat (3020, 4070/4075, 2020, 4020, 4000, 2420 ...).
-    assert 60 <= len(catalog["entries"]) <= 100
+    # sechs Positionen ausdruecklich fuer v1 nachgefordert hat (Ae935a/Ae5002, GOZ 0500-0530; 84 geprueft)
+    # und die Patiententyp-Umschaltung zwoelf Positionen nach v1 geholt hat: die GOZ-Paare von v1-BEMA-
+    # Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020, 4070, 4075) und die Inlays 2150-2170.
+    assert 60 <= len(catalog["entries"]) <= 96
+
+
+def test_positions_new_in_v1_are_marked_for_review(catalog):
+    marked = {e["code"] for e in catalog["entries"] if e["review"].get("note") == "neu, bitte prüfen"}
+    assert marked == {"2020", "2350", "3020", "3300", "1000", "4000", "4020", "4070", "4075", "2150", "2160", "2170"}
+    proc = subprocess.run(
+        [sys.executable, "-m", "medvox.catalog.validate", "--markdown"], cwd=SERVER_DIR, capture_output=True, text=True
+    )
+    assert "| GOZ 2350 **(neu, bitte prüfen)** |" in proc.stdout
+    assert "| GOZ 2060 |" in proc.stdout
 
 
 def test_extended_catalog_merges_cleanly_with_v1(catalog, extended):

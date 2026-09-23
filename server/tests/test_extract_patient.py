@@ -17,7 +17,8 @@ from tests.test_extract_acceptance import DICTATIONS
 MORE = [
     "Osteotomie drei acht", "L1, L1, Ost1 an drei acht.", "Osteotomie privat drei acht, GOZ drei null drei null.",
     "Kofferdam privat, Zahnfilm privat eins sechs, Oberflächenanästhesie.", "Implantat entfernt regio drei sechs.",
-    "Wurzelkanalaufbereitung drei sechs, drei Kanäle, elektrometrische Längenbestimmung, Ultraschallaktivierung.",
+    "Wurzelkanalaufbereitung drei sechs, drei Kanäle, elektrometrische Längenbestimmung.",
+    "Adhäsive Kompositfüllung drei sechs zweiflächig.", "Keramikinlay drei sechs dreiflächig.",
     "Zahnstein entfernt, professionelle Zahnreinigung, Fluoridierung.", "Zuschlag GOZ null fünf eins null.",
 ]
 
@@ -148,6 +149,38 @@ def test_co_payment_counterpart_is_offered_as_alternative_only():
     (offer,) = [s for s in result.suggestions if s.alternative]
     assert (offer.code, offer.kind, offer.teeth) == ("2100", "zuzahlung", (36,))
     assert offer.reason.startswith("Zuzahlung möglich zu BEMA 13c")
+
+
+MEHRKOSTEN = {
+    "adhäsive Kompositfüllung drei sechs zweiflächig": ["13b", "2080"],
+    "Mehrschichttechnik drei sechs mesial okklusal": ["13b", "2080"],
+    "Keramikinlay drei sechs dreiflächig": ["13c", "2170"],
+}
+
+
+@pytest.mark.parametrize("dictation", MEHRKOSTEN)
+def test_statutory_co_payment_filling_brings_its_bema_basis(dictation):
+    # Die Kasse zahlt die BEMA-Basis, der Patient die Differenz: die Basis fehlt nie, auch bei GOZ-Wortlaut.
+    result = run(dictation, "kasse")
+    assert billable_codes(result.suggestions) == MEHRKOSTEN[dictation]
+    basis, goz = [s for s in result.suggestions if not s.alternative]
+    assert (basis.kind, basis.teeth, goz.kind, goz.teeth) == ("bema", (36,), "zuzahlung", (36,))
+    assert basis.reason.startswith(f"Kassenanteil: Basis der Zuzahlung GOZ {goz.code}")
+    assert [s for s in result.suggestions if s.alternative] == []
+
+
+@pytest.mark.parametrize("dictation", MEHRKOSTEN)
+def test_private_co_payment_filling_has_no_bema_basis(dictation):
+    result = run(dictation, "privat")
+    assert billable_codes(result.suggestions) == MEHRKOSTEN[dictation][1:]
+    assert [s.code for s in result.suggestions if s.system == "BEMA"] == []
+
+
+def test_bema_basis_is_not_added_twice_or_for_planned_fillings():
+    dictated = run("Drei sechs okklusal, BEMA 13a, Zusatzleistung GOZ 2060.", "kasse")
+    assert billable_codes(dictated.suggestions) == ["13a", "2060"]
+    planned = run("Keramikinlay drei sechs dreiflächig geplant.", "kasse")
+    assert [(s.code, s.planned) for s in planned.suggestions] == [("2170", True)]
 
 
 def test_private_only_service_without_pair_is_noted_for_statutory_patient():

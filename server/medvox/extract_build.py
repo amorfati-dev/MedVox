@@ -42,6 +42,7 @@ class Draft:
     plan: str | None = None
     alternative_to: Draft | None = None
     reason: str = ""
+    surfaces: int | None = None  # Flächenzahl 1..4 bei Füllungen
 
     @property
     def key(self) -> tuple[str, str, int | None, bool]:
@@ -153,7 +154,7 @@ class Builder:
             spoken = [h for h in self._surface_words if tooth and tooth in h.teeth
                       and set(h.hit.keyword) == set(tooth.surfaces)]
             for t in own + mine + spoken:
-                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0])
+                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0]).surfaces = min(count, 4)
 
     # --- Zahnentfernung ----------------------------------------------------------------
 

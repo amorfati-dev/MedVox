@@ -131,7 +131,10 @@ Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_mat
   ein-/mehrwurzelig im Zielsystem gelten („Osteotomie 38, GOZ 3030“ ergibt eine einzige Position).
   - `kasse`: BEMA-Positionen plus genau die Privatpositionen der Zuzahlungs-Liste (`zuzahlung.allowed`,
     z. B. Mehrkostenfüllung GOZ 2060–2120, PZR 1040, elektrometrische Längenbestimmung 2400), mit
-    `kind: "zuzahlung"` und Basis und Grundlage in `reason`. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
+    `kind: "zuzahlung"` und Basis und Grundlage in `reason`. Eine als GOZ diktierte Mehrkosten-Füllung oder
+    ein Inlay bringt ihre BEMA-Basis nach Flächenzahl als Kassenanteil mit („adhäsive Kompositfüllung 36
+    zweiflächig“ → 13b und 2080, „Keramikinlay 36 dreiflächig“ → 13c und 2170), außer die Basis ist am Zahn
+    schon erbracht. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
     13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Andere diktierte Privatziffern werden
     auf ihr BEMA-Paar umgestellt („Osteotomie privat“ → 47a) oder mit Hinweis in `notes` weggelassen
     (keine Kassenleistung, z. B. „Implantat entfernt“, Oberflächenanästhesie).
