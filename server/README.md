@@ -67,7 +67,7 @@ kommt, sonst direkt vom Peer.
 | `PUT /dictations/{id}` | ja | JSON `{"patient"?: "4711", "dentist_id"?: 3, "transcript", "patient_type", "codes", "suggestions", "planned", "notes", "deselected", "adopted"}` – Stand eines Diktats, `id` vom iPad (8–64 Zeichen `A-Za-z0-9-`); `patient` = Evident-Nummer (1–12 Ziffern, Patient wird bei Bedarf angelegt), ohne `patient` bleibt die Zuordnung (neu: „ohne Patient“); ein schon zugeordnetes Diktat wechselt durch `patient` nie den Patienten (Umhängen nur im Büro); `dentist_id` (Behandler beim Start der Aufnahme) zählt nur beim ersten Speichern und ändert sich danach nie, unbekannte ID = ohne Behandler | Diktat mit `id, patient, patient_id, revision, created_at, updated_at, dentist_id, dentist_name` und den Feldern der Anfrage; jede Änderung erhöht `revision`, die 24 Stunden zählen ab der ersten Speicherung; 410, wenn das Diktat schon übertragen, gelöscht oder abgelaufen ist |
 | `DELETE /dictations/{id}` | ja | – | 204 oder 404 |
 | `PUT /dictations/{id}/dentist` | ja | JSON `{"dentist_id": 3}` | Behandler eines Diktats ohne Behandler nachtragen (Büro, „Behandler fehlt“); der Patient bekommt ihn als Eröffner, falls er noch keinen hat. Das Diktat; 409, wenn es schon einen Behandler hat (bleibt unverändert); 404, wenn Diktat oder Behandler fehlen |
-| `POST /patients` | ja | JSON `{"number": "4711"}` | Patient `{id, number, created_at, updated_at, dictations, transferred, transferred_at, dentist_id, dentist_name, dentists}` – vorhandener mit derselben Nummer oder neu; `dentist_*` = Behandler des ersten Diktats (hat den Patienten eröffnet), `dentists` = er und die Behandler der offenen Diktate (`[{id, name}]`), `without_dentist` = offene Diktate ohne Behandler |
+| `POST /patients` | ja | JSON `{"number": "4711"}` | Patient `{id, number, created_at, updated_at, dictations, transferred, transferred_at, dentist_id, dentist_name, dentists, without_dentist}` – vorhandener mit derselben Nummer oder neu; `dentist_*` = Behandler des ersten Diktats (hat den Patienten eröffnet), `dentists` = er und die Behandler der offenen Diktate (`[{id, name}]`), `without_dentist` = offene Diktate ohne Behandler |
 | `GET /patients` | ja | – | `{"patients": [...], "unassigned": [Diktat, ...]}` – jüngstes Diktat zuerst; `dictations` offen, `transferred` schon übertragen |
 | `GET /patients/{id}` | ja | – | Patient plus `items`: offene Diktate in Diktatreihenfolge; 404 |
 | `POST /patients/{id}/dictations` | ja | JSON `{"dictation_id": "…"}` | hängt ein gespeichertes Diktat (z. B. „ohne Patient“) an diesen Patienten; 404 |
@@ -115,8 +115,8 @@ Wird der Code nie abgerufen, bleibt das Diktat offen und läuft normal ab. Ohne 
 
 Behandler (`medvox/dentists.py`, Tabelle `dentists`): nur Zuordnung für Abrechnung und
 Nachvollziehbarkeit, keine Anmeldung und keine Rechte – jeder Angemeldete sieht alle Patienten und
-darf die Liste pflegen. Eine neue Datenbank beginnt mit einem Eintrag „Behandler 1“ (in der App
-umbenennen). Bestehende Datenbanken bekommen beim Start `dictations.dentist_id`,
+darf die Liste pflegen. Ist die Liste leer – bei einer neuen Datenbank und beim ersten Start einer
+bestehenden nach dem Update –, legt der Server einen Eintrag „Behandler 1“ an (in der App umbenennen). Bestehende Datenbanken bekommen beim Start `dictations.dentist_id`,
 `patients.dentist_id` und `transfers.dentist_id` per `ALTER TABLE`; Einträge aus der Zeit davor
 bleiben ohne Behandler (`null`) und funktionieren unverändert; das Büro trägt ihn nachträglich ein
 (`PUT /dictations/{id}/dentist`, `medvox/attribution.py`), danach ist er wie jeder andere fest.
