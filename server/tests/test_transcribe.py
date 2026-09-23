@@ -141,3 +141,15 @@ def test_prompt_file_is_used_without_warning(
     assert not [r for r in caplog.records if "FALLBACK_PROMPT" in r.message]
     inference = [r for r in whisper.requests if r.url.path == "/inference"]
     assert b"Zahnarzt-Diktat aus Datei." in inference[0].content
+
+
+def test_codes_from_extractor(logged_in: TestClient, whisper: FakeWhisper) -> None:
+    whisper.text = " Zahn 36 mesial okklusal distal, Kompositfüllung, Kofferdarm gelegt, Extraktion 48 planen.\n"
+    body = _upload(logged_in, make_wav()).json()
+    assert body["transcript"].startswith("Zahn 36") and "Kofferdam" in body["transcript"]
+    assert body["codes"] == ["13c", "12"]
+    assert [(s["code"], s["alternative"]) for s in body["suggestions"]] == [
+        ("13c", False), ("2100", True), ("12", False), ("2040", True)]
+    assert body["suggestions"][2]["reason"] == "wegen: Kofferdam gelegt"
+    assert [(p["code"], p["teeth"]) for p in body["planned"]] == [("44", [48])]
+    assert body["notes"] == []

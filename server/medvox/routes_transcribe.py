@@ -11,6 +11,9 @@ from pydantic import BaseModel
 
 from medvox import transcribe
 from medvox.auth import require_session
+from medvox.extract import Suggestion, analyze, billable_codes
+from medvox.lexicon import correct
+from medvox.normalize import normalize
 
 log = logging.getLogger("medvox.transcribe")
 router = APIRouter(prefix="/api/v1")
@@ -24,11 +27,50 @@ class Health(BaseModel):
     whisper: str
 
 
+class SuggestionOut(BaseModel):
+    """Ein Ziffernvorschlag des Regel-Extraktors (WP-8) mit Begründung."""
+
+    code: str
+    system: str
+    title: str
+    points: int | None
+    teeth: list[int]
+    count: int
+    reason: str
+    decide: list[str]
+    planned: bool
+    alternative: bool
+
+
 class TranscribeResponse(BaseModel):
     transcript: str
     duration_s: float
     latency_s: float
-    codes: list[str]
+    codes: list[str]  # erbrachte Hauptvorschläge im Kopierformat ("13c", "2x 41a")
+    suggestions: list[SuggestionOut] = []  # erbracht: Hauptvorschläge und Privat-Alternativen
+    planned: list[SuggestionOut] = []  # nur geplant – nie abrechnen
+    notes: list[str] = []  # Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
+
+
+def _out(s: Suggestion) -> SuggestionOut:
+    return SuggestionOut(
+        code=s.code, system=s.system, title=s.title, points=s.points, teeth=list(s.teeth), count=s.count,
+        reason=s.reason, decide=list(s.decide), planned=s.planned, alternative=s.alternative,
+    )
+
+
+def build_response(text: str, duration_s: float, latency_s: float) -> TranscribeResponse:
+    """Lexikon -> Normalisierer -> Extraktor; reine Rechenarbeit ohne I/O."""
+    corrected, _ = correct(text)
+    normalized = normalize(corrected)
+    result = analyze(normalized.text, normalized.teeth)
+    return TranscribeResponse(
+        transcript=corrected, duration_s=duration_s, latency_s=latency_s,
+        codes=billable_codes(result.suggestions),
+        suggestions=[_out(s) for s in result.suggestions if not s.planned],
+        planned=[_out(s) for s in result.suggestions if s.planned],
+        notes=result.notes,
+    )
 
 
 @router.get("/health", response_model=Health)
@@ -60,10 +102,7 @@ async def _read_limited(file: UploadFile, limit: int) -> bytes:
 
 @router.post("/transcribe", response_model=TranscribeResponse, dependencies=[Depends(require_session)])
 async def transcribe_upload(file: UploadFile, request: Request) -> TranscribeResponse:
-    """Nimmt eine Aufnahme entgegen und liefert das rohe Transkript.
-
-    `codes` bleibt in dieser Ausbaustufe leer; der Regel-Extraktor (WP-8) füllt es.
-    """
+    """Nimmt eine Aufnahme entgegen und liefert das lexikon-korrigierte Transkript plus Ziffernvorschläge."""
     settings = request.app.state.settings
     content_type = transcribe.media_type(file.content_type)
     if content_type is None:
@@ -79,6 +118,4 @@ async def transcribe_upload(file: UploadFile, request: Request) -> TranscribeRes
         )
     except transcribe.TranscribeError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
-    return TranscribeResponse(
-        transcript=result.text, duration_s=result.duration_s, latency_s=result.latency_s, codes=[]
-    )
+    return build_response(result.text, result.duration_s, result.latency_s)
