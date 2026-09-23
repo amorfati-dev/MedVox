@@ -58,6 +58,7 @@ def analyze(text: str, teeth: list[ToothRef]) -> Extraction:
     flag_not_beside(catalog, drafts)
     primaries = [d for d in drafts if not d.planned]
     extra = alternatives(catalog, primaries)
+    primaries = [d for d in primaries if d.alternative_to is None]
     flag_not_beside(catalog, extra, primaries + extra)
     added = surcharge(catalog, primaries + extra, builder.dictated_surcharges, notes)
     ordered = _ordered(primaries, extra + ([added] if added else []))

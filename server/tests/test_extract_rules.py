@@ -103,6 +103,10 @@ def test_osteotomy_of_retained_tooth():
     assert by_tooth(run("Osteotomie drei acht, retiniert.")) == {38: "48"}
 
 
+def test_implant_removal_keeps_catalog_code():
+    assert by_tooth(run("Implantat entfernt regio drei sechs.")) == {36: "3000"}
+
+
 def test_ait_per_tooth_by_root_count():
     result = run("Antiinfektiöse Therapie, Kürettage eins fünf bis eins sieben.")
     assert by_tooth(result) == {15: "AITa", 16: "AITb", 17: "AITb"}
@@ -236,6 +240,13 @@ def test_mixed_bema_and_goz_in_one_session():
     result = run("Drei sechs okklusal, Füllung mit Komposit, BEMA 13a, Zusatzleistung GOZ 2060, Kofferdam gelegt.")
     assert billable_codes(result.suggestions) == ["13a", "2060", "12"]
     assert [s.code for s in result.suggestions if s.alternative] == ["2040"]
+
+
+def test_bema_and_goz_surgery_on_same_tooth_are_exclusive():
+    result = run("Osteotomie drei acht, GOZ drei null drei null")
+    pair = [(s.code, s.alternative) for s in result.suggestions]
+    assert pair == [("47a", False), ("3030", True)]
+    assert all(any("BEMA 47a" in f and "GOZ 3030" in f for f in s.decide) for s in result.suggestions)
 
 
 def test_private_alternative_never_replaces_bema():

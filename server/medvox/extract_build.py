@@ -170,7 +170,8 @@ class Builder:
                     (tooth is not None and tooth in m.teeth)
                     or (m.sentence == t.sentence and (tooth is None or not m.teeth)))]
                 found = {kind for _m, kind in applying}
-                code, flag = self._removal_code(system, kinds[t.hit.entry.code], t.hit.code_word, found, tooth)
+                own_code = t.hit.code_word or "implantat" in t.hit.keyword
+                code, flag = self._removal_code(system, kinds[t.hit.entry.code], own_code, found, tooth)
                 entry = self.catalog.get(system, code)
                 self.add(entry, tooth.fdi if tooth else None, t, 1, flag)
                 for m, _kind in applying:

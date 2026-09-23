@@ -1,9 +1,13 @@
 """Abrechnungsregeln über die ganze Sitzung (WP-8): Enthaltensein, „nicht neben“,
 Privat-Alternativen zu BEMA-Positionen und der GOZ-Zuschlag zu chirurgischen Leistungen.
 
-Der Versichertenstatus schränkt nichts ein: BEMA- und GOZ-Vorschläge stehen
-nebeneinander, und wo der Katalog ein Privat-Gegenstück nennt, kommt es als
-zusätzliche Alternative dazu – es ersetzt nie den BEMA-Vorschlag.
+Der Patiententyp ist dem Extraktor noch nicht bekannt. Privatpatienten bekommen nur
+Privatpositionen, Kassenpatienten nur BEMA plus die erlaubten Zuzahlungsleistungen
+(hochwertige Kunststofffüllung, Endodontie); das setzt die Folgeaufgabe um. Bis dahin
+kommt ein Privat-Gegenstück aus dem Katalog als zusätzliche Alternative zur BEMA-Position.
+Sind BEMA und GOZ für dieselbe Leistung am selben Zahn erbracht diktiert und ist das kein
+Zuzahlungsfall, schließen sie sich aus: die GOZ-Position wird Alternative, beide tragen
+einen Entscheidungshinweis.
 """
 
 from __future__ import annotations
@@ -51,7 +55,8 @@ def _teeth(d: Draft) -> set[int]:
 
 def alternatives(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
     """Je erbrachter BEMA-Position die Privat-Gegenstücke aus dem Katalog als zusätzliche Kandidaten."""
-    taken = {d.key for d in drafts}
+    primary = {d.key: d for d in drafts}
+    taken = set(primary)
     result: list[Draft] = []
     for d in drafts:
         if d.planned or d.entry.system != "BEMA":
@@ -70,6 +75,10 @@ def alternatives(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
                     entry = catalog.get(entry.system, multi if multi_rooted(fdi) else single)
                 key = (entry.system, entry.code, fdi, False)
                 if key in taken:
+                    rival = primary.get(key)
+                    if rival and rival.alternative_to is None and not _co_payment(d):
+                        _exclusive(d, rival)
+                        result.append(rival)
                     continue
                 taken.add(key)
                 alt = Draft(entry, fdi, False, hits, count, d.context if fdi is None else ())
@@ -80,6 +89,22 @@ def alternatives(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
                     alt.decide.append("Zahn nicht diktiert – je Zahn")
                 result.append(alt)
     return result
+
+
+def _co_payment(d: Draft) -> bool:
+    """Zuzahlungsfall laut Behandler: BEMA und GOZ dürfen hier nebeneinander stehen."""
+    return bool(d.entry.family) or d.entry.area == "Endodontie"
+
+
+def _exclusive(bema: Draft, rival: Draft) -> None:
+    """BEMA- und GOZ-Position derselben Leistung am selben Zahn: nur eine abrechnen."""
+    rival.alternative_to = bema
+    where = f" an {bema.fdi}" if bema.fdi is not None else ""
+    flag = (f"{bema.entry.label} (Kassenpatient) oder {rival.entry.label} (Privatpatient) für dieselbe "
+            f"Leistung{where} – nur eine abrechnen")
+    for d in (bema, rival):
+        if flag not in d.decide:
+            d.decide.append(flag)
 
 
 def _counterpart_entries(catalog: Catalog, d: Draft) -> list[tuple[Entry, list]]:
@@ -119,8 +144,9 @@ def _contains(text: str, part: str) -> bool:
 
 def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list[str]) -> Draft | None:
     """Genau ein GOZ-Zuschlag je Sitzung aus der höchstbewerteten erbrachten chirurgischen GOZ-Leistung."""
-    # Nur eine selbst als GOZ erbrachte Leistung trägt den Zuschlag. BEMA-Chirurgie und ihr bloß
-    # angebotenes Privat-Gegenstück lösen ihn nie aus: der Zuschlag gilt nur für Privatpatienten.
+    # Nur eine selbst als GOZ erbrachte Leistung trägt den Zuschlag. BEMA-Chirurgie, ihr bloß
+    # angebotenes Privat-Gegenstück und eine noch offene BEMA/GOZ-Wahl lösen ihn nie aus: der
+    # Zuschlag gilt nur für Privatpatienten.
     surgical = [d for d in drafts if not d.planned and d.entry.system == "GOZ" and d.alternative_to is None
                 and d.entry.area == "Chirurgie" and d.entry.code not in SURCHARGE_CODES]
     known = [d for d in surgical if d.entry.points is not None]

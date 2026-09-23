@@ -111,14 +111,19 @@ Fachtabellen zum Nachlesen).
   Widerspruch wird markiert. Flächenwörter allein („36 mod Karies“) lösen keine Füllung aus.
 - **Ein-/mehrwurzelig** (43/44, AIT a/b, 4050/4055) aus der FDI-Nummer. Zahnentfernung braucht ein
   Handlungswort (Extraktion, Osteotomie, X1, Ost1); Befundwörter (retiniert, Längsfraktur) wählen nur
-  die Ziffer (48 statt 47a, 45 statt 43/44).
+  die Ziffer (48 statt 47a, 45 statt 43/44). „Implantat entfernt“ bleibt GOZ 3000 (Implantat, nicht Zahn).
 - **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl („3 Kanäle“),
   ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
 - **Geplant:** „geplant/planen, nächste Sitzung, Termin, Indikation zur, Überweisung, Wiedervorlage,
   in 2 Wochen …“ machen den Teilsatz (mit Doppelpunkt den Rest des Satzes) zum Plan: `planned`,
   nie in `codes`. „ohne/kein/nicht“ direkt an der Leistung verhindert den Vorschlag (Hinweis in `notes`).
-- **BEMA und GOZ gemischt:** der Versichertenstatus schränkt nichts ein. Nennt der Katalog ein
-  Privat-Gegenstück, erscheint es zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
+- **BEMA und GOZ gemischt:** der Patiententyp ist dem Extraktor noch nicht bekannt. Privatpatienten
+  bekommen nur Privatpositionen, Kassenpatienten nur BEMA plus die erlaubten Zuzahlungsleistungen
+  (hochwertige Kunststofffüllung, Endodontie); das setzt die Folgeaufgabe um. Bis dahin erscheint ein
+  Privat-Gegenstück aus dem Katalog zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
+  Sind BEMA und GOZ für dieselbe Leistung am selben Zahn diktiert („Osteotomie 38, GOZ 3030“) und ist
+  das kein Zuzahlungsfall, wird die GOZ-Position zur `alternative` und beide tragen `decide`
+  („nur eine abrechnen“); ein Zuschlag entfällt, solange diese Wahl offen ist.
 - **Zuschlag 0500–0530:** nur für Privatpatienten, also nur aus selbst als GOZ erbrachter Chirurgie
   (z. B. „Osteotomie privat“ oder „GOZ 3030“); genau einer je Sitzung, aus der Punktzahl der
   höchstbewerteten erbrachten chirurgischen GOZ-Leistung. Die Begründung nennt Ziffer und Punkte.
