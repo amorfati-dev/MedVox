@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { codeOf, joinCodes, kindsOf, normalizeCode, parsePatientType } from "../src/api.ts";
+import { codeOf, evidentLines, evidentText, isToothless, kindsOf, normalizeCode, parsePatientType, type Suggestion } from "../src/api.ts";
 
 test("normalizeCode: Großschreibung, nur erlaubtes Alphabet, 6 Zeichen", () => {
   assert.equal(normalizeCode("abc234"), "ABC234");
@@ -9,9 +9,64 @@ test("normalizeCode: Großschreibung, nur erlaubtes Alphabet, 6 Zeichen", () => 
   assert.equal(normalizeCode("ABCDEFGH"), "ABCDEF");
 });
 
-test("joinCodes: Kopierformat der Praxis", () => {
-  assert.equal(joinCodes(["01", "8", "13c", "2080"]), "01, 8, 13c, 2080");
-  assert.equal(joinCodes([]), "");
+// Vorschlag wie vom Server; `teeth` leer = ohne Zahn.
+function sug(code: string, teeth: number[], extra: Partial<Suggestion> = {}): Suggestion {
+  const system = /^\d{4}$/.test(code) ? "GOZ" : "BEMA";
+  return { code, system, title: "", kind: "bema", count: 1, teeth, reason: "", decide: [], alternative: false, ...extra };
+}
+
+test("evidentLines: Zahn vorn, dann seine Positionen in Vorschlagsreihenfolge", () => {
+  const lines = evidentLines([sug("Ä925a", [36]), sug("41a", [36]), sug("13a", [36])], ["Ä925a", "41a", "13a"]);
+  assert.deepEqual(lines, ["36,Ä925a,41a,13a"]);
+  assert.equal(evidentText(lines), "36,Ä925a,41a,13a");
+});
+
+test("evidentLines: zwei Zähne in Diktatreihenfolge, Sitzungspositionen als letzte Zeile ohne Zahn", () => {
+  const suggestions = [
+    sug("01", []),
+    sug("Ä925a", [36]),
+    sug("41a", [36]),
+    sug("13b", [36]),
+    sug("2080", [36], { kind: "zuzahlung", alternative: true }),
+    sug("44", [46]),
+    sug("107", []),
+  ];
+  const active = ["01", "Ä925a", "41a", "13b", "44", "107"];
+  const lines = evidentLines(suggestions, active);
+  assert.deepEqual(lines.map(isToothless), [false, false, true]);
+  assert.equal(evidentText(lines), "36,Ä925a,41a,13b\n46,44\n01,107");
+});
+
+test("evidentLines: abgewählte Chips fehlen, leere Zeilen entfallen", () => {
+  const suggestions = [sug("01", []), sug("41a", [36]), sug("13a", [36]), sug("44", [46])];
+  assert.deepEqual(evidentLines(suggestions, ["41a", "13a"]), ["36,41a,13a"]);
+  assert.deepEqual(evidentLines(suggestions, []), []);
+  assert.equal(evidentText([]), "");
+});
+
+test("evidentLines: Anzahl je Zahn ausgeschrieben, OP-Zuschlag bleibt am Zahn des Servers", () => {
+  const suggestions = [
+    sug("2410", [11], { count: 3 }),
+    sug("3030", [48]),
+    sug("0090", [48]),
+    sug("0090", [36]),
+    sug("0500", [48]),
+  ];
+  assert.equal(
+    evidentText(evidentLines(suggestions, ["3x 2410", "3030", "2x 0090", "0500"])),
+    "11,2410,2410,2410\n48,3030,0090,0500\n36,0090",
+  );
+});
+
+test("evidentLines: dieselbe Ziffer am selben Zahn aus zwei Abschnitten zählt einmal", () => {
+  const suggestions = [sug("01", []), sug("13a", [36]), sug("01", []), sug("13a", [36]), sug("8", [21])];
+  assert.deepEqual(evidentLines(suggestions, ["01", "13a", "8"]), ["36,13a", "21,8", ",01"]);
+});
+
+test("evidentLines: Zeile ohne Zahn erkennbar, auch wenn die Ziffer wie ein Zahn aussieht", () => {
+  const lines = evidentLines([sug("12", []), sug("13a", [12])], ["12", "13a"]);
+  assert.deepEqual(lines.map(isToothless), [false, true]);
+  assert.equal(evidentText(lines), "12,13a\n12");
 });
 
 test("codeOf: Anzahl aus dem Kopierformat entfernen", () => {

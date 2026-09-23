@@ -50,6 +50,28 @@ Einfügen in Evident immer lesen.
 Zu jeder BEMA-Ziffer zeigt MedVox das Privat-Gegenstück als *Alternative* (nicht in den
 kopierten Ziffern). Die Umschaltung Kasse/Privat kommt mit einer späteren Version.
 
+## „Ziffern kopieren" für Evident
+
+Evident nimmt Abrechnungspositionen nur hinter einem Zahn an. „Ziffern kopieren" (iPad und
+Rezeption) liefert deshalb **je Zahn eine Zeile**: erst der Zahn, dann seine Positionen,
+kommagetrennt, in der Reihenfolge der Vorschläge. Mehrere Zähne stehen in der diktierten
+Reihenfolge untereinander; der OP-Zuschlag 0500–0530 steht beim operierten Zahn. Positionen ohne
+Zahn (01, Ä1, 107) kommen in eine letzte Zeile ohne Zahnnummer – die nimmt Evident so nicht an.
+MedVox markiert diese Zeile am iPad und an der Rezeption mit „ohne Zahn – in Evident manuell
+eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Chips fehlen.
+
+Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie, Zahn drei sechs
+mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):
+
+```
+36,Ä925a,41a,13b
+46,44
+01,107
+```
+
+Eine Ziffer mit Anzahl steht so oft da, wie sie erbracht wurde: drei Kanäle an 11 → `11,32,32,32`.
+Die Ziffern sind so geschrieben wie im Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`).
+
 ## Bekannte Grenzen (ehrlich)
 
 - **Der angezeigte Text** schreibt Zahnnummern als Ziffern („Zahn 36") und fügt Codes zusammen

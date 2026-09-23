@@ -1,7 +1,7 @@
 // Aufnahme-Hook: MediaRecorder-Segmente aufnehmen und an die Upload-Warteschlange
 // übergeben, die die Transkripte der Abschnitte aneinanderhängt.
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PatientType, SuggestionKind } from "../api";
+import type { PatientType, Suggestion, SuggestionKind } from "../api";
 import {
   MIC_MESSAGES,
   pickMimeType,
@@ -34,6 +34,7 @@ export type Dictation = {
   transcript: string;
   codes: string[];
   kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
+  suggestions: Suggestion[]; // Vorschläge aller Abschnitte (Zahnzuordnung für Evident)
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   error: string | null;
   lastLatency: number | null;
@@ -236,6 +237,7 @@ export function useDictation(patientType: PatientType): Dictation {
     transcript: uploads.transcript,
     codes: uploads.codes,
     kinds: uploads.kinds,
+    suggestions: uploads.suggestions,
     resultType: uploads.resultType,
     error: uploads.error,
     lastLatency: uploads.lastLatency,

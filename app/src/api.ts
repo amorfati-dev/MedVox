@@ -26,6 +26,7 @@ export type TranscribeResult = {
   suggestions: Suggestion[];
 };
 export type TransferCreated = { code: string; expires_at: string };
+// `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,41a,13a"), siehe evidentLines.
 export type TransferData = { transcript: string; codes: string[]; created_at: string };
 
 export class ApiError extends Error {
@@ -94,11 +95,6 @@ export const api = {
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
 };
 
-// Ziffern im Kopierformat der Praxis: kommagetrennt, z. B. "01, 8, 13c, 2080".
-export function joinCodes(codes: string[]): string {
-  return codes.join(", ");
-}
-
 // Art je Ziffer der erbrachten Hauptvorschläge; Schlüssel wie in `codes` ohne Anzahl ("2x 41a" -> "41a").
 export function kindsOf(suggestions: Suggestion[]): Record<string, SuggestionKind> {
   const kinds: Record<string, SuggestionKind> = {};
@@ -108,6 +104,46 @@ export function kindsOf(suggestions: Suggestion[]): Record<string, SuggestionKin
 
 export function codeOf(copyCode: string): string {
   return copyCode.replace(/^\d+x\s+/, "");
+}
+
+// Kopierformat für Evident: Evident nimmt Abrechnungspositionen nur hinter einem Zahn an.
+// Je Zahn eine Zeile "Zahn,Ziffer,Ziffer" in Diktatreihenfolge, z. B. "36,Ä925a,41a,13a";
+// Positionen ohne Zahn (01, Ä1, 107) stehen in einer letzten Zeile mit leerem Zahnfeld (",01,107").
+// Das leere Zahnfeld kennzeichnet die Zeile für die Anzeige; kopiert wird sie ohne (evidentText).
+type Line = { tooth: number | null; counts: Map<string, number> };
+
+// `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
+// `active`: ausgewählte Chips im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
+// Eine Ziffer mit Anzahl steht so oft in der Zeile, wie sie erbracht wurde ("11,32,32,32").
+export function evidentLines(suggestions: Suggestion[], active: string[]): string[] {
+  const chosen = new Set(active.map(codeOf));
+  const lines = new Map<number | null, Line>();
+  for (const s of suggestions) {
+    if (s.alternative || !chosen.has(s.code)) continue;
+    const tooth = s.teeth.length > 0 ? s.teeth[0] : null;
+    let line = lines.get(tooth);
+    if (!line) {
+      line = { tooth, counts: new Map() };
+      lines.set(tooth, line);
+    }
+    // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal (wie die Chips).
+    line.counts.set(s.code, Math.max(line.counts.get(s.code) ?? 0, s.count));
+  }
+  const ordered = [...lines.values()].sort((a, b) => Number(a.tooth === null) - Number(b.tooth === null));
+  return ordered.map(({ tooth, counts }) => {
+    const codes = [...counts].flatMap(([code, n]) => Array<string>(n).fill(code));
+    return [tooth === null ? "" : String(tooth), ...codes].join(",");
+  });
+}
+
+// Zeile ohne Zahn: in Evident manuell eintragen.
+export function isToothless(line: string): boolean {
+  return line.startsWith(",");
+}
+
+// Text in der Zwischenablage: eine Zeile je Zahn, die Zeile ohne Zahn ohne führendes Komma.
+export function evidentText(lines: string[]): string {
+  return lines.map((line) => (isToothless(line) ? line.slice(1) : line)).join("\n");
 }
 
 // Gespeicherter Patiententyp; alles Unbekannte gilt als Kasse (Standard des Servers).

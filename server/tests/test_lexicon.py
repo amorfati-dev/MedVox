@@ -169,3 +169,22 @@ def test_levenshtein(a, b, limit, expected):
 
 def test_empty_text():
     assert correct("") == ("", [])
+
+
+def test_bleeding_terms_are_kept():
+    raw = ("Blutung auf Sondierung positiv, BOP 30 Prozent, 36 blutet, keine Nachblutung, "
+           "Blutungsneigung bekannt, Sickerblutung gestillt, Blutungen, bluten, Blut")
+    assert correct(raw) == (raw, [])
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("Bludung auf Sondierung", "Blutung auf Sondierung"),
+        ("Nachbludung", "Nachblutung"),
+        ("Sickerbludung", "Sickerblutung"),
+        ("Blutungsneigunk", "Blutungsneigung"),
+    ],
+)
+def test_bleeding_mishearings_are_corrected(raw, expected):
+    assert correct(raw)[0] == expected

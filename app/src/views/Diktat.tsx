@@ -1,9 +1,10 @@
 // Diktat-Ansicht: Schalter Kasse/Privat, großer Aufnahmeknopf, Pegel und Countdown,
 // Transkript in gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
 import { useMemo, useState } from "react";
-import { api, ApiError, joinCodes } from "../api";
+import { api, ApiError, evidentLines, evidentText } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
+import { EvidentLines } from "../components/EvidentLines";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
 import { TransferPanel } from "../components/TransferPanel";
 import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
@@ -18,6 +19,8 @@ export function Diktat({ onLogout }: Props) {
   // Abgewählte Ziffern merken; neu vorgeschlagene gelten damit automatisch als gewählt.
   const [deselected, setDeselected] = useState<ReadonlySet<string>>(() => new Set());
   const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
+  // Kopier- und Übergabeformat für Evident: je Zahn eine Zeile, Zahn vorn.
+  const evident = useMemo(() => evidentLines(d.suggestions, activeCodes), [d.suggestions, activeCodes]);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
@@ -172,12 +175,13 @@ export function Diktat({ onLogout }: Props) {
           </p>
         )}
         <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} onToggle={toggleCode} />
+        {evident.length > 0 && <EvidentLines lines={evident} />}
         <div className="actions">
-          <CopyButton label="Ziffern kopieren" text={joinCodes(activeCodes)} />
+          <CopyButton label="Ziffern kopieren" text={evidentText(evident)} />
         </div>
       </section>
 
-      <TransferPanel transcript={d.transcript} codes={activeCodes} onUnauthorized={d.sessionExpired} />
+      <TransferPanel transcript={d.transcript} codes={evident} onUnauthorized={d.sessionExpired} />
     </main>
   );
 }

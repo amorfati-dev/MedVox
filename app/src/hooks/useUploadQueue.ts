@@ -2,7 +2,7 @@
 // /api/v1/transcribe schicken. Kein Fehlerpfad verwirft Audio – bei einem
 // Fehler bleibt der Abschnitt am Kopf der Warteschlange stehen.
 import { useCallback, useRef, useState, type RefObject } from "react";
-import { api, ApiError, kindsOf, type PatientType, type SuggestionKind } from "../api";
+import { api, ApiError, kindsOf, type PatientType, type Suggestion, type SuggestionKind } from "../api";
 import { filenameFor } from "./recorder";
 
 // Fehler, die eine Wiederholung desselben Abschnitts nie bestehen würde.
@@ -17,6 +17,7 @@ export type UploadQueue = {
   transcript: string;
   codes: string[];
   kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
+  suggestions: Suggestion[]; // Vorschläge aller Abschnitte in Diktatreihenfolge (Zahnzuordnung)
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   lastLatency: number | null;
   error: string | null;
@@ -38,6 +39,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
   const [transcript, setTranscript] = useState("");
   const [codes, setCodes] = useState<string[]>([]);
   const [kinds, setKinds] = useState<Record<string, SuggestionKind>>({});
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [resultType, setResultType] = useState<PatientType | null>(null);
   const [lastLatency, setLastLatency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +74,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
           setTranscript((prev) => (prev && text ? `${prev} ${text}` : prev || text));
           setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
           setKinds((prev) => ({ ...prev, ...kindsOf(result.suggestions) }));
+          setSuggestions((prev) => [...prev, ...result.suggestions]);
           setResultType(result.patient_type);
           setLastLatency(result.latency_s);
           setError(null);
@@ -131,6 +134,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     setTranscript("");
     setCodes([]);
     setKinds({});
+    setSuggestions([]);
     setResultType(null);
     setLastLatency(null);
     setError(null);
@@ -145,6 +149,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     transcript,
     codes,
     kinds,
+    suggestions,
     resultType,
     lastLatency,
     error,
