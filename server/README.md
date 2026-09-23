@@ -95,7 +95,8 @@ längere Läufe nur direkt hinter "Zahn"/"Regio" ("Zahn 1 6 2 6" → 16, 26), so
 unverändert bleiben. Quadrantenangaben werden aufgelöst
 ("Oberkiefer rechts sechs" → 16), Flächen werden zu Buchstaben ("mesial okklusal distal" →
 "mod"; später im Satz folgende Flächen gehören zum Zahn davor, solange kein anderer Zahn
-dazwischen steht: "Zahn 36, GOZ 2170, mesial, okklusal" → 36 mo), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
+dazwischen steht und sie nicht zum nächsten Zahn hinführen: "Zahn 36, GOZ 2170, mesial, okklusal"
+→ 36 mo, aber "Zahn 36 Füllung, Karies mesial an 37" → 36 ohne Fläche), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
 sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und Anzahlen ("28 Zähne")
 nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste der Zahnbezüge
 (FDI-Nummer plus Flächen). Ausprobieren mit `python -m medvox.normalize --demo` oder
