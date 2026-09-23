@@ -43,6 +43,8 @@ Einfügen in Evident immer lesen.
 | „Zahnsteinentfernung" | 107 |
 | „Zahn eins eins Wurzelkanalbehandlung drei Kanäle" | 3x 32 |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
+| „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
+| „Tiefliegenden Abszess drei sechs eröffnet" / „Inz zwei" | GOÄ Ä2430 (Kasse als Analogposition) |
 | „Chlorhexidin Spülung" | 105 |
 | „PZR" | 1040 (GOZ) |
 | „BEMA dreizehn a", „GOZ zwei eins null null" | genau diese Ziffer |
@@ -205,7 +207,8 @@ mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernun
 Evident nimmt eine Mischung aus Ziffern und Kurzformen: steht im Katalog eine Evident-Kurzform
 (Feld `evident`), wird sie statt der Ziffer kopiert (`l1` statt 41a), sonst die Ziffer.
 Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a, GOZ 3030), opg
-(Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002), bmf (12, klein wie in Evident) – eine private Osteotomie an 48 kopiert als
+(Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002), bmf (12, klein wie in Evident), inz1 (Ä161, GOÄ Ä2428),
+inz2 (GOÄ Ä2430) – eine private Osteotomie an 48 kopiert als
 `48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte
 Positionen stehen einmal mit Anzahl, hinter Kurzform wie Ziffer: drei Kanäle an 36 → `36,wf*3`,
 `11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen). Die
@@ -231,6 +234,19 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
 - **Zuordnung:** „36 o Karies, 37 mo Karies, Füllungen" ordnet die Füllung nur 37 zu – je Zahn
   einen Satz.
 - Fehlen Flächen-, Kanal- oder Zahnangabe, kommt der kleinste Vorschlag mit Hinweis.
+- **Inzision: Abszess und Tiefe mitsagen.** „Inzision" oder „Entlastungsschnitt" allein wird nicht
+  erkannt (sonst träfe es jede Schnittführung bei der Lappenbildung) – „Abszess eröffnet" oder gleich
+  „oberflächlich"/„tiefliegend" sagen. „Abszess eröffnet" ohne Tiefe ergibt Inz1 mit Hinweis „Tiefe
+  nicht diktiert". Je Abszess einen eigenen Satz mit seinem Zahn sagen – jeder ist eine eigene
+  Position. Mehrere Zähne oder ein Bereich in einem Satz („regio drei fünf bis drei sieben") zählen als
+  ein Abszess (mit Hinweis); zwei Abszesse in einer Region als zwei Sätze diktieren („zwei Abszesse").
+  Zwei Inzisionen am selben Zahn (vestibulär und palatinal) bleiben eine Position mit Hinweis – waren
+  es wirklich zwei Abszesse, „zwei Abszesse" ausdrücklich sagen und von Hand ergänzen.
+- **Tiefliegende Inzision beim Kassenpatienten:** GOÄ Ä2430 kommt als Analogposition (Praxisregel des
+  Behandlers) und steht so in der Begründung.
+- **Inzision und Osteotomie in einem Diktat:** nur getrennt abrechenbar (andere Sitzung), außer bei einem
+  separaten Operationsgebiet – beide Positionen bleiben stehen und tragen den Hinweis; entscheiden und
+  eine abwählen, wenn es kein separates Operationsgebiet war.
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.

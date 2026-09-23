@@ -10,12 +10,24 @@ getrennt gesammelt; Befundwörter gelten für beide.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
-    OSTEO_KINDS, REMOVAL, REMOVAL_ACT, ROOT_PAIRS, SURCHARGE_CODES, multi_rooted, removal_modifier,
+    INCISION,
+    INCISION_REPEATED,
+    INCISION_TEETH,
+    INCISION_VERB,
+    OSTEO_KINDS,
+    REMOVAL,
+    REMOVAL_ACT,
+    ROOT_PAIRS,
+    SURCHARGE_CODES,
+    incision_depth_open,
+    incision_depth_stated,
+    multi_rooted,
+    removal_modifier,
     surface_count_word,
 )
 from medvox.extract_text import TextContext
@@ -57,15 +69,17 @@ class Draft:
 class Builder:
     def __init__(self, catalog: Catalog, ctx: TextContext) -> None:
         self.catalog, self.ctx = catalog, ctx
-        self.drafts: dict[tuple[str, str, int | None, bool], Draft] = {}
+        self.drafts: dict[tuple[str, str, object, bool], Draft] = {}
         self.dictated_surcharges: list[Tagged] = []
         self._surface_words: list[Tagged] = []
 
     def add(self, entry: Entry, fdi: int | None, t: Tagged, count: int = 1, flag: str | None = None,
-            like: Tagged | None = None) -> Draft:
-        """Fundstelle ``t`` einem Entwurf zuordnen; ``like`` gibt geplant/erbracht vor (sonst ``t``)."""
+            like: Tagged | None = None, slot: object = None) -> Draft:
+        """Fundstelle ``t`` einem Entwurf zuordnen; ``like`` gibt geplant/erbracht vor (sonst ``t``).
+
+        ``slot`` trennt Entwürfe ohne Zahn statt ``fdi`` (Abszess je Satz)."""
         plan = (like or t).plan
-        draft = self.drafts.setdefault((entry.system, entry.code, fdi, plan is not None),
+        draft = self.drafts.setdefault((entry.system, entry.code, slot or fdi, plan is not None),
                                        Draft(entry, fdi, plan is not None))
         draft.hits.append(t)
         draft.count = max(draft.count, count)
@@ -77,7 +91,7 @@ class Builder:
     def build(self, tagged: list[Tagged]) -> list[Draft]:
         fillings = [t for t in tagged if t.hit.entry.family]
         removals = [t for t in tagged if t.hit.entry.code in REMOVAL.get(t.hit.entry.system, {}).values()]
-        rest = [t for t in tagged if t not in fillings and t not in removals]
+        rest = _incision_depth([self._incision_teeth(t) for t in tagged if t not in fillings and t not in removals])
         self._fillings(fillings)
         self._removals(removals)
         sessions: dict[tuple[str, str, bool], list[Tagged]] = {}
@@ -86,6 +100,8 @@ class Builder:
             if entry.system == "GOZ" and entry.code in SURCHARGE_CODES:
                 if t.plan is None:
                     self.dictated_surcharges.append(t)
+            elif entry.key in INCISION:
+                self._incision(t)
             elif (entry.system, entry.code) in ROOT_PAIRS:
                 self._root_pair(t)
             elif (unit := self.catalog.unit(entry)) == "session":
@@ -95,6 +111,7 @@ class Builder:
         for group in sessions.values():
             self._session(group)
         self._absorb_toothless()
+        self._incision_flags()
         return sorted(self.drafts.values(), key=lambda d: d.start)
 
     def _absorb_toothless(self) -> None:
@@ -109,6 +126,34 @@ class Builder:
                 for host in hosts:
                     host.hits = sorted(host.hits + [t for t in d.hits if t not in host.hits], key=lambda t: t.hit.start)
                 del self.drafts[key]
+
+    def _incision_teeth(self, t: Tagged) -> Tagged:
+        """Zahn nach dem Verb gehört zur Fundstelle; jedes Verb schließt einen Abszess ab, auch ohne Punkt."""
+        if t.hit.entry.key not in INCISION:
+            return t
+        s, e = t.sentence
+        t = replace(t, sentence=(max((m.end() for m in INCISION_VERB.finditer(self.ctx.folded, s, t.hit.start)),
+                                     default=s), e))
+        verb = INCISION_VERB.match(self.ctx.folded, t.hit.end)
+        return replace(t, teeth=self.ctx.teeth_for(t.hit.start, verb.end())) if verb else t
+
+    def _incision(self, t: Tagged) -> None:
+        """Eine Abszesseröffnung je Fundstelle; mehrere Zähne an einer Fundstelle sind ein Abszess."""
+        teeth = _unique_fdi(tuple(tooth.fdi for tooth in t.teeth))
+        if len(teeth) == 1:
+            self.add(t.hit.entry, teeth[0], t)
+            return
+        draft = self.add(t.hit.entry, None, t, 1, INCISION_TEETH if teeth else "Zahn nicht diktiert", slot=t.sentence)
+        draft.context = _unique_fdi(draft.context + teeth)
+
+    def _incision_flags(self) -> None:
+        """Tiefe offen, wenn kein Wort desselben Abszesses (Ziffer, Zahn) sie nennt."""
+        for d in self.drafts.values():
+            flags = [incision_depth_open(t.hit) for t in d.hits]
+            if flags and all(flags) and flags[0] not in d.decide:
+                d.decide.append(flags[0])
+            if d.fdi is not None and d.entry.key in INCISION and (n := len({t.sentence for t in d.hits})) > 1:
+                d.decide.append(INCISION_REPEATED.format(n=n, fdi=d.fdi))
 
     # --- Füllungen --------------------------------------------------------------------
 
@@ -234,6 +279,17 @@ class Builder:
         for t in group:
             draft = self.add(t.hit.entry, None, t, max(repeats, times))
             draft.context = _unique_fdi(draft.context + tuple(tooth.fdi for tooth in t.teeth))
+
+
+def _incision_depth(tagged: list[Tagged]) -> list[Tagged]:
+    """„Subperiostaler Abszess inzidiert“: ein Wort ohne Tiefe gehört zur Abszesseröffnung mit Tiefe im selben Satz."""
+    stated = [t for t in tagged if incision_depth_stated(t.hit)]
+    result = []
+    for t in tagged:
+        host = next((s for s in stated if s.sentence == t.sentence and (
+            not t.teeth or not s.teeth or set(t.teeth) & set(s.teeth))), None) if incision_depth_open(t.hit) else None
+        result.append(replace(t, hit=replace(t.hit, entry=host.hit.entry, via=None)) if host else t)
+    return result
 
 
 def _unique(items) -> list:

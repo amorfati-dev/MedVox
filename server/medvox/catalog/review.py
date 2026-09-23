@@ -40,6 +40,16 @@ def co_payments(catalog: dict) -> list[dict]:
     return [e for area in AREAS for e in catalog["entries"] if e["area"] == area and e.get("zuzahlung")]
 
 
+def analogs(catalog: dict) -> list[dict]:
+    """GOZ/GOÄ-Einträge, die der Behandler beim Kassenpatienten als Analogposition berechnet."""
+    return [e for e in catalog["entries"] if e.get("analog")]
+
+
+def conflicts(catalog: dict) -> list[tuple[dict, dict]]:
+    """(Eintrag, Konflikt) je notiertem „nicht in derselben Sitzung“."""
+    return [(e, c) for e in catalog["entries"] for c in e.get("conflicts", [])]
+
+
 def text_sections(catalog: dict) -> list[str]:
     lines = ["== Paare BEMA <-> GOZ/GOÄ (Patiententyp wählt eine Seite) =="]
     for bema, other, note in pairs(catalog):
@@ -49,6 +59,10 @@ def text_sections(catalog: dict) -> list[str]:
         z = e["zuzahlung"]
         basis = "/".join(z["basis"]) or "–"
         lines.append(f"  {'ja  ' if z['allowed'] else 'nein'} {_label(e):<11}{basis:<14}{e['title'][:44]}")
+    lines += ["", "== Analogpositionen (Kassenpatient, Praxisregel) =="]
+    lines += [f"  {_label(e):<11}{e['analog']['note']}" for e in analogs(catalog)]
+    lines += ["", "== Nicht in derselben Sitzung (Konflikt, beide bleiben mit Hinweis) =="]
+    lines += [f"  {_label(e):<11}<-> {c['system']} {c['code']:<6}außer: {c.get('except', '–')}" for e, c in conflicts(catalog)]
     return lines + [""]
 
 
@@ -65,6 +79,10 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 - **BEMA-Bezug:** bei „ja“ die BEMA-Position, neben der sie üblich ist (– = eigenständige Privatleistung),
   bei „nein“ die Kassenleistung, die sie abdeckt. Bei Mehrkosten-Füllung und Inlay schlägt der Extraktor
   die BEMA-Basis nach Flächenzahl mit vor (Kassenanteil).
+- **Analogposition:** GOZ/GOÄ-Position, die der Behandler beim Kassenpatienten analog berechnet
+  (Praxisregel, Feld `analog`); der Vorschlag nennt das in der Begründung.
+- **Konflikt:** nicht in derselben Sitzung abrechenbar (Feld `conflicts`, Ausnahme in „außer“); der
+  Extraktor streicht keine der beiden, sondern markiert beide mit dem Hinweis.
 - **neu, bitte prüfen:** Position, die für den Patiententyp aus dem erweiterten Katalog nach v1 geholt wurde
   und noch nicht in der geprüften Fassung stand.
 """
@@ -98,6 +116,16 @@ def markdown(parts: list[tuple[str, dict]]) -> str:
                 z = e["zuzahlung"]
                 out.append(f"| ☐ | {'ja' if z['allowed'] else 'nein'} | {_marked(e)} | {e['title']} | "
                            f"{', '.join(z['basis']) or '–'} | {z['note']} | {cite(z['sources'])} |")
+        if analogs(catalog):
+            out += ["", "### Analogpositionen beim Kassenpatienten", "",
+                    "| ☐ | Ziffer | Kurztext | Begründung im Vorschlag | Quelle |", "|---|---|---|---|---|"]
+            out += [f"| ☐ | {_marked(e)} | {e['title']} | {e['analog']['note']} | {e['analog']['source']} |"
+                    for e in analogs(catalog)]
+        if conflicts(catalog):
+            out += ["", "### Nicht in derselben Sitzung (Konflikt)", "",
+                    "| ☐ | Ziffer | nicht neben | außer | Hinweis im Vorschlag | Quelle |", "|---|---|---|---|---|---|"]
+            out += [f"| ☐ | {_marked(e)} | {c['system']} {c['code']} | {c.get('except', '–')} | {c['note']} | {c['source']} |"
+                    for e, c in conflicts(catalog)]
         out.append("")
     out += ["## Quellen", ""] + [f"- Q{n}: [{names.get(url, url)}]({url})" for url, n in refs.items()]
     return "\n".join(out)

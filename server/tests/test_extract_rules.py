@@ -11,7 +11,7 @@ import pytest
 from medvox import extract as extract_module
 from medvox.extract import Extraction, Suggestion, analyze, billable_codes
 from medvox.extract_catalog import CATALOG_PATH, Catalog, load_catalog
-from medvox.extract_rules import INCLUDED_IN, REMOVAL, ROOT_PAIRS, SURCHARGES, multi_rooted, surcharge_for
+from medvox.extract_rules import INCISION, INCLUDED_IN, REMOVAL, ROOT_PAIRS, SURCHARGES, multi_rooted, surcharge_for
 from medvox.lexicon import correct
 from medvox.normalize import normalize
 
@@ -267,6 +267,7 @@ def test_tables_only_name_catalog_codes():
     codes = [("BEMA", c) for c in REMOVAL["BEMA"].values()] + [("GOZ", c) for c in REMOVAL["GOZ"].values()]
     codes += [(s, c) for (s, _), pair in ROOT_PAIRS.items() for c in pair]
     codes += list(INCLUDED_IN) + list(INCLUDED_IN.values()) + [("GOZ", c) for c, _lo, _hi in SURCHARGES]
+    codes += sorted(INCISION)
     assert [key for key in codes if catalog.get(*key) is None] == []
 
 

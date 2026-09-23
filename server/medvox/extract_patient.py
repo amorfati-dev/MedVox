@@ -32,8 +32,10 @@ _OWN = {"kasse": ("BEMA",), "privat": ("GOZ", "GOÄ")}
 
 
 def kind(catalog: Catalog, entry: Entry, patient: str) -> str:
-    """"bema", "goz" (Privatleistung, auch GOÄ) oder "zuzahlung" (Privatleistung beim Kassenpatienten)."""
-    if entry.system == "BEMA":
+    """"bema", "goz" (Privatleistung, auch GOÄ) oder "zuzahlung" (Privatleistung beim Kassenpatienten).
+
+    Eine Analogposition (Katalogfeld ``analog``) rechnet der Behandler beim Kassenpatienten wie BEMA ab."""
+    if entry.system == "BEMA" or (patient == "kasse" and entry.analog):
         return "bema"
     if patient == "kasse" and catalog.co_payment_allowed(entry):
         return "zuzahlung"

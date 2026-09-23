@@ -151,6 +151,36 @@
             }
           }
         },
+        "analog": {
+          "description": "Nur GOZ/GOÄ ohne BEMA-Paar und ohne erlaubte Zuzahlung: Praxisregel des Behandlers, die Position beim Kassenpatienten als Analogposition zu berechnen. note erscheint in der Begründung des Vorschlags; source nennt, wer die Regel festgelegt hat.",
+          "type": "object",
+          "required": ["patient", "note", "source"],
+          "additionalProperties": false,
+          "properties": {
+            "patient": {"enum": ["kasse"]},
+            "note": {"type": "string", "minLength": 10, "maxLength": 240},
+            "source": {"type": "string", "minLength": 3}
+          }
+        },
+        "conflicts": {
+          "description": "Positionen, die nicht in derselben Sitzung neben dieser abgerechnet werden (außer except). Der Extraktor streicht nie, sondern markiert beide mit note; Ziel steht in derselben Datei.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": ["system", "code", "unit", "note", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "system": {"enum": ["BEMA", "GOZ", "GOÄ"]},
+              "code": {"type": "string", "pattern": "^[0-9A-Za-zÄ]{1,6}$"},
+              "unit": {"enum": ["sitzung"]},
+              "except": {"type": "string", "minLength": 3},
+              "note": {"type": "string", "minLength": 10, "maxLength": 240},
+              "source": {"type": "string", "minLength": 3}
+            }
+          }
+        },
         "sources": {
           "description": "Öffentliche Quelle(n), gegen die Ziffer, Kurztext und Punkte geprüft wurden.",
           "type": "array",

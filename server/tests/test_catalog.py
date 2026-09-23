@@ -44,12 +44,14 @@ def test_catalog_v1_is_a_mini_catalog(catalog):
     # sechs Positionen ausdruecklich fuer v1 nachgefordert hat (Ae935a/Ae5002, GOZ 0500-0530; 84 geprueft)
     # und die Patiententyp-Umschaltung zwoelf Positionen nach v1 geholt hat: die GOZ-Paare von v1-BEMA-
     # Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020, 4070, 4075) und die Inlays 2150-2170.
-    assert 60 <= len(catalog["entries"]) <= 96
+    # Nachgefordert: Abszesseroeffnung BEMA Ae161 (Inz1), GOAe Ae2428/Ae2430 (inz1/inz2).
+    assert 60 <= len(catalog["entries"]) <= 99
 
 
 def test_positions_new_in_v1_are_marked_for_review(catalog):
     marked = {e["code"] for e in catalog["entries"] if e["review"].get("note") == "neu, bitte prüfen"}
-    assert marked == {"2020", "2350", "3020", "3300", "1000", "4000", "4020", "4070", "4075", "2150", "2160", "2170"}
+    assert marked == {"2020", "2350", "3020", "3300", "1000", "4000", "4020", "4070", "4075", "2150", "2160", "2170",
+                      "Ä161", "Ä2428", "Ä2430"}
     proc = subprocess.run(
         [sys.executable, "-m", "medvox.catalog.validate", "--markdown"], cwd=SERVER_DIR, capture_output=True, text=True
     )
@@ -219,6 +221,7 @@ def test_evident_short_forms_are_only_the_confirmed_ones(catalog, extended):
         ("BEMA", "47a"): "ost1", ("GOZ", "3030"): "ost1",
         ("BEMA", "Ä935d"): "opg", ("GOÄ", "Ä5004"): "opg", ("BEMA", "Ä935a"): "pan1", ("GOÄ", "Ä5002"): "pan1",
         ("BEMA", "12"): "bmf",
+        ("BEMA", "Ä161"): "inz1", ("GOÄ", "Ä2428"): "inz1", ("GOÄ", "Ä2430"): "inz2",
     }
 
 
@@ -227,3 +230,19 @@ def test_evident_short_form_must_be_lowercase(catalog):
         broken = copy.deepcopy(catalog)
         broken["entries"][0]["evident"] = bad
         assert any("evident" in err for err in _errors_for(broken)), bad
+
+
+def test_detects_misplaced_analog_position(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "GOÄ", "Ä2428")["analog"] = copy.deepcopy(_entry(broken, "GOÄ", "Ä2430")["analog"])
+    assert any("GOÄ Ä2428: 'analog' nur bei GOZ/GOÄ ohne BEMA-Paar" in err for err in _errors_for(broken))
+
+
+def test_detects_broken_or_one_sided_conflict(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "BEMA", "Ä161")["conflicts"][0]["code"] = "99x"
+    assert any("BEMA Ä161: Konflikt BEMA 99x fehlt" in err for err in _errors_for(broken))
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "GOÄ", "Ä2428")["conflicts"] = [c for c in _entry(broken, "GOÄ", "Ä2428")["conflicts"]
+                                                    if c["code"] != "3030"]
+    assert any("BEMA Ä161: Paar GOÄ Ä2428 trägt den Konflikt mit GOZ 3030 nicht" in err for err in _errors_for(broken))

@@ -52,6 +52,35 @@ def private_only(entry, folded_keyword: str) -> str | None:
     rule = _PRIVATE_ONLY.get((entry.system, entry.code))
     return rule[1] if rule and rule[0].search(folded_keyword) else None
 
+# Abszesseröffnung: die Tiefe wählt die Ziffer – oberflächlich BEMA Ä161 (Inz1) = GOÄ Ä2428,
+# tiefliegend GOÄ Ä2430 (beim Kassenpatienten Analogposition, Katalogfeld analog). Die Tiefenwörter
+# sind Keywords von Ä2428/Ä2430;
+# die übrigen Wörter von Ä161 („Abszess eröffnet“, „Abszessinzision“) lassen die Tiefe offen, dann wird
+# nicht still eine Tiefe gewählt, sondern nachgefragt. Gezählt wird je Abszess = je Fundstelle, nie je
+# genanntem Zahn: lieber zu wenig mit Hinweis als zu viel.
+INCISION_OPEN = ("BEMA", "Ä161")
+INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), ("GOÄ", "Ä2430")})
+INCISION_VERB = re.compile(r"\s*(?:eroeffnet|inzidiert|gespalten)\b")  # „oberflächlichen Abszess eröffnet regio 46“
+INCISION_REPEATED = "{n} Inzisionen an {fdi} diktiert – ein Abszess angenommen; falls mehrere Abszesse, von Hand ergänzen"
+INCISION_TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
+_INCISION_DEPTH = {
+    "BEMA": "Tiefe nicht diktiert – oberflächlich Ä161 (Inz1) oder tiefliegend GOÄ Ä2430 als Analogposition (inz2) wählen",
+    "GOÄ": "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen",
+}
+
+
+def incision_depth_open(hit) -> str | None:
+    """Prüfhinweis, wenn eine Abszesseröffnung ohne oberflächlich/tiefliegend diktiert wurde."""
+    origin = hit.via or hit.entry
+    if origin.key != INCISION_OPEN or hit.code_word:
+        return None
+    return _INCISION_DEPTH.get(hit.entry.system)
+
+
+def incision_depth_stated(hit) -> bool:
+    """Abszesseröffnung mit diktierter Tiefe („tiefliegenden Abszess“, „Inz1“)."""
+    return (hit.via or hit.entry).key in INCISION and not incision_depth_open(hit)
+
 # GOZ-Zuschläge zu chirurgischen Leistungen (Anlage 1, Abschnitt L): Ziffer, Punkte von, bis.
 SURCHARGES: tuple[tuple[str, int, int | None], ...] = (
     ("0500", 250, 499),

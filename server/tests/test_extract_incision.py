@@ -1,0 +1,209 @@
+"""Abszesseröffnung (Inzision): die Tiefe wählt die Ziffer, ohne Tiefe wird nachgefragt.
+
+Oberflächlich = BEMA Ä161 (Inz1) bzw. GOÄ Ä2428, Evident „inz1“; tiefliegend = GOÄ Ä2430, Evident
+„inz2“ – im BEMA (Stand 1. Januar 2026) gibt es dafür keine Ziffer, der Behandler berechnet Ä2430 beim
+Kassenpatienten als Analogposition. Falsch wäre vor allem, still die falsche der beiden Tiefen zu wählen.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from medvox.extract import Extraction, Suggestion, analyze, billable_codes
+from medvox.lexicon import correct
+from medvox.normalize import normalize
+
+DEPTH_OPEN_KASSE = ("Tiefe nicht diktiert – oberflächlich Ä161 (Inz1) oder tiefliegend GOÄ Ä2430 als Analogposition "
+                    "(inz2) wählen")
+ANALOG = "Analogposition: GOÄ Ä2430 wird beim Kassenpatienten analog berechnet (Praxisregel des Behandlers)"
+APART_FROM_OSTEOTOMY = ("Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates "
+                        "Operationsgebiet – bitte prüfen")
+DEPTH_OPEN_PRIVAT = "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen"
+
+
+def run(dictation: str, patient: str = "kasse") -> Extraction:
+    corrected, _ = correct(dictation)
+    n = normalize(corrected)
+    return analyze(n.text, n.teeth, patient)
+
+
+def performed(result: Extraction) -> list[Suggestion]:
+    return [s for s in result.suggestions if not s.planned and not s.alternative]
+
+
+@pytest.mark.parametrize("patient, system, code", [("kasse", "BEMA", "Ä161"), ("privat", "GOÄ", "Ä2428")])
+def test_superficial_incision_is_inz1(patient, system, code):
+    [s] = performed(run("Regio drei sechs oberflächlichen Abszess eröffnet.", patient))
+    assert (s.system, s.code, s.evident, s.teeth, s.decide) == (system, code, "inz1", (36,), ())
+
+
+def test_deep_incision_is_inz2_for_private_patients():
+    [s] = performed(run("Zahn drei sechs tiefliegenden Abszess eröffnet, Drainage eingelegt.", "privat"))
+    assert (s.system, s.code, s.evident, s.points, s.teeth, s.decide) == ("GOÄ", "Ä2430", "inz2", 303, (36,), ())
+
+
+def test_deep_incision_is_an_analog_position_for_kasse_patients():
+    result = run("Zahn drei sechs tiefliegenden Abszess eröffnet.")
+    [s] = performed(result)
+    assert (s.system, s.code, s.evident, s.kind, s.teeth, s.decide) == ("GOÄ", "Ä2430", "inz2", "bema", (36,), ())
+    assert s.reason.startswith(ANALOG)
+    assert result.notes == []
+
+
+@pytest.mark.parametrize("words", [
+    "Abszess inzidiert", "Abszess eröffnet", "Abszessinzision", "Abszesseröffnung",
+    "Abszessspaltung", "Abszess gespalten",
+])
+@pytest.mark.parametrize("patient, code, flag", [("kasse", "Ä161", DEPTH_OPEN_KASSE), ("privat", "Ä2428", DEPTH_OPEN_PRIVAT)])
+def test_incision_without_depth_asks(words, patient, code, flag):
+    [s] = performed(run(f"Regio drei sechs {words}.", patient))
+    assert (s.code, s.teeth, s.decide) == (code, (36,), (flag,))
+
+
+@pytest.mark.parametrize("dictation, patient, code", [
+    ("Inz eins an drei sechs.", "kasse", "Ä161"),
+    ("Inz eins an drei sechs.", "privat", "Ä2428"),
+    ("Inz zwei regio drei sechs.", "privat", "Ä2430"),
+    ("BEMA Ä161 regio drei sechs.", "kasse", "Ä161"),
+    ("Ä zwei vier drei null regio drei sechs.", "privat", "Ä2430"),
+])
+def test_short_form_and_code_name_the_depth(dictation, patient, code):
+    [s] = performed(run(dictation, patient))
+    assert (s.code, s.decide) == (code, ())
+
+
+def test_goae_number_without_umlaut_is_not_the_goz_number():
+    # „GOÄ 2430“ ist die tiefe Inzision, nicht GOZ 2430 (medikamentöse Einlage)
+    [s] = performed(run("GOÄ Ziffer 2430 an drei sechs.", "privat"))
+    assert (s.system, s.code) == ("GOÄ", "Ä2430")
+    assert billable_codes(run("GOÄ 5004.", "privat").suggestions) == ["Ä5004"]
+
+
+@pytest.mark.parametrize("patient", ["kasse", "privat"])
+def test_depth_word_settles_the_other_words_of_the_same_incision(patient):
+    [s] = performed(run("Regio drei sechs oberflächliche Inzision, Abszess eröffnet.", patient))
+    assert (s.code, s.count, s.decide) == ({"kasse": "Ä161", "privat": "Ä2428"}[patient], 1, ())
+
+
+def test_deep_word_takes_the_open_word_along():
+    [s] = performed(run("Subperiostaler Abszess inzidiert regio drei sechs.", "privat"))
+    assert (s.code, s.count) == ("Ä2430", 1)
+    [s] = performed(run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet.", "privat"))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä2430", 1, (36,), ())
+    [s] = performed(run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet."))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä2430", 1, (36,), ())
+
+
+def test_open_word_at_another_tooth_stays_its_own_incision():
+    result = run("Regio drei sechs Abszess eröffnet, tiefliegender Abszess an vier sieben.", "privat")
+    assert [(s.code, s.teeth, s.decide) for s in performed(result)] == [
+        ("Ä2428", (36,), (DEPTH_OPEN_PRIVAT,)), ("Ä2430", (47,), ())]
+
+
+def test_goae_incision_gets_no_goz_surcharge():
+    # 0500–0530 gelten nur für die in GOZ Abschnitt L genannten GOZ-Nummern; Ä2430 (303 Punkte) ist keine
+    assert billable_codes(run("Tiefliegenden Abszess drei sechs eröffnet.", "privat").suggestions) == ["Ä2430"]
+    osteo = run("Osteotomie drei acht, tiefliegenden Abszess eröffnet.", "privat")
+    assert billable_codes(osteo.suggestions) == ["3030", "Ä2430", "0500"]
+    assert "GOZ 3030" in next(s.reason for s in osteo.suggestions if s.code == "0500")
+
+
+@pytest.mark.parametrize("patient, code, flag", [("kasse", "Ä161", DEPTH_OPEN_KASSE), ("privat", "Ä2428", DEPTH_OPEN_PRIVAT)])
+def test_each_abscess_is_its_own_position_with_its_own_depth(patient, code, flag):
+    result = run("Drei sechs Abszess eröffnet. Oberflächlicher Abszess an vier sechs eröffnet.", patient)
+    assert [(s.code, s.teeth, s.count, s.decide) for s in performed(result)] == [
+        (code, (36,), 1, (flag,)), (code, (46,), 1, ())]
+
+
+TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
+
+
+def test_one_abscess_over_several_teeth_is_one_position():
+    [s] = performed(run("Abszess eröffnet regio drei fünf bis drei sieben."))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä161", 1, (35, 36, 37), (TEETH, DEPTH_OPEN_KASSE))
+    [s] = performed(run("Oberflächlicher Abszess regio drei sechs, drei sieben eröffnet.", "privat"))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä2428", 1, (36, 37), (TEETH,))
+
+
+def test_separate_abscesses_without_tooth_are_counted():
+    result = run("Oberflächliche Inzision vestibulär. Oberflächliche Inzision palatinal.", "privat")
+    assert billable_codes(result.suggestions) == ["2x Ä2428"]
+    result = run("Abszess eröffnet an drei sechs. Abszess eröffnet.")
+    assert [(s.code, s.count, s.teeth, s.decide[0]) for s in performed(result)] == [
+        ("Ä161", 1, (36,), DEPTH_OPEN_KASSE), ("Ä161", 1, (), "Zahn nicht diktiert")]
+
+
+@pytest.mark.parametrize("joint", [". ", ", "])  # Whisper schreibt oft ein Komma statt des Punkts
+def test_toothless_abscesses_keep_their_own_depth_and_teeth(joint):
+    result = run(f"Oberflächlichen Abszess eröffnet{joint}Abszess eröffnet.")
+    assert [(s.code, s.count, s.decide) for s in performed(result)] == [
+        ("Ä161", 1, ("Zahn nicht diktiert",)), ("Ä161", 1, ("Zahn nicht diktiert", DEPTH_OPEN_KASSE))]
+    result = run("Oberflächliche Inzision vestibulär. Abszess eröffnet palatinal.", "privat")
+    assert [s.decide for s in performed(result)] == [("Zahn nicht diktiert",), ("Zahn nicht diktiert", DEPTH_OPEN_PRIVAT)]
+    result = run("Abszess eröffnet regio drei fünf bis drei sieben. Abszess eröffnet.")
+    assert [(s.teeth, s.decide[0]) for s in performed(result)] == [((35, 36, 37), TEETH), ((), "Zahn nicht diktiert")]
+
+
+@pytest.mark.parametrize("dictation, patient, code, teeth", [
+    ("Oberflächlichen Abszess eröffnet regio vier sechs.", "kasse", "Ä161", (46,)),
+    ("Tiefliegenden Abszess eröffnet regio vier fünf bis vier sieben.", "privat", "Ä2430", (45, 46, 47)),
+])
+def test_tooth_after_the_verb_belongs_to_the_abscess(dictation, patient, code, teeth):
+    [s] = performed(run(dictation, patient))
+    assert (s.code, s.teeth) == (code, teeth)
+
+
+@pytest.mark.parametrize("joint", [". Abszess", ", Abszess"])
+def test_two_incisions_at_one_tooth_are_one_position_with_a_hint(joint):
+    result = run(f"Abszess eröffnet an drei sechs vestibulär{joint} eröffnet an drei sechs palatinal.")
+    [s] = performed(result)
+    assert (s.code, s.count, s.teeth) == ("Ä161", 1, (36,))
+    assert s.decide == (DEPTH_OPEN_KASSE,
+                        "2 Inzisionen an 36 diktiert – ein Abszess angenommen; falls mehrere Abszesse, von Hand ergänzen")
+
+
+def test_two_deep_abscesses_are_two_positions():
+    result = run("Tiefliegenden Abszess drei sechs eröffnet. Tiefliegenden Abszess vier sechs eröffnet.", "privat")
+    assert [(s.code, s.teeth, s.count) for s in performed(result)] == [("Ä2430", (36,), 1), ("Ä2430", (46,), 1)]
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ["47a"]), ("privat", ["3030", "0500"])])
+def test_flap_incision_of_an_osteotomy_is_no_abscess(patient, codes):
+    dictation = "Zahn drei acht Osteotomie, marginale Inzision, Entlastungsschnitt, Mukoperiostlappen gebildet."
+    assert billable_codes(run(dictation, patient).suggestions) == codes
+
+
+@pytest.mark.parametrize("dictation, patient, expected", [
+    ("Drei sechs extrahiert, tiefliegenden Abszess eröffnet regio drei sieben.", "privat", [("Ä2430", (37,), ())]),
+    ("Tiefliegenden Abszess eröffnet regio drei sechs, Abszess eröffnet regio drei sieben.", "privat",
+     [("Ä2430", (36,), ()), ("Ä2428", (37,), (DEPTH_OPEN_PRIVAT,))]),
+])
+def test_tooth_after_the_verb_wins_over_an_earlier_tooth(dictation, patient, expected):
+    result = run(dictation, patient)
+    assert [(s.code, s.teeth, s.decide) for s in performed(result) if s.code.startswith("Ä24")] == expected
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ("47a", "Ä161")), ("privat", ("3030", "Ä2428"))])
+def test_incision_beside_osteotomy_keeps_both_with_a_conflict_note(patient, codes):
+    result = run("Osteotomie drei acht, Abszess eröffnet an drei acht.", patient)
+    both = [s for s in performed(result) if s.code in codes]
+    assert [s.code for s in both] == list(codes)
+    assert all(APART_FROM_OSTEOTOMY in s.decide for s in both)
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ("47a", "Ä161")), ("privat", ("3030", "Ä2428"))])
+def test_conflict_in_other_quadrants_hints_at_a_separate_area(patient, codes):
+    result = run("Osteotomie drei acht, oberflächlichen Abszess eröffnet an eins sechs.", patient)
+    both = [s for s in performed(result) if s.code in codes]
+    flag = f"{APART_FROM_OSTEOTOMY}; Zähne in verschiedenen Quadranten – separates Operationsgebiet möglich"
+    assert [(s.code, flag in s.decide) for s in both] == [(codes[0], True), (codes[1], True)]
+
+
+def test_deep_incision_beside_osteotomy_for_kasse_patients():
+    result = run("Osteotomie drei acht, tiefliegenden Abszess eröffnet.")
+    assert billable_codes(result.suggestions) == ["47a", "Ä2430"]
+    assert all(APART_FROM_OSTEOTOMY in s.decide for s in performed(result))
+
+
+def test_negated_incision_is_not_suggested():
+    assert run("Kein Abszess eröffnet.").suggestions == []
