@@ -1,7 +1,8 @@
 """WP-8 Abnahme: die zwölf Diktate aus Anhang B des Planungsberichts.
 
-``EXPECTED`` ist die fachlich richtige Abrechnung, beschränkt auf Katalog v1 (Ziffer -> Anzahl,
-nur erbrachte Hauptvorschläge; Privat-Alternativen zählen nicht). ``KNOWN`` hält fest, wo die
+``EXPECTED`` ist die fachlich richtige Abrechnung für einen Kassenpatienten, beschränkt auf Katalog v1
+(Ziffer -> Anzahl, nur erbrachte Hauptvorschläge; Alternativen zählen nicht). ``EXPECTED_PRIVAT`` ist
+dieselbe Sitzung beim Privatpatienten: jede Leistung auf ihrem GOZ/GOÄ-Paar, Zuschlag aus den Punkten. ``KNOWN`` hält fest, wo die
 Regeln davon abweichen – jede Abweichung steht auch unter „Bekannte Grenzen“ in server/README.md.
 Precision/Recall werden auf Ziffernebene je Diktat gezählt und hier festgeschrieben.
 """
@@ -47,7 +48,8 @@ EXPECTED: dict[str, dict[str, int]] = {
     "d01": {"13c": 1, "25": 1, "40": 1, "12": 1},
     "d02": {"01": 1, "04": 1, "8": 1, "Ä925a": 1},
     "d03": {"45": 1, "41a": 1},  # X3 wegen Längsfraktur (Katalog-Keyword), Behandler bestätigt oder wählt 44
-    "d04": {"28": 1, "32": 1, "34": 1},  # 31 in 28, 11 in 34 enthalten
+    # 31 in 28, 11 in 34 enthalten; elektrometrische Längenbestimmung ist keine BEMA-Leistung -> Zuzahlung GOZ 2400
+    "d04": {"28": 1, "32": 1, "34": 1, "2400": 1},
     "d05": {"1040": 28},
     "d06": {"13c": 1, "2100": 1},
     "d07": {},  # Prothetik steht nur im erweiterten Katalog, der nicht geladen wird
@@ -59,6 +61,22 @@ EXPECTED: dict[str, dict[str, int]] = {
 }
 EXPECTED_PLANNED = {"d09": [("48", (38,))], "d12": [("44", (48,))]}
 
+EXPECTED_PRIVAT: dict[str, dict[str, int]] = {
+    "d01": {"2100": 1, "2330": 1, "0090": 1, "2040": 1},
+    "d02": {"0010": 1, "4005": 1, "0070": 1, "Ä5000": 1},
+    "d03": {"3020": 1, "0100": 1, "0500": 1},  # GOZ 3020 hat 270 Punkte -> Zuschlag 0500
+    "d04": {"2360": 1, "2410": 1, "2400": 1, "2430": 1},  # 2390 in 2360, 2020 in 2430 enthalten
+    "d05": {"1040": 28, "1020": 1, "1000": 1},  # 1020/1000 wie IP4/MHU beim Kassenpatienten (bekannte Grenze)
+    "d06": {"2100": 1},
+    "d07": {},
+    "d08": {"2000": 4},
+    "d09": {"Ä5004": 1, "Ä1": 1},
+    "d10": {"4070": 8, "4075": 6},
+    "d11": {"2060": 2},
+    "d12": {},  # „Spülung mit Chlorhexidin“ trifft auch GOZ 4020 nicht (wie d12 beim Kassenpatienten)
+}
+EXPECTED_PLANNED_PRIVAT = {"d09": [("3040", (38,))], "d12": [("3010", (48,))]}
+
 # Abweichungen der Regeln: (zusätzlich vorgeschlagen, nicht erkannt)
 KNOWN: dict[str, tuple[set[str], set[str]]] = {
     "d05": ({"IP4", "MHU"}, set()),  # Keywords "fluoridierung"/"mundhygieneinstruktion" ohne Alters-/PAR-Kontext
@@ -66,10 +84,10 @@ KNOWN: dict[str, tuple[set[str], set[str]]] = {
 }
 
 
-def run(dictation: str) -> Extraction:
+def run(dictation: str, patient: str = "kasse") -> Extraction:
     corrected, _ = correct(dictation)
     n = normalize(corrected)
-    return analyze(n.text, n.teeth)
+    return analyze(n.text, n.teeth, patient)
 
 
 def billed(result: Extraction) -> Counter[str]:
@@ -93,14 +111,23 @@ def test_dictation(key):
     assert all(s.reason for s in result.suggestions)
 
 
+@pytest.mark.parametrize("key", sorted(DICTATIONS))
+def test_dictation_private_patient(key):
+    result = run(DICTATIONS[key], "privat")
+    assert billed(result) == Counter(EXPECTED_PRIVAT[key])
+    planned = [(s.code, s.teeth) for s in result.suggestions if s.planned]
+    assert planned == EXPECTED_PLANNED_PRIVAT.get(key, [])
+    assert all(s.system != "BEMA" for s in result.suggestions)
+
+
 def test_precision_and_recall():
     tp = fp = fn = 0
     for key, dictation in DICTATIONS.items():
         got, want = set(billed(run(dictation))), set(EXPECTED[key])
         tp, fp, fn = tp + len(got & want), fp + len(got - want), fn + len(want - got)
-    assert (tp, fp, fn) == (23, 2, 1)
-    assert round(tp / (tp + fp), 3) == 0.92  # Precision
-    assert round(tp / (tp + fn), 3) == 0.958  # Recall
+    assert (tp, fp, fn) == (24, 2, 1)
+    assert round(tp / (tp + fp), 3) == 0.923  # Precision
+    assert round(tp / (tp + fn), 3) == 0.96  # Recall
 
 
 @pytest.mark.parametrize(("whisper", "key"), [

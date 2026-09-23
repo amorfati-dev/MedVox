@@ -195,7 +195,7 @@ class Builder:
             if "fractured" in table:
                 alt = table[root] if root else f"{table['single']}/{table['multi']}"
                 return table["fractured"], f"tieffrakturiert laut Diktat – sonst {alt}"
-            flag = "tieffrakturiert laut Diktat: GOZ 3020 steht nicht im Katalog v1"
+            flag = f"tieffrakturiert laut Diktat: keine eigene {system}-Ziffer im Katalog v1"
             return table[root or "single"], flag if root else flag + "; ein-/mehrwurzelig prüfen"
         if root is None:
             return table["single"], "Zahn nicht diktiert – ein- oder mehrwurzelig prüfen"

@@ -1,6 +1,6 @@
 """Prüft einen Katalog (Standard: catalog_v1.json) gegen schema.json und fachliche Regeln, druckt die Review-Tabelle.
 
-Aufruf:  python -m medvox.catalog.validate [--catalog PFAD] [--schema PFAD] [--quiet]
+Aufruf:  python -m medvox.catalog.validate [--catalog PFAD] [--schema PFAD] [--quiet] [--markdown]
 Exit 0 = gültig, Exit 1 = Fehler (werden einzeln aufgelistet).
 
 Bewusst ohne Fremdbibliothek: ein kleiner Prüfer für genau die Schema-Schlüsselwörter,
@@ -16,6 +16,8 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from medvox.catalog import review
+
 HERE = Path(__file__).resolve().parent
 CATALOG_PATH = HERE / "catalog_v1.json"
 SCHEMA_PATH = HERE / "schema.json"
@@ -28,7 +30,7 @@ CODE_FORMAT = {
 }
 ANNOTATIONS = {"$schema", "$id", "title", "description", "$defs"}
 # Reihenfolge der Fachbereiche in der Review-Tabelle (GOZ-Nummern springen zwischen Bereichen)
-AREAS = ("Diagnostik", "Röntgen", "Anästhesie", "Konservierend", "Endodontie", "Chirurgie", "Prophylaxe", "PAR", "Prothetik")
+AREAS = review.AREAS
 TYPES = {
     "object": dict, "array": list, "string": str, "boolean": bool, "null": type(None),
     "integer": int, "number": (int, float),
@@ -140,6 +142,10 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
                 elif other.get("surfaces_to_code") != fam:
                     errors.append(f"{label}: {target} trägt eine andere surfaces_to_code-Familie")
 
+    errors += _check_pairs(entries, by_key)
+    for e in entries:
+        errors += _check_co_payment(e, meta_urls)
+
     for (system, kw), codes in kw_owner.items():
         if len(codes) > 1:
             errors.append(f"{system}: Keyword {kw!r} bei mehreren Ziffern {codes} (exakt gleiches Keyword)")
@@ -150,6 +156,37 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
     if shared:
         infos.append(f"{len(shared)} Keywords kommen in mehreren Systemen vor (erlaubt): {', '.join(shared)}")
     return errors, infos
+
+
+def _check_pairs(entries: list[dict], by_key: dict) -> list[str]:
+    """equivalent: nur BEMA <-> GOZ/GOÄ, Ziel vorhanden, beidseitig eingetragen."""
+    errors: list[str] = []
+    for e in entries:
+        label = f"{e['system']} {e['code']}"
+        for link in e.get("equivalent", []):
+            target = by_key.get((link["system"], link["code"]))
+            name = f"{link['system']} {link['code']}"
+            if (e["system"] == "BEMA") == (link["system"] == "BEMA"):
+                errors.append(f"{label}: Paar {name} muss im anderen System liegen (BEMA <-> GOZ/GOÄ)")
+            elif target is None:
+                errors.append(f"{label}: Paar {name} steht nicht in dieser Datei")
+            elif not any((x["system"], x["code"]) == (e["system"], e["code"]) for x in target.get("equivalent", [])):
+                errors.append(f"{label}: Paar {name} ist nicht beidseitig eingetragen")
+    return errors
+
+
+def _check_co_payment(e: dict, meta_urls: set[str]) -> list[str]:
+    """zuzahlung: Pflicht bei jeder GOZ/GOÄ-Position, verboten bei BEMA; Basis im BEMA-Format, Quellen belegt."""
+    label = f"{e['system']} {e['code']}"
+    z = e.get("zuzahlung")
+    if e["system"] == "BEMA":
+        return [f"{label}: 'zuzahlung' gibt es nur bei GOZ/GOÄ"] if z else []
+    if z is None:
+        return [f"{label}: 'zuzahlung' fehlt (Zuzahlungs-Liste: jede GOZ/GOÄ-Position braucht eine Angabe)"]
+    errors = [f"{label}: Zuzahlungs-Basis {b} ist keine BEMA-Ziffer" for b in z["basis"]
+              if not CODE_FORMAT["BEMA"].match(b)]
+    errors += [f"{label}: Zuzahlungs-Quelle {url} fehlt in meta.sources" for url in z["sources"] if url not in meta_urls]
+    return errors
 
 
 # ---------------------------------------------------------- Review-Tabelle
@@ -174,6 +211,7 @@ def review_table(catalog: dict) -> str:
                     f"{e['review']['status']}"
                 )
         lines.append("")
+    lines += review.text_sections(catalog)
     unverified = [f"{e['system']} {e['code']}" for e in entries if e["points"] is None]
     status = Counter(e["review"]["status"] for e in entries)
     lines.append(f"Gesamt: {len(entries)} Positionen, Status: {dict(status)}")
@@ -204,8 +242,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--catalog", type=Path, default=CATALOG_PATH)
     parser.add_argument("--schema", type=Path, default=SCHEMA_PATH)
     parser.add_argument("--quiet", action="store_true", help="keine Review-Tabelle ausgeben")
+    parser.add_argument("--markdown", action="store_true",
+                        help="Paare und Zuzahlungs-Liste als Markdown-Prüftabellen ausgeben (PR-Beschreibung)")
     args = parser.parse_args(argv)
     errors, infos, catalog = validate(args.catalog, args.schema)
+    if args.markdown and not errors:
+        extended = args.catalog.with_name("catalog_extended.json")
+        parts = [("Katalog v1 (wird geladen)", catalog)]
+        if extended.exists() and extended != args.catalog:
+            parts.append(("Erweiterter Katalog (Saat für Phase 2, wird nicht geladen)", load(extended)))
+        print(review.HEADER + "\n" + review.markdown(parts))
+        return 0
     if not args.quiet and not errors:
         print(review_table(catalog))
     for info in infos:

@@ -29,6 +29,7 @@ class Hit:
     end: int
     keyword: str  # gefaltetes Keyword bzw. die diktierte Ziffer
     code_word: bool  # die Ziffer oder amtliche Kurzbezeichnung selbst wurde diktiert
+    via: Entry | None = None  # diktierte Ziffer im anderen System, vom Patiententyp auf ``entry`` umgestellt
 
 
 def _keyword_pattern(keyword: str) -> re.Pattern[str]:

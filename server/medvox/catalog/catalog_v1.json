@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "MedVox Katalog v1 (BEMA/GOZ/GOÄ, Alltagspositionen)",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "stand": {
       "BEMA": "KZBV, Stand 1. Januar 2026",
       "GOZ": "GOZ 2012, Anlage 1 (Bundesrecht, gesetze-im-internet.de)",
@@ -42,9 +42,152 @@
         "system": "GOÄ",
         "name": "GOÄ § 5 Bemessung der Gebühren (gesetze-im-internet.de)",
         "url": "https://www.gesetze-im-internet.de/go__1982/__5.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "SGB V § 28",
+        "url": "https://www.gesetze-im-internet.de/sgb_5/__28.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "SGB V § 55",
+        "url": "https://www.gesetze-im-internet.de/sgb_5/__55.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "GOZ § 2",
+        "url": "https://www.gesetze-im-internet.de/goz_1987/__2.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "GOZ § 6",
+        "url": "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB: Privatleistungen bei Wurzelkanalbehandlungen nach Bema",
+        "url": "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe: Schnittstellen Bema/GOZ (Endo, Füllung, Prophylaxe, PAR, Kinderkronen, ZE, Privatbehandlung)",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZV BW: Gegenüberstellung BEMA- und GOZ-Honorare (2022)",
+        "url": "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZBV Festzuschuss-Kompendium 2025",
+        "url": "https://www.kzbv.de/wp-content/uploads/KZBV_FZ-Kompendium_2025-01-01_2.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZV Nordrhein: Beschluss BEMA 13 ab 2025",
+        "url": "https://www.kzvnr.de/fileadmin/user_upload/PDF/Zahnaerzteseite/KZVNR-Informationsschreiben/2024-10-11_Informationsschreiben_an_Mitglieder_zur_AEnderung_BEMA_13_einsch._Anlage.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "ZÄK Berlin: GKV-Patienten/Privatleistungen",
+        "url": "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/G/GKV_Pat_Privatleistungen.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "ZÄK Berlin: DVT (GOÄ 5370/5377)",
+        "url": "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/D/DVT.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "ZÄK Berlin: Bleaching",
+        "url": "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/B/Bleaching_01.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "ZÄK Berlin: GOZ-Frage des Monats (NiTi-Feilen)",
+        "url": "https://www.zaek-berlin.de/presse/meldungen/meldungen-detail/article/goz-frage-des-monats-24.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "BZÄK Beratungsforum Beschluss 22: Computergesteuerte Anästhesie",
+        "url": "https://www.bzaek.de/goz/beratungsforum/beschluss/computergesteuerte-anaesthesie.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "BZÄK: Leistungsinhalt GOZ 2060–2120",
+        "url": "https://www.bzaek.de/goz/stellungnahmen-zur-goz/stellungnahme/der-leistungsinhalt-der-geb-nrn-2060-2080-2100-2120-goz.html"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "LZK BW: Lachgas-Sedierung",
+        "url": "https://lzk-bw.de/fileadmin/user_upload/1.Zahn%C3%A4rzte/70.Geb%C3%BChrenrecht/GOZInform/INFORMATIONSBL%C3%84TTER_-_ZAHNARZTINFORMATION/Berechnung_der_inhalativen_Analgosedierung_mit_Lachgas_N2O.pdf"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "abrechnung-dental.de (kommerziell) GOZ 0080",
+        "url": "https://www.abrechnung-dental.de/goz/0080-intraorale-oberflaechenanaesthesie-je-kieferhaelfte-oder-frontzahnbereich"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "abrechnung-dental.de (kommerziell) GOZ 4050",
+        "url": "https://www.abrechnung-dental.de/goz/4050-entfernung-harter-und-weicher-zahnbelaege-einwurzeliger-zahn-implantate-brueckenglieder"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Zuzahlung zur Sachleistung (ZE-Versorgung)",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Privatbehandlung von GKV-Versicherten",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/privatbeh-gkv"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Füllungsleistungen",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Auffüllen parodontaler Knochendefekte (GBR/GTR)",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/chirurgische-leistungen-knochenmanagement/auffuellen-parodontaler-knochendefekte-gbr-bzw-gtr"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Plastische Parodontalchirurgie",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/plastische-parodontalchirurgie"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Prophylaxe, Patienten zwischen 6 und 17 Jahren",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/patienten-zwischen--und--jahren"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Prophylaxe, erwachsene Patienten",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Systematische PAR-Behandlungsstrecke",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/systematische-parbehandlungsstrecke"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Endodontie, Wurzelkanalfüllung",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung"
+      },
+      {
+        "system": "Zuzahlung",
+        "name": "KZVB Abrechnungsmappe, Schnittstellen Bema/GOZ: Kinderkronen in der pädiatrischen Zahnheilkunde",
+        "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/kinderkronen-in-der-paediatrischen-zahnheilkunde"
       }
     ],
-    "abgerufen": "2026-09-21"
+    "abgerufen": "2026-09-23",
+    "paar_quellen": [
+      "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+    ]
   },
   "entries": [
     {
@@ -66,6 +209,12 @@
         "nicht neben 01 in derselben Sitzung",
         "nicht neben ATG, MHU, BEV, FU1",
         "Privatpatient: GOÄ Ä1"
+      ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä1"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -97,6 +246,12 @@
         "nicht neben FU1/FU2 im selben Halbjahr",
         "Privatpatient: GOZ 0010"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "0010"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -123,6 +278,12 @@
         "nicht während laufender PAR-Behandlung",
         "bis 18 J. an Indexzähnen 11, 16, 26, 31, 36, 46; ab 18 J. alle Zähne",
         "Privatpatient: GOZ 4005"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4005"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -162,6 +323,12 @@
         "auch bei Zahnersatz/Kronen auf dem Erfassungsschein",
         "Privatpatient: GOZ 0070"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "0070"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -194,6 +361,13 @@
         "Beurteilung und schriftliche Befunddokumentation abgegolten",
         "Privatpatient: GOÄ Ä5000 je Projektion"
       ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5000",
+          "note": "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -222,6 +396,13 @@
       "rules": [
         "3–5 Aufnahmen"
       ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5000",
+          "note": "GOÄ Ä5000 zählt je Projektion (BEMA Ä925b: 3–5 Aufnahmen) – Anzahl prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -249,6 +430,13 @@
       "rules": [
         "6–8 Aufnahmen"
       ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5000",
+          "note": "GOÄ Ä5000 zählt je Projektion (BEMA Ä925c: 6–8 Aufnahmen) – Anzahl prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -273,6 +461,13 @@
       ],
       "rules": [
         "mehr als 8 Aufnahmen"
+      ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5000",
+          "note": "GOÄ Ä5000 zählt je Projektion (BEMA Ä925d: mehr als 8 Aufnahmen) – Anzahl prüfen"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -299,6 +494,12 @@
       ],
       "rules": [
         "Privatpatient: GOÄ Ä5004"
+      ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5004"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -330,6 +531,12 @@
         "amtlich nennt Ä935a auch die Zähne des Ober- und Unterkiefers derselben Seite; ob eine Halbseitenaufnahme beider Kiefer hier oder unter Ä935d fällt, ist offen",
         "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Privatpatient: GOÄ Ä5002"
+      ],
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä5002"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -367,6 +574,13 @@
         "Leitungsanästhesie: 41a",
         "Privatpatient: GOZ 0090"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "0090",
+          "note": "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -394,6 +608,12 @@
         "nur wenn Nr. 40 nicht ausreicht: im Unterkiefer in der Regel; im Oberkiefer bei Entzündung oder größeren Eingriffen (nicht bei 43–46, 49, 50)",
         "bei lang dauernden Eingriffen ein zweites Mal",
         "Privatpatient: GOZ 0100"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "0100"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -439,6 +659,13 @@
         "3": "13c",
         "4": "13d"
       },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2060",
+          "note": "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -469,6 +696,13 @@
         "3": "13c",
         "4": "13d"
       },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2080",
+          "note": "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -500,6 +734,13 @@
         "3": "13c",
         "4": "13d"
       },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2100",
+          "note": "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -533,6 +774,13 @@
         "3": "13c",
         "4": "13d"
       },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2120",
+          "note": "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -560,6 +808,12 @@
       "rules": [
         "als alleinige Leistung; im Rahmen von 34 (Med) bereits enthalten",
         "Privatpatient: GOZ 2020"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2020"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -590,6 +844,16 @@
         "je Sitzung, je Kieferhälfte oder Frontzahnbereich",
         "Privatpatient: GOZ 2030/2040"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2030"
+        },
+        {
+          "system": "GOZ",
+          "code": "2040"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -619,6 +883,12 @@
         "nur wenn dadurch die Devitalisierung vermeidbar ist",
         "Privatpatient: GOZ 2330"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2330"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -645,6 +915,12 @@
         "je Zahn",
         "Privatpatient: GOZ 2340"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2340"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -668,7 +944,13 @@
       ],
       "rules": [
         "v. a. Milchzähne und jugendliche bleibende Zähne",
-        "Privatpatient: vgl. GOZ 2380 (Milchzahn)"
+        "Privatpatient: GOZ 2350"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2350"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -699,6 +981,12 @@
         "Trepanation des vitalen Zahnes ist enthalten (31 nur bei pulpatotem Zahn)",
         "Privatpatient: GOZ 2360"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2360"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -726,6 +1014,12 @@
         "nur bei pulpatotem/avitalem Zahn; bei vitaler Pulpa in 28 enthalten",
         "Privatpatient: GOZ 2390"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2390"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -751,14 +1045,18 @@
         "endo",
         "aufbereitet",
         "maschinell aufbereitet",
-        "reziprok",
-        "elektrometrische längenbestimmung",
-        "endometrie"
+        "reziprok"
       ],
       "rules": [
         "je Kanal",
-        "elektrometrische Längenbestimmung ist enthalten (Privatpatient: GOZ 2400)",
+        "elektrometrische Längenbestimmung ist keine BEMA-Leistung (keine Abrechnungsbestimmung zu Nr. 32): beim Kassenpatienten Zuzahlung GOZ 2400 nach Vereinbarung",
         "Privatpatient: GOZ 2410"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2410"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -792,6 +1090,12 @@
         "nur zusammen mit 28, 29 oder 32",
         "Privatpatient: GOZ 2430"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2430"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -821,6 +1125,12 @@
       "rules": [
         "je Kanal, inkl. provisorischem Verschluss",
         "Privatpatient: GOZ 2440"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2440"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -855,6 +1165,12 @@
         "mehrwurzelig: 44",
         "Privatpatient: GOZ 3000"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3000"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -881,6 +1197,12 @@
         "mehrwurzelig: alle Molaren, OK 4er, alle Milchmolaren",
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3010"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3010"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -909,6 +1231,12 @@
       "rules": [
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3020"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3020"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -939,6 +1267,12 @@
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3030"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3030"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -968,6 +1302,12 @@
         "auch Zahnkeim und impaktierter Wurzelrest",
         "inkl. Wundversorgung",
         "Privatpatient: GOZ 3040/3045"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3040"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1000,6 +1340,17 @@
         "je Kieferhälfte oder Frontzahnbereich, je Sitzung, als selbständige Leistung",
         "Privatpatient: GOZ 3290/3300"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3300"
+        },
+        {
+          "system": "GOZ",
+          "code": "3290",
+          "note": "GOZ 3290 ist die reine Kontrolle; mit Behandlung (Tamponieren, Spülen) GOZ 3300 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1031,6 +1382,12 @@
         "je Sitzung",
         "Privatpatient: GOZ 4020"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4020"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1058,6 +1415,17 @@
         "je Sitzung, einmal pro Kalenderjahr",
         "Privatpatient: GOZ 4050/4055 je Zahn",
         "PZR ist keine BEMA-Leistung (GOZ 1040)"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4050",
+          "note": "BEMA 107 gilt je Sitzung, GOZ 4050/4055 je Zahn – Zähne prüfen"
+        },
+        {
+          "system": "GOZ",
+          "code": "4055"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1087,6 +1455,13 @@
         "6.–17. Lebensjahr, einmal je Kalenderhalbjahr",
         "Privatpatient/Erwachsene: GOZ 1000"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "1000",
+          "note": "GOZ 1000 umfasst Status und Unterweisung, mindestens 25 Minuten – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1112,7 +1487,14 @@
       ],
       "rules": [
         "6.–17. Lebensjahr, einmal je Kalenderhalbjahr, Einzelunterweisung",
-        "Privatpatient/Erwachsene: GOZ 1010"
+        "Privatpatient/Erwachsene: GOZ 1000"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "1000",
+          "note": "GOZ 1000 umfasst Status und Unterweisung, mindestens 25 Minuten – prüfen"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1144,6 +1526,12 @@
         "Kleinkind bis 72. Monat: FLA",
         "Privatpatient/Erwachsene: GOZ 1020"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "1020"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1171,6 +1559,12 @@
         "je Zahn; nur kariesfreie bleibende Molaren 6 und 7, 6.–17. Lebensjahr",
         "andere Zähne/Privatpatient: GOZ 2000"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "2000"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1197,6 +1591,12 @@
       "rules": [
         "Befunderhebung zu Beginn der systematischen PAR-Therapie (Teil 4)",
         "Privatpatient: GOZ 4000"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4000"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1248,6 +1648,13 @@
         "in der UPT: UPTb",
         "nicht neben Ä1"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "1000",
+          "note": "kein inhaltsgleiches GOZ-Gegenstück; KZV BW vergleicht MHU mit GOZ 1000 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1282,6 +1689,13 @@
         "Taschen ab 4 mm",
         "Privatpatient: GOZ 4070"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4070",
+          "note": "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1303,6 +1717,13 @@
       "rules": [
         "je behandeltem mehrwurzeligen Zahn (Definition wie Nr. 44)",
         "Privatpatient: GOZ 4075"
+      ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4075",
+          "note": "KZV BW vergleicht AIT mit GOZ 4055 + 4075 (ggf. 4080) – prüfen"
+        }
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1330,6 +1751,13 @@
         "3–6 Monate nach Abschluss der AIT",
         "nicht neben Ä1"
       ],
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "4000",
+          "note": "Befundevaluation hat kein eigenes GOZ-Gegenstück; privat über den Parodontalstatus GOZ 4000 – prüfen"
+        }
+      ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
@@ -1355,6 +1783,23 @@
         "inkl. Parodontalbefund und Befundaufzeichnung",
         "Kassenpatient: BEMA 01"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "01"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "01"
+        ],
+        "note": "Kassenleistung BEMA 01 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1378,6 +1823,23 @@
         "je Sitzung, inkl. Vergleichstest",
         "Kassenpatient: BEMA 8"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "8"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "8"
+        ],
+        "note": "Kassenleistung BEMA 8 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1402,6 +1864,16 @@
       "rules": [
         "je Kieferhälfte oder Frontzahnbereich"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Nicht belegt: nur ein kommerzielles Portal nennt die Oberflächenanästhesie privat vereinbar; amtlich steht nur fest, dass BEMA sie nicht enthält.",
+        "sources": [
+          "https://www.abrechnung-dental.de/goz/0080-intraorale-oberflaechenanaesthesie-je-kieferhaelfte-oder-frontzahnbereich",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1426,6 +1898,24 @@
         "Anästhetikum gesondert berechenbar",
         "Kassenpatient: BEMA 40"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "40"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "40"
+        ],
+        "note": "Kassenleistung BEMA 40; Ausnahme: Anästhesie zu einer Privatleistung (z. B. Inlay) ist GOZ 0090.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.bzaek.de/goz/beratungsforum/beschluss/computergesteuerte-anaesthesie.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1449,6 +1939,24 @@
         "Anästhetikum gesondert berechenbar",
         "Kassenpatient: BEMA 41a"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "41a"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "41a"
+        ],
+        "note": "Kassenleistung BEMA 41a; Ausnahme: Anästhesie zu einer Privatleistung (z. B. Inlay) ist GOZ 0100.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.bzaek.de/goz/beratungsforum/beschluss/computergesteuerte-anaesthesie.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1474,6 +1982,62 @@
         "je Zahn, auch Glattflächen",
         "Kassenpatient 6er/7er bis 17 J.: IP5"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "IP5"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Nur außerhalb IP5 privat vereinbar (Prämolaren, andere Zähne, Erwachsene); 6er/7er bis 17 J. sind IP5.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/patienten-zwischen--und--jahren",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2020",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Temporärer speicheldichter Verschluss",
+      "points": 98,
+      "keywords": [
+        "provisorischer verschluss privat",
+        "speicheldichter verschluss",
+        "2020",
+        "zwei null zwei null"
+      ],
+      "rules": [
+        "je Kavität",
+        "Kassenpatient: BEMA 11"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "11"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "11"
+        ],
+        "note": "Kassenleistung BEMA 11; in BEMA 25/34 ist der provisorische Verschluss enthalten.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1498,6 +2062,25 @@
         "je Kieferhälfte oder Frontzahnbereich; je Sitzung höchstens einmal Präparieren + einmal Füllen",
         "Kassenpatient: BEMA 12"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "12"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13a",
+          "13b",
+          "13c",
+          "13d"
+        ],
+        "note": "Nur neben mehrkostenfähiger Füllung für getrennte Arbeitsschritte (z. B. Formgebungshilfe), sonst BEMA 12.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1522,6 +2105,22 @@
         "je Kieferhälfte oder Frontzahnbereich",
         "Kassenpatient: in BEMA 12 enthalten"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "12"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Kofferdam ist in BEMA 12 enthalten; privat nur, wenn er für eine Privatleistung (z. B. 2400/2420, Inlay) gelegt wird.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1558,6 +2157,24 @@
         "3": "2100",
         "4": "2120"
       },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "13a"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13a"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13a, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1586,6 +2203,24 @@
         "3": "2100",
         "4": "2120"
       },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "13b"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13b"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13b, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1613,6 +2248,24 @@
         "2": "2080",
         "3": "2100",
         "4": "2120"
+      },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "13c"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13c"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13c, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html"
+        ]
       },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
@@ -1643,6 +2296,159 @@
         "3": "2100",
         "4": "2120"
       },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "13d"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13d"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13d, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2150",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Einlagefüllung (Inlay), einflächig",
+      "points": 1141,
+      "keywords": [
+        "inlay",
+        "einlagefüllung",
+        "keramikinlay",
+        "goldinlay",
+        "inlay einflächig",
+        "2150",
+        "cerec inlay"
+      ],
+      "rules": [
+        "Flächenzahl: 1 → 2150, 2 → 2160, mehr als 2 → 2170",
+        "Onlay: 2170 oder Teilkrone 2220 (Arztentscheidung)",
+        "Laborkosten gesondert"
+      ],
+      "surfaces_to_code": {
+        "1": "2150",
+        "2": "2160",
+        "3": "2170",
+        "4": "2170"
+      },
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13a",
+          "13b",
+          "13c",
+          "13d"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt die vergleichbare BEMA-13-Füllung, Patient den Rest; Begleitanästhesie und Kofferdam sind privat.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2160",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Einlagefüllung (Inlay), zweiflächig",
+      "points": 1356,
+      "keywords": [
+        "inlay zweiflächig",
+        "2160"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 2150"
+      ],
+      "surfaces_to_code": {
+        "1": "2150",
+        "2": "2160",
+        "3": "2170",
+        "4": "2170"
+      },
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13a",
+          "13b",
+          "13c",
+          "13d"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt die vergleichbare BEMA-13-Füllung, Patient den Rest; Begleitanästhesie und Kofferdam sind privat.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2170",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Einlagefüllung (Inlay), mehr als zweiflächig",
+      "points": 1709,
+      "keywords": [
+        "inlay dreiflächig",
+        "onlay",
+        "teilkrone keramik inlay",
+        "2170"
+      ],
+      "rules": [
+        "Materialwörter stehen bei 2150"
+      ],
+      "surfaces_to_code": {
+        "1": "2150",
+        "2": "2160",
+        "3": "2170",
+        "4": "2170"
+      },
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "13a",
+          "13b",
+          "13c",
+          "13d"
+        ],
+        "note": "Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt die vergleichbare BEMA-13-Füllung, Patient den Rest; Begleitanästhesie und Kofferdam sind privat.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.gesetze-im-internet.de/sgb_5/__28.html",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/fuellungsleistungen"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1669,6 +2475,20 @@
       "rules": [
         "je befestigtem Teil (Aufbau, Stift, Inlay, Krone, Teilkrone, Veneer)"
       ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "34",
+          "35",
+          "18a"
+        ],
+        "note": "Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig).",
+        "sources": [
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_FZ-Kompendium_2025-01-01_2.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1692,6 +2512,23 @@
         "je Kavität, inkl. Exkavieren",
         "Kassenpatient: BEMA 25"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "25"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "25"
+        ],
+        "note": "Kassenleistung BEMA 25 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1715,9 +2552,66 @@
         "je Kavität, inkl. Exkavieren",
         "Kassenpatient: BEMA 26"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "26"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "26"
+        ],
+        "note": "Kassenleistung BEMA 26 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2350",
+      "system": "GOZ",
+      "area": "Konservierend",
+      "title": "Amputation und Versorgung der vitalen Pulpa (Pulpotomie)",
+      "points": 290,
+      "keywords": [
+        "pulpotomie privat",
+        "vitalamputation privat",
+        "2350",
+        "zwei drei fünf null"
+      ],
+      "rules": [
+        "einschließlich Exkavieren",
+        "Kassenpatient: BEMA 27"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "27"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "27"
+        ],
+        "note": "Kassenleistung BEMA 27 (vitale Pulpotomie) – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
       ],
       "review": {
         "status": "draft"
@@ -1738,6 +2632,23 @@
         "je Kanal, inkl. Exkavieren",
         "Kassenpatient: BEMA 28"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "28"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "28"
+        ],
+        "note": "Kassenleistung BEMA 28 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1761,6 +2672,23 @@
         "nur als selbstständige Leistung",
         "Kassenpatient: BEMA 31"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "31"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "31"
+        ],
+        "note": "Kassenleistung BEMA 31 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1781,12 +2709,26 @@
         "längenbestimmung",
         "2400",
         "zwei vier null null",
-        "apexlocator"
+        "apexlocator",
+        "elektrometrische längenbestimmung",
+        "endometrie"
       ],
       "rules": [
         "je Wurzelkanal höchstens zweimal je Sitzung",
-        "Kassenpatient: in BEMA 32 enthalten"
+        "Kassenpatient: keine BEMA-Leistung, neben BEMA 32 als Zuzahlung nach Vereinbarung"
       ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "32"
+        ],
+        "note": "Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar.",
+        "sources": [
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1811,6 +2753,59 @@
         "je Kanal, ggf. in mehreren Sitzungen; erneut nur nach definitiver Versorgung",
         "Kassenpatient: BEMA 32"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "32"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "32"
+        ],
+        "note": "Kassenleistung BEMA 32; nur wenn die ganze Endo richtlinienbedingt oder auf Wunsch privat ist, gilt GOZ 2410.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung",
+          "https://www.zaek-berlin.de/presse/meldungen/meldungen-detail/article/goz-frage-des-monats-24.html"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "2420",
+      "system": "GOZ",
+      "area": "Endodontie",
+      "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+      "points": 70,
+      "keywords": [
+        "ultraschallaktivierung",
+        "elektrophysikalisch",
+        "schallaktivierte spülung",
+        "2420",
+        "laser endo"
+      ],
+      "rules": [
+        "je Kanal, zusätzlich zu 2410"
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [
+          "32"
+        ],
+        "note": "Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal).",
+        "sources": [
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1831,9 +2826,24 @@
         "zwei vier drei null"
       ],
       "rules": [
-        "je Zahn und Sitzung, nur mit 2360, 2380 oder 2410",
+        "je Zahn und Sitzung, nur mit 2360, 2380 oder 2410; provisorischer Verschluss inklusive",
         "Kassenpatient: BEMA 34"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "34"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34.",
+        "sources": [
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1857,6 +2867,23 @@
         "je Wurzelkanal",
         "Kassenpatient: BEMA 35"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "35"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "35"
+        ],
+        "note": "Kassenleistung BEMA 35; nur die adhäsive Befestigung (2197) ist privat vereinbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1881,6 +2908,23 @@
         "einwurzeliger Zahn oder enossales Implantat",
         "Kassenpatient: BEMA 43"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "43"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "43"
+        ],
+        "note": "Kassenleistung BEMA 43 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1903,6 +2947,63 @@
       "rules": [
         "Kassenpatient: BEMA 44"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "44"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "44"
+        ],
+        "note": "Kassenleistung BEMA 44 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3020",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Extraktion, tief frakturierter/zerstörter Zahn",
+      "points": 270,
+      "keywords": [
+        "tief frakturiert privat",
+        "tief zerstört privat",
+        "3020",
+        "drei null zwei null"
+      ],
+      "rules": [
+        "Kassenpatient: BEMA 45"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "45"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "45"
+        ],
+        "note": "Kassenleistung BEMA 45 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1925,6 +3026,23 @@
       "rules": [
         "Kassenpatient: BEMA 47a"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "47a"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "47a"
+        ],
+        "note": "Kassenleistung BEMA 47a – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1949,6 +3067,23 @@
         "extrem verlagert mit gefährdeten Nachbarstrukturen: 3045",
         "Kassenpatient: BEMA 48"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "48"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "48"
+        ],
+        "note": "Kassenleistung BEMA 48 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -1972,12 +3107,71 @@
       ],
       "rules": [
         "je Kieferhälfte oder Frontzahnbereich, als selbstständige Leistung",
-        "Nachbehandlung (Tamponieren): 3300",
+        "Nachbehandlung (Tamponieren): 3300; nicht neben 3300 in derselben Sitzung",
         "Kassenpatient: BEMA 38"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "38",
+          "note": "Reine Kontrolle hat laut KZV BW kein BEMA-Gegenstück; BEMA 38 verlangt eine Nachbehandlung – prüfen"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "38"
+        ],
+        "note": "Umstritten: Kontrolle ohne Nachbehandlung hat kein BEMA-Pendant, ist aber medizinisch notwendig; keine Quelle für private Vereinbarung gefunden.",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "3300",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren)",
+      "points": 65,
+      "keywords": [
+        "nachbehandlung privat",
+        "tamponade privat",
+        "3300",
+        "drei drei null null"
+      ],
+      "rules": [
+        "als selbstständige Leistung, je Operationsgebiet; höchstens zweimal je Kieferhälfte oder Frontzahnbereich",
+        "Kontrolle ohne Behandlung: 3290; nicht neben 3290 in derselben Sitzung",
+        "Kassenpatient: BEMA 38"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "38"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "38"
+        ],
+        "note": "Kassenleistung BEMA 38 (Nachbehandlung) – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
       ],
       "review": {
         "status": "draft"
@@ -2003,6 +3197,16 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/chirurgische-leistungen-knochenmanagement/auffuellen-parodontaler-knochendefekte-gbr-bzw-gtr",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/plastische-parodontalchirurgie",
+          "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2031,6 +3235,16 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/chirurgische-leistungen-knochenmanagement/auffuellen-parodontaler-knochendefekte-gbr-bzw-gtr",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/plastische-parodontalchirurgie",
+          "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2059,6 +3273,16 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/chirurgische-leistungen-knochenmanagement/auffuellen-parodontaler-knochendefekte-gbr-bzw-gtr",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/plastische-parodontalchirurgie",
+          "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2087,6 +3311,16 @@
         "nicht neben GOÄ 440–445; nicht bei stationärer Aufnahme am selben Tag wegen derselben Erkrankung",
         "GOZ Anlage 1, Abschnitt L"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/chirurgische-leistungen-knochenmanagement/auffuellen-parodontaler-knochendefekte-gbr-bzw-gtr",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/plastische-parodontalchirurgie",
+          "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2112,6 +3346,68 @@
         "nicht neben 1040 (in PZR enthalten)",
         "Kassenpatient bis 17 J.: IP4"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "IP4"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Erwachsene: keine Sachleistung, privat vereinbar; 6–17 J. und Kleinkinder sind IP4/FLA Kassenleistung.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten",
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "1000",
+      "system": "GOZ",
+      "area": "Prophylaxe",
+      "title": "Mundhygienestatus und Unterweisung (mind. 25 min)",
+      "points": 200,
+      "keywords": [
+        "mundhygienestatus privat",
+        "1000",
+        "eins null null null",
+        "mundhygieneunterweisung 25 minuten"
+      ],
+      "rules": [
+        "Dauer mindestens 25 Minuten; einmal je Jahr",
+        "Kassenpatient: IP1/IP2"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "IP1"
+        },
+        {
+          "system": "BEMA",
+          "code": "IP2"
+        },
+        {
+          "system": "BEMA",
+          "code": "MHU"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Erwachsene: keine Sachleistung, privat vereinbar; 6–17 J. nur über die IP1/IP2-Häufigkeit hinaus.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/patienten-zwischen--und--jahren",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2140,6 +3436,60 @@
         "nicht neben 1020, 4050, 4055, 4060, 4070, 4075, 4090, 4100",
         "keine BEMA-Leistung (nur UPT)"
       ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Keine Kassenleistung; privat vereinbar, auch in derselben Sitzung nach vollständig erbrachter BEMA 107.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/systematische-parbehandlungsstrecke"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4000",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Parodontalstatus",
+      "points": 160,
+      "keywords": [
+        "parodontalstatus privat",
+        "par status privat",
+        "4000",
+        "vier null null null"
+      ],
+      "rules": [
+        "höchstens zweimal je Jahr",
+        "Kassenpatient: BEMA 4"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "4"
+        },
+        {
+          "system": "BEMA",
+          "code": "BEVa"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "4"
+        ],
+        "note": "Kassenleistung BEMA 4 in der PAR-Strecke; privat nur bei rein privater PAR-Behandlung außerhalb der Richtlinie.",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/systematische-parbehandlungsstrecke"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2165,6 +3515,64 @@
         "höchstens zweimal je Jahr",
         "Kassenpatient: BEMA 04"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "04"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "04"
+        ],
+        "note": "Kassenleistung BEMA 04 (alle zwei Jahre); keine Quelle für private Zwischenerhebung gefunden.",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4020",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Lokalbehandlung Mundschleimhaut / Taschenspülung",
+      "points": 45,
+      "keywords": [
+        "taschenspülung",
+        "schleimhautbehandlung privat",
+        "chx taschenspülung",
+        "4020",
+        "vier null zwei null"
+      ],
+      "rules": [
+        "je Sitzung",
+        "Kassenpatient: BEMA 105"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "105"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "105"
+        ],
+        "note": "Kassenleistung BEMA 105 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2191,6 +3599,23 @@
         "nicht neben 1040",
         "Kassenpatient: BEMA 107 (je Sitzung)"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "107"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "107"
+        ],
+        "note": "Kassenleistung BEMA 107; privat nur, wenn 107 im Kalenderjahr verbraucht ist – dafür nur kommerzielle Quelle, nie neben 107 in derselben Sitzung.",
+        "sources": [
+          "https://www.abrechnung-dental.de/goz/4050-entfernung-harter-und-weicher-zahnbelaege-einwurzeliger-zahn-implantate-brueckenglieder",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2214,6 +3639,101 @@
         "je mehrwurzeligem Zahn; innerhalb 30 Tagen nur einmal",
         "nicht neben 1040"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "107"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "107"
+        ],
+        "note": "Kassenleistung BEMA 107; privat nur, wenn 107 im Kalenderjahr verbraucht ist – dafür nur kommerzielle Quelle, nie neben 107 in derselben Sitzung.",
+        "sources": [
+          "https://www.abrechnung-dental.de/goz/4050-entfernung-harter-und-weicher-zahnbelaege-einwurzeliger-zahn-implantate-brueckenglieder",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4070",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+      "points": 100,
+      "keywords": [
+        "geschlossene kürettage privat",
+        "kürettage privat",
+        "4070",
+        "vier null sieben null",
+        "subgingivales scaling privat"
+      ],
+      "rules": [
+        "je einwurzeligem Zahn/Implantat, geschlossenes Vorgehen",
+        "Kassenpatient: AITa"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "AITa"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Nur außerhalb einer richtliniengemäßen PAR-Behandlung privat; in der Kassen-PAR gilt AITa/UPTe.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/systematische-parbehandlungsstrecke"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "4075",
+      "system": "GOZ",
+      "area": "PAR",
+      "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+      "points": 130,
+      "keywords": [
+        "kürettage mehrwurzelig privat",
+        "4075",
+        "vier null sieben fünf"
+      ],
+      "rules": [
+        "je mehrwurzeligem Zahn, geschlossenes Vorgehen",
+        "Kassenpatient: AITb"
+      ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "AITb"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Nur außerhalb einer richtliniengemäßen PAR-Behandlung privat; in der Kassen-PAR gilt AITb/UPTf.",
+        "sources": [
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/prophylaxe-und-frueherkennung-von-zahnerkrankungen/erwachsene-patienten",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/parodontologische-leistungen/systematische-parbehandlungsstrecke"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
@@ -2239,6 +3759,22 @@
         "auch telefonisch",
         "Kassenpatient: BEMA Ä1 (9 Punkte)"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "Ä1"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "Ä1"
+        ],
+        "note": "Kassenleistung BEMA Ä1 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html"
       ],
@@ -2263,6 +3799,16 @@
         "GOÄ Abschnitt B I, für Zahnärzte über § 6 Abs. 2 GOZ",
         "für die eingehende Untersuchung stattdessen GOZ 0010"
       ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "01"
+        ],
+        "note": "Symptombezogene Untersuchung ist beim Kassenpatienten mit 01/Ä1 abgegolten.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html"
       ],
@@ -2289,6 +3835,39 @@
         "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä925a–d"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "Ä925a",
+          "note": "BEMA nach Anzahl der Aufnahmen: 1–2 Ä925a, 3–5 Ä925b, 6–8 Ä925c, mehr als 8 Ä925d – prüfen"
+        },
+        {
+          "system": "BEMA",
+          "code": "Ä925b"
+        },
+        {
+          "system": "BEMA",
+          "code": "Ä925c"
+        },
+        {
+          "system": "BEMA",
+          "code": "Ä925d"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "Ä925a",
+          "Ä925b",
+          "Ä925c",
+          "Ä925d"
+        ],
+        "note": "Kassenleistung BEMA Ä925 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html",
         "https://www.gesetze-im-internet.de/go__1982/__5.html"
@@ -2314,6 +3893,22 @@
         "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
         "Kassenpatient: BEMA Ä935d"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "Ä935d"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "Ä935d"
+        ],
+        "note": "Kassenleistung BEMA Ä935d – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html",
         "https://www.gesetze-im-internet.de/go__1982/__5.html"
@@ -2345,9 +3940,96 @@
         "Viertelseite/Pan1 (ein Kiefer einer Seite): vom Behandler bestätigte Zuordnung zu dieser Ziffer; der amtliche Text nennt den Viertel-/Segmentfall nicht ausdrücklich",
         "Kassenpatient: BEMA Ä935a"
       ],
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "Ä935a",
+          "note": "BEMA Ä935a umfasst auch Schädelteilaufnahmen; GOÄ Ä5002 nur die Panoramaaufnahme eines Kiefers"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "Ä935a"
+        ],
+        "note": "Kassenleistung BEMA Ä935 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
       "sources": [
         "https://www.gesetze-im-internet.de/go__1982/anlage.html",
         "https://www.gesetze-im-internet.de/go__1982/__5.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5370",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Computergesteuerte Tomographie im Kopfbereich (DVT)",
+      "points": 2000,
+      "keywords": [
+        "dvt",
+        "digitale volumentomographie",
+        "digitale volumentomografie",
+        "dvt angefertigt",
+        "3d röntgen",
+        "ä5370",
+        "ä fünf drei sieben null"
+      ],
+      "rules": [
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "Steigerungsfaktor Abschnitt O (§ 5 Abs. 3 GOÄ): Regelsatz 1,8, Höchstsatz 2,5",
+        "computergesteuerte Analyse mit 3D-Rekonstruktion: Zuschlag Ä5377",
+        "Kassenpatient: keine BEMA-Leistung"
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "DVT ist keine BEMA-Leistung; beim Kassenpatienten nur als Privatleistung nach GOÄ 5370 (+ ggf. 5377).",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+          "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/D/DVT.pdf",
+          "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
+      ],
+      "review": {
+        "status": "draft"
+      }
+    },
+    {
+      "code": "Ä5377",
+      "system": "GOÄ",
+      "area": "Röntgen",
+      "title": "Zuschlag computergesteuerte Analyse mit 3D-Rekonstruktion",
+      "points": 800,
+      "keywords": [
+        "3d rekonstruktion",
+        "3d analyse",
+        "ä5377",
+        "ä fünf drei sieben sieben"
+      ],
+      "rules": [
+        "Zuschlag zu Ä5370, nur zum einfachen Gebührensatz",
+        "GOÄ Abschnitt O, für Zahnärzte über § 6 Abs. 2 GOZ"
+      ],
+      "zuzahlung": {
+        "allowed": true,
+        "basis": [],
+        "note": "Zuschlag für computergesteuerte 3D-Analyse zur privaten DVT; nur zum einfachen Satz.",
+        "sources": [
+          "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+          "https://www.zaek-berlin.de/dateien/Content/Dokumente/Zahn%C3%A4rzte/GOZ/GOZ_2012_Stellungnahmen/D/DVT.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html"
       ],
       "review": {
         "status": "draft"

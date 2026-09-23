@@ -11,10 +11,10 @@ import re
 
 # Zahnentfernung: je System die Ziffer für jede Art. Ein-/mehrwurzelig entscheidet die
 # FDI-Nummer; "tieffrakturiert" nur mit Befundwort, Osteotomie retiniert/verlagert nur mit
-# Befundwort. GOZ 3020 (tieffrakturiert) steht nicht im Katalog v1.
+# Befundwort.
 REMOVAL: dict[str, dict[str, str]] = {
     "BEMA": {"single": "43", "multi": "44", "fractured": "45", "osteo": "47a", "osteo_retained": "48"},
-    "GOZ": {"single": "3000", "multi": "3010", "osteo": "3030", "osteo_retained": "3040"},
+    "GOZ": {"single": "3000", "multi": "3010", "fractured": "3020", "osteo": "3030", "osteo_retained": "3040"},
 }
 OSTEO_KINDS = ("osteo", "osteo_retained")
 
@@ -25,14 +25,32 @@ ROOT_PAIRS: dict[tuple[str, str], tuple[str, str]] = {
     ("BEMA", "AITb"): ("AITa", "AITb"),
     ("GOZ", "4050"): ("4050", "4055"),
     ("GOZ", "4055"): ("4050", "4055"),
+    ("GOZ", "4070"): ("4070", "4075"),
+    ("GOZ", "4075"): ("4070", "4075"),
 }
 
 # Leistung -> Leistung, in der sie am selben Zahn bzw. in derselben Sitzung enthalten ist.
 # 31: "bei vitaler Pulpa in 28 enthalten"; 11: "im Rahmen von 34 (Med) bereits enthalten".
+# GOZ wie BEMA: 2390 nur als selbstständige Leistung; 2430 schließt den provisorischen Verschluss ein.
 INCLUDED_IN: dict[tuple[str, str], tuple[str, str]] = {
     ("BEMA", "31"): ("BEMA", "28"),
     ("BEMA", "11"): ("BEMA", "34"),
+    ("GOZ", "2390"): ("GOZ", "2360"),
+    ("GOZ", "2020"): ("GOZ", "2430"),
 }
+
+# Privatziffer, die für ein bestimmtes diktiertes Wort keine Kassenleistung ist, obwohl sie ein
+# BEMA-Paar hat: "Implantat entfernt" ist GOZ 3000, aber nicht BEMA 43 (Implantate sind keine
+# Kassenleistung). Beim Kassenpatienten wird sie nicht umgestellt, sondern mit Hinweis weggelassen.
+_PRIVATE_ONLY: dict[tuple[str, str], tuple[re.Pattern[str], str]] = {
+    ("GOZ", "3000"): (re.compile(r"implantat"), "Implantatentfernung ist keine Kassenleistung"),
+}
+
+
+def private_only(entry, folded_keyword: str) -> str | None:
+    """Grund, warum dieses diktierte Wort beim Kassenpatienten nicht auf das BEMA-Paar umgestellt wird."""
+    rule = _PRIVATE_ONLY.get((entry.system, entry.code))
+    return rule[1] if rule and rule[0].search(folded_keyword) else None
 
 # GOZ-Zuschläge zu chirurgischen Leistungen (Anlage 1, Abschnitt L): Ziffer, Punkte von, bis.
 SURCHARGES: tuple[tuple[str, int, int | None], ...] = (

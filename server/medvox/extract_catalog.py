@@ -2,9 +2,10 @@
 
 Lädt ``catalog/catalog_v1.json`` einmal und stellt bereit: Einträge nach System
 und Ziffer, die Keyword-Liste für den Abgleich, die Abrechnungseinheit je
-Eintrag (je Kanal / je Zahn / je Sitzung) und die im Katalog notierten
-Privat-Gegenstücke einer BEMA-Position. Der erweiterte Katalog wird bewusst nicht
-geladen: der Extraktor darf nur Ziffern aus ``catalog_v1.json`` vorschlagen.
+Eintrag (je Kanal / je Zahn / je Sitzung), die Paare derselben Leistung in BEMA und
+GOZ/GOÄ (``equivalent``), die Zuzahlungs-Liste (``zuzahlung``) und die im Regeltext
+notierten Privat-Gegenstücke einer BEMA-Position. Der erweiterte Katalog wird bewusst
+nicht geladen: der Extraktor darf nur Ziffern aus ``catalog_v1.json`` vorschlagen.
 """
 
 from __future__ import annotations
@@ -38,6 +39,28 @@ def fold_with_map(text: str) -> tuple[str, list[int]]:
 
 
 @dataclass(frozen=True)
+class Link:
+    """Gegenstück derselben diktierten Leistung im anderen System (``equivalent``)."""
+
+    system: str
+    code: str
+    note: str | None = None  # Unterschied, den der Behandler prüfen muss (Einheit, Anzahl)
+
+
+@dataclass(frozen=True)
+class CoPayment:
+    """Eintrag der Zuzahlungs-Liste: darf ein Kassenpatient diese Privatleistung bezahlen?"""
+
+    allowed: bool
+    basis: tuple[str, ...]  # BEMA-Ziffern, neben denen sie üblich ist; leer = eigenständige Privatleistung
+    note: str
+
+    @property
+    def basis_label(self) -> str:
+        return f"BEMA {'/'.join(self.basis)}" if self.basis else ""
+
+
+@dataclass(frozen=True)
 class Entry:
     code: str
     system: str  # BEMA | GOZ | GOÄ
@@ -48,6 +71,8 @@ class Entry:
     keywords: tuple[str, ...]
     rules: tuple[str, ...]
     family: tuple[str, ...] = ()  # Füllungs-Familie (surfaces_to_code "1".."4"), sonst leer
+    equivalents: tuple[Link, ...] = ()
+    co_payment: CoPayment | None = None  # nur GOZ/GOÄ
 
     @property
     def key(self) -> tuple[str, str]:
@@ -81,15 +106,30 @@ class Catalog:
         for e in raw["entries"]:
             s2c = e.get("surfaces_to_code")
             family = tuple(s2c[k] for k in ("1", "2", "3", "4")) if s2c else ()
+            links = tuple(Link(x["system"], x["code"], x.get("note")) for x in e.get("equivalent", []))
+            z = e.get("zuzahlung")
+            co = CoPayment(z["allowed"], tuple(z["basis"]), z["note"]) if z else None
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
-                tuple(e["keywords"]), tuple(e["rules"]), family,
+                tuple(e["keywords"]), tuple(e["rules"]), family, links, co,
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}
 
     def get(self, system: str, code: str) -> Entry | None:
         return self._by_key.get((system, code))
+
+    def equivalents(self, entry: Entry) -> list[tuple[Entry, Link]]:
+        """Gegenstücke derselben Leistung im anderen System, in Katalogreihenfolge."""
+        return [(e, link) for link in entry.equivalents if (e := self.get(link.system, link.code))]
+
+    def link(self, source: Entry, target: Entry) -> Link | None:
+        return next((x for x in source.equivalents if (x.system, x.code) == target.key), None)
+
+    @staticmethod
+    def co_payment_allowed(entry: Entry) -> bool:
+        """Steht auf der Zuzahlungs-Liste: Kassenpatient darf diese Privatleistung bezahlen."""
+        return entry.co_payment is not None and entry.co_payment.allowed
 
     def find_code(self, system: str, folded_code: str) -> Entry | None:
         """Eintrag zu einer diktierten Ziffer ("13a", "ae935d") im genannten System."""
@@ -138,6 +178,16 @@ class Catalog:
             for m in _NOT_BESIDE.finditer(rule):
                 codes |= {t for t in re.split(r"[\s,/]+", m.group(1)) if self.get(entry.system, t)}
         return codes
+
+
+def related(trigger: str, keyword: str) -> bool:
+    """Privat-Keyword ("kofferdam privat") passt zum auslösenden Wort ("kofferdam gelegt")."""
+    core = re.sub(r"\s*\bprivat\b\s*", " ", fold(keyword)).strip()
+    return bool(core) and (_contains(trigger, core) or _contains(core, trigger))
+
+
+def _contains(text: str, part: str) -> bool:
+    return re.search(rf"(?<![a-z0-9]){re.escape(part)}(?![a-z0-9])", text) is not None
 
 
 @lru_cache(maxsize=1)

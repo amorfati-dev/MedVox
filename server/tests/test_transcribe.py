@@ -18,8 +18,8 @@ from tests.conftest import PASSWORD, FakeWhisper, make_wav
 URL = "/api/v1/transcribe"
 
 
-def _upload(client: TestClient, data: bytes, content_type: str = "audio/wav") -> httpx.Response:
-    return client.post(URL, files={"file": ("aufnahme.wav", data, content_type)})
+def _upload(client: TestClient, data: bytes, content_type: str = "audio/wav", **form: str) -> httpx.Response:
+    return client.post(URL, files={"file": ("aufnahme.wav", data, content_type)}, data=form or None)
 
 
 def test_requires_login(client: TestClient) -> None:
@@ -147,10 +147,34 @@ def test_prompt_file_is_used_without_warning(
 def test_codes_from_extractor(logged_in: TestClient, whisper: FakeWhisper) -> None:
     whisper.text = " Zahn 36 mesial okklusal distal, Kompositfüllung, Kofferdarm gelegt, Extraktion 48 planen.\n"
     body = _upload(logged_in, make_wav()).json()
+    assert body["patient_type"] == "kasse"  # Standard ohne Formularfeld
     assert body["transcript"].startswith("Zahn 36") and "Kofferdam" in body["transcript"]
     assert body["codes"] == ["13c", "12"]
-    assert [(s["code"], s["alternative"]) for s in body["suggestions"]] == [
-        ("13c", False), ("2100", True), ("12", False), ("2040", True)]
-    assert body["suggestions"][2]["reason"] == "wegen: Kofferdam gelegt"
+    primary = [(s["code"], s["kind"]) for s in body["suggestions"] if not s["alternative"]]
+    assert primary == [("13c", "bema"), ("12", "bema")]
+    assert ("2100", "zuzahlung") in [(s["code"], s["kind"]) for s in body["suggestions"] if s["alternative"]]
+    assert {s["kind"] for s in body["suggestions"]} <= {"bema", "zuzahlung"}
+    assert next(s for s in body["suggestions"] if s["code"] == "12")["reason"] == "wegen: Kofferdam gelegt"
     assert [(p["code"], p["teeth"]) for p in body["planned"]] == [("44", [48])]
     assert body["notes"] == []
+
+
+def test_private_patient_gets_goz_only(logged_in: TestClient, whisper: FakeWhisper) -> None:
+    whisper.text = " L1, L1, Ost1 an 38, Extraktion 48 planen.\n"
+    body = _upload(logged_in, make_wav(), patient_type="privat").json()
+    assert body["patient_type"] == "privat"
+    assert body["codes"] == ["2x 0100", "3030", "0500"]
+    assert {(s["system"], s["kind"]) for s in body["suggestions"]} == {("GOZ", "goz")}
+    assert [(p["code"], p["teeth"]) for p in body["planned"]] == [("3010", [48])]
+
+
+def test_statutory_patient_same_dictation(logged_in: TestClient, whisper: FakeWhisper) -> None:
+    whisper.text = " L1, L1, Ost1 an 38.\n"
+    body = _upload(logged_in, make_wav(), patient_type="kasse").json()
+    assert body["codes"] == ["2x 41a", "47a"]  # kein Zuschlag beim Kassenpatienten
+
+
+def test_unknown_patient_type_422(logged_in: TestClient) -> None:
+    response = _upload(logged_in, make_wav(), patient_type="gesetzlich")
+    assert response.status_code == 422
+    assert "Patiententyp" in response.json()["detail"]
