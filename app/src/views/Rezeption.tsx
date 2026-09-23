@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, ApiError, CODE_LENGTH, evidentText, normalizeCode, type TransferData } from "../api";
 import { CopyButton } from "../components/CopyButton";
+import { EvidentLines } from "../components/EvidentLines";
 
 export function Rezeption() {
   const [code, setCode] = useState(() => normalizeCode(new URLSearchParams(window.location.search).get("code") ?? ""));
@@ -37,7 +38,7 @@ export function Rezeption() {
     void lookup(code);
   };
 
-  // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,41a,13a"), eine je Zahn.
+  // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,41a,13a"), eine je Zahn, siehe evidentLines.
   const codes = data ? evidentText(data.codes) : "";
   const both = data ? `${data.transcript}\n\nZiffern:\n${codes}` : "";
 
@@ -78,7 +79,7 @@ export function Rezeption() {
           <h2>Diktat</h2>
           <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
           <h2>Ziffern</h2>
-          <p className="codes-line">{codes || <span className="muted">keine</span>}</p>
+          <EvidentLines lines={data.codes} />
           <div className="actions">
             <CopyButton label="Text kopieren" text={data.transcript} primary />
             <CopyButton label="Ziffern kopieren" text={codes} />

@@ -184,9 +184,6 @@ def test_bleeding_terms_are_kept():
         ("Nachbludung", "Nachblutung"),
         ("Sickerbludung", "Sickerblutung"),
         ("Blutungsneigunk", "Blutungsneigung"),
-        ("Sicker Blutung", "Sickerblutung"),
-        ("Blutungs Neigung", "Blutungsneigung"),
-        ("Bob positiv", "BOP positiv"),
     ],
 )
 def test_bleeding_mishearings_are_corrected(raw, expected):

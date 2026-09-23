@@ -55,8 +55,10 @@ kopierten Ziffern). Die Umschaltung Kasse/Privat kommt mit einer späteren Versi
 Evident nimmt Abrechnungspositionen nur hinter einem Zahn an. „Ziffern kopieren" (iPad und
 Rezeption) liefert deshalb **je Zahn eine Zeile**: erst der Zahn, dann seine Positionen,
 kommagetrennt, in der Reihenfolge der Vorschläge. Mehrere Zähne stehen in der diktierten
-Reihenfolge untereinander; Positionen ohne Zahn (01, Ä1, 107, Zuschlag 0500–0530) kommen in eine
-letzte Zeile ohne Zahnnummer. Abgewählte Chips fehlen.
+Reihenfolge untereinander; der OP-Zuschlag 0500–0530 steht beim operierten Zahn. Positionen ohne
+Zahn (01, Ä1, 107) kommen in eine letzte Zeile ohne Zahnnummer – die nimmt Evident so nicht an.
+MedVox markiert diese Zeile am iPad und an der Rezeption mit „ohne Zahn – in Evident manuell
+eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Chips fehlen.
 
 Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie, Zahn drei sechs
 mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):

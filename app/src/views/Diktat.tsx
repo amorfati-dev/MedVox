@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { api, ApiError, evidentLines, evidentText } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
+import { EvidentLines } from "../components/EvidentLines";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
 import { TransferPanel } from "../components/TransferPanel";
 import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
@@ -174,6 +175,7 @@ export function Diktat({ onLogout }: Props) {
           </p>
         )}
         <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} onToggle={toggleCode} />
+        {evident.length > 0 && <EvidentLines lines={evident} />}
         <div className="actions">
           <CopyButton label="Ziffern kopieren" text={evidentText(evident)} />
         </div>

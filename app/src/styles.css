@@ -195,11 +195,21 @@ input {
   margin: 0 0 8px;
   min-height: 2.5em;
 }
-.codes-line {
-  white-space: pre-line; /* eine Evident-Zeile je Zahn */
+.codes-line,
+.codes-lines {
   font-size: 1.35rem;
   font-family: ui-monospace, Menlo, monospace;
   margin: 0 0 8px;
+}
+.codes-lines {
+  list-style: none;
+  padding: 0;
+}
+.toothless-hint {
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--danger);
 }
 .chips {
   list-style: none;

@@ -108,16 +108,9 @@ export function codeOf(copyCode: string): string {
 
 // Kopierformat für Evident: Evident nimmt Abrechnungspositionen nur hinter einem Zahn an.
 // Je Zahn eine Zeile "Zahn,Ziffer,Ziffer" in Diktatreihenfolge, z. B. "36,Ä925a,41a,13a";
-// Positionen ohne Zahn (01, Ä1, Zuschlag 0500–0530) stehen in einer letzten Zeile ohne Zahn.
-// Der OP-Zuschlag gilt je Sitzung, auch wenn der Server den auslösenden Zahn mitliefert.
-const SESSION_SURCHARGES = new Set(["0500", "0510", "0520", "0530"]);
-
+// Positionen ohne Zahn (01, Ä1, 107) stehen in einer letzten Zeile mit leerem Zahnfeld (",01,107").
+// Das leere Zahnfeld kennzeichnet die Zeile für die Anzeige; kopiert wird sie ohne (evidentText).
 type Line = { tooth: number | null; counts: Map<string, number> };
-
-function toothOf(s: Suggestion): number | null {
-  if (s.system === "GOZ" && SESSION_SURCHARGES.has(s.code)) return null;
-  return s.teeth.length > 0 ? s.teeth[0] : null;
-}
 
 // `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
 // `active`: ausgewählte Chips im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
@@ -127,7 +120,7 @@ export function evidentLines(suggestions: Suggestion[], active: string[]): strin
   const lines = new Map<number | null, Line>();
   for (const s of suggestions) {
     if (s.alternative || !chosen.has(s.code)) continue;
-    const tooth = toothOf(s);
+    const tooth = s.teeth.length > 0 ? s.teeth[0] : null;
     let line = lines.get(tooth);
     if (!line) {
       line = { tooth, counts: new Map() };
@@ -139,12 +132,18 @@ export function evidentLines(suggestions: Suggestion[], active: string[]): strin
   const ordered = [...lines.values()].sort((a, b) => Number(a.tooth === null) - Number(b.tooth === null));
   return ordered.map(({ tooth, counts }) => {
     const codes = [...counts].flatMap(([code, n]) => Array<string>(n).fill(code));
-    return (tooth === null ? codes : [String(tooth), ...codes]).join(",");
+    return [tooth === null ? "" : String(tooth), ...codes].join(",");
   });
 }
 
+// Zeile ohne Zahn: in Evident manuell eintragen.
+export function isToothless(line: string): boolean {
+  return line.startsWith(",");
+}
+
+// Text in der Zwischenablage: eine Zeile je Zahn, die Zeile ohne Zahn ohne führendes Komma.
 export function evidentText(lines: string[]): string {
-  return lines.join("\n");
+  return lines.map((line) => (isToothless(line) ? line.slice(1) : line)).join("\n");
 }
 
 // Gespeicherter Patiententyp; alles Unbekannte gilt als Kasse (Standard des Servers).
