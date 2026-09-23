@@ -3,7 +3,8 @@
 Der Builder zählt Fundstellen: „Kofferdam gelegt“ an 36 und noch einmal an 37 ergibt zwei. Abrechnen
 darf man aber höchstens, was der amtliche Text erlaubt – BEMA 12 einmal je Sitzung, je Kieferhälfte
 oder Frontzahnbereich. ``apply_limits`` begrenzt die Anzahl darauf und nennt die Begrenzung in der
-Begründung; eine Position fällt dabei nie weg.
+Begründung; eine Position fällt dabei nie weg. Es wirken nur vom Behandler bestätigte Höchstzahlen
+(``max_per_status`` „bestaetigt“); Vorschläge ändern nichts, bis er sie bestätigt.
 
 Bei ``kieferhaelfte`` bestimmen die diktierten FDI-Nummern die Bereiche: Frontzahnbereich = Zähne
 13–23 bzw. 33–43, Kieferhälfte = Seitenzähne 4–8 eines Quadranten (Milchzähne wie ihr bleibender

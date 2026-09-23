@@ -1,5 +1,8 @@
 """Höchstzahl je Position (Katalogfeld ``max_per``): BEMA 12 „bmf“ nur einmal je Sitzung und Bereich.
 
+Es wirken nur vom Behandler bestätigte Höchstzahlen (``max_per_status`` „bestaetigt“); die übrigen sind
+Vorschläge und lassen die Vorschläge des Extraktors unverändert.
+
 Praxisbefund: „Kofferdam gelegt“ an 36 und an 37 wurde als 12*2 kopiert – abrechenbar ist 12 dort einmal.
 """
 
@@ -11,12 +14,13 @@ import pytest
 
 from medvox.catalog import validate as v
 from medvox.extract import Extraction, Suggestion, analyze, billable_codes
+from medvox.extract_catalog import load_catalog
 from medvox.extract_limits import NO_REGION, region
 from medvox.lexicon import correct
 from medvox.normalize import normalize
 
-# Einträge mit Höchstzahl (Einheit, Anzahl), je gegen den amtlichen KZBV-/GOZ-Text geprüft; alle übrigen
-# v1-Einträge tragen ausdrücklich "unbegrenzt".
+# Einträge mit Höchstzahl (Einheit, Anzahl), je gegen den amtlichen KZBV-/GOZ-Text gelesen; alle übrigen
+# v1-Einträge tragen ausdrücklich "unbegrenzt". Bestätigt hat der Behandler bisher nur CONFIRMED.
 LIMITED = {
     ("BEMA", "01"): ("sitzung", 1), ("BEMA", "04"): ("sitzung", 1), ("BEMA", "8"): ("sitzung", 1),
     ("BEMA", "105"): ("sitzung", 1), ("BEMA", "107"): ("sitzung", 1), ("BEMA", "IP1"): ("sitzung", 1),
@@ -35,6 +39,7 @@ LIMITED = {
     ("GOZ", "4050"): ("zahn", 1), ("GOZ", "4055"): ("zahn", 1), ("GOZ", "4070"): ("zahn", 1), ("GOZ", "4075"): ("zahn", 1),
     ("GOZ", "2360"): ("kanal", 1), ("GOZ", "2400"): ("kanal", 2), ("GOZ", "2410"): ("kanal", 1), ("GOZ", "2440"): ("kanal", 1),
 }
+CONFIRMED = {("BEMA", "12")}
 
 
 def run(dictation: str, patient: str = "kasse") -> Extraction:
@@ -54,6 +59,15 @@ def test_every_v1_entry_states_its_limit():
     assert all("count" not in m for k, m in limits.items() if k not in LIMITED)
 
 
+def test_only_confirmed_limits_are_enforced():
+    _errors, _infos, catalog = v.validate()
+    status = {(e["system"], e["code"]): e.get("max_per_status") for e in catalog["entries"]}
+    assert {k for k, st in status.items() if st == "bestaetigt"} == CONFIRMED
+    assert {k for k, st in status.items() if st == "vorschlag"} == set(LIMITED) - CONFIRMED
+    enforced = {e.key: e.limit for e in load_catalog().entries if e.limit is not None}
+    assert enforced == {k: LIMITED[k] for k in CONFIRMED}
+
+
 @pytest.mark.parametrize("limit", [{"unit": "sitzung"}, {"unit": "unbegrenzt", "count": 1}])
 def test_validator_requires_count_exactly_for_limits(limit):
     _errors, _infos, catalog = v.validate()
@@ -61,6 +75,18 @@ def test_validator_requires_count_exactly_for_limits(limit):
     next(e for e in broken["entries"] if e["code"] == "12")["max_per"] = limit
     errors, _ = v.check_rules(broken)
     assert any("BEMA 12: max_per braucht 'count'" in err for err in errors)
+
+
+@pytest.mark.parametrize("code, change", [
+    ("12", lambda e: e.pop("max_per_status")),
+    ("01", lambda e: e.update(max_per={"unit": "unbegrenzt"})),
+])
+def test_validator_requires_status_exactly_for_limits(code, change):
+    _errors, _infos, catalog = v.validate()
+    broken = copy.deepcopy(catalog)
+    change(next(e for e in broken["entries"] if e["code"] == code))
+    errors, _ = v.check_rules(broken)
+    assert any(f"BEMA {code}: max_per_status gehört genau zu einer Höchstzahl" in err for err in errors)
 
 
 def test_kofferdam_twice_in_one_jaw_half_is_billed_once():
@@ -72,14 +98,23 @@ def test_kofferdam_twice_in_one_jaw_half_is_billed_once():
     assert billable_codes(result.suggestions) == ["13c", "12", "13b"]
 
 
-@pytest.mark.parametrize("patient, code", [("kasse", "12"), ("privat", "2040")])
-def test_kofferdam_in_both_jaw_halves_is_billed_per_half(patient, code):
-    result = run("Zahn drei sechs Füllung dreiflächig, Kofferdam gelegt. "
-                 "Zahn vier sechs Füllung zweiflächig, Kofferdam gelegt.", patient)
-    pieces = performed(result, code)
+KOFFERDAM_BOTH_HALVES = ("Zahn drei sechs Füllung dreiflächig, Kofferdam gelegt. "
+                         "Zahn vier sechs Füllung zweiflächig, Kofferdam gelegt.")
+
+
+def test_kofferdam_in_both_jaw_halves_is_billed_per_half():
+    result = run(KOFFERDAM_BOTH_HALVES)
+    pieces = performed(result, "12")
     assert [(s.count, s.teeth) for s in pieces] == [(1, (36,)), (1, (46,))]
     assert "eigene Position für UK links" in pieces[0].reason and "UK rechts" in pieces[1].reason
-    assert f"2x {code}" in billable_codes(result.suggestions)
+    assert "2x 12" in billable_codes(result.suggestions)
+
+
+def test_privat_counterpart_with_proposed_limit_is_unchanged():
+    result = run(KOFFERDAM_BOTH_HALVES, "privat")
+    [goz] = performed(result, "2040")
+    assert (goz.count, goz.teeth) == (2, (36, 46)) and "höchstens" not in goz.reason
+    assert billable_codes(result.suggestions) == ["2100", "2x 2040", "2080"]
 
 
 def test_one_mention_covering_two_jaw_halves_gives_one_per_half():
@@ -96,9 +131,11 @@ def test_unknown_region_gives_one_with_decide_note():
     assert bmf.count == 1 and NO_REGION in bmf.decide and "höchstens 1×" in bmf.reason
 
 
-def test_session_limit_caps_explicit_times_with_reason():
+def test_proposed_limit_changes_nothing():
     [zst] = performed(run("Zahnsteinentfernung 2x."), "107")
-    assert zst.count == 1 and "2× diktiert, höchstens 1× je Sitzung" in zst.reason
+    assert zst.count == 2 and "höchstens" not in zst.reason
+    [vit] = performed(run("Vitalitätsprüfung drei sechs. Vitalitätsprüfung vier sechs."), "8")
+    assert vit.count == 2 and "höchstens" not in vit.reason
 
 
 def test_unlimited_position_still_multiplies():

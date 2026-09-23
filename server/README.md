@@ -125,11 +125,13 @@ Fachtabellen zum Nachlesen).
   beim Kassenpatienten nur ein Hinweis, weil keine Kassenleistung).
 - **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl („3 Kanäle“),
   ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
-  Danach gilt die Höchstzahl aus dem Katalog (`max_per`): „Kofferdam gelegt“ an 36 und an 37 bleibt
+  Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
+  `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.
   Liegen die Zähne in mehreren Bereichen (36 und 46), steht die Position je Bereich einmal da, mit den
   Zähnen dieses Bereichs; ohne Zahnnummer einmal mit Prüfhinweis. Positionen ohne Grenze
-  (`unbegrenzt`, z. B. 41a) zählen weiter wie diktiert.
+  (`unbegrenzt`, z. B. 41a) oder mit nur vorgeschlagener Grenze (`vorschlag`, z. B. 107) zählen weiter
+  wie diktiert, bis der Behandler die Grenze bestätigt.
 - **Geplant:** „geplant/planen, nächste Sitzung, Termin, Indikation zur, Überweisung, Wiedervorlage,
   in 2 Wochen …“ machen den Teilsatz (mit Doppelpunkt den Rest des Satzes) zum Plan: `planned`,
   nie in `codes`. „ohne/kein/nicht“ direkt an der Leistung verhindert den Vorschlag (Hinweis in `notes`).

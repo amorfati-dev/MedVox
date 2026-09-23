@@ -74,7 +74,7 @@ class Entry:
     equivalents: tuple[Link, ...] = ()
     co_payment: CoPayment | None = None  # nur GOZ/GOÄ
     evident: str | None = None  # vom Behandler bestätigte Evident-Kurzform ("l1"), sonst None
-    limit: tuple[str, int] | None = None  # max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; None = unbegrenzt
+    limit: tuple[str, int] | None = None  # bestätigtes max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; sonst None
 
     @property
     def key(self) -> tuple[str, str]:
@@ -112,7 +112,7 @@ class Catalog:
             z = e.get("zuzahlung")
             co = CoPayment(z["allowed"], tuple(z["basis"]), z["note"]) if z else None
             m = e.get("max_per")
-            limit = (m["unit"], m["count"]) if m and "count" in m else None
+            limit = (m["unit"], m["count"]) if e.get("max_per_status") == "bestaetigt" else None
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
                 tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"), limit,

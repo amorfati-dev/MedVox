@@ -110,7 +110,8 @@ Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a
 `48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte
 Positionen stehen einmal mit Anzahl, hinter Kurzform wie Ziffer: drei Kanäle an 36 → `36,wf*3`,
 `11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen). Die
-Anzahl ist nie höher als der amtliche Text erlaubt: BEMA 12 (bmf) steht je Sitzung nur einmal je
+Anzahl ist nie höher als eine vom Behandler bestätigte Höchstzahl erlaubt (bisher nur BEMA 12; weitere
+Grenzen aus dem amtlichen Text warten im Katalog als Vorschlag auf seine Bestätigung): BEMA 12 (bmf) steht je Sitzung nur einmal je
 Kieferhälfte oder Frontzahnbereich – Kofferdam an 36 und 37 ergibt `bmf`, nicht `bmf*2`; an 36 und
 46 steht bmf in beiden Zahnzeilen.
 Die Liste zeigt beides: die amtliche Ziffer groß, die Kurzform klein darunter („Evident: l1").

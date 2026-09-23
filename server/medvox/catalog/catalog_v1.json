@@ -253,6 +253,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -290,6 +291,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -338,6 +340,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -906,6 +909,7 @@
         "unit": "kieferhaelfte",
         "count": 1
       },
+      "max_per_status": "bestaetigt",
       "equivalent": [
         {
           "system": "GOZ",
@@ -984,6 +988,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1057,6 +1062,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1135,6 +1141,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1177,6 +1184,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1218,6 +1226,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1452,6 +1461,7 @@
         "unit": "kieferhaelfte",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1498,6 +1508,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1536,6 +1547,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1579,6 +1591,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1617,6 +1630,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1658,6 +1672,7 @@
         "unit": "sitzung",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1695,6 +1710,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1838,6 +1854,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1871,6 +1888,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "GOZ",
@@ -1986,6 +2004,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2031,6 +2050,7 @@
         "unit": "kieferhaelfte",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -2160,6 +2180,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2248,6 +2269,7 @@
         "unit": "kieferhaelfte",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2295,6 +2317,7 @@
         "unit": "kieferhaelfte",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2863,6 +2886,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -2955,6 +2979,7 @@
         "unit": "kanal",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": true,
         "basis": [
@@ -2995,6 +3020,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3040,6 +3066,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3082,6 +3109,7 @@
         "unit": "kanal",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3346,6 +3374,7 @@
         "unit": "kieferhaelfte",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3393,6 +3422,7 @@
         "unit": "kieferhaelfte",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3442,6 +3472,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3484,6 +3515,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3526,6 +3558,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3568,6 +3601,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": false,
         "basis": [],
@@ -3607,6 +3641,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3650,6 +3685,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3706,6 +3742,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "zuzahlung": {
         "allowed": true,
         "basis": [],
@@ -3743,6 +3780,7 @@
         "unit": "sitzung",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3794,6 +3832,7 @@
         "unit": "sitzung",
         "count": 2
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3840,6 +3879,7 @@
         "unit": "sitzung",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3887,6 +3927,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3931,6 +3972,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -3977,6 +4019,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",
@@ -4020,6 +4063,7 @@
         "unit": "zahn",
         "count": 1
       },
+      "max_per_status": "vorschlag",
       "equivalent": [
         {
           "system": "BEMA",

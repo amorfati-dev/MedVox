@@ -89,7 +89,7 @@
           "items": {"type": "string", "minLength": 3}
         },
         "max_per": {
-          "description": "Höchstzahl laut amtlichem Text: count-mal je unit (Diktat = eine Sitzung; kieferhaelfte = je Kieferhälfte oder Frontzahnbereich). unbegrenzt ohne count, wo der Text keine Grenze nennt. Fehlt das Feld, gilt unbegrenzt (noch nicht geprüft). Der Extraktor begrenzt die Anzahl darauf.",
+          "description": "Höchstzahl laut amtlichem Text: count-mal je unit (Diktat = eine Sitzung; kieferhaelfte = je Kieferhälfte oder Frontzahnbereich). unbegrenzt ohne count, wo der Text keine Grenze nennt. Fehlt das Feld, gilt unbegrenzt (noch nicht geprüft). Der Extraktor begrenzt die Anzahl nur, wenn max_per_status \"bestaetigt\" ist.",
           "type": "object",
           "required": ["unit"],
           "additionalProperties": false,
@@ -97,6 +97,10 @@
             "unit": {"enum": ["sitzung", "kieferhaelfte", "zahn", "kanal", "flaeche", "unbegrenzt"]},
             "count": {"type": "integer", "minimum": 1}
           }
+        },
+        "max_per_status": {
+          "description": "Nur zusammen mit einer Höchstzahl (count): bestaetigt = vom Behandler bestätigt, der Extraktor begrenzt darauf; vorschlag = aus dem amtlichen Text gelesen, wartet auf Bestätigung, wirkt noch nicht.",
+          "enum": ["vorschlag", "bestaetigt"]
         },
         "surfaces_to_code": {
           "description": "Füllungs-Familien: Flächenzahl 1..4 (4 = mehr als dreiflächig) -> Ziffer im selben System.",
