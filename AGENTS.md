@@ -4,6 +4,7 @@ MedVox: lokale Diktat-Transkription mit BEMA/GOZ-Vorschlägen für eine Zahnarzt
 Drei Teile: `server/` (Python 3.12, FastAPI), `app/` (Vite + React + TypeScript) und `infra/` (bash-Skripte für die launchd-Dienste auf dem Praxis-Mac).
 Befehle und Arbeitspakete: `README.md`; Server-Targets: `server/Makefile`; App-Skripte: `app/package.json`; Praxis-Mac: `infra/README.md`.
 Betrieb: `make install` / `make status` im Repo-Root. Die installierten Dienste laufen aus Kopien unter `~/Library/Application Support/MedVox/`, nie aus dem Repo oder einem Worktree – Code-Änderungen wirken dort erst nach erneutem `make install`.
+Geräte erreichen den Mac nur über `https://medvox.local` (Bonjour-Dienst `de.medvox.mdns`, meldet nach Netzwechsel selbst neu an; `infra/README.md` Abschnitt 8) – die LAN-IP ist nur Ausweichadresse, nie als Adresse für iPad/Rezeption dokumentieren.
 
 ## Leitplanken
 

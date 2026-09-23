@@ -101,7 +101,7 @@ ein Ergebnis hat, ist der Wechsel gesperrt; ein fertiges Diktat bleibt beim bish
 wenn man danach eine andere Nummer wählt. Hat das Büro ein Diktat inzwischen umgehängt, bleibt es
 dort – das iPad hängt es beim nächsten Speichern nicht zurück.
 
-**Im Büro** (Rezeptions-PC oder iPad, angemeldet): `https://<LAN-IP>/patienten` (am iPad: ⋯ →
+**Im Büro** (Rezeptions-PC oder iPad, angemeldet): `https://medvox.local/patienten` (am iPad: ⋯ →
 Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Anzahl der Diktate,
 Uhrzeit und Zustand **offen** / **übertragen**; Diktate „ohne Patient" stehen bernsteinfarben
 ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Rechts je Diktat Text, Evident-Zeilen
@@ -109,6 +109,11 @@ und Mehrkosten mit **Text kopieren**, **Ziffern kopieren** und **Nur Ziffern** �
 wie am iPad. Danach **Als übertragen markieren**: Text und Ziffern sind sofort vom Praxis-Mac
 gelöscht, in der Liste bleibt nur „übertragen" mit Uhrzeit. Kam inzwischen am iPad etwas dazu,
 bleibt das offen und wird gemeldet.
+
+**Adresse:** iPad und Rezeptions-PC öffnen immer `https://medvox.local` – in der Praxis wie zu
+Hause; nach einem Netzwechsel ist nichts neu zu tun. Nur wenn ein Gerät den Namen nicht findet
+(älterer Windows-PC, Gäste-WLAN), geht die Zahlenadresse aus `make status` („HTTPS-Zugang"),
+bis sich die Adresse des Macs ändert.
 
 **Aufbewahrung:** ein Diktat bleibt, bis es als übertragen markiert ist – **höchstens 24 Stunden**,
 dann löscht der Praxis-Mac es von selbst, auch wenn es vergessen wurde. Was am Abend nicht

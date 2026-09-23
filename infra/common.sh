@@ -26,6 +26,13 @@ WHISPER_LABEL="de.medvox.whisper-server"
 CADDY_LABEL="de.medvox.caddy"
 CADDY_HTTPS_PORT="443"
 
+# Bonjour-Name, unter dem iPad und Rezeption den Mac in jedem Netz finden
+# (infra/mdns/). Steht auch im Zertifikat; der Mac selbst behält seinen Namen.
+MDNS_LABEL="de.medvox.mdns"
+MDNS_NAME="medvox.local"
+MEDVOX_MDNS="$MEDVOX_HOME/mdns"
+MDNS_LOG="$MEDVOX_LOGS/mdns.log"
+
 # Backend (FastAPI) und gebaute PWA: feste Orte, unabhängig davon, wo das Repo liegt.
 SERVER_LABEL="de.medvox.server"
 SERVER_HOST="127.0.0.1"
@@ -72,6 +79,22 @@ lan_ip() {
   for iface in en0 en1 en2 en3 en4 en5; do
     ip="$(ipconfig getifaddr "$iface" 2>/dev/null || true)"
     [[ -n "$ip" ]] && { echo "$ip"; return 0; }
+  done
+  return 1
+}
+
+# mdns_address – IPv4, auf die medvox.local gerade aufgelöst wird (über
+# mDNSResponder wie bei jedem Programm auf dem Mac); leer, wenn niemand antwortet.
+mdns_address() {
+  dscacheutil -q host -a name "$MDNS_NAME" 2>/dev/null | awk '/^ip_address:/{print $2; exit}'
+}
+
+# wait_for_mdns <ip> [sekunden] – wartet, bis medvox.local auf <ip> auflöst.
+wait_for_mdns() {
+  local ip="$1" secs="${2:-15}" i
+  for ((i = 0; i < secs; i++)); do
+    [[ "$(mdns_address)" == "$ip" ]] && return 0
+    sleep 1
   done
   return 1
 }

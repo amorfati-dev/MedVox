@@ -1,7 +1,7 @@
 #!/bin/bash
-# Prüft die HTTPS-Kette über die LAN-IP: Zertifikat wird von der Praxis-CA
-# (rootCA.pem) beglaubigt, SANs enthalten medvox.local und die LAN-IP, Caddy
-# antwortet. Exit 0 = alles in Ordnung.
+# Prüft die HTTPS-Kette für medvox.local an der LAN-IP: Zertifikat wird von der
+# Praxis-CA (rootCA.pem) beglaubigt, SANs enthalten medvox.local (und, für die
+# Ausweichadresse, die LAN-IP), Caddy antwortet. Exit 0 = alles in Ordnung.
 
 source "$(dirname "$0")/../common.sh"
 CERT="$MEDVOX_TLS/cert.pem"
@@ -21,7 +21,8 @@ if [[ -f "$CERT" ]]; then
   echo "   gültig bis: $(openssl x509 -in "$CERT" -noout -enddate | cut -d= -f2)"
   sans="$(cert_san_list "$CERT")"
   [[ "$sans" == *"DNS:medvox.local,"* ]] && ok "SAN medvox.local" || { warn "SAN medvox.local fehlt"; status=1; }
-  [[ "$sans" == *"IPAddress:$LAN_IP,"* ]] && ok "SAN $LAN_IP" || { warn "SAN $LAN_IP fehlt (IP geändert? infra/tls/setup.sh erneut ausführen)"; status=1; }
+  # Nur für die Ausweichadresse https://<LAN-IP> nötig – kein Fehler.
+  [[ "$sans" == *"IPAddress:$LAN_IP,"* ]] && ok "SAN $LAN_IP" || warn "SAN $LAN_IP fehlt – nur die Ausweichadresse betroffen (infra/tls/setup.sh stellt neu aus)"
 else
   warn "Zertifikat fehlt"; status=1
 fi
@@ -42,7 +43,8 @@ case "$code" in
   404) warn "App fehlt (HTTP 404): 'make install' ausführen"; status=1 ;;
   *) warn "unerwartet: $code"; status=1 ;;
 esac
-code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
+code="$(curl -sS --cacert "$ROOT" --resolve "medvox.local:$CADDY_HTTPS_PORT:$LAN_IP" -o /dev/null -w '%{http_code}' \
+  "https://medvox.local:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
 case "$code" in
   200) ok "/api/v1/health → Backend erreichbar (HTTP 200)" ;;
   502) warn "Backend antwortet nicht (HTTP 502): $API_UPSTREAM ist aus – 'make status' zeigt Details"; status=1 ;;
