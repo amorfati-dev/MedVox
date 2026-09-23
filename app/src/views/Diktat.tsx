@@ -18,12 +18,20 @@ import { usePatientType } from "../hooks/usePatientType";
 import { useSelection } from "../hooks/useSelection";
 import { useTransfer } from "../hooks/useTransfer";
 import { countGroups, positionsOf, uniquePlanned } from "../result";
-import { formatSeconds, plural, uiState } from "../status";
+import { formatSeconds, plural, uiState, type UiState } from "../status";
 import { Login } from "./Login";
 
 type Props = { onLogout: () => void };
 
 const UNSUPPORTED = "Dieser Browser kann nicht aufnehmen – bitte Safari auf dem iPad verwenden.";
+
+// Rechte Spalte, solange noch kein Ergebnis da ist.
+const EMPTY: Partial<Record<UiState, string>> = {
+  bereit: "Noch nichts diktiert – „Aufnehmen“ antippen und sprechen.",
+  aufnahme: "Aufnahme läuft – das Ergebnis erscheint nach „Stopp“.",
+  senden: "Der Praxis-Mac schreibt ab …",
+  fortsetzbar: "Das Aufgenommene ist gesichert und wird gesendet, sobald der Praxis-Mac antwortet.",
+};
 
 export function Diktat({ onLogout }: Props) {
   const [patientType, setPatientType] = usePatientType();
@@ -123,7 +131,7 @@ export function Diktat({ onLogout }: Props) {
         {hasResult ? (
           <ResultHead counts={counts} resultType={d.resultType} numbersText={evidentText(sel.numbers)} />
         ) : (
-          <p className="muted empty">Noch nichts diktiert – „Aufnehmen“ antippen und sprechen.</p>
+          <p className="muted empty">{EMPTY[state] ?? EMPTY.bereit}</p>
         )}
         {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
           <p className="notice">
