@@ -44,7 +44,7 @@ test("evidentLines: abgewählte Chips fehlen, leere Zeilen entfallen", () => {
   assert.equal(evidentText([]), "");
 });
 
-test("evidentLines: amtliche Ziffern mehrfach wiederholt, OP-Zuschlag bleibt am Zahn des Servers", () => {
+test("evidentLines: Anzahl je Zahn als Ziffer*Anzahl, OP-Zuschlag bleibt am Zahn des Servers", () => {
   const suggestions = [
     sug("2410", [11], { count: 3 }),
     sug("3030", [48]),
@@ -54,7 +54,7 @@ test("evidentLines: amtliche Ziffern mehrfach wiederholt, OP-Zuschlag bleibt am 
   ];
   assert.equal(
     evidentText(evidentLines(suggestions, ["3x 2410", "3030", "2x 0090", "0500"])),
-    "11,2410,2410,2410\n48,3030,0090,0500\n36,0090",
+    "11,2410*3\n48,3030,0090,0500\n36,0090",
   );
 });
 
@@ -72,7 +72,7 @@ test("evidentLines: Zeile ohne Zahn erkennbar, auch wenn die Ziffer wie ein Zahn
 test("evidentLines: Wurzelfüllung an drei Kanälen als Evident-Kurzform mit Anzahl", () => {
   const suggestions = [sug("35", [36], { count: 3, evident: "wf" })];
   assert.deepEqual(evidentLines(suggestions, ["3x 35"]), ["36,wf*3"]);
-  assert.deepEqual(evidentLines(suggestions, ["3x 35"], false), ["36,35,35,35"]);
+  assert.deepEqual(evidentLines(suggestions, ["3x 35"], false), ["36,35*3"]);
 });
 
 test("evidentLines: gemischte Zeile – Kurzform wo bekannt, sonst Ziffer; „Nur Ziffern“ nur Ziffern", () => {
@@ -86,8 +86,8 @@ test("evidentLines: gemischte Zeile – Kurzform wo bekannt, sonst Ziffer; „Nu
     sug("Ä935d", [], { evident: "opg" }),
   ];
   const active = ["Ä925a", "41a", "2x 32", "2x 35", "13a", "47a", "Ä935d"];
-  assert.equal(evidentText(evidentLines(suggestions, active)), "36,Ä925a,l1,32,32,wf*2,13a\n48,ost1\nopg");
-  assert.equal(evidentText(evidentLines(suggestions, active, false)), "36,Ä925a,41a,32,32,35,35,13a\n48,47a\nÄ935d");
+  assert.equal(evidentText(evidentLines(suggestions, active)), "36,Ä925a,l1,32*2,wf*2,13a\n48,ost1\nopg");
+  assert.equal(evidentText(evidentLines(suggestions, active, false)), "36,Ä925a,41a,32*2,35*2,13a\n48,47a\nÄ935d");
   assert.deepEqual(evidentLines(suggestions, ["Ä925a", "13a"]), ["36,Ä925a,13a"]);
 });
 
