@@ -1,7 +1,8 @@
 # Abnahme Phase 1 – Protokoll für die Praxis
 
 Sechs Prüfungen, eine je Abnahmekriterium aus dem Plan (Phase 1), dazu Prüfung 7 für die
-Diktate je Patient (mehrere Patienten, übertragen im Büro). Jede Zeile
+Diktate je Patient (mehrere Patienten, übertragen im Büro) und Prüfung 8 für mehrere Behandler an
+geteilten iPads. Jede Zeile
 abhaken und notieren, was tatsächlich zu sehen war – auch wenn es geklappt hat.
 Schlägt etwas fehl: Uhrzeit notieren, `make status` im Terminal ausführen und die
 Ausgabe mit aufschreiben.
@@ -19,6 +20,9 @@ Ausgabe mit aufschreiben.
 - [ ] Praxis-CA auf iPad und Rezeptions-PC installiert (`infra/README.md`, Abschnitte 3 und 4).
 - [ ] Ruhezustand am Netzteil aus (`infra/README.md`, Abschnitt 5); `make status` zeigt keinen
       Hinweis „Ruhezustand".
+- [ ] Behandlerliste: iPad → ⋯ → Behandlerliste (`/behandler`). Den ersten Eintrag „Behandler 1"
+      auf den eigenen Namen umbenennen, alle Behandler der Praxis hinzufügen (Name wie angezeigt,
+      Behandlernummer optional).
 - [ ] `docs/diktierhilfe.md` ausgedruckt neben dem Behandlungsstuhl.
 
 Datum: ____________  Mac: ____________  iPad/iOS-Version: ____________
@@ -160,6 +164,32 @@ Beobachtet: ______________________________________________________
 15. [ ] Diktat für 4717, **An Rezeption**, Code **nicht** abrufen; im Büro 4717 **Als übertragen
        markieren**; dann den Code abrufen → „Dieses Diktat wurde bereits am … übertragen … – nicht
        erneut in Evident eintragen", keine Ziffern; erneuter Abruf → „Kein Diktat unter diesem Code".
+
+Beobachtet: ______________________________________________________
+
+## 8. Mehrere Behandler an geteilten iPads
+
+Zwei Behandler (hier A und B) und ein iPad; Behandlerliste wie in der Vorbereitung angelegt.
+
+1. [ ] iPad neu öffnen (oder ein anderes iPad) → „Wer diktiert?" erscheint von selbst mit den
+       aktiven Behandlern. **A** antippen → oben links „Es diktiert A".
+2. [ ] Seite neu laden → weiterhin „Es diktiert A", keine Frage.
+3. [ ] Patient 4721 wählen, diktieren. Während der Aufnahme ist die Leiste gesperrt („Diktat von A").
+4. [ ] Ergebnis steht noch da: oben auf den Namen tippen, **B** wählen → Bildschirm wird frei,
+       „Es diktiert B". Im Büro (`/patienten`) steht das Diktat von 4721 weiterhin bei **A**.
+5. [ ] B diktiert für 4721 → im Büro hat 4721 zwei Diktate, eins von A, eins von B; beim Patienten
+       „Eröffnet von A"; links unter 4721 „A, B".
+6. [ ] B: **An Rezeption** → Code bleibt sichtbar, oben bernsteinfarben „Wer diktiert jetzt?".
+       Rezeptions-PC: Code abrufen → neben „Diktat" steht **B**. Am iPad **Neu** → erst die Frage,
+       nach dem Tipp auf einen Namen startet die Aufnahme.
+7. [ ] Büro: Filter **B** → nur Patienten mit Diktaten von B; **Alle** → wieder alle. „Ziffern
+       kopieren" liefert in beiden Fällen dasselbe wie ohne Filter.
+8. [ ] iPad 30 Minuten liegen lassen (Wert `MEDVOX_DENTIST_IDLE_S`, Voreinstellung 1800 s) → beim
+       nächsten Hinsehen fragt es „Wer diktiert?".
+9. [ ] Behandlerliste: B **Inaktiv setzen** → B erscheint am iPad nicht mehr zur Auswahl; das Diktat
+       von B im Büro trägt weiterhin den Namen B.
+10. [ ] Diktate aus der Zeit vor der Behandlerliste (falls noch da) stehen als „ohne Behandler" und
+       lassen sich wie bisher kopieren und übertragen.
 
 Beobachtet: ______________________________________________________
 

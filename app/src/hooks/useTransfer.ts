@@ -6,7 +6,8 @@ export type Transfer = {
   busy: boolean;
   result: TransferCreated | null;
   error: string | null;
-  send: (link: HandoverLink | null) => Promise<void>; // gespeichertes Diktat, das der Abruf schließt
+  // `link`: gespeichertes Diktat, das der Abruf schließt; `dentist`: sein Behandler (für die Rezeption)
+  send: (link: HandoverLink | null, dentist?: number | null) => Promise<void>;
 };
 
 // `details`: Patiententyp und Art je Position, nur zur Anzeige an der Rezeption (E6).
@@ -29,12 +30,12 @@ export function useTransfer(
     setError(null);
   }, [transcript, codes, details]);
 
-  const send = async (link: HandoverLink | null) => {
+  const send = async (link: HandoverLink | null, dentist?: number | null) => {
     const sent = version.current;
     setBusy(true);
     setError(null);
     try {
-      const created = await api.createTransfer(transcript, codes, details ?? undefined, link);
+      const created = await api.createTransfer(transcript, codes, details ?? undefined, link, dentist);
       if (sent !== version.current) return;
       setResult(created);
     } catch (e) {

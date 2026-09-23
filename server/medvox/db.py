@@ -1,4 +1,4 @@
-"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen, Transfer-Codes und Diktate je Patient.
+"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen, Transfer-Codes, Diktate je Patient und Behandler.
 
 Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; ein Patient ist nur die
 Evident-Patientennummer. Transkripte liegen als Transfer-Eintrag bis zum Ablauf der TTL darin
@@ -63,6 +63,15 @@ CREATE TABLE IF NOT EXISTS dictation_tombstones (
     id          TEXT PRIMARY KEY,
     closed_at   REAL NOT NULL
 );
+-- Behandler der Gemeinschaftspraxis (`medvox/dentists.py`): nur Zuordnung, keine Anmeldung und keine
+-- Rechte. Wird nie gelöscht, nur inaktiv gesetzt, damit alte Diktate ihren Behandler behalten.
+CREATE TABLE IF NOT EXISTS dentists (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,
+    practitioner_id TEXT,  -- optional: Evident-/BEMA-Behandlernummer
+    active          INTEGER NOT NULL DEFAULT 1,
+    created_at      REAL NOT NULL
+);
 -- Abgeholter Kurzcode eines Diktats (`medvox/handovers.py`): nur Evident-Zeilen, kein Transkript.
 -- Bleibt, solange das Diktat offen ist oder sein Grabstein liegt.
 CREATE TABLE IF NOT EXISTS handovers (
@@ -76,15 +85,25 @@ CREATE TABLE IF NOT EXISTS handovers (
 
 TOMBSTONE_S = 7 * 24 * 3600  # länger als die 24 Stunden eines Diktats
 
-# Spalten, die nach der ersten Installation dazukamen: (Name, Definition). Bestehende Datenbanken
-# bekommen sie beim Start per ALTER TABLE; alte Einträge gelten als ohne Angabe.
-ADDED_TRANSFER_COLUMNS = [
-    ("patient_type", "TEXT"),
-    ("positions_json", "TEXT NOT NULL DEFAULT '[]'"),
-    ("dictation_id", "TEXT"),  # gespeichertes Diktat, das der Abruf des Kurzcodes schließt
-    ("dictation_revision", "INTEGER"),  # genau dieser Stand wurde übergeben; None = noch nicht gespeichert
-    ("handed_over_at", "REAL"),  # erster Abruf; weitere Abrufe schließen nichts mehr
-]
+# Spalten, die nach der ersten Installation dazukamen: Tabelle → [(Name, Definition)]. Bestehende
+# Datenbanken bekommen sie beim Start per ALTER TABLE; alte Einträge gelten als ohne Angabe (NULL).
+ADDED_COLUMNS = {
+    "transfers": [
+        ("patient_type", "TEXT"),
+        ("positions_json", "TEXT NOT NULL DEFAULT '[]'"),
+        ("dictation_id", "TEXT"),  # gespeichertes Diktat, das der Abruf des Kurzcodes schließt
+        ("dictation_revision", "INTEGER"),  # genau dieser Stand wurde übergeben; None = noch nicht gespeichert
+        ("handed_over_at", "REAL"),  # erster Abruf; weitere Abrufe schließen nichts mehr
+        ("dentist_id", "INTEGER"),  # Behandler des Diktats, für die Anzeige an der Rezeption
+    ],
+    # Behandler beim Start der Aufnahme, danach unveränderlich; NULL = ohne Behandler (Pilotdaten)
+    "dictations": [("dentist_id", "INTEGER")],
+    # Behandler des ersten Diktats: wer den Patienten eröffnet hat
+    "patients": [("dentist_id", "INTEGER")],
+}
+
+# Erster Eintrag der Behandlerliste bei einer neuen Datenbank; in der App umbenennen.
+FIRST_DENTIST = "Behandler 1"
 
 
 def init_db(path: Path) -> None:
@@ -92,10 +111,14 @@ def init_db(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with connect(path) as conn:
         conn.executescript(SCHEMA)
-        present = {row["name"] for row in conn.execute("PRAGMA table_info(transfers)")}
-        for name, definition in ADDED_TRANSFER_COLUMNS:
-            if name not in present:
-                conn.execute(f"ALTER TABLE transfers ADD COLUMN {name} {definition}")
+        for table, columns in ADDED_COLUMNS.items():
+            present = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+            for name, definition in columns:
+                if name not in present:
+                    conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
+        # Einmalig: Behandler werden nie gelöscht, eine leere Liste gibt es nur bei einer neuen Datenbank.
+        if conn.execute("SELECT count(*) FROM dentists").fetchone()[0] == 0:
+            conn.execute("INSERT INTO dentists (name, created_at) VALUES (?, ?)", (FIRST_DENTIST, time.time()))
 
 
 @contextmanager

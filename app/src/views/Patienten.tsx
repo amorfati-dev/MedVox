@@ -1,14 +1,18 @@
 // Büro (/patienten): nach der Runde durch die Behandlungsräume die Diktate je Patient nach Evident
 // übertragen. Links die Liste (ohne Patient, dann Patienten, jüngstes zuerst), rechts der gewählte
 // Patient mit seinen Diktaten und denselben Kopieraktionen wie am iPad; „Als übertragen markieren“
-// löscht den Inhalt sofort. Kurzcode und /transfer bleiben für die sofortige Übergabe.
-import { useState } from "react";
+// löscht den Inhalt sofort. Kurzcode und /transfer bleiben für die sofortige Übergabe. Behandler je
+// Patient und Diktat stehen dabei; der Filter nach Behandler steht auf „Alle“ und versteckt nichts
+// dauerhaft – Gemeinschaftspraxis, jeder sieht alle Patienten.
+import { useEffect, useState } from "react";
 import { api, ApiError, type StoredDictation } from "../api";
+import { DentistFilter } from "../components/DentistFilter";
 import { DictationCard } from "../components/DictationCard";
 import { HandoverWarning } from "../components/HandoverWarning";
 import { PatientListCard, type Selection } from "../components/PatientListCard";
 import { PatientPicker } from "../components/PatientPicker";
 import { ThemeSwitch } from "../components/ThemeSwitch";
+import { dentistApi, filterByDentist, filterChoices, type Dentist } from "../dentists";
 import { usePatientList } from "../hooks/usePatientList";
 import { dictationCopy, patientState, STATE_LABEL } from "../patients";
 
@@ -22,6 +26,12 @@ export function Patienten({ onLogout }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [roster, setRoster] = useState<Dentist[]>([]);
+  const [filter, setFilter] = useState<number | null>(null); // null = alle Behandler
+
+  useEffect(() => {
+    dentistApi.list().then((l) => setRoster(l.dentists), () => undefined); // ohne Liste: kein Filter
+  }, []);
 
   const select = (s: Selection) => {
     setSelected(s);
@@ -121,6 +131,7 @@ export function Patienten({ onLogout }: Props) {
           </h2>
           <span className={`state-chip state-${state === "übertragen" ? "done" : state}`}>{STATE_LABEL[state]}</span>
         </div>
+        {detail.dentist_name && <p className="muted small">Eröffnet von {detail.dentist_name}</p>}
         {detail.items.length === 0 && (
           <p className="muted">
             {state === "übertragen"
@@ -209,8 +220,14 @@ export function Patienten({ onLogout }: Props) {
           {message}
         </p>
       )}
+      <DentistFilter choices={filterChoices(roster, data.list)} value={filter} onChange={setFilter} />
       <div className="rezeption-grid">
-        <PatientListCard list={data.list} selected={selected} onSelect={select} />
+        <PatientListCard
+          list={data.list && filterByDentist(data.list, filter)}
+          selected={selected}
+          onSelect={select}
+          filtered={filter !== null}
+        />
         {content}
       </div>
       {assigning && (

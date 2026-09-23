@@ -1,0 +1,120 @@
+/* Behandler: wer diktiert (Leiste und Auswahl am iPad), Liste pflegen (/behandler), Filter im Büro.
+   Neutrale Farbe (Tinte), denn Türkis und Indigo heißen „wer zahlt“; Bernstein = bitte wählen. */
+.dentist-bar {
+  min-height: var(--tap);
+  border-color: var(--ink-2);
+}
+.dentist-bar > .icon {
+  color: var(--ink-2);
+}
+.dentist-bar .patient-change {
+  color: var(--ink-2);
+}
+.dentist-name {
+  font-size: var(--fs-state);
+  line-height: 1.15;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.dentist-ask {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+}
+.dentist-ask > .icon,
+.dentist-ask .patient-label,
+.dentist-ask .patient-change,
+.dentist-ask .dentist-name {
+  color: var(--warn);
+}
+
+.dentist-picker {
+  width: min(720px, 100%);
+}
+.dentist-grid {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  gap: var(--tap-gap);
+}
+@media (min-width: 600px) {
+  .dentist-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.dentist-grid .pick {
+  min-height: 84px;
+}
+.dentist-pick {
+  font-size: var(--fs-state);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.dentist-more {
+  justify-content: space-between;
+}
+
+/* Büro: Behandler je Patient und Diktat, Filter (Voreinstellung „Alle“). */
+.section-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+.dentist-chip {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.dentist-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.dentist-filter .btn[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--surface-2);
+  font-weight: 800;
+}
+.dentist-filter-label {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+/* /behandler: Liste pflegen */
+.roster-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 900px) {
+  .roster-row {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 17rem;
+    align-items: end;
+  }
+}
+.roster-row input {
+  width: 100%;
+  margin-bottom: 0;
+}
+.roster-inactive .roster-name {
+  color: var(--ink-2);
+}
+.roster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

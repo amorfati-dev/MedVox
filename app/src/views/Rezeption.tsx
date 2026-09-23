@@ -1,5 +1,5 @@
 // Rezeptions-Ansicht (/transfer): Kurzcode eingeben, Text und Ziffern abholen – ohne Anmeldung.
-// Am PC zwei Spalten: links der Code, rechts das Diktat mit Patiententyp, Evident-Zeilen und
+// Am PC zwei Spalten: links der Code, rechts das Diktat mit Behandler, Patiententyp, Evident-Zeilen und
 // einer kleinen Tabelle für Zuzahlung und Kassenanteil (nur Anzeige, kopiert wird wie bisher).
 import { useEffect, useState, type FormEvent } from "react";
 import {
@@ -18,6 +18,7 @@ import { EvidentLines } from "../components/EvidentLines";
 import { HandoverWarning } from "../components/HandoverWarning";
 import { PATIENT_LABEL } from "../components/PatientSwitch";
 import { ThemeSwitch } from "../components/ThemeSwitch";
+import { dentistLabel } from "../dentists";
 
 export function Rezeption() {
   const [code, setCode] = useState(() => normalizeCode(new URLSearchParams(window.location.search).get("code") ?? ""));
@@ -107,9 +108,12 @@ export function Rezeption() {
           <section className="card">
             <div className="section-head">
               <h2>Diktat</h2>
-              {data.patient_type && (
-                <span className={`badge badge-${data.patient_type}`}>{PATIENT_LABEL[data.patient_type]}</span>
-              )}
+              <span className="section-tags">
+                <span className="dentist-chip">{dentistLabel(data.dentist_name)}</span>
+                {data.patient_type && (
+                  <span className={`badge badge-${data.patient_type}`}>{PATIENT_LABEL[data.patient_type]}</span>
+                )}
+              </span>
             </div>
             <HandoverWarning earlier={data.earlier ?? []} current={blocks} allPrivate={allPrivate} labelled={kasse} />
             <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>

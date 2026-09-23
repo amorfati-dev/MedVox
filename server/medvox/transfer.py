@@ -6,11 +6,11 @@ Dazu, rein informativ für die Rezeption: der Patiententyp und je Position Zahn,
 Sechsstellige Codes aus einem verwechslungsfreien Alphabet (ohne 0/O/1/I),
 TTL 15 Minuten, innerhalb der TTL mehrfach abrufbar. Nennt das iPad beim Anlegen die ID des
 gespeicherten Diktats (`dictation_id`), schließt der erste Abruf dieses Diktat wie „übertragen“
-im Büro (`patients.hand_over`), genau in dem Stand, den der Code trägt (`dictation_revision`).
+im Büro (`handovers.hand_over`), genau in dem Stand, den der Code trägt (`dictation_revision`).
 Ist das Diktat schon vorher übertragen worden, gibt der Code nichts mehr heraus und wird
 gelöscht (`AlreadyTransferred`) – Kurzcode und Patientenliste sind nie zwei Wege zu demselben
-Diktat. Abgelaufene Einträge
-werden bei jedem Schreiben und Lesen entfernt; zusätzlich räumt `main.py`
+Diktat. Der Code nennt den Behandler des Diktats (beim Anlegen festgehalten, auch nach dem
+Schließen des Diktats sichtbar). Abgelaufene Einträge werden bei jedem Schreiben und Lesen entfernt; zusätzlich räumt `main.py`
 beim Start und periodisch auf (WP-11).
 """
 
@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from medvox import db, handovers, patients
+from medvox import db, dentists, handovers
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 CODE_LENGTH = 6
@@ -55,6 +55,7 @@ class Transfer:
     patient_type: str | None = None  # kasse | privat; None bei älteren iPad-Versionen
     positions: list[dict] = field(default_factory=list)  # {"tooth", "code", "kind"}
     earlier: list[dict] = field(default_factory=list)  # frühere Abholungen desselben Diktats (handovers.py)
+    dentist_name: str | None = None  # Behandler des Diktats; None bei Diktaten ohne Behandler
 
 
 def create_transfer(
@@ -66,8 +67,12 @@ def create_transfer(
     positions: list[dict] | None = None,
     dictation_id: str | None = None,
     dictation_revision: int | None = None,
+    dentist_id: int | None = None,
 ) -> Transfer:
-    """Speichert einen Eintrag unter einem neuen, noch unbenutzten Code."""
+    """Speichert einen Eintrag unter einem neuen, noch unbenutzten Code.
+
+    Behandler: der des gespeicherten Diktats, sonst der vom iPad genannte (Diktat noch nicht gespeichert).
+    """
     positions = list(positions or [])
     now = time.time()
     with db.connect(db_path) as conn:
@@ -77,12 +82,14 @@ def create_transfer(
             exists = conn.execute("SELECT 1 FROM transfers WHERE code = ?", (code,)).fetchone()
             if exists is None:
                 break
+        stored = conn.execute("SELECT dentist_id FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+        dentist_id = stored["dentist_id"] if stored is not None else dentists.known(conn, dentist_id)
         conn.execute(
-            "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at,"
-            " patient_type, positions_json, dictation_id, dictation_revision) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at, patient_type,"
+            " positions_json, dictation_id, dictation_revision, dentist_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions),
-                dictation_id, dictation_revision,
+                dictation_id, dictation_revision, dentist_id,
             ),
         )
     return Transfer(code, transcript, list(codes), now, now + ttl_s, patient_type, positions)
@@ -100,10 +107,12 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
         row = conn.execute(
-            "SELECT * FROM transfers WHERE code = ?", (code.strip().upper(),)
+            "SELECT t.*, d.name AS dentist_name FROM transfers t LEFT JOIN dentists d ON d.id = t.dentist_id"
+            " WHERE t.code = ?",
+            (code.strip().upper(),),
         ).fetchone()
         if row is not None and row["dictation_id"] and row["handed_over_at"] is None:
-            closed_at = patients.hand_over(conn, row["dictation_id"], row["dictation_revision"], now)
+            closed_at = handovers.hand_over(conn, row["dictation_id"], row["dictation_revision"], now)
             if closed_at is None:
                 conn.execute("UPDATE transfers SET handed_over_at = ? WHERE code = ?", (now, row["code"]))
                 codes = json.loads(row["codes_json"])
@@ -125,4 +134,5 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
         row["patient_type"],
         json.loads(row["positions_json"]),
         earlier,
+        row["dentist_name"],
     )

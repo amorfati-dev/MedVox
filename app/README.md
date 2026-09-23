@@ -6,9 +6,10 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 
 | Pfad | Zweck |
 |---|---|
-| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander |
-| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“, je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt) |
-| `/transfer` | Rezeption: Kurzcode eingeben (oder per QR-Link `?code=…`), Text/Ziffern/beides kopieren – ohne Anmeldung |
+| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander |
+| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt) |
+| `/behandler` | Behandlerliste (mit Anmeldung): Name, optionale Behandlernummer, aktiv/inaktiv – nur Zuordnung, keine Rechte |
+| `/transfer` | Rezeption: Kurzcode eingeben (oder per QR-Link `?code=…`), Behandler des Diktats sehen, Text/Ziffern/beides kopieren – ohne Anmeldung |
 | `/check` | Gerätetest: HTTPS, MediaRecorder-Formate, Mikrofon, Server-Health |
 
 Aufbau in `src/`: `api.ts` (API-Client, deutsche Fehlermeldungen, Evident-Kopierformat), `router.ts` (Pfad-Switch),

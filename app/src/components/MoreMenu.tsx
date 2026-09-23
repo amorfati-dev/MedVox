@@ -1,4 +1,4 @@
-// ⋯-Menü in der Kopfzeile: seltene Aktionen (Patientenliste, Gerätetest, Abmelden) als große Menüzeilen,
+// ⋯-Menü in der Kopfzeile: seltene Aktionen (Patientenliste, Behandlerliste, Gerätetest, Abmelden) als große Menüzeilen,
 // damit sie nicht als kleine Textlinks neben den Handschuh-Tippflächen stehen.
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
@@ -39,6 +39,9 @@ export function MoreMenu({ onLogout }: Props) {
         <div className="more-menu" role="menu">
           <a className="more-item" role="menuitem" href="/patienten">
             Patientenliste (Büro)
+          </a>
+          <a className="more-item" role="menuitem" href="/behandler">
+            Behandlerliste
           </a>
           <a className="more-item" role="menuitem" href="/check">
             Gerätetest

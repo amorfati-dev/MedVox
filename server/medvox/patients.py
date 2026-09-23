@@ -13,6 +13,11 @@ beim Kurzcode-Transfer bei jedem Schreiben und Lesen (`db.purge_expired`), beim 
 periodisch (`main.py`). Ein übertragenes, gelöschtes oder abgelaufenes Diktat hinterlässt einen
 Grabstein ohne Inhalt (`db.bury`); Speichern unter dieser ID wird abgelehnt (`DictationClosed`),
 damit es nie wieder offen erscheint und nicht zweimal nach Evident geht.
+
+Behandler (`medvox/dentists.py`): jedes Diktat behält den Behandler, den das iPad beim ersten
+Speichern nennt (gewählt beim Start der Aufnahme), und ändert ihn danach nie; der Patient behält
+den Behandler seines ersten Diktats als den, der ihn eröffnet hat. Beides ist nur Zuordnung –
+jeder sieht alle Patienten. Diktate und Patienten aus der Zeit vor der Behandlerliste bleiben ohne.
 """
 
 from __future__ import annotations
@@ -23,7 +28,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from medvox import db, handovers
+from medvox import db, dentists, handovers
 
 RETENTION_S = 24 * 3600  # harte Grenze, nicht per Umgebung verlängerbar
 
@@ -41,6 +46,8 @@ class Patient:
     transferred_at: float | None
     transferred_count: int  # bereits übertragene (gelöschte) Diktate
     open_count: int  # noch nicht übertragene Diktate
+    dentist_id: int | None = None  # Behandler des ersten Diktats (hat den Patienten eröffnet)
+    dentist_ids: tuple[int, ...] = ()  # dieser und die Behandler der offenen Diktate, ohne Doppelte
 
 
 @dataclass(frozen=True)
@@ -53,18 +60,24 @@ class Dictation:
     updated_at: float
     data: dict
     handovers: tuple[dict, ...] = ()  # abgeholte Kurzcodes: {"fetched_at", "codes"} (handovers.py)
+    dentist_id: int | None = None  # Behandler beim Start der Aufnahme; None = ohne Behandler
 
 
 _PATIENT_SQL = (
-    "SELECT p.*, (SELECT count(*) FROM dictations d WHERE d.patient_id = p.id) AS open_count FROM patients p"
+    "SELECT p.*, (SELECT count(*) FROM dictations d WHERE d.patient_id = p.id) AS open_count,"
+    " (SELECT group_concat(d.dentist_id) FROM (SELECT dentist_id FROM dictations WHERE patient_id = p.id"
+    " AND dentist_id IS NOT NULL ORDER BY created_at, id) d) AS dentist_list FROM patients p"
 )
 _DICTATION_SQL = "SELECT d.*, p.number FROM dictations d LEFT JOIN patients p ON p.id = d.patient_id"
 
 
 def _patient(row: sqlite3.Row) -> Patient:
+    listed = [int(x) for x in (row["dentist_list"] or "").split(",") if x]
+    involved = ([row["dentist_id"]] if row["dentist_id"] is not None else []) + listed
     return Patient(
         row["id"], row["number"], row["created_at"], row["updated_at"],
         row["transferred_at"], row["transferred_count"], row["open_count"],
+        row["dentist_id"], tuple(dict.fromkeys(involved)),
     )
 
 
@@ -73,7 +86,7 @@ def _dictations(conn: sqlite3.Connection, rows: list[sqlite3.Row]) -> list[Dicta
     return [
         Dictation(
             r["id"], r["patient_id"], r["number"], r["revision"], r["created_at"], r["updated_at"],
-            json.loads(r["data_json"]), tuple(fetched[r["id"]]),
+            json.loads(r["data_json"]), tuple(fetched[r["id"]]), r["dentist_id"],
         )
         for r in rows
     ]
@@ -91,11 +104,17 @@ def _patient_id(conn: sqlite3.Connection, number: str, now: float) -> int:
     return int(cur.lastrowid)
 
 
-def _touch(conn: sqlite3.Connection, patient_id: int, dictation_expires: float, now: float) -> None:
-    """Patient lebt mindestens so lange wie sein jüngstes Diktat; `updated_at` sortiert die Liste."""
+def _touch(
+    conn: sqlite3.Connection, patient_id: int, dictation_expires: float, now: float, dentist_id: int | None
+) -> None:
+    """Patient lebt mindestens so lange wie sein jüngstes Diktat; `updated_at` sortiert die Liste.
+
+    Der erste Behandler, der hier ein Diktat hinterlässt, bleibt der, der den Patienten eröffnet hat.
+    """
     conn.execute(
-        "UPDATE patients SET updated_at = ?, expires_at = max(expires_at, ?) WHERE id = ?",
-        (now, dictation_expires, patient_id),
+        "UPDATE patients SET updated_at = ?, expires_at = max(expires_at, ?), dentist_id = coalesce(dentist_id, ?)"
+        " WHERE id = ?",
+        (now, dictation_expires, dentist_id, patient_id),
     )
 
 
@@ -148,14 +167,21 @@ def get_patient(
 
 
 def save_dictation(
-    db_path: Path, dictation_id: str, data: dict, number: str | None, now: float | None = None
+    db_path: Path,
+    dictation_id: str,
+    data: dict,
+    number: str | None,
+    dentist_id: int | None = None,
+    now: float | None = None,
 ) -> Dictation:
     """Legt das Diktat an oder ersetzt seinen Inhalt (iPad speichert nach jeder Änderung).
 
     `number` ordnet nur ein neues Diktat oder eines „ohne Patient“ zu (Patient angelegt, falls
     nötig); ein schon zugeordnetes bleibt bei seinem Patienten, auch wenn das Büro es umgehängt
     hat. Die 24 Stunden zählen ab der ersten Speicherung und verlängern sich durch Änderungen
-    nicht. Hat die ID einen Grabstein, gibt es `DictationClosed`.
+    nicht. `dentist_id` zählt nur beim Anlegen (unbekannte ID: ohne Behandler); spätere
+    Speicherungen ändern den Behandler nie, auch wenn das iPad inzwischen gewechselt wurde.
+    Hat die ID einen Grabstein, gibt es `DictationClosed`.
     """
     now = time.time() if now is None else now
     payload = json.dumps(data, ensure_ascii=False)
@@ -163,19 +189,22 @@ def save_dictation(
         db.purge_expired(conn, now)
         if conn.execute("SELECT 1 FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone():
             raise DictationClosed(dictation_id)
-        row = conn.execute("SELECT patient_id, expires_at FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+        row = conn.execute(
+            "SELECT patient_id, expires_at, dentist_id FROM dictations WHERE id = ?", (dictation_id,)
+        ).fetchone()
         patient_id = row["patient_id"] if row else None
         if patient_id is None and number:
             patient_id = _patient_id(conn, number, now)
         if row is None:
             expires = now + RETENTION_S
+            dentist_id = dentists.known(conn, dentist_id)
             conn.execute(
-                "INSERT INTO dictations (id, patient_id, created_at, updated_at, expires_at, data_json)"
-                " VALUES (?, ?, ?, ?, ?, ?)",
-                (dictation_id, patient_id, now, now, expires, payload),
+                "INSERT INTO dictations (id, patient_id, created_at, updated_at, expires_at, data_json, dentist_id)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (dictation_id, patient_id, now, now, expires, payload, dentist_id),
             )
         else:
-            expires = row["expires_at"]
+            expires, dentist_id = row["expires_at"], row["dentist_id"]
             conn.execute(
                 "UPDATE dictations SET patient_id = ?, revision = revision + 1, saved_revision = revision + 1,"
                 " updated_at = ?, data_json = ?"
@@ -183,7 +212,7 @@ def save_dictation(
                 (patient_id, now, payload, dictation_id),
             )
         if patient_id is not None:
-            _touch(conn, patient_id, expires, now)
+            _touch(conn, patient_id, expires, now, dentist_id)
         saved = _get_dictation(conn, dictation_id)
     assert saved is not None
     return saved
@@ -194,14 +223,14 @@ def assign_dictation(db_path: Path, dictation_id: str, patient_id: int, now: flo
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
-        row = conn.execute("SELECT expires_at FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+        row = conn.execute("SELECT expires_at, dentist_id FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
         if row is None or _get_patient(conn, patient_id) is None:
             return None
         conn.execute(
             "UPDATE dictations SET patient_id = ?, revision = revision + 1, updated_at = ? WHERE id = ?",
             (patient_id, now, dictation_id),
         )
-        _touch(conn, patient_id, row["expires_at"], now)
+        _touch(conn, patient_id, row["expires_at"], now, row["dentist_id"])
         return _get_dictation(conn, dictation_id)
 
 
@@ -245,31 +274,3 @@ def delete_patient(db_path: Path, patient_id: int, now: float | None = None) -> 
         db.bury(conn, "patient_id = ?", (patient_id,), now)
         return conn.execute("DELETE FROM patients WHERE id = ?", (patient_id,)).rowcount > 0
 
-
-def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None, now: float) -> float | None:
-    """Erster Abruf eines Kurzcodes: genau der übergebene Stand (`revision`) gilt als übertragen.
-
-    Rückgabe: Zeitpunkt, zu dem das Diktat schon vorher geschlossen wurde (Büro, Löschen, Ablauf
-    oder ein anderer Kurzcode) – dann darf der Code nichts mehr herausgeben; sonst None.
-    Unverändert (`revision` = Revision des letzten Speicherns vom iPad; Zuordnen im Büro und
-    frühere Abholungen zählen nicht als Änderung): löschen wie „übertragen“ im Büro. Danach
-    geändert (oder beim Anlegen des Codes noch nicht gespeichert): offen lassen mit neuer
-    Revision, damit das Büro die Abholung (handovers.py) sieht und nur die Änderung nachträgt. Noch gar nicht gespeichert: Grabstein, damit das
-    spätere Speichern abgelehnt wird statt ein zweites offenes Diktat anzulegen.
-    """
-    tomb = conn.execute("SELECT closed_at FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone()
-    if tomb is not None:
-        return float(tomb["closed_at"])
-    row = conn.execute("SELECT patient_id, saved_revision FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
-    if row is None:
-        conn.execute("INSERT INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
-    elif revision is not None and row["saved_revision"] == revision:
-        db.bury(conn, "id = ?", (dictation_id,), now)
-        if row["patient_id"] is not None:
-            conn.execute(
-                "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",
-                (now, row["patient_id"]),
-            )
-    else:
-        conn.execute("UPDATE dictations SET revision = revision + 1 WHERE id = ?", (dictation_id,))
-    return None
