@@ -1,6 +1,6 @@
 // Steuerung unter dem Statusfeld: Aufnahmeknopf und die Aktionen des jeweiligen Zustands.
 // Nur Anzeige – alle Aktionen sind die von useDictation (stop, next, resume, retry, dropSegment)
-// bzw. „neues Diktat“ und „leeren“ aus der Diktat-Ansicht.
+// bzw. „neues Diktat“, „nächster Patient“ und „verwerfen“ aus der Diktat-Ansicht.
 import type { Dictation } from "../hooks/useDictation";
 import type { UiState } from "../status";
 import { Icon } from "./Icon";
@@ -9,12 +9,13 @@ import { RecordButton } from "./RecordButton";
 type Props = {
   state: UiState;
   d: Dictation;
-  onNew: () => void; // neues Diktat aufnehmen (verwirft das bisherige)
-  onClear: () => void; // Bildschirm leeren, ohne aufzunehmen
+  onNew: () => void; // neues Diktat aufnehmen (das bisherige bleibt beim Patienten gespeichert)
+  onNext: () => void; // Bildschirm leeren und die nächste Patientennummer abfragen
+  onDiscard: () => void; // Diktat verwerfen (auch das gespeicherte)
   handedOver: boolean; // Kurzcode erzeugt: „Nächster Patient“ wird Hauptaktion
 };
 
-export function Controls({ state, d, onNew, onClear, handedOver }: Props) {
+export function Controls({ state, d, onNew, onNext, onDiscard, handedOver }: Props) {
   switch (state) {
     case "aufnahme":
       return (
@@ -39,7 +40,7 @@ export function Controls({ state, d, onNew, onClear, handedOver }: Props) {
       return (
         <div className="controls">
           <RecordButton variant="neu" onClick={onNew} />
-          <button type="button" className={handedOver ? "btn btn-primary btn-block" : "btn btn-block"} onClick={onClear}>
+          <button type="button" className={handedOver ? "btn btn-primary btn-block" : "btn btn-block"} onClick={onNext}>
             <Icon name="user" />
             Nächster Patient
           </button>
@@ -64,7 +65,7 @@ export function Controls({ state, d, onNew, onClear, handedOver }: Props) {
               onClick={() => void d.resume()}
             />
           )}
-          <button type="button" className="btn btn-quiet btn-block" onClick={onClear}>
+          <button type="button" className="btn btn-quiet btn-block" onClick={onDiscard}>
             Verwerfen
           </button>
         </div>
@@ -77,7 +78,7 @@ export function Controls({ state, d, onNew, onClear, handedOver }: Props) {
             <button type="button" className="btn btn-warn btn-block" onClick={d.dropSegment}>
               Diesen Abschnitt verwerfen
             </button>
-            <button type="button" className="btn btn-quiet btn-block" onClick={onClear}>
+            <button type="button" className="btn btn-quiet btn-block" onClick={onDiscard}>
               Ganzes Diktat verwerfen
             </button>
           </div>

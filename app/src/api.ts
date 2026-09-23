@@ -45,6 +45,40 @@ export type TransferData = {
   positions?: TransferPosition[];
 };
 
+// Stand eines Diktats, wie das iPad ihn beim Patienten speichert (PUT /api/v1/dictations/{id}):
+// die Felder aus /transcribe aller Abschnitte plus die Auswahl (abgewählte Ziffern, übernommene Optionen).
+export type DictationContent = {
+  transcript: string;
+  patient_type: PatientType | null;
+  codes: string[];
+  suggestions: Suggestion[];
+  planned: Suggestion[];
+  notes: string[];
+  deselected: string[]; // Ziffern im Kopierformat ("2x 41a")
+  adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
+};
+// `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).
+export type DictationBody = DictationContent & { patient?: string };
+export type StoredDictation = DictationContent & {
+  id: string;
+  patient: string | null;
+  patient_id: number | null;
+  revision: number; // „übertragen“ löscht nur genau die angezeigte Fassung
+  created_at: string;
+  updated_at: string;
+};
+export type PatientSummary = {
+  id: number;
+  number: string; // Evident-Patientennummer
+  created_at: string;
+  updated_at: string; // jüngstes Diktat
+  dictations: number; // offen
+  transferred: number; // schon übertragen (Inhalt gelöscht)
+  transferred_at: string | null;
+};
+export type PatientDetail = PatientSummary & { items: StoredDictation[] };
+export type PatientList = { patients: PatientSummary[]; unassigned: StoredDictation[] };
+
 export class ApiError extends Error {
   readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
 
@@ -111,6 +145,23 @@ export const api = {
     request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes, ...details })),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
+
+  // Diktate je Patient: am Stuhl speichern, im Büro übertragen (höchstens 24 Stunden).
+  saveDictation: (id: string, body: DictationBody) =>
+    request<StoredDictation>(`/api/v1/dictations/${encodeURIComponent(id)}`, json("PUT", body)),
+  deleteDictation: (id: string) =>
+    request<void>(`/api/v1/dictations/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  listPatients: () => request<PatientList>("/api/v1/patients"),
+  createPatient: (number: string) => request<PatientSummary>("/api/v1/patients", json("POST", { number })),
+  getPatient: (id: number) => request<PatientDetail>(`/api/v1/patients/${id}`),
+  appendDictation: (patientId: number, dictationId: string) =>
+    request<StoredDictation>(`/api/v1/patients/${patientId}/dictations`, json("POST", { dictation_id: dictationId })),
+  markTransferred: (patientId: number, seen: StoredDictation[]) =>
+    request<PatientDetail>(
+      `/api/v1/patients/${patientId}/transferred`,
+      json("POST", { seen: seen.map((d) => ({ id: d.id, revision: d.revision })) }),
+    ),
+  deletePatient: (id: number) => request<void>(`/api/v1/patients/${id}`, { method: "DELETE" }),
 };
 
 // Art je Ziffer der erbrachten Hauptvorschläge; Schlüssel wie in `codes` ohne Anzahl ("2x 41a" -> "41a").

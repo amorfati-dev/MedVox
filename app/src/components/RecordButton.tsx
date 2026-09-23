@@ -9,7 +9,7 @@ const LOOK: Record<RecordVariant, { icon: IconName; label: string; aria: string 
   stopp: { icon: "stop", label: "Stopp", aria: "Aufnahme beenden" },
   warten: { icon: "spinner", label: "Bitte warten", aria: "Wird übertragen – bitte warten" },
   erneut: { icon: "send", label: "Erneut senden", aria: "Wartende Abschnitte erneut senden" },
-  neu: { icon: "mic", label: "Neu", aria: "Neues Diktat aufnehmen – ersetzt das Ergebnis" },
+  neu: { icon: "mic", label: "Neu", aria: "Neues Diktat aufnehmen – das bisherige bleibt beim Patienten gespeichert" },
 };
 
 type Props = { variant: RecordVariant; onClick: () => void; disabled?: boolean; label?: string; aria?: string };

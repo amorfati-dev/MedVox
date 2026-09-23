@@ -9,18 +9,13 @@ import {
   evidentText,
   normalizeCode,
   splitBlocks,
-  type PositionKind,
   type TransferData,
 } from "../api";
+import { CopayTable } from "../components/CopayTable";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
 import { PATIENT_LABEL } from "../components/PatientSwitch";
 import { ThemeSwitch } from "../components/ThemeSwitch";
-
-const KIND_LABEL: Partial<Record<PositionKind, string>> = {
-  kassenanteil: "Kassenanteil – Kasse zahlt",
-  zuzahlung: "Zuzahlung – Patient zahlt",
-};
 
 export function Rezeption() {
   const [code, setCode] = useState(() => normalizeCode(new URLSearchParams(window.location.search).get("code") ?? ""));
@@ -59,7 +54,6 @@ export function Rezeption() {
   // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,l1,13a"), eine je Zahn, siehe evidentLines.
   const codes = data ? evidentText(data.codes) : "";
   const both = data ? `${data.transcript}\n\nZiffern:\n${codes}` : "";
-  const extra = (data?.positions ?? []).filter((p) => KIND_LABEL[p.kind]);
   // Kassenpatient: Kassenblock, Leerzeile, Privatblock (Privatpositionen immer zuletzt, siehe evidentBlocks).
   const kasse = data?.patient_type === "kasse";
   const positions = data?.positions ?? [];
@@ -72,6 +66,9 @@ export function Rezeption() {
         <h1>MedVox · Rezeption</h1>
         <nav>
           <ThemeSwitch />
+          <a className="btn" href="/patienten">
+            Patienten
+          </a>
           <a className="btn" href="/">
             Diktat
           </a>
@@ -115,27 +112,7 @@ export function Rezeption() {
             <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
             <h2>Ziffern für Evident</h2>
             <EvidentLines blocks={blocks} labelled={kasse} />
-            {extra.length > 0 && (
-              <table className="copay-table">
-                <caption>Mehrkosten – Vereinbarung mit dem Patienten nötig</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Zahn</th>
-                    <th scope="col">Ziffer</th>
-                    <th scope="col">Art</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {extra.map((p) => (
-                    <tr key={`${p.tooth}-${p.code}`} className={`copay-${p.kind}`}>
-                      <td>{p.tooth ?? "ohne Zahn"}</td>
-                      <td className="mono">{p.code}</td>
-                      <td>{KIND_LABEL[p.kind]}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <CopayTable positions={positions} />
             <div className="actions">
               <CopyButton label="Text kopieren" text={data.transcript} primary />
               <CopyButton label="Ziffern kopieren" text={codes} />

@@ -13,6 +13,8 @@ export type Selection = {
   toggleCode: (code: string) => void; // Ziffer ohne Anzahl ("41a"); gilt für alle Zähne mit dieser Ziffer
   toggleOption: (key: string) => void; // optionKey
   clear: () => void;
+  deselected: string[]; // für das Speichern beim Patienten
+  adopted: string[];
 };
 
 // `codes`: Ziffern im Kopierformat ("2x 41a") aus der Warteschlange.
@@ -53,5 +55,8 @@ export function useSelection(codes: string[], suggestions: Suggestion[]): Select
     setAdopted(new Set());
   }, []);
 
-  return { groups, evident, blocks, numbers, toggleCode, toggleOption, clear };
+  const deselectedList = useMemo(() => [...deselected], [deselected]);
+  const adoptedList = useMemo(() => [...adopted], [adopted]);
+
+  return { groups, evident, blocks, numbers, toggleCode, toggleOption, clear, deselected: deselectedList, adopted: adoptedList };
 }

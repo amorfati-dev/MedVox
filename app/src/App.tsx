@@ -1,11 +1,12 @@
-// Einstieg: Route wählen; die Diktat-Ansicht verlangt eine Sitzung,
-// Rezeption (/transfer) und Gerätetest (/check) sind ohne Anmeldung nutzbar.
+// Einstieg: Route wählen; Diktat und Patientenliste (/patienten, enthält Transkripte) verlangen eine
+// Sitzung, Rezeption (/transfer) und Gerätetest (/check) sind ohne Anmeldung nutzbar.
 import { useEffect, useState } from "react";
 import { api, ApiError } from "./api";
 import { routeFromPath } from "./router";
 import { Check } from "./views/Check";
 import { Diktat } from "./views/Diktat";
 import { Login } from "./views/Login";
+import { Patienten } from "./views/Patienten";
 import { Rezeption } from "./views/Rezeption";
 
 type Session = "prüfe" | "angemeldet" | "abgemeldet" | "server-weg";
@@ -13,9 +14,10 @@ type Session = "prüfe" | "angemeldet" | "abgemeldet" | "server-weg";
 export function App() {
   const route = routeFromPath(window.location.pathname);
   const [session, setSession] = useState<Session>("prüfe");
+  const needsSession = route === "diktat" || route === "patienten";
 
   useEffect(() => {
-    if (route !== "diktat") return;
+    if (!needsSession) return;
     let aktiv = true;
     api
       .session()
@@ -27,7 +29,7 @@ export function App() {
     return () => {
       aktiv = false;
     };
-  }, [route]);
+  }, [needsSession]);
 
   if (route === "rezeption") return <Rezeption />;
   if (route === "check") return <Check />;
@@ -58,5 +60,6 @@ export function App() {
     );
   }
   if (session === "abgemeldet") return <Login onLogin={() => setSession("angemeldet")} />;
+  if (route === "patienten") return <Patienten onLogout={() => setSession("abgemeldet")} />;
   return <Diktat onLogout={() => setSession("abgemeldet")} />;
 }
