@@ -123,7 +123,8 @@ Fachtabellen zum Nachlesen).
   Privat-Gegenstück aus dem Katalog zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
   Sind BEMA und GOZ für dieselbe Leistung am selben Zahn diktiert („Osteotomie 38, GOZ 3030“) und ist
   das kein Zuzahlungsfall, wird die GOZ-Position zur `alternative` und beide tragen `decide`
-  („nur eine abrechnen“); ein Zuschlag entfällt, solange diese Wahl offen ist.
+  („nur eine abrechnen“); ein Zuschlag entfällt, solange diese Wahl offen ist
+  (ein diktierter Zuschlag erscheint dann nur als `alternative` mit `decide`).
 - **Zuschlag 0500–0530:** nur für Privatpatienten, also nur aus selbst als GOZ erbrachter Chirurgie
   (z. B. „Osteotomie privat“ oder „GOZ 3030“); genau einer je Sitzung, aus der Punktzahl der
   höchstbewerteten erbrachten chirurgischen GOZ-Leistung. Die Begründung nennt Ziffer und Punkte.
