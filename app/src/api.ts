@@ -139,15 +139,49 @@ export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
 // statt "41a"), sonst die Ziffer; ohne `shortForms` nur amtliche Ziffern („Nur Ziffern“).
 type Line = { tooth: number | null; counts: Map<string, number>; forms: Map<string, string> };
 
+// Evident setzt nach einer Privatposition alles Folgende ebenfalls auf privat. Beim Kassenpatienten
+// stehen deshalb alle Kassenzeilen zuerst und alle Privatpositionen (Zuzahlung, GOZ/GOÄ) in einem
+// eigenen Block danach – nicht nur zuletzt in ihrer Zahnzeile; ein Zahn kann in beiden Blöcken stehen.
+// Beim Privatpatienten ist alles privat: ein Block, Format unverändert.
+export type EvidentBlocks = { kasse: string[]; privat: string[] };
+
+export function isPrivate(s: Suggestion): boolean {
+  return s.kind !== "bema";
+}
+
 // `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
 // `active`: ausgewählte Ziffern im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
 // Mehrfach erbrachte Positionen stehen einmal mit "*Anzahl", hinter Kurzform wie Ziffer ("36,wf*3",
 // "11,2410*3"); für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen.
-export function evidentLines(suggestions: Suggestion[], active: string[], shortForms = true): string[] {
+export function evidentBlocks(suggestions: Suggestion[], active: string[], shortForms = true): EvidentBlocks {
   const chosen = new Set(active.map(codeOf));
+  const copied = suggestions.filter((s) => !s.alternative && chosen.has(s.code));
+  return {
+    kasse: toothLines(copied.filter((s) => !isPrivate(s)), shortForms),
+    privat: toothLines(copied.filter(isPrivate), shortForms),
+  };
+}
+
+// Beide Blöcke als eine Zeilenliste, getrennt durch eine Leerzeile, wenn beide etwas enthalten.
+export function evidentLines(suggestions: Suggestion[], active: string[], shortForms = true): string[] {
+  return joinBlocks(evidentBlocks(suggestions, active, shortForms));
+}
+
+export function joinBlocks({ kasse, privat }: EvidentBlocks): string[] {
+  return kasse.length > 0 && privat.length > 0 ? [...kasse, "", ...privat] : [...kasse, ...privat];
+}
+
+// Umkehrung von joinBlocks für übergebene Zeilen (Rezeption). Ohne Leerzeile ist es ein Block:
+// `allPrivate` sagt, ob das der Privatblock ist (nur Privatpositionen übergeben).
+export function splitBlocks(lines: string[], allPrivate = false): EvidentBlocks {
+  const gap = lines.indexOf("");
+  if (gap >= 0) return { kasse: lines.slice(0, gap), privat: lines.slice(gap + 1) };
+  return allPrivate ? { kasse: [], privat: lines } : { kasse: lines, privat: [] };
+}
+
+function toothLines(suggestions: Suggestion[], shortForms: boolean): string[] {
   const lines = new Map<number | null, Line>();
   for (const s of suggestions) {
-    if (s.alternative || !chosen.has(s.code)) continue;
     const tooth = s.teeth.length > 0 ? s.teeth[0] : null;
     let line = lines.get(tooth);
     if (!line) {
@@ -173,7 +207,8 @@ export function isToothless(line: string): boolean {
   return line.startsWith(",");
 }
 
-// Text in der Zwischenablage: eine Zeile je Zahn, die Zeile ohne Zahn ohne führendes Komma.
+// Text in der Zwischenablage: eine Zeile je Zahn, die Zeile ohne Zahn ohne führendes Komma; die
+// Leerzeile zwischen Kassen- und Privatblock bleibt stehen.
 export function evidentText(lines: string[]): string {
   return lines.map((line) => (isToothless(line) ? line.slice(1) : line)).join("\n");
 }

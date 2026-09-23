@@ -54,7 +54,17 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt }:
         <section key={g.tooth ?? "ohne"} className={g.tooth === null ? "tooth tooth-none" : "tooth"}>
           <header className="tooth-head">
             <h3>{g.tooth === null ? "Ohne Zahn – in Evident manuell eintragen" : `Zahn ${g.tooth}`}</h3>
-            <code className="tooth-line">{g.line ?? "nichts ausgewählt"}</code>
+            <span className="tooth-lines">
+              {g.lines.length > 0 ? (
+                g.lines.map((line) => (
+                  <code key={line} className="tooth-line">
+                    {line}
+                  </code>
+                ))
+              ) : (
+                <code className="tooth-line">nichts ausgewählt</code>
+              )}
+            </span>
           </header>
           <ul className="rows">
             {g.items.map((item) =>

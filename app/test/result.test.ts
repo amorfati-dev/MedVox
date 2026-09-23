@@ -58,9 +58,12 @@ for (const [name, r] of Object.entries(fixtures)) {
     );
     assert.equal(shown.length, expected.size);
     assert.deepEqual(new Set(shown), expected);
-    // Blockköpfe tragen genau die kopierten Zeilen (ohne Zahn: ohne führendes Komma).
-    const lines = copyLines(r.suggestions, r.codes, none).map((l) => l.replace(/^,/, ""));
-    assert.deepEqual(groups.map((g) => g.line).filter((l) => l !== null), lines);
+    // Blockköpfe tragen genau die kopierten Zeilen (ohne Zahn: ohne führendes Komma); beim Kassenpatienten
+    // kann ein Zahn eine Kassen- und eine Privatzeile haben, die Leerzeile zwischen den Blöcken fehlt.
+    const lines = copyLines(r.suggestions, r.codes, none).filter((l) => l !== "");
+    const heads = groups.flatMap((g) => g.lines);
+    assert.deepEqual(new Set(heads), new Set(lines.map((l) => l.replace(/^,/, ""))));
+    assert.equal(heads.length, lines.length);
     assert.equal(groups.findIndex((g) => g.tooth === null), groups.some((g) => g.tooth === null) ? groups.length - 1 : -1);
   });
 }
@@ -69,7 +72,7 @@ test("Kasse d01: Zuzahlungs-Option GOZ 2100 unter BEMA 13c, abgewählt voreinges
   const [g] = groupsOf("d01-kasse");
   assert.equal(g.tooth, 36);
   assert.deepEqual(g.items.map(sketch), ["13c+[2100?]", "25", "40", "12"]);
-  assert.equal(g.line, "36,13c,25,40,12");
+  assert.deepEqual(g.lines, ["36,13c,25,40,bmf"]);
   const option = ("row" in g.items[0] && g.items[0].row.options[0]) || null;
   assert.ok(option && option.adoptable && !option.adopted);
 });
@@ -77,12 +80,13 @@ test("Kasse d01: Zuzahlungs-Option GOZ 2100 unter BEMA 13c, abgewählt voreinges
 test("Kasse d01: übernommene Option wird kopiert wie jede gewählte Position – nur nach Antippen", () => {
   const r = fixtures["d01-kasse"];
   const adopted = new Set(["2100@36"]);
-  assert.deepEqual(copyLines(r.suggestions, r.codes, adopted), ["36,13c,2100,25,40,12"]);
-  assert.deepEqual(copyLines(r.suggestions, r.codes, adopted, false), ["36,13c,2100,25,40,12"]);
-  assert.deepEqual(copyLines(r.suggestions, ["25"], adopted), ["36,2100,25"]);
+  // Evident setzt nach einer Privatposition alles Folgende auf privat: die Zuzahlung steht im Privatblock zuletzt.
+  assert.deepEqual(copyLines(r.suggestions, r.codes, adopted), ["36,13c,25,40,bmf", "", "36,2100"]);
+  assert.deepEqual(copyLines(r.suggestions, r.codes, adopted, false), ["36,13c,25,40,12", "", "36,2100"]);
+  assert.deepEqual(copyLines(r.suggestions, ["25"], adopted), ["36,25", "", "36,2100"]);
   const [g] = groupsOf("d01-kasse", r.codes, adopted);
   assert.deepEqual(g.items.map(sketch), ["13c+[2100!]", "25", "40", "12"]);
-  assert.equal(g.line, "36,13c,2100,25,40,12");
+  assert.deepEqual(g.lines, ["36,13c,25,40,bmf", "36,2100"]);
   assert.equal(countGroups([g], r.planned ?? []).positions, 5);
 });
 
@@ -104,7 +108,7 @@ test("Abnahme-Diktat Kasse: Mehrkosten-Rahmen 13a + 2150 an 46, ohne Zahn zuletz
   assert.deepEqual(groups.map((g) => g.items.map(sketch)), [["13c+[2100?]", "25"], ["8", "[13a|2150]"], ["40", "12", "107"]]);
   const frame = groups[1].items[1];
   assert.ok("frame" in frame && frame.frame.basis?.tag === "kassenanteil" && frame.frame.copay.tag === "zuzahlung");
-  assert.deepEqual(groups.map((g) => g.line), ["36,13c,25", "46,8,13a,2150", "40,12,107"]);
+  assert.deepEqual(groups.map((g) => g.lines), [["36,13c,25"], ["46,8,13a", "46,2150"], ["40,bmf,107"]]);
   const r = fixtures["abnahme-kasse"];
   assert.deepEqual(countGroups(groups, r.planned ?? []), { positions: 8, options: 1, check: 0, planned: 1 });
 });
@@ -128,7 +132,7 @@ test("Abgewählte Ziffer bleibt als Zeile stehen; Block ohne Auswahl hat keine Z
   const active = r.codes.filter((c) => c !== "01" && c !== "04");
   const groups = groupsOf("d02-kasse", active);
   const toothless = groups.find((g) => g.tooth === null)!;
-  assert.equal(toothless.line, null);
+  assert.deepEqual(toothless.lines, []);
   assert.ok(toothless.items.every((i) => "row" in i && !i.row.selected));
 });
 
@@ -162,13 +166,13 @@ test("Übernommene Option bringt eine abgewählte Position mit derselben Ziffer 
   const active = [...d06.codes, ...d01.codes].filter((c) => c !== "2100");
   const adopted = new Set(["2100@36"]);
   const lines = copyLines(suggestions, active, adopted);
-  assert.deepEqual(lines, ["14,13c", "36,13c,2100,25,40,12"]);
-  assert.deepEqual(copyLines(suggestions, active, adopted, false), ["14,13c", "36,13c,2100,25,40,12"]);
+  assert.deepEqual(lines, ["14,13c", "36,13c,25,40,bmf", "", "36,2100"]);
+  assert.deepEqual(copyLines(suggestions, active, adopted, false), ["14,13c", "36,13c,25,40,12", "", "36,2100"]);
   const groups = buildGroups(suggestions, active, adopted, lines);
   const at14 = groups.find((g) => g.tooth === 14)!;
   const frame = at14.items[0];
   assert.ok("frame" in frame && !frame.frame.copay.selected);
-  assert.equal(at14.line, "14,13c");
+  assert.deepEqual(at14.lines, ["14,13c"]);
   assert.deepEqual(
     positionsOf(groups).filter((p) => p.code === "2100"),
     [{ tooth: 36, code: "2100", kind: "zuzahlung" }],

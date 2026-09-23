@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { api, ApiError, evidentText } from "../api";
 import { Controls } from "../components/Controls";
 import { CopyButton } from "../components/CopyButton";
+import { CopyPreview } from "../components/CopyPreview";
 import { Icon } from "../components/Icon";
 import { MoreMenu } from "../components/MoreMenu";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
@@ -156,6 +157,7 @@ export function Diktat({ onLogout }: Props) {
             onAdopt={sel.toggleOption}
           />
         )}
+        {hasResult && <CopyPreview blocks={sel.blocks} kasse={d.resultType === "kasse"} />}
 
         <footer className="bottom-bar">
           {transfer.error && (

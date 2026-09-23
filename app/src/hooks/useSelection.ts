@@ -1,13 +1,14 @@
 // Auswahl in der Ergebnisliste: abgewählte Ziffern (wie früher die Chips) und übernommene
 // Zuzahlungs-Optionen (E4: abgewählt voreingestellt, per Tipp übernehmbar). Daraus die Evident-Zeilen
-// für „Ziffern kopieren“, „Nur Ziffern“ und die Übergabe an die Rezeption.
+// für „Ziffern kopieren“ (beim Kassenpatienten auch je Block), „Nur Ziffern“ und die Übergabe an die Rezeption.
 import { useCallback, useMemo, useState } from "react";
-import { codeOf, type Suggestion } from "../api";
-import { buildGroups, copyLines, type Group } from "../result";
+import { codeOf, joinBlocks, type EvidentBlocks, type Suggestion } from "../api";
+import { buildGroups, copyBlocks, copyLines, type Group } from "../result";
 
 export type Selection = {
   groups: Group[]; // Ergebnisliste nach Zahn
-  evident: string[]; // Kopier- und Übergabeformat (Kurzformen)
+  evident: string[]; // Kopier- und Übergabeformat (Kurzformen): Kassenblock, Leerzeile, Privatblock
+  blocks: EvidentBlocks; // dieselben Zeilen je Block („Kassenleistungen/Privatleistungen kopieren“)
   numbers: string[]; // „Nur Ziffern“
   toggleCode: (code: string) => void; // Ziffer ohne Anzahl ("41a"); gilt für alle Zähne mit dieser Ziffer
   toggleOption: (key: string) => void; // optionKey
@@ -21,7 +22,8 @@ export function useSelection(codes: string[], suggestions: Suggestion[]): Select
   const [adopted, setAdopted] = useState<ReadonlySet<string>>(() => new Set());
   const active = useMemo(() => codes.filter((c) => !deselected.has(c)), [codes, deselected]);
   // Kopier- und Übergabeformat für Evident: je Zahn eine Zeile, Zahn vorn.
-  const evident = useMemo(() => copyLines(suggestions, active, adopted), [suggestions, active, adopted]);
+  const blocks = useMemo(() => copyBlocks(suggestions, active, adopted), [suggestions, active, adopted]);
+  const evident = useMemo(() => joinBlocks(blocks), [blocks]);
   const numbers = useMemo(() => copyLines(suggestions, active, adopted, false), [suggestions, active, adopted]);
   const groups = useMemo(() => buildGroups(suggestions, active, adopted, evident), [suggestions, active, adopted, evident]);
 
@@ -51,5 +53,5 @@ export function useSelection(codes: string[], suggestions: Suggestion[]): Select
     setAdopted(new Set());
   }, []);
 
-  return { groups, evident, numbers, toggleCode, toggleOption, clear };
+  return { groups, evident, blocks, numbers, toggleCode, toggleOption, clear };
 }

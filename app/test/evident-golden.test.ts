@@ -3,6 +3,8 @@
 // plus das Abnahme-Diktat (docs/abnahme.md 1.3 mit Inlay 46 und „kein OPG“), je Kasse und Privat,
 // als echte Server-Antworten (`build_response`). Geprüft werden alle Ziffern ausgewählt und jede
 // einzelne Ziffer abgewählt, mit Kurzformen und „Nur Ziffern“.
+// Bewusst geändert (Pilot-Befunde): BEMA 12 kopiert als Kurzform „bmf“, und beim Kassenpatienten stehen
+// Privatpositionen (Zuzahlung) nach einer Leerzeile hinter allen Kassenzeilen; Privat unverändert.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";

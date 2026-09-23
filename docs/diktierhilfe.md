@@ -64,7 +64,7 @@ Rezeption gesendet. Ohne Tipp kommt sie nirgends hin.
 | **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** |
 | **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen** |
 
-Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile, die
+Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile(n), die
 „Ziffern kopieren" liefert. Jede Zeile: Kästchen · Ziffer · Leistung · „wegen: …". Antippen
 wählt ab (Ziffer durchgestrichen, Zeile bleibt) – die Auswahl gilt für die Ziffer an allen
 Zähnen. Farben: **Türkis** = Kasse/BEMA, **Indigo** = Privat/GOZ/Zuzahlung, **Bernstein** =
@@ -82,8 +82,17 @@ kommagetrennt, in der Reihenfolge der Vorschläge. Mehrere Zähne stehen in der 
 Reihenfolge untereinander; der OP-Zuschlag 0500–0530 steht beim operierten Zahn. Positionen ohne
 Zahn (01, Ä1, 107) kommen in eine letzte Zeile ohne Zahnnummer – die nimmt Evident so nicht an.
 MedVox markiert diese Zeile am iPad und an der Rezeption mit „ohne Zahn – in Evident manuell
-eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Zeilen fehlen, übernommene
-Zuzahlungs-Optionen stehen wie jede Position in ihrer Zahnzeile.
+eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Zeilen fehlen.
+
+**Privatpositionen beim Kassenpatienten immer zuletzt.** Evident wird Zeile für Zeile gefüttert,
+eine Zahnzeile nach der anderen – und setzt nach einer Privatposition alles Folgende ebenfalls auf
+privat (aus `l1,13b,2080,pan1,bmf` würden pan1 und bmf privat). Beim Kassenpatienten stehen deshalb
+erst alle Kassenzeilen, dann eine Leerzeile, dann alle Privatpositionen (übernommene Zuzahlung wie
+2080, GOZ/GOÄ) in eigenen Zahnzeilen: `36,l1,13b,pan1,bmf`, Leerzeile, `36,2080`. Unter der
+Ergebnisliste zeigt „Kopiertext für Evident" genau diese Zeilen, beschriftet nach Kassen- und
+Privatleistungen; „Kassenleistungen kopieren" und „Privatleistungen kopieren" (iPad, beim
+Kassenpatienten; an der Rezeption, wenn beides übergeben wurde) liefern jeden Block einzeln. Beim
+Privatpatienten ist alles privat, dort ändert sich nichts.
 
 Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie, Zahn drei sechs
 mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):
@@ -97,10 +106,13 @@ mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernun
 Evident nimmt eine Mischung aus Ziffern und Kurzformen: steht im Katalog eine Evident-Kurzform
 (Feld `evident`), wird sie statt der Ziffer kopiert (`l1` statt 41a), sonst die Ziffer.
 Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a, GOZ 3030), opg
-(Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002) – eine private Osteotomie an 48 kopiert als
+(Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002), bmf (12, klein wie in Evident) – eine private Osteotomie an 48 kopiert als
 `48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte
 Positionen stehen einmal mit Anzahl, hinter Kurzform wie Ziffer: drei Kanäle an 36 → `36,wf*3`,
-`11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen).
+`11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen). Die
+Anzahl ist nie höher als der amtliche Text erlaubt: BEMA 12 (bmf) steht je Sitzung nur einmal je
+Kieferhälfte oder Frontzahnbereich – Kofferdam an 36 und 37 ergibt `bmf`, nicht `bmf*2`; an 36 und
+46 steht bmf in beiden Zahnzeilen.
 Die Liste zeigt beides: die amtliche Ziffer groß, die Kurzform klein darunter („Evident: l1").
 „Nur Ziffern" kopiert dieselben Zeilen nur mit amtlichen Ziffern (`36,35*3`), so geschrieben wie im
 Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption gibt es nur „Ziffern kopieren".

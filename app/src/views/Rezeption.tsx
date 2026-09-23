@@ -2,7 +2,16 @@
 // Am PC zwei Spalten: links der Code, rechts das Diktat mit Patiententyp, Evident-Zeilen und
 // einer kleinen Tabelle für Zuzahlung und Kassenanteil (nur Anzeige, kopiert wird wie bisher).
 import { useEffect, useState, type FormEvent } from "react";
-import { api, ApiError, CODE_LENGTH, evidentText, normalizeCode, type PositionKind, type TransferData } from "../api";
+import {
+  api,
+  ApiError,
+  CODE_LENGTH,
+  evidentText,
+  normalizeCode,
+  splitBlocks,
+  type PositionKind,
+  type TransferData,
+} from "../api";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
 import { PATIENT_LABEL } from "../components/PatientSwitch";
@@ -51,6 +60,11 @@ export function Rezeption() {
   const codes = data ? evidentText(data.codes) : "";
   const both = data ? `${data.transcript}\n\nZiffern:\n${codes}` : "";
   const extra = (data?.positions ?? []).filter((p) => KIND_LABEL[p.kind]);
+  // Kassenpatient: Kassenblock, Leerzeile, Privatblock (Privatpositionen immer zuletzt, siehe evidentBlocks).
+  const kasse = data?.patient_type === "kasse";
+  const positions = data?.positions ?? [];
+  const allPrivate = positions.length > 0 && positions.every((p) => p.kind === "goz" || p.kind === "zuzahlung");
+  const blocks = splitBlocks(data?.codes ?? [], allPrivate);
 
   return (
     <main className="page wide rezeption">
@@ -100,7 +114,7 @@ export function Rezeption() {
             </div>
             <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
             <h2>Ziffern für Evident</h2>
-            <EvidentLines lines={data.codes} />
+            <EvidentLines blocks={blocks} labelled={kasse} />
             {extra.length > 0 && (
               <table className="copay-table">
                 <caption>Mehrkosten – Vereinbarung mit dem Patienten nötig</caption>
@@ -127,6 +141,12 @@ export function Rezeption() {
               <CopyButton label="Ziffern kopieren" text={codes} />
               <CopyButton label="Beides kopieren" text={both} />
             </div>
+            {kasse && blocks.kasse.length > 0 && blocks.privat.length > 0 && (
+              <div className="actions">
+                <CopyButton label="Kassenleistungen kopieren" text={evidentText(blocks.kasse)} />
+                <CopyButton label="Privatleistungen kopieren" text={evidentText(blocks.privat)} />
+              </div>
+            )}
             <p className="muted small">Danach in Evident mit Strg+V einfügen.</p>
           </section>
         ) : (
