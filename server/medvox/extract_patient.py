@@ -23,7 +23,7 @@ from medvox.extract_billing import counterpart_drafts, exclusive
 from medvox.extract_build import Draft, Tagged
 from medvox.extract_catalog import Catalog, Entry, related
 from medvox.extract_match import Hit
-from medvox.extract_rules import private_only
+from medvox.extract_rules import INCISION_DEEP, INCISION_DEEP_KASSE, private_only
 from medvox.extract_text import TextContext
 
 PATIENT_TYPES = ("kasse", "privat")
@@ -160,6 +160,8 @@ def _dropped(d: Draft, patient: str) -> str:
     what = f"{d.entry.label} ({d.entry.title})"
     if patient == "privat":
         return f"{what} hat kein GOZ/GOÄ-Paar im Katalog – für Privatpatienten nicht vorgeschlagen"
+    if d.entry.key == INCISION_DEEP:
+        return INCISION_DEEP_KASSE
     why = next((w for t in d.hits if (w := private_only(d.entry, t.hit.keyword))), None)
     if why:
         return f"{what}: {why} – bei Kassenpatienten nur privat nach Vereinbarung, nicht vorgeschlagen"

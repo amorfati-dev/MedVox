@@ -57,10 +57,13 @@ def private_only(entry, folded_keyword: str) -> str | None:
 # die übrigen Wörter von Ä161 („Inzision“, „Abszess eröffnet“) lassen die Tiefe offen, dann wird
 # nicht still eine Tiefe gewählt, sondern nachgefragt.
 INCISION_OPEN = ("BEMA", "Ä161")
-INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), ("GOÄ", "Ä2430")})
+INCISION_DEEP = ("GOÄ", "Ä2430")
+INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), INCISION_DEEP})
+INCISION_DEEP_KASSE = ("Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – "
+                       "bitte selbst prüfen")
 _INCISION_DEPTH = {
     "BEMA": "Tiefe nicht diktiert – Ä161 (Inz1) nur beim oberflächlichen Abszess; "
-            "für den tiefliegenden hat der BEMA keine Ziffer",
+            "tiefliegend: im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen",
     "GOÄ": "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen",
 }
 

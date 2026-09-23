@@ -14,7 +14,8 @@ from medvox.lexicon import correct
 from medvox.normalize import normalize
 
 DEPTH_OPEN_KASSE = ("Tiefe nicht diktiert – Ä161 (Inz1) nur beim oberflächlichen Abszess; "
-                    "für den tiefliegenden hat der BEMA keine Ziffer")
+                    "tiefliegend: im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen")
+DEEP_KASSE = "Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen"
 DEPTH_OPEN_PRIVAT = "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen"
 
 
@@ -42,12 +43,12 @@ def test_deep_incision_is_inz2_for_private_patients():
 def test_deep_incision_has_no_bema_code():
     result = run("Tiefliegende Inzision regio vier sieben.")
     assert result.suggestions == []
-    assert any(n.startswith("GOÄ Ä2430") and "kein BEMA-Paar" in n for n in result.notes)
+    assert result.notes == [DEEP_KASSE]
 
 
 @pytest.mark.parametrize("words", [
-    "Inzision", "Abszess inzidiert", "Abszess eröffnet", "Abszessinzision", "Abszesseröffnung",
-    "Entlastungsschnitt", "Abszessspaltung", "Abszess gespalten",
+    "Abszess inzidiert", "Abszess eröffnet", "Abszessinzision", "Abszesseröffnung",
+    "Abszessspaltung", "Abszess gespalten",
 ])
 @pytest.mark.parametrize("patient, code, flag", [("kasse", "Ä161", DEPTH_OPEN_KASSE), ("privat", "Ä2428", DEPTH_OPEN_PRIVAT)])
 def test_incision_without_depth_asks(words, patient, code, flag):
@@ -82,13 +83,15 @@ def test_depth_word_settles_the_other_words_of_the_same_incision(patient):
 
 def test_deep_word_takes_the_open_word_along():
     [s] = performed(run("Subperiostaler Abszess inzidiert regio drei sechs.", "privat"))
+    assert (s.code, s.count) == ("Ä2430", 1)
+    [s] = performed(run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet.", "privat"))
     assert (s.code, s.count, s.teeth, s.decide) == ("Ä2430", 1, (36,), ())
-    kasse = run("Subperiostaler Abszess inzidiert regio drei sechs.")
-    assert kasse.suggestions == [] and any(n.startswith("GOÄ Ä2430") for n in kasse.notes)
+    kasse = run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet.")
+    assert kasse.suggestions == [] and kasse.notes == [DEEP_KASSE]
 
 
 def test_open_word_at_another_tooth_stays_its_own_incision():
-    result = run("Inzision an drei sechs, tiefliegender Abszess an vier sieben.", "privat")
+    result = run("Regio drei sechs Abszess eröffnet, tiefliegender Abszess an vier sieben.", "privat")
     assert [(s.code, s.teeth, s.decide) for s in performed(result)] == [
         ("Ä2428", (36,), (DEPTH_OPEN_PRIVAT,)), ("Ä2430", (47,), ())]
 
@@ -101,5 +104,23 @@ def test_goae_incision_gets_no_goz_surcharge():
     assert "GOZ 3030" in next(s.reason for s in osteo.suggestions if s.code == "0500")
 
 
+@pytest.mark.parametrize("patient, code, flag", [("kasse", "Ä161", DEPTH_OPEN_KASSE), ("privat", "Ä2428", DEPTH_OPEN_PRIVAT)])
+def test_each_abscess_is_its_own_position_with_its_own_depth(patient, code, flag):
+    result = run("Drei sechs Abszess eröffnet. Oberflächlicher Abszess an vier sechs eröffnet.", patient)
+    assert [(s.code, s.teeth, s.count, s.decide) for s in performed(result)] == [
+        (code, (36,), 1, (flag,)), (code, (46,), 1, ())]
+
+
+def test_two_deep_abscesses_are_two_positions():
+    result = run("Tiefliegenden Abszess drei sechs eröffnet. Tiefliegenden Abszess vier sechs eröffnet.", "privat")
+    assert [(s.code, s.teeth, s.count) for s in performed(result)] == [("Ä2430", (36,), 1), ("Ä2430", (46,), 1)]
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ["47a"]), ("privat", ["3030", "0500"])])
+def test_flap_incision_of_an_osteotomy_is_no_abscess(patient, codes):
+    dictation = "Zahn drei acht Osteotomie, marginale Inzision, Entlastungsschnitt, Mukoperiostlappen gebildet."
+    assert billable_codes(run(dictation, patient).suggestions) == codes
+
+
 def test_negated_incision_is_not_suggested():
-    assert run("Keine Inzision nötig.").suggestions == []
+    assert run("Kein Abszess eröffnet.").suggestions == []

@@ -15,8 +15,16 @@ from dataclasses import dataclass, field, replace
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
-    OSTEO_KINDS, REMOVAL, REMOVAL_ACT, ROOT_PAIRS, SURCHARGE_CODES, incision_depth_open, incision_depth_stated,
-    multi_rooted, removal_modifier, surface_count_word,
+    OSTEO_KINDS,
+    REMOVAL,
+    REMOVAL_ACT,
+    ROOT_PAIRS,
+    SURCHARGE_CODES,
+    incision_depth_open,
+    incision_depth_stated,
+    multi_rooted,
+    removal_modifier,
+    surface_count_word,
 )
 from medvox.extract_text import TextContext
 from medvox.normalize import ToothRef
@@ -95,6 +103,7 @@ class Builder:
         for group in sessions.values():
             self._session(group)
         self._absorb_toothless()
+        self._incision_flags()
         return sorted(self.drafts.values(), key=lambda d: d.start)
 
     def _absorb_toothless(self) -> None:
@@ -109,6 +118,13 @@ class Builder:
                 for host in hosts:
                     host.hits = sorted(host.hits + [t for t in d.hits if t not in host.hits], key=lambda t: t.hit.start)
                 del self.drafts[key]
+
+    def _incision_flags(self) -> None:
+        """Tiefe offen, wenn kein Wort desselben Abszesses (Ziffer, Zahn) sie nennt."""
+        for d in self.drafts.values():
+            flags = [incision_depth_open(t.hit) for t in d.hits]
+            if flags and all(flags) and flags[0] not in d.decide:
+                d.decide.append(flags[0])
 
     # --- Füllungen --------------------------------------------------------------------
 
@@ -231,10 +247,8 @@ class Builder:
     def _session(self, group: list[Tagged]) -> None:
         repeats = max(Counter(t.hit.keyword for t in group).values())
         times = max((self.ctx.times(t.hit.start, t.hit.end) or 0 for t in group), default=0)
-        flags = [incision_depth_open(t.hit) for t in group]
-        flag = flags[0] if all(flags) else None  # Tiefe offen, wenn kein Wort der Leistung sie nennt
         for t in group:
-            draft = self.add(t.hit.entry, None, t, max(repeats, times), flag)
+            draft = self.add(t.hit.entry, None, t, max(repeats, times))
             draft.context = _unique_fdi(draft.context + tuple(tooth.fdi for tooth in t.teeth))
 
 

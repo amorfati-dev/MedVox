@@ -198,10 +198,10 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
 - **Zuordnung:** „36 o Karies, 37 mo Karies, Füllungen" ordnet die Füllung nur 37 zu – je Zahn
   einen Satz.
 - Fehlen Flächen-, Kanal- oder Zahnangabe, kommt der kleinste Vorschlag mit Hinweis.
-- **Inzision: die Tiefe mitsagen.** „Inzision", „Abszess eröffnet", „Entlastungsschnitt" ohne
-  „oberflächlich" oder „tiefliegend" davor ergibt Inz1 mit Hinweis „Tiefe nicht diktiert". Ein
-  Entlastungsschnitt bei der Lappenbildung (Osteotomie) wird ebenso als Inzision gelesen – dort
-  den Vorschlag abwählen.
+- **Inzision: Abszess und Tiefe mitsagen.** „Inzision" oder „Entlastungsschnitt" allein wird nicht
+  erkannt (sonst träfe es jede Schnittführung bei der Lappenbildung) – „Abszess eröffnet" oder gleich
+  „oberflächlich"/„tiefliegend" sagen. „Abszess eröffnet" ohne Tiefe ergibt Inz1 mit Hinweis „Tiefe
+  nicht diktiert". Jeder Abszess an seinem Zahn ist eine eigene Position – je Abszess den Zahn nennen.
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.
