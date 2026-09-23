@@ -16,7 +16,9 @@ from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
     INCISION,
+    INCISION_REPEATED,
     INCISION_TEETH,
+    INCISION_VERB,
     OSTEO_KINDS,
     REMOVAL,
     REMOVAL_ACT,
@@ -67,15 +69,17 @@ class Draft:
 class Builder:
     def __init__(self, catalog: Catalog, ctx: TextContext) -> None:
         self.catalog, self.ctx = catalog, ctx
-        self.drafts: dict[tuple[str, str, int | None, bool], Draft] = {}
+        self.drafts: dict[tuple[str, str, object, bool], Draft] = {}
         self.dictated_surcharges: list[Tagged] = []
         self._surface_words: list[Tagged] = []
 
     def add(self, entry: Entry, fdi: int | None, t: Tagged, count: int = 1, flag: str | None = None,
-            like: Tagged | None = None) -> Draft:
-        """Fundstelle ``t`` einem Entwurf zuordnen; ``like`` gibt geplant/erbracht vor (sonst ``t``)."""
+            like: Tagged | None = None, slot: object = None) -> Draft:
+        """Fundstelle ``t`` einem Entwurf zuordnen; ``like`` gibt geplant/erbracht vor (sonst ``t``).
+
+        ``slot`` trennt Entwürfe ohne Zahn statt ``fdi`` (Abszess je Satz)."""
         plan = (like or t).plan
-        draft = self.drafts.setdefault((entry.system, entry.code, fdi, plan is not None),
+        draft = self.drafts.setdefault((entry.system, entry.code, slot or fdi, plan is not None),
                                        Draft(entry, fdi, plan is not None))
         draft.hits.append(t)
         draft.count = max(draft.count, count)
@@ -125,13 +129,15 @@ class Builder:
 
     def _incision(self, t: Tagged) -> None:
         """Eine Abszesseröffnung je Fundstelle; mehrere Zähne an einer Fundstelle sind ein Abszess."""
-        teeth = _unique_fdi(tuple(tooth.fdi for tooth in t.teeth))
+        refs = t.teeth
+        if not refs and (verb := INCISION_VERB.match(self.ctx.folded, t.hit.end)):
+            refs = self.ctx.teeth_for(t.hit.start, verb.end())
+        teeth = _unique_fdi(tuple(tooth.fdi for tooth in refs))
         if len(teeth) == 1:
             self.add(t.hit.entry, teeth[0], t)
             return
-        draft = self.add(t.hit.entry, None, t, 1, INCISION_TEETH if teeth else "Zahn nicht diktiert")
+        draft = self.add(t.hit.entry, None, t, 1, INCISION_TEETH if teeth else "Zahn nicht diktiert", slot=t.sentence)
         draft.context = _unique_fdi(draft.context + teeth)
-        draft.count = len({h.sentence for h in draft.hits})
 
     def _incision_flags(self) -> None:
         """Tiefe offen, wenn kein Wort desselben Abszesses (Ziffer, Zahn) sie nennt."""
@@ -139,6 +145,8 @@ class Builder:
             flags = [incision_depth_open(t.hit) for t in d.hits]
             if flags and all(flags) and flags[0] not in d.decide:
                 d.decide.append(flags[0])
+            if d.fdi is not None and d.entry.key in INCISION and (n := len({t.sentence for t in d.hits})) > 1:
+                d.decide.append(INCISION_REPEATED.format(n=n, fdi=d.fdi))
 
     # --- Füllungen --------------------------------------------------------------------
 

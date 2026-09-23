@@ -129,6 +129,33 @@ def test_separate_abscesses_without_tooth_are_counted():
         ("Ä161", 1, (36,), DEPTH_OPEN_KASSE), ("Ä161", 1, (), "Zahn nicht diktiert")]
 
 
+def test_toothless_abscesses_keep_their_own_depth_and_teeth():
+    result = run("Oberflächlichen Abszess eröffnet. Abszess eröffnet.")
+    assert [(s.code, s.count, s.decide) for s in performed(result)] == [
+        ("Ä161", 1, ("Zahn nicht diktiert",)), ("Ä161", 1, ("Zahn nicht diktiert", DEPTH_OPEN_KASSE))]
+    result = run("Oberflächliche Inzision vestibulär. Abszess eröffnet palatinal.", "privat")
+    assert [s.decide for s in performed(result)] == [("Zahn nicht diktiert",), ("Zahn nicht diktiert", DEPTH_OPEN_PRIVAT)]
+    result = run("Abszess eröffnet regio drei fünf bis drei sieben. Abszess eröffnet.")
+    assert [(s.teeth, s.decide[0]) for s in performed(result)] == [((35, 36, 37), TEETH), ((), "Zahn nicht diktiert")]
+
+
+@pytest.mark.parametrize("dictation, patient, code, teeth", [
+    ("Oberflächlichen Abszess eröffnet regio vier sechs.", "kasse", "Ä161", (46,)),
+    ("Tiefliegenden Abszess eröffnet regio vier fünf bis vier sieben.", "privat", "Ä2430", (45, 46, 47)),
+])
+def test_tooth_after_the_verb_belongs_to_the_abscess(dictation, patient, code, teeth):
+    [s] = performed(run(dictation, patient))
+    assert (s.code, s.teeth) == (code, teeth)
+
+
+def test_two_incisions_at_one_tooth_are_one_position_with_a_hint():
+    result = run("Abszess eröffnet an drei sechs vestibulär. Abszess eröffnet an drei sechs palatinal.")
+    [s] = performed(result)
+    assert (s.code, s.count, s.teeth) == ("Ä161", 1, (36,))
+    assert s.decide == (DEPTH_OPEN_KASSE,
+                        "2 Inzisionen an 36 diktiert – ein Abszess angenommen; falls mehrere Abszesse, von Hand ergänzen")
+
+
 def test_two_deep_abscesses_are_two_positions():
     result = run("Tiefliegenden Abszess drei sechs eröffnet. Tiefliegenden Abszess vier sechs eröffnet.", "privat")
     assert [(s.code, s.teeth, s.count) for s in performed(result)] == [("Ä2430", (36,), 1), ("Ä2430", (46,), 1)]

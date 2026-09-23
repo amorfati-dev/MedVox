@@ -60,6 +60,8 @@ def private_only(entry, folded_keyword: str) -> str | None:
 INCISION_OPEN = ("BEMA", "Ä161")
 INCISION_DEEP = ("GOÄ", "Ä2430")
 INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), INCISION_DEEP})
+INCISION_VERB = re.compile(r"\s*(?:eroeffnet|inzidiert|gespalten)\b")  # „oberflächlichen Abszess eröffnet regio 46“
+INCISION_REPEATED = "{n} Inzisionen an {fdi} diktiert – ein Abszess angenommen; falls mehrere Abszesse, von Hand ergänzen"
 INCISION_TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
 INCISION_DEEP_KASSE = ("Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – "
                        "bitte selbst prüfen")

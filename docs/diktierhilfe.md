@@ -204,6 +204,8 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
   nicht diktiert". Je Abszess einen eigenen Satz mit seinem Zahn sagen – jeder ist eine eigene
   Position. Mehrere Zähne oder ein Bereich in einem Satz („regio drei fünf bis drei sieben") zählen als
   ein Abszess (mit Hinweis); zwei Abszesse in einer Region als zwei Sätze diktieren („zwei Abszesse").
+  Zwei Inzisionen am selben Zahn (vestibulär und palatinal) bleiben eine Position mit Hinweis – waren
+  es wirklich zwei Abszesse, „zwei Abszesse" ausdrücklich sagen und von Hand ergänzen.
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.
