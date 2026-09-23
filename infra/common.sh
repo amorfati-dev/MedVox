@@ -25,7 +25,17 @@ WHISPER_LABEL="de.medvox.whisper-server"
 
 CADDY_LABEL="de.medvox.caddy"
 CADDY_HTTPS_PORT="443"
-API_UPSTREAM="127.0.0.1:8000"
+
+# Backend (FastAPI) und gebaute PWA: feste Orte, unabhängig davon, wo das Repo liegt.
+SERVER_LABEL="de.medvox.server"
+SERVER_HOST="127.0.0.1"
+SERVER_PORT="8000"
+API_UPSTREAM="$SERVER_HOST:$SERVER_PORT"
+MEDVOX_SERVER="$MEDVOX_HOME/server"
+MEDVOX_APP="$MEDVOX_HOME/app"
+MEDVOX_TMP="$MEDVOX_HOME/tmp"
+PASSWORD_FILE="$MEDVOX_HOME/password-hash"
+SERVER_LOG="$MEDVOX_LOGS/server.log"
 
 INFRA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$INFRA_DIR/.." && pwd)"

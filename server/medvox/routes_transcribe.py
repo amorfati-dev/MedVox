@@ -14,6 +14,7 @@ from medvox.auth import require_session
 from medvox.extract import Suggestion, analyze, billable_codes
 from medvox.lexicon import correct
 from medvox.normalize import normalize
+from medvox.normalize_display import display_text
 
 log = logging.getLogger("medvox.transcribe")
 router = APIRouter(prefix="/api/v1")
@@ -60,12 +61,12 @@ def _out(s: Suggestion) -> SuggestionOut:
 
 
 def build_response(text: str, duration_s: float, latency_s: float) -> TranscribeResponse:
-    """Lexikon -> Normalisierer -> Extraktor; reine Rechenarbeit ohne I/O."""
+    """Lexikon -> Normalisierer -> Extraktor; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert)."""
     corrected, _ = correct(text)
     normalized = normalize(corrected)
     result = analyze(normalized.text, normalized.teeth)
     return TranscribeResponse(
-        transcript=corrected, duration_s=duration_s, latency_s=latency_s,
+        transcript=display_text(corrected), duration_s=duration_s, latency_s=latency_s,
         codes=billable_codes(result.suggestions),
         suggestions=[_out(s) for s in result.suggestions if not s.planned],
         planned=[_out(s) for s in result.suggestions if s.planned],

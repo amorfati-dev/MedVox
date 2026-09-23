@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import re
 import unicodedata
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from medvox.normalize_digits import expand_range, is_fdi, pair_digit_run
@@ -239,12 +240,12 @@ def _collect_teeth(text: str) -> list[ToothRef]:
 # --- Pipeline -------------------------------------------------------------------
 
 
-def normalize(text: str) -> NormalizedText:
+def normalize(text: str, surfaces: Callable[[str], str] | None = None) -> NormalizedText:
     text = unicodedata.normalize("NFC", text).replace("–", "-").replace("—", "-")
     text = re.sub(r"\s+", " ", text).strip()
     text = _number_words(text)
     text = _codes(text)
-    text = _surfaces(text)
+    text = (surfaces or _surfaces)(text)  # eigener Flächenschritt nur für normalize_display
     text = _quadrants(text)
     text = _DIGIT_RUN.sub(
         lambda m: pair_digit_run(
@@ -287,7 +288,6 @@ def main(argv: list[str] | None = None) -> None:
     for dictation in DEMO if args.demo else [" ".join(args.text)]:
         if not args.raw:
             from medvox.lexicon import correct
-
             dictation, corrections = correct(dictation)
             for c in corrections:
                 print(f"  korrigiert: {c.original!r} -> {c.corrected!r}")

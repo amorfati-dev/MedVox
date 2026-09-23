@@ -19,7 +19,7 @@ KEY="$MEDVOX_TLS/key.pem"
 ROOT="$MEDVOX_TLS/rootCA.pem"
 CADDYFILE="$MEDVOX_CADDY/Caddyfile"
 PLIST="$LAUNCH_AGENTS/$CADDY_LABEL.plist"
-APP_DIST="$REPO_DIR/app/dist"
+APP_DIST="$MEDVOX_APP"
 
 # --- 1. Werkzeuge -----------------------------------------------------------
 log "Voraussetzungen prüfen"
@@ -70,7 +70,7 @@ fi
 
 # --- 4. Caddy ---------------------------------------------------------------
 log "Schreibe $CADDYFILE"
-[[ -d "$APP_DIST" ]] || warn "App-Verzeichnis $APP_DIST existiert noch nicht (erst nach 'npm run build' in app/) – Caddy startet trotzdem"
+[[ -f "$APP_DIST/index.html" ]] || warn "App fehlt noch in $APP_DIST (installiert 'make install') – Caddy startet trotzdem"
 render_template "$INFRA_DIR/tls/Caddyfile" "$CADDYFILE" \
   "LAN_IP=$LAN_IP" \
   "HTTPS_PORT=$CADDY_HTTPS_PORT" \
