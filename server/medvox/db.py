@@ -1,9 +1,11 @@
-"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen und Transfer-Codes.
+"""SQLite-Zugriff (stdlib sqlite3) für Sitzungen, Transfer-Codes und Diktate je Patient.
 
-Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; Transkripte
-liegen nur als Transfer-Eintrag bis zum Ablauf der TTL darin. `secure_delete`
-sorgt dafür, dass SQLite gelöschte Zeilen in der Datei überschreibt statt sie
-in freien Seiten liegen zu lassen (WP-11).
+Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; ein Patient ist nur die
+Evident-Patientennummer. Transkripte liegen als Transfer-Eintrag bis zum Ablauf der TTL darin
+und als Diktat eines Patienten, bis es als übertragen markiert ist – höchstens 24 Stunden
+(`medvox/patients.py`); danach bleibt nur ein Grabstein (ID und Zeitpunkt) für sieben Tage,
+damit ein iPad es nicht neu anlegt. `secure_delete` sorgt dafür, dass SQLite gelöschte Zeilen in der Datei
+überschreibt statt sie in freien Seiten liegen zu lassen (WP-11).
 """
 
 from __future__ import annotations
@@ -27,15 +29,61 @@ CREATE TABLE IF NOT EXISTS transfers (
     created_at  REAL NOT NULL,
     expires_at  REAL NOT NULL,
     patient_type    TEXT,
-    positions_json  TEXT NOT NULL DEFAULT '[]'
+    positions_json  TEXT NOT NULL DEFAULT '[]',
+    dictation_id    TEXT,
+    dictation_revision  INTEGER,
+    handed_over_at  REAL
+);
+-- Patient = nur die Evident-Nummer. Die Zeile bleibt nach „übertragen“ ohne Inhalt stehen,
+-- damit die Liste den Zustand zeigt; sie läuft ab, wenn ihr jüngstes Diktat abliefe.
+-- AUTOINCREMENT: eine gelöschte ID wird nie an einen anderen Patienten vergeben.
+CREATE TABLE IF NOT EXISTS patients (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    number              TEXT NOT NULL UNIQUE,
+    created_at          REAL NOT NULL,
+    updated_at          REAL NOT NULL,
+    expires_at          REAL NOT NULL,
+    transferred_at      REAL,
+    transferred_count   INTEGER NOT NULL DEFAULT 0
+);
+-- Ein Diktat (Transkript, Vorschläge, Auswahl); ID vom iPad, patient_id NULL = „ohne Patient“.
+CREATE TABLE IF NOT EXISTS dictations (
+    id          TEXT PRIMARY KEY,
+    patient_id  INTEGER,
+    revision    INTEGER NOT NULL DEFAULT 1,
+    saved_revision  INTEGER NOT NULL DEFAULT 1,  -- Revision, die das letzte Speichern vom iPad lieferte
+    created_at  REAL NOT NULL,
+    updated_at  REAL NOT NULL,
+    expires_at  REAL NOT NULL,
+    data_json   TEXT NOT NULL
+);
+-- Grabstein eines übertragenen, gelöschten oder abgelaufenen Diktats: nur ID und Zeitpunkt, kein
+-- Inhalt, keine Patientennummer. Solange er liegt, wird die ID nie wieder angelegt.
+CREATE TABLE IF NOT EXISTS dictation_tombstones (
+    id          TEXT PRIMARY KEY,
+    closed_at   REAL NOT NULL
+);
+-- Abgeholter Kurzcode eines Diktats (`medvox/handovers.py`): nur Evident-Zeilen, kein Transkript.
+-- Bleibt, solange das Diktat offen ist oder sein Grabstein liegt.
+CREATE TABLE IF NOT EXISTS handovers (
+    dictation_id    TEXT NOT NULL,
+    code            TEXT NOT NULL,
+    revision        INTEGER,
+    fetched_at      REAL NOT NULL,
+    codes_json      TEXT NOT NULL
 );
 """
+
+TOMBSTONE_S = 7 * 24 * 3600  # länger als die 24 Stunden eines Diktats
 
 # Spalten, die nach der ersten Installation dazukamen: (Name, Definition). Bestehende Datenbanken
 # bekommen sie beim Start per ALTER TABLE; alte Einträge gelten als ohne Angabe.
 ADDED_TRANSFER_COLUMNS = [
     ("patient_type", "TEXT"),
     ("positions_json", "TEXT NOT NULL DEFAULT '[]'"),
+    ("dictation_id", "TEXT"),  # gespeichertes Diktat, das der Abruf des Kurzcodes schließt
+    ("dictation_revision", "INTEGER"),  # genau dieser Stand wurde übergeben; None = noch nicht gespeichert
+    ("handed_over_at", "REAL"),  # erster Abruf; weitere Abrufe schließen nichts mehr
 ]
 
 
@@ -66,11 +114,29 @@ def connect(path: Path) -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def bury(conn: sqlite3.Connection, where: str, params: tuple, now: float) -> int:
+    """Löscht die Diktate, auf die `where` passt, und hinterlässt je einen Grabstein."""
+    conn.execute(
+        f"INSERT OR IGNORE INTO dictation_tombstones (id, closed_at) SELECT id, ? FROM dictations WHERE {where}",
+        (now, *params),
+    )
+    return conn.execute(f"DELETE FROM dictations WHERE {where}", params).rowcount
+
+
 def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
-    """Entfernt abgelaufene Sitzungen und Transfer-Einträge (WP-11)."""
+    """Entfernt abgelaufene Sitzungen, Transfer-Einträge, Diktate, Patienten, Grabsteine und Abholungen (WP-11)."""
     now = time.time() if now is None else now
     conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (now,))
     conn.execute("DELETE FROM transfers WHERE expires_at <= ?", (now,))
+    bury(conn, "expires_at <= ?", (now,), now)
+    conn.execute("DELETE FROM patients WHERE expires_at <= ?", (now,))
+    # Diktate eines gelöschten Patienten nie verwaist stehen lassen.
+    bury(conn, "patient_id IS NOT NULL AND patient_id NOT IN (SELECT id FROM patients)", (), now)
+    conn.execute("DELETE FROM dictation_tombstones WHERE closed_at <= ?", (now - TOMBSTONE_S,))
+    conn.execute(
+        "DELETE FROM handovers WHERE dictation_id NOT IN (SELECT id FROM dictations)"
+        " AND dictation_id NOT IN (SELECT id FROM dictation_tombstones)"
+    )
 
 
 def purge_expired_at(path: Path) -> None:

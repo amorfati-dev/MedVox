@@ -1,0 +1,306 @@
+/* Patienten: aktiver Patient in der Diktat-Steuerung, Auswahl mit Tastenfeld, Büroliste (/patienten). */
+
+/* Aktiver Patient: Nummer groß; „ohne Patient“ bernsteinfarben (nachholen). */
+.patient {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.patient-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 18px;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 2px solid var(--kasse);
+  border-radius: var(--radius);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.patient-bar > .icon {
+  width: 30px;
+  height: 30px;
+  color: var(--kasse);
+}
+.patient-bar:disabled {
+  cursor: default;
+}
+.patient-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.patient-label {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.patient-number {
+  font-family: var(--mono);
+  font-size: var(--fs-clock);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+.patient-change {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--kasse);
+}
+.patient-bar:disabled .patient-change {
+  visibility: hidden;
+}
+.patient-none {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+}
+.patient-none > .icon,
+.patient-none .patient-label,
+.patient-none .patient-change {
+  color: var(--warn);
+}
+.patient-none .patient-number {
+  font-family: var(--sans);
+  font-size: var(--fs-transcript);
+  color: var(--warn);
+}
+.patient-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+.patient-save-gespeichert {
+  color: var(--ok);
+}
+.patient-save-fehler {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+/* Auswahl: Vollbild-Blatt über der Ansicht, Tastenfeld mit Handschuh-Tasten. */
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  background: var(--backdrop);
+}
+.picker {
+  width: min(960px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-menu);
+  font-size: var(--fs-base);
+}
+.picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.picker-head h2 {
+  margin: 0;
+}
+.assign {
+  width: min(560px, 100%);
+}
+.assign-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.picker-body {
+  display: grid;
+  gap: 20px;
+  margin-top: 12px;
+}
+@media (min-width: 900px) {
+  .picker-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.keypad-display {
+  display: block;
+  min-height: 76px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  font-family: var(--mono);
+  font-size: var(--fs-code);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-align: center;
+  border: 2px solid var(--kasse);
+  border-radius: 12px;
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+}
+.keypad-empty {
+  font-family: var(--sans);
+  font-size: var(--fs-transcript);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 50px;
+  color: var(--ink-2);
+  border-color: var(--line);
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--tap-gap);
+}
+.key {
+  min-height: 76px;
+  font-size: var(--fs-ziffer);
+}
+.picker-list h3 {
+  margin: 0 0 8px;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+.picker-list ul {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: var(--tap-gap);
+}
+.pick {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.pick-number {
+  font-family: var(--mono);
+  font-size: var(--fs-ziffer);
+  font-weight: 800;
+}
+.pick-meta {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.pick-on {
+  border-color: var(--kasse);
+  background: var(--kasse-bg);
+}
+
+/* Büro: Liste links, gewählter Patient rechts (Raster wie Rezeption). */
+.plist ul {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.plist-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  align-items: center;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.plist-on {
+  border-color: var(--kasse);
+  background: var(--kasse-bg);
+}
+.plist-number {
+  font-family: var(--mono);
+  font-size: 1.3rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.plist-ohne .plist-number {
+  font-family: var(--sans);
+  color: var(--warn);
+}
+.plist-ohne:not(.plist-on) {
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+.plist-meta {
+  grid-column: 1 / -1;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.state-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--fs-label);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.state-offen {
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.state-done {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.state-leer {
+  color: var(--ink-2);
+}
+.state-ohne {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.patienten .patient-head {
+  font-size: 1.3rem;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.dictation {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.handed-over {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  color: var(--warn);
+  background: var(--warn-bg);
+  border: 2px solid var(--warn);
+  border-radius: 12px;
+  font-weight: 700;
+}
+.dictation h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.patient-actions {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}

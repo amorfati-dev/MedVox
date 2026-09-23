@@ -30,6 +30,10 @@ export type TranscribeResult = {
   notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
+// Früher an der Rezeption abgeholter Stand desselben Diktats (Kurzcode): Zeitpunkt und Evident-Zeilen.
+export type Handover = { fetched_at: string; codes: string[] };
+// Gespeichertes Diktat hinter einem Kurzcode; `revision` null, solange dieser Stand noch nicht gespeichert ist.
+export type HandoverLink = { id: string; revision: number | null };
 // Art einer übergebenen Position; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
 export type PositionKind = "bema" | "goz" | "zuzahlung" | "kassenanteil";
 // Übergebene Position, nur zur Anzeige an der Rezeption (kopiert wird `codes`).
@@ -43,7 +47,43 @@ export type TransferData = {
   created_at: string;
   patient_type?: PatientType | null;
   positions?: TransferPosition[];
+  earlier?: Handover[]; // schon abgeholte Stände desselben Diktats – nur die Änderung eintragen
 };
+
+// Stand eines Diktats, wie das iPad ihn beim Patienten speichert (PUT /api/v1/dictations/{id}):
+// die Felder aus /transcribe aller Abschnitte plus die Auswahl (abgewählte Ziffern, übernommene Optionen).
+export type DictationContent = {
+  transcript: string;
+  patient_type: PatientType | null;
+  codes: string[];
+  suggestions: Suggestion[];
+  planned: Suggestion[];
+  notes: string[];
+  deselected: string[]; // Ziffern im Kopierformat ("2x 41a")
+  adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
+};
+// `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).
+export type DictationBody = DictationContent & { patient?: string };
+export type StoredDictation = DictationContent & {
+  id: string;
+  patient: string | null;
+  patient_id: number | null;
+  revision: number; // „übertragen“ löscht nur genau die angezeigte Fassung
+  created_at: string;
+  updated_at: string;
+  handovers?: Handover[]; // schon per Kurzcode an der Rezeption abgeholte Stände
+};
+export type PatientSummary = {
+  id: number;
+  number: string; // Evident-Patientennummer
+  created_at: string;
+  updated_at: string; // jüngstes Diktat
+  dictations: number; // offen
+  transferred: number; // schon übertragen (Inhalt gelöscht)
+  transferred_at: string | null;
+};
+export type PatientDetail = PatientSummary & { items: StoredDictation[] };
+export type PatientList = { patients: PatientSummary[]; unassigned: StoredDictation[] };
 
 export class ApiError extends Error {
   readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
@@ -57,6 +97,7 @@ export class ApiError extends Error {
 const MESSAGES: Record<number, string> = {
   401: "Nicht angemeldet.",
   404: "Nicht gefunden.",
+  410: "Dieses Diktat wurde bereits übertragen.",
   413: "Aufnahme zu lang (maximal 60 Sekunden).",
   415: "Audioformat wird vom Server nicht unterstützt.",
   429: "Zu viele Abfragen – bitte kurz warten.",
@@ -107,10 +148,38 @@ export const api = {
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
-  createTransfer: (transcript: string, codes: string[], details?: TransferDetails) =>
-    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes, ...details })),
+  // `link`: gespeichertes Diktat; der erste Abruf des Kurzcodes schließt genau diesen Stand wie
+  // „übertragen“ im Büro. War es schon übertragen, lehnt der Abruf mit 410 ab.
+  createTransfer: (transcript: string, codes: string[], details?: TransferDetails, link?: HandoverLink | null) =>
+    request<TransferCreated>(
+      "/api/v1/transfer",
+      json("POST", {
+        transcript,
+        codes,
+        ...details,
+        ...(link ? { dictation_id: link.id, ...(link.revision !== null ? { dictation_revision: link.revision } : {}) } : {}),
+      }),
+    ),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
+
+  // Diktate je Patient: am Stuhl speichern, im Büro übertragen (höchstens 24 Stunden). Ein schon
+// übertragenes, gelöschtes oder abgelaufenes Diktat lehnt der Server mit 410 ab.
+  saveDictation: (id: string, body: DictationBody) =>
+    request<StoredDictation>(`/api/v1/dictations/${encodeURIComponent(id)}`, json("PUT", body)),
+  deleteDictation: (id: string) =>
+    request<void>(`/api/v1/dictations/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  listPatients: () => request<PatientList>("/api/v1/patients"),
+  createPatient: (number: string) => request<PatientSummary>("/api/v1/patients", json("POST", { number })),
+  getPatient: (id: number) => request<PatientDetail>(`/api/v1/patients/${id}`),
+  appendDictation: (patientId: number, dictationId: string) =>
+    request<StoredDictation>(`/api/v1/patients/${patientId}/dictations`, json("POST", { dictation_id: dictationId })),
+  markTransferred: (patientId: number, seen: StoredDictation[]) =>
+    request<PatientDetail>(
+      `/api/v1/patients/${patientId}/transferred`,
+      json("POST", { seen: seen.map((d) => ({ id: d.id, revision: d.revision })) }),
+    ),
+  deletePatient: (id: number) => request<void>(`/api/v1/patients/${id}`, { method: "DELETE" }),
 };
 
 // Art je Ziffer der erbrachten Hauptvorschläge; Schlüssel wie in `codes` ohne Anzahl ("2x 41a" -> "41a").
@@ -177,6 +246,11 @@ export function splitBlocks(lines: string[], allPrivate = false): EvidentBlocks 
   const gap = lines.indexOf("");
   if (gap >= 0) return { kasse: lines.slice(0, gap), privat: lines.slice(gap + 1) };
   return allPrivate ? { kasse: [], privat: lines } : { kasse: lines, privat: [] };
+}
+
+// Übergebene Positionen nur privat (GOZ/GOÄ, Zuzahlung): dann sind Zeilen ohne Leerzeile der Privatblock.
+export function onlyPrivate(positions: TransferPosition[]): boolean {
+  return positions.length > 0 && positions.every((p) => p.kind === "goz" || p.kind === "zuzahlung");
 }
 
 function toothLines(suggestions: Suggestion[], shortForms: boolean): string[] {

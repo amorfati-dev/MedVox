@@ -60,8 +60,8 @@ Rezeption gesendet. Ohne Tipp kommt sie nirgends hin.
 | **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kreis **Aufnehmen** – beginnt ein neues Diktat |
 | **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Quadrat **Stopp**; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
 | **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | gesperrt – warten |
-| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** (neues Diktat, ersetzt das Ergebnis), **Nächster Patient** (Bildschirm leeren) |
-| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** |
+| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** (weiteres Diktat für denselben Patienten, das bisherige bleibt gespeichert), **Nächster Patient** (Bildschirm leeren, nächste Nummer eingeben) |
+| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** (löscht das Diktat auch beim Patienten) |
 | **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen** |
 
 Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile(n), die
@@ -72,12 +72,70 @@ prüfen (Streifen „Prüfen: …" unter der Zeile). Kassenanteil und Zuzahlung 
 in einem Rahmen „Mehrkosten Zahn 46 · Kasse zahlt 13a · Patient zahlt 2150 · Vereinbarung nötig".
 Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint). Die Leiste unten:
 **Text kopieren** · **Ziffern kopieren** · **An Rezeption**; „Nur Ziffern" steht in der Kopfzeile.
-Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Gerätetest und Abmelden.
+Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste, Gerätetest
+und Abmelden.
+
+## Mehrere Patienten hintereinander, übertragen im Büro
+
+Von Zimmer zu Zimmer diktieren und erst im Büro nach Evident übertragen:
+
+1. **Patient wählen** – ganz oben links steht immer der aktive Patient: die **Evident-Patientennummer**
+   groß, oder bernsteinfarben **„Ohne Patient"**. Antippen öffnet ein großes Tastenfeld; Nummer
+   tippen, **OK**. Wer heute schon diktiert wurde, steht rechts daneben unter „Offene Patienten" –
+   einfach antippen. Nur die Nummer, **keine Namen**.
+2. **Diktieren wie immer.** Das Ergebnis wird beim Patienten auf dem Praxis-Mac gespeichert
+   („Gespeichert – im Büro unter ‚Patienten'" unter der Nummer). Auch späteres Abwählen oder eine
+   übernommene Zuzahlungs-Option wird mitgespeichert.
+3. **Noch ein Diktat für denselben Patienten:** **Neu** – es kommt als weiteres Diktat dazu.
+4. **Nächster Patient:** der Knopf leert den Bildschirm und fragt gleich die nächste Nummer ab.
+5. **Nummer vergessen?** Das Diktat ist trotzdem gespeichert, als „ohne Patient". Nummer oben
+   nachtragen, solange es noch am Bildschirm steht – oder später im Büro zuordnen. Beim
+   Nachtragen fragt MedVox immer nach, mit der Nummer in der Frage: **„Ja, Patient 4711
+   zuordnen"** oder **„Nein, neues Diktat für 4711"**. „Nein" lässt das Diktat „ohne Patient"
+   gespeichert und leert den Bildschirm für den neuen Patienten. So landet ein Diktat nie
+   unbemerkt beim falschen Patienten – etwa wenn man im nächsten Zimmer auf „Ohne Patient"
+   statt auf **Nächster Patient** tippt. Dasselbe gilt beim Antippen eines offenen Patienten.
+
+Während ein Diktat läuft (Aufnahme, Senden, unterbrochen) und schon einem Patienten gehört oder
+ein Ergebnis hat, ist der Wechsel gesperrt; ein fertiges Diktat bleibt beim bisherigen Patienten,
+wenn man danach eine andere Nummer wählt. Hat das Büro ein Diktat inzwischen umgehängt, bleibt es
+dort – das iPad hängt es beim nächsten Speichern nicht zurück.
+
+**Im Büro** (Rezeptions-PC oder iPad, angemeldet): `https://<LAN-IP>/patienten` (am iPad: ⋯ →
+Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Anzahl der Diktate,
+Uhrzeit und Zustand **offen** / **übertragen**; Diktate „ohne Patient" stehen bernsteinfarben
+ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Rechts je Diktat Text, Evident-Zeilen
+und Mehrkosten mit **Text kopieren**, **Ziffern kopieren** und **Nur Ziffern** – dasselbe Format
+wie am iPad. Danach **Als übertragen markieren**: Text und Ziffern sind sofort vom Praxis-Mac
+gelöscht, in der Liste bleibt nur „übertragen" mit Uhrzeit. Kam inzwischen am iPad etwas dazu,
+bleibt das offen und wird gemeldet.
+
+**Aufbewahrung:** ein Diktat bleibt, bis es als übertragen markiert ist – **höchstens 24 Stunden**,
+dann löscht der Praxis-Mac es von selbst, auch wenn es vergessen wurde. Was am Abend nicht
+übertragen ist, ist am nächsten Tag weg. Der Kurzcode („An Rezeption") funktioniert daneben wie
+bisher für die sofortige Übergabe (15 Minuten). Sobald die Rezeption den Kurzcode abruft, gilt
+das gespeicherte Diktat als übertragen: es verschwindet aus der Patientenliste (beim Patienten
+steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht. Wurde das Diktat nach dem
+Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den Stand des Codes ab;
+die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Schon an der
+Rezeption abgeholt" mit Uhrzeit, den damals übergebenen Zeilen und dem, was seitdem **neu** ist –
+nur das nachtragen (hat sich nur eine Anzahl geändert, steht es ausdrücklich da, z. B. „36: wf
+jetzt 3× statt 2× – 1× nachtragen"; beim Kassenpatienten wie beim Kopieren getrennt nach Kasse
+und Privat, erst die Kassenzeilen eintragen); „Als übertragen markieren" zeigt diese Warnung
+vorher noch einmal. Wird für die Korrektur ein zweiter Kurzcode abgeholt, zeigt die Rezeption
+dieselbe Warnung über den Ziffern. Hat das Büro das Diktat schon übertragen, zeigt die Rezeption
+beim Code nur „Dieses Diktat wurde bereits am … übertragen … – nicht erneut in Evident eintragen"
+und keine Ziffern.
+
+**„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
+das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann
+nicht mehr gespeichert und nicht wieder angelegt; „An Rezeption" ist gesperrt. **Neues Diktat
+beginnen** (oder **Neu** / **Nächster Patient**) – nichts anderes ist nötig.
 
 ## „Ziffern kopieren" für Evident
 
-Evident nimmt Abrechnungspositionen nur hinter einem Zahn an. „Ziffern kopieren" (iPad und
-Rezeption) liefert deshalb **je Zahn eine Zeile**: erst der Zahn, dann seine Positionen,
+Evident nimmt Abrechnungspositionen nur hinter einem Zahn an. „Ziffern kopieren" (iPad, Rezeption
+und Patientenliste im Büro) liefert deshalb **je Zahn eine Zeile**: erst der Zahn, dann seine Positionen,
 kommagetrennt, in der Reihenfolge der Vorschläge. Mehrere Zähne stehen in der diktierten
 Reihenfolge untereinander; der OP-Zuschlag 0500–0530 steht beim operierten Zahn. Positionen ohne
 Zahn (01, Ä1, 107) kommen in eine letzte Zeile ohne Zahnnummer – die nimmt Evident so nicht an.
@@ -116,7 +174,8 @@ Kieferhälfte oder Frontzahnbereich – Kofferdam an 36 und 37 ergibt `bmf`, nic
 46 steht bmf in beiden Zahnzeilen.
 Die Liste zeigt beides: die amtliche Ziffer groß, die Kurzform klein darunter („Evident: l1").
 „Nur Ziffern" kopiert dieselben Zeilen nur mit amtlichen Ziffern (`36,35*3`), so geschrieben wie im
-Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption gibt es nur „Ziffern kopieren".
+Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzcode) gibt es nur
+„Ziffern kopieren", in der Patientenliste beides.
 
 ## Bekannte Grenzen (ehrlich)
 

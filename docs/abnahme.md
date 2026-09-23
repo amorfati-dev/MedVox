@@ -1,6 +1,7 @@
 # Abnahme Phase 1 – Protokoll für die Praxis
 
-Sechs Prüfungen, eine je Abnahmekriterium aus dem Plan (Phase 1). Jede Zeile
+Sechs Prüfungen, eine je Abnahmekriterium aus dem Plan (Phase 1), dazu Prüfung 7 für die
+Diktate je Patient (mehrere Patienten, übertragen im Büro). Jede Zeile
 abhaken und notieren, was tatsächlich zu sehen war – auch wenn es geklappt hat.
 Schlägt etwas fehl: Uhrzeit notieren, `make status` im Terminal ausführen und die
 Ausgabe mit aufschreiben.
@@ -118,6 +119,48 @@ Beobachtet: ______________________________________________________
 5. [ ] Auf dem iPad ohne neue Anmeldung diktieren – funktioniert.
 
 Uhrzeit Neustart: ______  `make status` grün um: ______
+Beobachtet: ______________________________________________________
+
+## 7. Mehrere Patienten hintereinander, übertragen im Büro
+
+1. [ ] iPad: oben links auf „Ohne Patient" tippen, Evident-Nummer über das Tastenfeld eingeben
+       (z. B. 4711), **OK** → die Nummer steht groß oben links.
+2. [ ] Diktieren → unter der Nummer „Gespeichert – im Büro unter ‚Patienten'".
+3. [ ] **Neu** → zweites Diktat für denselben Patienten.
+4. [ ] **Nächster Patient** → Tastenfeld erscheint; 4711 steht rechts unter „Offene Patienten".
+       Zweite Nummer (z. B. 4712) eingeben, diktieren.
+5. [ ] **Nächster Patient** → „Ohne Patient weiter" wählen, diktieren → „Gespeichert ohne Patient".
+       Danach oben die Nummer 4713 eintragen → Nachfrage „Das Diktat auf dem Bildschirm Patient 4713
+       zuordnen?" → **Ja, Patient 4713 zuordnen** → das Diktat gehört jetzt 4713.
+       Gegenprobe: noch ein Diktat ohne Nummer, oben 4714 eintragen → **Nein, neues Diktat für 4714**
+       → Bildschirm leer, 4714 oben; das Diktat bleibt „ohne Patient" (Schritt 7).
+6. [ ] Noch ein Diktat ohne Nummer aufnehmen und **nicht** zuordnen.
+7. [ ] Rezeptions-PC: `https://<LAN-IP>/patienten` (mit dem Praxis-Passwort anmelden) → oben
+       „Ohne Patient", darunter 4713, 4712, 4711 (jüngstes zuerst), 4711 mit „2 Diktate", alle „offen".
+8. [ ] „Ohne Patient" → **Patient zuordnen** → Nummer eingeben → erscheint beim Patienten.
+9. [ ] 4711: je Diktat „Text kopieren", „Ziffern kopieren", „Nur Ziffern" → in Evident einfügen:
+       dasselbe Format wie am iPad (Prüfung 3).
+10. [ ] **Als übertragen markieren** → „übertragen" mit Uhrzeit; Text und Ziffern sind weg. Gegenprobe
+       (0 = in Ordnung):
+       `sqlite3 ~/Library/Application\ Support/MedVox/medvox.db "select count(*) from dictations d join patients p on p.id = d.patient_id where p.number = '4711'"`
+11. [ ] Am nächsten Morgen: die gestern nicht übertragenen Patienten sind aus der Liste
+       verschwunden (spätestens 24 Stunden nach dem Diktat), Gegenprobe (0 = in Ordnung):
+       `sqlite3 ~/Library/Application\ Support/MedVox/medvox.db "select count(*) from dictations where created_at < cast(strftime('%s','now') as real) - 86400"`
+12. [ ] Der Kurzcode („An Rezeption", Prüfung 3) funktioniert unverändert daneben. Diktat für 4715
+       aufnehmen, **An Rezeption**, Code am Rezeptions-PC abrufen → in `/patienten` steht 4715 als
+       „übertragen", nicht als „offen".
+13. [ ] Danach am iPad beim selben Diktat eine Ziffer abwählen → „Dieses Diktat wurde bereits
+       übertragen"; in `/patienten` erscheint es **nicht** wieder als offen.
+14. [ ] Diktat für 4716, **An Rezeption**, danach am iPad eine Ziffer abwählen, erst dann den alten
+       Code abrufen → Rezeption zeigt den Stand des Codes; in `/patienten` bleibt 4716 offen mit dem
+       bernsteinfarbenen Hinweis „Schon an der Rezeption abgeholt" (Uhrzeit, damalige Zeilen, „Neu
+       seitdem"). **Als übertragen markieren** zeigt die Warnung erst noch einmal. Stattdessen am
+       iPad erneut **An Rezeption** und den neuen Code abrufen → über den Ziffern steht dieselbe
+       Warnung mit der früheren Abholung und nur der neuen Position unter „Neu seitdem".
+15. [ ] Diktat für 4717, **An Rezeption**, Code **nicht** abrufen; im Büro 4717 **Als übertragen
+       markieren**; dann den Code abrufen → „Dieses Diktat wurde bereits am … übertragen … – nicht
+       erneut in Evident eintragen", keine Ziffern; erneuter Abruf → „Kein Diktat unter diesem Code".
+
 Beobachtet: ______________________________________________________
 
 ---

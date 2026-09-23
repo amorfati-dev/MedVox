@@ -1,12 +1,12 @@
 // „An Rezeption“: legt einen Kurzcode für Transkript und Evident-Zeilen an.
 import { useEffect, useRef, useState } from "react";
-import { api, ApiError, type TransferCreated, type TransferDetails } from "../api";
+import { api, ApiError, type HandoverLink, type TransferCreated, type TransferDetails } from "../api";
 
 export type Transfer = {
   busy: boolean;
   result: TransferCreated | null;
   error: string | null;
-  send: () => Promise<void>;
+  send: (link: HandoverLink | null) => Promise<void>; // gespeichertes Diktat, das der Abruf schließt
 };
 
 // `details`: Patiententyp und Art je Position, nur zur Anzeige an der Rezeption (E6).
@@ -29,12 +29,12 @@ export function useTransfer(
     setError(null);
   }, [transcript, codes, details]);
 
-  const send = async () => {
+  const send = async (link: HandoverLink | null) => {
     const sent = version.current;
     setBusy(true);
     setError(null);
     try {
-      const created = await api.createTransfer(transcript, codes, details ?? undefined);
+      const created = await api.createTransfer(transcript, codes, details ?? undefined, link);
       if (sent !== version.current) return;
       setResult(created);
     } catch (e) {

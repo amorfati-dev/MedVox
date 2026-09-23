@@ -89,6 +89,18 @@ export function copyLines(
   return joinBlocks(copyBlocks(suggestions, active, adopted, shortForms));
 }
 
+// Evident-Zeilen aus der Auswahl in der Ergebnisliste: alle Ziffern außer den abgewählten, dazu die
+// übernommenen Optionen. Dieselbe Rechnung am iPad (useSelection) und im Büro (patients.ts).
+export function selectedLines(
+  suggestions: Suggestion[],
+  codes: string[],
+  deselected: ReadonlySet<string>,
+  adopted: ReadonlySet<string>,
+  shortForms = true,
+): string[] {
+  return copyLines(suggestions, codes.filter((c) => !deselected.has(c)), adopted, shortForms);
+}
+
 // „Zuzahlung zu BEMA 13a/13b/13c/13d: …“ → ["13a", "13b", "13c", "13d"]
 function basisCodes(reason: string): string[] {
   const m = /^Zuzahlung(?: möglich)? zu BEMA ([^\s:]+)/.exec(reason);
