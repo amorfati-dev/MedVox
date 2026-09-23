@@ -1,0 +1,101 @@
+/* Gestaltungs-Tokens: Farben (hell/dunkel), Schriftstufen, Maße.
+   Farbe steht für „wer zahlt“: Türkis = Kasse/BEMA, Indigo = Privat/GOZ/Zuzahlung,
+   Bernstein = prüfen/unterbrochen, Rot nur für „nimmt auf“ und Fehler.
+   Alle Text-auf-Fläche-Paare ≥ 4,5 : 1 (WCAG), nachgerechnet im Gestaltungsvorschlag. */
+:root {
+  color-scheme: light;
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --surface-2: #eef1f4;
+  --line: #d5dbe1;
+  --ink: #14191e;
+  --ink-2: #4f5a64;
+  --on-solid: #ffffff; /* Text auf vollen Farbflächen */
+
+  --rec: #c62828; /* nur „nimmt auf“ */
+  --busy: #475569;
+  --busy-bg: #e9edf2;
+  --ok: #166b33;
+  --ok-bg: #e3f4e8;
+  --warn: #8a5000;
+  --warn-bg: #fff1d6;
+  --err: #b3261e;
+  --err-bg: #fde8e6;
+  --kasse: #0d6b5c;
+  --kasse-bg: #e3f2ee;
+  --privat: #3b4fa0;
+  --privat-bg: #e9ecf9;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Schriftstufen am iPad (Armlänge ≈ 70 cm); Text nie < 16 px, Etiketten 14 px */
+  --fs-base: 22px;
+  --fs-clock: 55px;
+  --fs-code: 62px;
+  --fs-ziffer: 31px;
+  --fs-state: 29px;
+  --fs-transcript: 24px;
+  --fs-reason: 18px;
+  --fs-small: 16px;
+  --fs-label: 14px;
+
+  --tap: 64px; /* Tippfläche mit Handschuhen */
+  --tap-gap: 10px;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(20, 25, 30, 0.06), 0 4px 14px rgba(20, 25, 30, 0.06);
+}
+
+/* Dunkelmodus (Röntgenraum): folgt dem Gerät, außer der Schalter steht auf „Hell“ … */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0e1215;
+    --surface: #161c21;
+    --surface-2: #1d242a;
+    --line: #2c353d;
+    --ink: #e3e7eb;
+    --ink-2: #9aa5af;
+    --on-solid: #0e1215;
+    --rec: #b71c1c;
+    --busy: #aeb8c2;
+    --busy-bg: #1d242a;
+    --ok: #6fd08f;
+    --ok-bg: #10291a;
+    --warn: #f0b44c;
+    --warn-bg: #33260f;
+    --err: #ff8a80;
+    --err-bg: #361514;
+    --kasse: #5cc2ad;
+    --kasse-bg: #0f2a25;
+    --privat: #a3b0f5;
+    --privat-bg: #1c2140;
+    --shadow: none;
+  }
+}
+
+/* … oder der Schalter steht auf „Dunkel“ (gleiche Werte wie oben). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1215;
+  --surface: #161c21;
+  --surface-2: #1d242a;
+  --line: #2c353d;
+  --ink: #e3e7eb;
+  --ink-2: #9aa5af;
+  --on-solid: #0e1215;
+  --rec: #b71c1c;
+  --busy: #aeb8c2;
+  --busy-bg: #1d242a;
+  --ok: #6fd08f;
+  --ok-bg: #10291a;
+  --warn: #f0b44c;
+  --warn-bg: #33260f;
+  --err: #ff8a80;
+  --err-bg: #361514;
+  --kasse: #5cc2ad;
+  --kasse-bg: #0f2a25;
+  --privat: #a3b0f5;
+  --privat-bg: #1c2140;
+  --shadow: none;
+}

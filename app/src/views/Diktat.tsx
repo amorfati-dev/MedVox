@@ -6,6 +6,7 @@ import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
+import { ThemeSwitch } from "../components/ThemeSwitch";
 import { TransferPanel } from "../components/TransferPanel";
 import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
 import { usePatientType } from "../hooks/usePatientType";
@@ -71,10 +72,11 @@ export function Diktat({ onLogout }: Props) {
   }
 
   return (
-    <main className="page">
+    <main className="page ipad">
       <header className="topbar">
         <h1>MedVox</h1>
         <nav>
+          <ThemeSwitch />
           <a href="/check">Gerätetest</a>
           <button type="button" className="link" onClick={logout}>
             Abmelden

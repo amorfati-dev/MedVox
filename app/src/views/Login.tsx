@@ -26,7 +26,7 @@ export function Login({ onLogin, notice }: Props) {
   };
 
   return (
-    <main className="page narrow">
+    <main className="page narrow ipad">
       <h1>MedVox</h1>
       <p className="muted">Lokale Diktat-Transkription für die Praxis.</p>
       {notice && (

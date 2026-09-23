@@ -1,6 +1,7 @@
 // Gerätetest (/check): HTTPS, Mikrofon, Server-Health und MediaRecorder-Formate.
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../api";
+import { ThemeSwitch } from "../components/ThemeSwitch";
 import { MIC_MESSAGES, MIME_CANDIDATES, requestMicrophone, stopStream } from "../hooks/recorder";
 
 type Result = { ok: boolean | null; text: string };
@@ -51,6 +52,7 @@ export function Check() {
       <header className="topbar">
         <h1>MedVox · Gerätetest</h1>
         <nav>
+          <ThemeSwitch />
           <a href="/">Diktat</a>
         </nav>
       </header>

@@ -1,0 +1,94 @@
+/* Diktat-Ansicht: Patiententyp-Schalter, Aufnahmeknopf, Pegel, Transkript. */
+.recorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.record {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: none;
+  background: var(--rec);
+  color: #fff;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.record:disabled {
+  background: var(--busy-bg);
+  color: var(--busy);
+}
+.record-active {
+  border-radius: 24px;
+}
+.meter {
+  width: 100%;
+  max-width: 420px;
+  height: 10px;
+  background: var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  background: var(--ok);
+  transition: width 60ms linear;
+}
+.countdown {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.countdown.warn {
+  color: var(--err);
+  font-weight: 700;
+}
+.transcript {
+  font-size: var(--fs-transcript);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin: 0 0 8px;
+  min-height: 2.5em;
+}
+.switch {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.switch-option {
+  flex: 1;
+  min-height: var(--tap);
+  font: inherit;
+  font-weight: 600;
+  border: none;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.switch-option + .switch-option {
+  border-left: 2px solid var(--line);
+}
+.switch-option:disabled {
+  cursor: default;
+}
+.switch-on.switch-kasse {
+  background: var(--kasse);
+  color: var(--on-solid);
+}
+.switch-on.switch-privat {
+  background: var(--privat);
+  color: var(--on-solid);
+}
+.switch-option:disabled:not(.switch-on) {
+  opacity: 0.45;
+}
+.switch-hint {
+  margin: 0;
+  font-size: var(--fs-small);
+}

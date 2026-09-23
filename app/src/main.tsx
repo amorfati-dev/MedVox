@@ -1,7 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
-import "./styles.css";
+import "./styles/tokens.css";
+import "./styles/base.css";
+import "./styles/diktat.css";
+import "./styles/ergebnis.css";
+import "./styles/rezeption.css";
+import { applyTheme, loadTheme } from "./theme";
+
+// Farbschema vor dem ersten Zeichnen setzen, damit nichts hell aufblitzt.
+applyTheme(loadTheme());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

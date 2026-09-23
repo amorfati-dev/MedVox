@@ -1,6 +1,7 @@
 // Rezeptions-Ansicht (/transfer): Kurzcode eingeben, Text und Ziffern abholen.
 import { useEffect, useState, type FormEvent } from "react";
 import { api, ApiError, CODE_LENGTH, evidentText, normalizeCode, type TransferData } from "../api";
+import { ThemeSwitch } from "../components/ThemeSwitch";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
 
@@ -47,6 +48,7 @@ export function Rezeption() {
       <header className="topbar">
         <h1>MedVox · Rezeption</h1>
         <nav>
+          <ThemeSwitch />
           <a href="/">Diktat</a>
         </nav>
       </header>

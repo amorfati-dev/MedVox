@@ -1,0 +1,104 @@
+/* Ergebnis: Ziffern, Evident-Zeilen, Patiententyp-Etikett, Kurzcode-Tafel. */
+.codes-line,
+.codes-lines {
+  font-size: 1.35rem;
+  font-family: var(--mono);
+  margin: 0 0 8px;
+}
+.codes-lines {
+  list-style: none;
+  padding: 0;
+}
+.chip-short {
+  font-weight: 400;
+  opacity: 0.7;
+}
+.toothless-hint {
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--warn);
+}
+.chips {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tap-gap);
+}
+.chip {
+  font: inherit;
+  min-height: var(--tap);
+  padding: 6px 18px;
+  border-radius: 32px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  text-decoration: line-through;
+  cursor: pointer;
+}
+.chip-active {
+  border-color: var(--kasse);
+  background: var(--kasse-bg);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+.chip-zuzahlung {
+  border-style: dashed;
+}
+.chip-zuzahlung.chip-active {
+  border-color: var(--privat);
+  background: var(--privat-bg);
+}
+.chip-tag {
+  margin-left: 8px;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--privat);
+}
+.legend {
+  font-size: var(--fs-small);
+  margin: 8px 0 0;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.badge {
+  display: inline-block;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 12px;
+  color: var(--on-solid);
+  white-space: nowrap;
+}
+.badge-kasse {
+  background: var(--kasse);
+}
+.badge-privat {
+  background: var(--privat);
+}
+.transfer-result {
+  text-align: center;
+  margin-top: 12px;
+}
+.transfer-code {
+  font-size: var(--fs-code);
+  letter-spacing: 0.25em;
+  font-family: var(--mono);
+  font-weight: 700;
+  margin: 8px 0 12px;
+}
+.qr {
+  display: block;
+  margin: 0 auto;
+  image-rendering: pixelated;
+  border-radius: 8px;
+}

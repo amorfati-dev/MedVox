@@ -1,0 +1,30 @@
+/* Rezeption (/transfer), Gerätetest (/check), Anmeldung. */
+.code-input {
+  font-size: 2rem;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+.checks {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+.checks th,
+.checks td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.checks th {
+  white-space: nowrap;
+  width: 40%;
+}
+.checks .ok {
+  color: var(--ok);
+}
+.checks .bad {
+  color: var(--err);
+}
