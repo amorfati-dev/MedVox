@@ -23,7 +23,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from medvox import db
+from medvox import db, handovers
 
 RETENTION_S = 24 * 3600  # harte Grenze, nicht per Umgebung verlängerbar
 
@@ -52,7 +52,7 @@ class Dictation:
     created_at: float
     updated_at: float
     data: dict
-    handed_over_at: float | None = None  # früherer Stand per Kurzcode abgeholt, danach geändert
+    handovers: tuple[dict, ...] = ()  # abgeholte Kurzcodes: {"fetched_at", "codes"} (handovers.py)
 
 
 _PATIENT_SQL = (
@@ -68,11 +68,15 @@ def _patient(row: sqlite3.Row) -> Patient:
     )
 
 
-def _dictation(row: sqlite3.Row) -> Dictation:
-    return Dictation(
-        row["id"], row["patient_id"], row["number"], row["revision"],
-        row["created_at"], row["updated_at"], json.loads(row["data_json"]), row["handed_over_at"],
-    )
+def _dictations(conn: sqlite3.Connection, rows: list[sqlite3.Row]) -> list[Dictation]:
+    fetched = handovers.by_dictation(conn, [r["id"] for r in rows])
+    return [
+        Dictation(
+            r["id"], r["patient_id"], r["number"], r["revision"], r["created_at"], r["updated_at"],
+            json.loads(r["data_json"]), tuple(fetched[r["id"]]),
+        )
+        for r in rows
+    ]
 
 
 def _patient_id(conn: sqlite3.Connection, number: str, now: float) -> int:
@@ -102,7 +106,7 @@ def _get_patient(conn: sqlite3.Connection, patient_id: int) -> Patient | None:
 
 def _get_dictation(conn: sqlite3.Connection, dictation_id: str) -> Dictation | None:
     row = conn.execute(f"{_DICTATION_SQL} WHERE d.id = ?", (dictation_id,)).fetchone()
-    return None if row is None else _dictation(row)
+    return None if row is None else _dictations(conn, [row])[0]
 
 
 def create_patient(db_path: Path, number: str, now: float | None = None) -> Patient:
@@ -121,10 +125,10 @@ def list_patients(db_path: Path, now: float | None = None) -> tuple[list[Patient
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
         patients = conn.execute(f"{_PATIENT_SQL} ORDER BY p.updated_at DESC, p.id DESC").fetchall()
-        loose = conn.execute(
-            f"{_DICTATION_SQL} WHERE d.patient_id IS NULL ORDER BY d.updated_at DESC"
-        ).fetchall()
-    return [_patient(r) for r in patients], [_dictation(r) for r in loose]
+        loose = _dictations(
+            conn, conn.execute(f"{_DICTATION_SQL} WHERE d.patient_id IS NULL ORDER BY d.updated_at DESC").fetchall()
+        )
+    return [_patient(r) for r in patients], loose
 
 
 def get_patient(
@@ -140,7 +144,7 @@ def get_patient(
         rows = conn.execute(
             f"{_DICTATION_SQL} WHERE d.patient_id = ? ORDER BY d.created_at, d.id", (patient_id,)
         ).fetchall()
-    return patient, [_dictation(r) for r in rows]
+        return patient, _dictations(conn, rows)
 
 
 def save_dictation(
@@ -248,9 +252,9 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
     Rückgabe: Zeitpunkt, zu dem das Diktat schon vorher geschlossen wurde (Büro, Löschen, Ablauf
     oder ein anderer Kurzcode) – dann darf der Code nichts mehr herausgeben; sonst None.
     Unverändert (`revision` = Revision des letzten Speicherns vom iPad; Zuordnen im Büro und
-    frühere Abhol-Vermerke zählen nicht als Änderung): löschen wie „übertragen“ im Büro. Danach geändert (oder beim Anlegen des Codes
-    noch nicht gespeichert): offen lassen, mit Vermerk der Abholzeit und neuer Revision, damit
-    das Büro die Änderung bewusst prüft. Noch gar nicht gespeichert: Grabstein, damit das
+    frühere Abholungen zählen nicht als Änderung): löschen wie „übertragen“ im Büro. Danach
+    geändert (oder beim Anlegen des Codes noch nicht gespeichert): offen lassen mit neuer
+    Revision, damit das Büro die Abholung (handovers.py) sieht und nur die Änderung nachträgt. Noch gar nicht gespeichert: Grabstein, damit das
     spätere Speichern abgelehnt wird statt ein zweites offenes Diktat anzulegen.
     """
     tomb = conn.execute("SELECT closed_at FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone()
@@ -267,7 +271,5 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
                 (now, row["patient_id"]),
             )
     else:
-        conn.execute(
-            "UPDATE dictations SET handed_over_at = ?, revision = revision + 1 WHERE id = ?", (now, dictation_id)
-        )
+        conn.execute("UPDATE dictations SET revision = revision + 1 WHERE id = ?", (dictation_id,))
     return None

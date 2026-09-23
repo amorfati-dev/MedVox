@@ -14,6 +14,7 @@ import {
 import { CopayTable } from "../components/CopayTable";
 import { CopyButton } from "../components/CopyButton";
 import { EvidentLines } from "../components/EvidentLines";
+import { HandoverWarning } from "../components/HandoverWarning";
 import { PATIENT_LABEL } from "../components/PatientSwitch";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 
@@ -109,6 +110,7 @@ export function Rezeption() {
                 <span className={`badge badge-${data.patient_type}`}>{PATIENT_LABEL[data.patient_type]}</span>
               )}
             </div>
+            <HandoverWarning earlier={data.earlier ?? []} current={data.codes} />
             <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
             <h2>Ziffern für Evident</h2>
             <EvidentLines blocks={blocks} labelled={kasse} />

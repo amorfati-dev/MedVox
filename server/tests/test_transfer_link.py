@@ -8,9 +8,11 @@ Abruf schließt genau diesen Stand; ein danach geänderter bleibt offen (mit Ver
 from __future__ import annotations
 
 import sqlite3
+import time
 
 from fastapi.testclient import TestClient
 
+from medvox import db, patients
 from medvox.settings import Settings
 
 PATIENTS = "/api/v1/patients"
@@ -37,6 +39,11 @@ def code_for(client: TestClient, saved: dict | None, did: str = "diktat-0001", c
     if saved is not None:
         body["dictation_revision"] = saved["revision"]
     return client.post(TRANSFER, json=body).json()["code"]
+
+
+def fetched(db_path) -> list[tuple]:
+    with sqlite3.connect(db_path) as conn:
+        return conn.execute("SELECT dictation_id, codes_json FROM handovers ORDER BY fetched_at").fetchall()
 
 
 def tombstones(db_path) -> list[str]:
@@ -72,12 +79,13 @@ def test_changed_after_the_code_stays_open_with_a_note(logged_in: TestClient, se
     assert read.status_code == 200 and read.json()["codes"] == ["36,13c"]  # der Stand des Codes
 
     (item,) = items(logged_in, "4711")
-    assert item["adopted"] == ["2100@36"] and item["handed_over_at"]  # offen, mit Vermerk
+    assert item["adopted"] == ["2100@36"]  # offen, mit der Abholung für das Büro
+    assert [h["codes"] for h in item["handovers"]] == [["36,13c"]] and item["handovers"][0]["fetched_at"]
     assert item["revision"] > changed["revision"]  # was das Büro vorher sah, gilt nicht mehr
     assert patient(logged_in, "4711")["dictations"] == 1 and tombstones(settings.db_path) == []
 
     again = put(logged_in, "diktat-0001", "4711", adopted=["2100@36"], deselected=["13c"])
-    assert again.status_code == 200 and again.json()["handed_over_at"]  # weiter speicherbar
+    assert again.status_code == 200 and len(again.json()["handovers"]) == 1  # weiter speicherbar
     seen = [{"id": "diktat-0001", "revision": again.json()["revision"]}]
     done = logged_in.post(f"{PATIENTS}/{again.json()['patient_id']}/transferred", json={"seen": seen}).json()
     assert done["items"] == [] and done["transferred"] == 1  # im Büro wie gewohnt abschließbar
@@ -93,11 +101,28 @@ def test_second_code_after_the_correction_closes_it(logged_in: TestClient, setti
     assert patient(logged_in, "4711")["dictations"] == 1
 
     code_b = code_for(logged_in, changed, codes=["36,13c,2100"])  # Revision, die das iPad kennt
-    read = reception.get(f"{TRANSFER}/{code_b}")
-    assert read.status_code == 200 and read.json()["codes"] == ["36,13c,2100"]
+    for _ in range(2):  # auch beim erneuten Abruf bleibt der Hinweis
+        read = reception.get(f"{TRANSFER}/{code_b}")
+        assert read.status_code == 200 and read.json()["codes"] == ["36,13c,2100"]
+        (earlier,) = read.json()["earlier"]  # die Rezeption sieht, was A schon übergeben hat
+        assert earlier["codes"] == ["36,13c"] and earlier["fetched_at"].endswith("+00:00")
+    assert reception.get(f"{TRANSFER}/{code_a}").json()["earlier"] == []  # A war die erste Abholung
     state = patient(logged_in, "4711")
     assert state["dictations"] == 0 and state["transferred"] == 1
     assert tombstones(settings.db_path) == ["diktat-0001"]
+    assert fetched(settings.db_path) == [("diktat-0001", '["36,13c"]'), ("diktat-0001", '["36,13c,2100"]')]
+
+    # Die Abholungen bleiben mit dem Grabstein und gehen mit ihm.
+    patients.list_patients(settings.db_path, now=time.time() + db.TOMBSTONE_S + 1)
+    assert fetched(settings.db_path) == [] and tombstones(settings.db_path) == []
+
+
+def test_single_code_has_no_earlier_handover(logged_in: TestClient) -> None:
+    saved = put(logged_in, "diktat-0001", "4711").json()
+    read = TestClient(logged_in.app).get(f"{TRANSFER}/{code_for(logged_in, saved)}")
+    assert read.status_code == 200 and read.json()["earlier"] == []
+    plain = logged_in.post(TRANSFER, json={"transcript": "ohne Verknüpfung"}).json()["code"]
+    assert TestClient(logged_in.app).get(f"{TRANSFER}/{plain}").json()["earlier"] == []
 
 
 def test_code_after_office_reassignment_still_closes(logged_in: TestClient) -> None:

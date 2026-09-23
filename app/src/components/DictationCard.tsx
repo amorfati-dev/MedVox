@@ -6,6 +6,7 @@ import { clock, dictationCopy } from "../patients";
 import { CopayTable } from "./CopayTable";
 import { CopyButton } from "./CopyButton";
 import { EvidentLines } from "./EvidentLines";
+import { HandoverWarning } from "./HandoverWarning";
 import { PATIENT_LABEL } from "./PatientSwitch";
 
 type Props = { d: StoredDictation; title: string; children?: ReactNode };
@@ -20,12 +21,7 @@ export function DictationCard({ d, title, children }: Props) {
         </h3>
         {d.patient_type && <span className={`badge badge-${d.patient_type}`}>{PATIENT_LABEL[d.patient_type]}</span>}
       </div>
-      {d.handed_over_at && (
-        <p className="handed-over" role="note">
-          Ein früherer Stand wurde um {clock(d.handed_over_at)} Uhr per Kurzcode an der Rezeption abgeholt; danach
-          kann das Diktat geändert worden sein – bitte bewusst prüfen, nur die Änderung nachtragen.
-        </p>
-      )}
+      <HandoverWarning earlier={d.handovers ?? []} current={copy.evident} />
       <p className="transcript">{d.transcript || <span className="muted">(leer)</span>}</p>
       <h2>Ziffern für Evident</h2>
       <EvidentLines lines={copy.evident} />

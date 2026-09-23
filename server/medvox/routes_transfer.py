@@ -43,12 +43,24 @@ class TransferCreated(BaseModel):
     expires_at: str
 
 
+class HandoverOut(BaseModel):
+    """Früher an der Rezeption abgeholter Stand desselben Diktats: Zeitpunkt und Evident-Zeilen."""
+
+    fetched_at: str
+    codes: list[str]
+
+
+def handover_out(h: dict) -> HandoverOut:
+    return HandoverOut(fetched_at=transfer.iso(h["fetched_at"]), codes=h["codes"])
+
+
 class TransferRead(BaseModel):
     transcript: str
     codes: list[str]
     created_at: str
     patient_type: str | None = None
     positions: list[TransferPosition] = []
+    earlier: list[HandoverOut] = []  # schon abgeholte Stände desselben Diktats: nur die Änderung eintragen
 
 
 @router.post("/transfer", response_model=TransferCreated, dependencies=[Depends(require_session)])
@@ -89,4 +101,5 @@ def read(code: str, request: Request) -> TransferRead:
         created_at=transfer.iso(entry.created_at),
         patient_type=entry.patient_type,
         positions=[TransferPosition(**p) for p in entry.positions],
+        earlier=[handover_out(h) for h in entry.earlier],
     )

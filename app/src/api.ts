@@ -30,6 +30,8 @@ export type TranscribeResult = {
   notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
+// Früher an der Rezeption abgeholter Stand desselben Diktats (Kurzcode): Zeitpunkt und Evident-Zeilen.
+export type Handover = { fetched_at: string; codes: string[] };
 // Gespeichertes Diktat hinter einem Kurzcode; `revision` null, solange dieser Stand noch nicht gespeichert ist.
 export type HandoverLink = { id: string; revision: number | null };
 // Art einer übergebenen Position; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
@@ -45,6 +47,7 @@ export type TransferData = {
   created_at: string;
   patient_type?: PatientType | null;
   positions?: TransferPosition[];
+  earlier?: Handover[]; // schon abgeholte Stände desselben Diktats – nur die Änderung eintragen
 };
 
 // Stand eines Diktats, wie das iPad ihn beim Patienten speichert (PUT /api/v1/dictations/{id}):
@@ -68,7 +71,7 @@ export type StoredDictation = DictationContent & {
   revision: number; // „übertragen“ löscht nur genau die angezeigte Fassung
   created_at: string;
   updated_at: string;
-  handed_over_at?: string | null; // ein früherer Stand wurde per Kurzcode an der Rezeption abgeholt
+  handovers?: Handover[]; // schon per Kurzcode an der Rezeption abgeholte Stände
 };
 export type PatientSummary = {
   id: number;

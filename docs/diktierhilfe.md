@@ -117,8 +117,11 @@ bisher für die sofortige Übergabe (15 Minuten). Sobald die Rezeption den Kurzc
 das gespeicherte Diktat als übertragen: es verschwindet aus der Patientenliste (beim Patienten
 steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht. Wurde das Diktat nach dem
 Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den Stand des Codes ab;
-die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Ein früherer Stand
-wurde um … per Kurzcode abgeholt … bitte bewusst prüfen, nur die Änderung nachtragen". Hat das
+die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Schon an der
+Rezeption abgeholt" mit Uhrzeit, den damals übergebenen Zeilen und dem, was seitdem **neu** ist –
+nur das nachtragen; „Als übertragen markieren" zeigt diese Warnung vorher noch einmal. Wird für
+die Korrektur ein zweiter Kurzcode abgeholt, zeigt die Rezeption dieselbe Warnung über den
+Ziffern. Hat das
 Büro das Diktat schon übertragen, zeigt die Rezeption beim Code nur „Dieses Diktat wurde bereits
 am … übertragen … – nicht erneut in Evident eintragen" und keine Ziffern.
 

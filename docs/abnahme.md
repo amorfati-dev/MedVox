@@ -153,7 +153,10 @@ Beobachtet: ______________________________________________________
        übertragen"; in `/patienten` erscheint es **nicht** wieder als offen.
 14. [ ] Diktat für 4716, **An Rezeption**, danach am iPad eine Ziffer abwählen, erst dann den alten
        Code abrufen → Rezeption zeigt den Stand des Codes; in `/patienten` bleibt 4716 offen mit dem
-       bernsteinfarbenen Hinweis „Ein früherer Stand wurde um … per Kurzcode … abgeholt".
+       bernsteinfarbenen Hinweis „Schon an der Rezeption abgeholt" (Uhrzeit, damalige Zeilen, „Neu
+       seitdem"). **Als übertragen markieren** zeigt die Warnung erst noch einmal. Stattdessen am
+       iPad erneut **An Rezeption** und den neuen Code abrufen → über den Ziffern steht dieselbe
+       Warnung mit der früheren Abholung und nur der neuen Position unter „Neu seitdem".
 15. [ ] Diktat für 4717, **An Rezeption**, Code **nicht** abrufen; im Büro 4717 **Als übertragen
        markieren**; dann den Code abrufen → „Dieses Diktat wurde bereits am … übertragen … – nicht
        erneut in Evident eintragen", keine Ziffern; erneuter Abruf → „Kein Diktat unter diesem Code".

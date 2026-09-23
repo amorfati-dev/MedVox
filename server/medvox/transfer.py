@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from medvox import db, patients
+from medvox import db, handovers, patients
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 CODE_LENGTH = 6
@@ -54,6 +54,7 @@ class Transfer:
     expires_at: float
     patient_type: str | None = None  # kasse | privat; None bei älteren iPad-Versionen
     positions: list[dict] = field(default_factory=list)  # {"tooth", "code", "kind"}
+    earlier: list[dict] = field(default_factory=list)  # frühere Abholungen desselben Diktats (handovers.py)
 
 
 def create_transfer(
@@ -95,6 +96,7 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
     """
     now = time.time()
     closed_at = None
+    earlier: list[dict] = []
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
         row = conn.execute(
@@ -104,8 +106,12 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
             closed_at = patients.hand_over(conn, row["dictation_id"], row["dictation_revision"], now)
             if closed_at is None:
                 conn.execute("UPDATE transfers SET handed_over_at = ? WHERE code = ?", (now, row["code"]))
+                codes = json.loads(row["codes_json"])
+                handovers.record(conn, row["dictation_id"], row["code"], row["dictation_revision"], codes, now)
             else:
                 conn.execute("DELETE FROM transfers WHERE code = ?", (row["code"],))
+        if closed_at is None and row is not None and row["dictation_id"]:
+            earlier = handovers.before(conn, row["dictation_id"], row["code"])
     if closed_at is not None:
         raise AlreadyTransferred(closed_at)
     if row is None:
@@ -118,4 +124,5 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
         row["expires_at"],
         row["patient_type"],
         json.loads(row["positions_json"]),
+        earlier,
     )

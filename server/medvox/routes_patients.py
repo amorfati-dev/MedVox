@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from medvox import patients
 from medvox.auth import require_session
 from medvox.routes_transcribe import SuggestionOut
+from medvox.routes_transfer import HandoverOut, handover_out
 from medvox.transfer import iso
 
 log = logging.getLogger("medvox.patients")
@@ -52,7 +53,7 @@ class DictationOut(DictationIn):
     revision: int
     created_at: str
     updated_at: str
-    handed_over_at: str | None = None  # früherer Stand per Kurzcode abgeholt, dieser danach geändert
+    handovers: list[HandoverOut] = []  # schon per Kurzcode abgeholte Stände: nur die Änderung nachtragen
 
 
 class PatientOut(BaseModel):
@@ -99,7 +100,7 @@ def _dictation_out(d: patients.Dictation) -> DictationOut:
     return DictationOut(
         **d.data, patient=d.number, id=d.id, patient_id=d.patient_id, revision=d.revision,
         created_at=iso(d.created_at), updated_at=iso(d.updated_at),
-        handed_over_at=iso(d.handed_over_at) if d.handed_over_at is not None else None,
+        handovers=[handover_out(h) for h in d.handovers],
     )
 
 

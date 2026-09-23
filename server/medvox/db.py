@@ -55,14 +55,22 @@ CREATE TABLE IF NOT EXISTS dictations (
     created_at  REAL NOT NULL,
     updated_at  REAL NOT NULL,
     expires_at  REAL NOT NULL,
-    data_json   TEXT NOT NULL,
-    handed_over_at  REAL  -- früherer Stand per Kurzcode abgeholt, dieser danach geändert
+    data_json   TEXT NOT NULL
 );
 -- Grabstein eines übertragenen, gelöschten oder abgelaufenen Diktats: nur ID und Zeitpunkt, kein
 -- Inhalt, keine Patientennummer. Solange er liegt, wird die ID nie wieder angelegt.
 CREATE TABLE IF NOT EXISTS dictation_tombstones (
     id          TEXT PRIMARY KEY,
     closed_at   REAL NOT NULL
+);
+-- Abgeholter Kurzcode eines Diktats (`medvox/handovers.py`): nur Evident-Zeilen, kein Transkript.
+-- Bleibt, solange das Diktat offen ist oder sein Grabstein liegt.
+CREATE TABLE IF NOT EXISTS handovers (
+    dictation_id    TEXT NOT NULL,
+    code            TEXT NOT NULL,
+    revision        INTEGER,
+    fetched_at      REAL NOT NULL,
+    codes_json      TEXT NOT NULL
 );
 """
 
@@ -116,7 +124,7 @@ def bury(conn: sqlite3.Connection, where: str, params: tuple, now: float) -> int
 
 
 def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
-    """Entfernt abgelaufene Sitzungen, Transfer-Einträge, Diktate, Patienten und Grabsteine (WP-11)."""
+    """Entfernt abgelaufene Sitzungen, Transfer-Einträge, Diktate, Patienten, Grabsteine und Abholungen (WP-11)."""
     now = time.time() if now is None else now
     conn.execute("DELETE FROM sessions WHERE expires_at <= ?", (now,))
     conn.execute("DELETE FROM transfers WHERE expires_at <= ?", (now,))
@@ -125,6 +133,10 @@ def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
     # Diktate eines gelöschten Patienten nie verwaist stehen lassen.
     bury(conn, "patient_id IS NOT NULL AND patient_id NOT IN (SELECT id FROM patients)", (), now)
     conn.execute("DELETE FROM dictation_tombstones WHERE closed_at <= ?", (now - TOMBSTONE_S,))
+    conn.execute(
+        "DELETE FROM handovers WHERE dictation_id NOT IN (SELECT id FROM dictations)"
+        " AND dictation_id NOT IN (SELECT id FROM dictation_tombstones)"
+    )
 
 
 def purge_expired_at(path: Path) -> None:

@@ -5,11 +5,12 @@
 import { useState } from "react";
 import { api, ApiError, type StoredDictation } from "../api";
 import { DictationCard } from "../components/DictationCard";
+import { HandoverWarning } from "../components/HandoverWarning";
 import { PatientListCard, type Selection } from "../components/PatientListCard";
 import { PatientPicker } from "../components/PatientPicker";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import { usePatientList } from "../hooks/usePatientList";
-import { patientState, STATE_LABEL } from "../patients";
+import { dictationCopy, patientState, STATE_LABEL } from "../patients";
 
 type Props = { onLogout: () => void };
 
@@ -110,6 +111,8 @@ export function Patienten({ onLogout }: Props) {
     );
   } else if (detail) {
     const state = patientState(detail);
+    // Schon teilweise per Kurzcode abgeholt: vor dem Markieren noch einmal warnen (kein Browser-Dialog).
+    const handedOver = detail.items.filter((d) => (d.handovers ?? []).length > 0);
     content = (
       <section className="card">
         <div className="section-head">
@@ -130,12 +133,19 @@ export function Patienten({ onLogout }: Props) {
             {assignButton(d, "Anderem Patienten zuordnen")}
           </DictationCard>
         ))}
+        {confirm === `übertragen-${detail.id}` &&
+          handedOver.map((d) => <HandoverWarning key={d.id} earlier={d.handovers ?? []} current={dictationCopy(d).evident} />)}
         <div className="actions patient-actions">
-          {detail.items.length > 0 && (
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void markTransferred()}>
-              Als übertragen markieren
-            </button>
-          )}
+          {detail.items.length > 0 &&
+            (handedOver.length > 0 && confirm !== `übertragen-${detail.id}` ? (
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => setConfirm(`übertragen-${detail.id}`)}>
+                Als übertragen markieren
+              </button>
+            ) : (
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void markTransferred()}>
+                {handedOver.length > 0 ? "Geprüft – nur Änderungen eingetragen, als übertragen markieren" : "Als übertragen markieren"}
+              </button>
+            ))}
           {twoStep(`pat-${detail.id}`, "löschen", async () => {
             await api.deletePatient(detail.id);
             setSelected(null);
