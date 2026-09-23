@@ -84,7 +84,8 @@ def alternatives(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
 
 def _counterpart_entries(catalog: Catalog, d: Draft) -> list[tuple[Entry, list]]:
     """Privat-Gegenstücke im Katalog v1 plus die Fundstellen, die sie begründen."""
-    parts = catalog.counterparts(d.entry)
+    head = catalog.get(d.entry.system, d.entry.family[0]) if d.entry.family else d.entry
+    parts = catalog.counterparts(head)  # Füllungs-Familie: Gegenstück steht bei der einflächigen Ziffer
     listed = [e for c in parts if (e := catalog.get(c.system, c.code))]
     if d.entry.family:  # Füllung: gleiche Flächenzahl in der Privat-Familie
         index = d.entry.family.index(d.entry.code)
