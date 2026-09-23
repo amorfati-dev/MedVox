@@ -1,6 +1,6 @@
 // Warnung, wenn ein Stand dieses Diktats schon per Kurzcode an der Rezeption abgeholt wurde:
 // wann, was damals übergeben wurde und was seitdem neu ist (handoverDiff) – nie still doppelt eintragen.
-import type { Handover } from "../api";
+import { splitBlocks, type Handover } from "../api";
 import { handoverDiff } from "../handover";
 import { clock } from "../patients";
 import { EvidentLines } from "./EvidentLines";
@@ -19,11 +19,11 @@ export function HandoverWarning({ earlier, current }: Props) {
       {earlier.map((h) => (
         <div key={h.fetched_at}>
           <p>Abgeholt um {clock(h.fetched_at)} Uhr:</p>
-          <EvidentLines lines={h.codes} />
+          <EvidentLines blocks={splitBlocks(h.codes)} />
         </div>
       ))}
       <p>Neu seitdem:</p>
-      <EvidentLines lines={diff.added} />
+      <EvidentLines blocks={splitBlocks(diff.added)} />
       {diff.changed.length > 0 && (
         <>
           <p>Anzahl geändert:</p>
@@ -37,7 +37,7 @@ export function HandoverWarning({ earlier, current }: Props) {
       {diff.removed.length > 0 && (
         <>
           <p>Abgeholt, aber nicht mehr im Diktat – in Evident prüfen:</p>
-          <EvidentLines lines={diff.removed} />
+          <EvidentLines blocks={splitBlocks(diff.removed)} />
         </>
       )}
     </div>
