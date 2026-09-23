@@ -102,4 +102,3 @@ def test_ipad_save_keeps_office_reassignment(logged_in: TestClient) -> None:
     assert again.status_code == 200 and again.json()["patient"] == "4712"
     assert again.json()["revision"] == saved["revision"] + 2
     assert patient(logged_in, "4711")["dictations"] == 0 and patient(logged_in, "4712")["dictations"] == 1
-
