@@ -54,14 +54,16 @@ export function Diktat({ onLogout }: Props) {
   const [dictDentist, setDictDentist] = useState<number | null>(null); // beim Start der Aufnahme festgehalten
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [patient, setPatient] = useState<string | null>(null); // Evident-Nummer, null = ohne Patient
+  const [patientLabel, setPatientLabel] = useState<string | null>(null); // Kürzel dazu (Initialen)
   const [picking, setPicking] = useState(false);
-  const [asking, setAsking] = useState<string | null>(null); // Nummer, für die die Zuordnung erfragt wird
+  const [asking, setAsking] = useState<{ number: string; label: string | null } | null>(null); // Zuordnung erfragen
   const hasResult = d.transcript !== "" || d.suggestions.length > 0 || d.planned.length > 0;
   const body = useMemo<DictationBody | null>(
     () =>
       hasResult
         ? {
             ...(patient ? { patient } : {}),
+            ...(patient && patientLabel ? { patient_label: patientLabel } : {}),
             dentist_id: dictDentist,
             transcript: d.transcript,
             patient_type: d.resultType,
@@ -73,7 +75,7 @@ export function Diktat({ onLogout }: Props) {
             adopted: sel.adopted,
           }
         : null,
-    [hasResult, patient, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted],
+    [hasResult, patient, patientLabel, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted],
   );
   const save = useDictationSave(body, d.sessionExpired);
   const closed = save.state === "übertragen";
@@ -133,25 +135,32 @@ export function Diktat({ onLogout }: Props) {
   const nextPatient = () => {
     clear();
     setPatient(null);
+    setPatientLabel(null);
     setPicking(true);
   };
 
   // Gehört das Diktat schon einem Patienten, bleibt es dort gespeichert und der Bildschirm wird frei;
   // ein Diktat „ohne Patient“ bekommt die Nummer nur nach Nachfrage.
-  const choosePatient = (number: string | null) => {
+  // Das Kürzel gehört zur Nummer: ein neues ersetzt das bisherige, auch beim selben Patienten.
+  const choosePatient = (number: string | null, label: string | null) => {
     setPicking(false);
     const action = pickAction(patient, number, !hasResult ? "keins" : closed ? "übertragen" : "offen");
-    if (action === "bleiben") return;
-    if (action === "fragen" && number !== null) return setAsking(number);
+    if (action === "bleiben") {
+      if (label) setPatientLabel(label);
+      return;
+    }
+    if (action === "fragen" && number !== null) return setAsking({ number, label });
     if (action === "neu") clear();
     setPatient(number);
+    setPatientLabel(label);
   };
 
   // Antwort auf die Nachfrage: zuordnen oder das Diktat „ohne Patient“ lassen und neu beginnen.
   const answer = (assign: boolean) => {
     if (asking === null) return;
     if (!assign) clear();
-    setPatient(asking);
+    setPatient(asking.number);
+    setPatientLabel(asking.label);
     setAsking(null);
   };
 
@@ -184,7 +193,7 @@ export function Diktat({ onLogout }: Props) {
           <MoreMenu onLogout={logout} />
         </header>
         <DentistBar choice={dentist} onOpen={dentist.open} locked={running} />
-        <PatientBar number={patient} onOpen={() => setPicking(true)} locked={running && (patient !== null || hasResult)} save={save} />
+        <PatientBar number={patient} label={patientLabel} onOpen={() => setPicking(true)} locked={running && (patient !== null || hasResult)} save={save} />
         <PatientSwitch value={patientType} onChange={setPatientType} disabled={running} />
         {running && (
           <p className="switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
@@ -249,7 +258,7 @@ export function Diktat({ onLogout }: Props) {
         />
       )}
       {asking !== null && (
-        <AssignDialog number={asking} onAssign={() => answer(true)} onNew={() => answer(false)} onCancel={() => setAsking(null)} />
+        <AssignDialog number={asking.number} label={asking.label} onAssign={() => answer(true)} onNew={() => answer(false)} onCancel={() => setAsking(null)} />
       )}
     </div>
   );

@@ -5,7 +5,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { evidentText, type PatientSummary, type StoredDictation, type TranscribeResult } from "../src/api.ts";
-import { dictationCopy, normalizeNumber, patientState, pickable, pickAction, preview } from "../src/patients.ts";
+import {
+  dictationCopy,
+  isLabel,
+  normalizeLabel,
+  normalizeNumber,
+  patientName,
+  patientState,
+  pickable,
+  pickAction,
+  preview,
+} from "../src/patients.ts";
 import { buildGroups, copyLines, optionKey, positionsOf } from "../src/result.ts";
 
 type Golden = Record<string, Record<string, { evident: string[]; numbers: string[] }>>;
@@ -94,6 +104,37 @@ test("Zustand in der Liste: offen, übertragen, noch kein Diktat", () => {
 test("Patientennummer: nur Ziffern, höchstens 12", () => {
   assert.equal(normalizeNumber("00 47-11a"), "004711");
   assert.equal(normalizeNumber("12345678901234"), "123456789012");
+});
+
+test("Kürzel: Initialen gelten, höchstens 4 Buchstaben, höchstens 2 hintereinander", () => {
+  for (const ok of ["", "MK", "M.K.", "M. K.", "A-B.", "Ö.Ü.", "A. B. C. D.", "AB-CD"]) assert.ok(isLabel(ok), ok);
+});
+
+test("Kürzel: Namen, Namensanfänge und Ziffern werden abgelehnt, nicht gekürzt", () => {
+  for (const bad of ["Max", "Muel", "Mueller", "Max Musterma", "A.B.C.D.E.", "A-BCD", "M.K. 1980", "M..K", "M--K", ".MK", "<b>"]) {
+    assert.equal(normalizeLabel(bad), bad.trim());
+    assert.ok(!isLabel(normalizeLabel(bad)), bad);
+  }
+});
+
+test("Kürzel wie gespeichert: Leerraum zusammengefasst, Umlaut zusammengesetzt", () => {
+  assert.equal(normalizeLabel("  M.   K.  "), "M. K.");
+  assert.equal(normalizeLabel("U\u0308."), "Ü.");
+  assert.equal(normalizeLabel("   "), "");
+});
+
+test("Nummer mit Kürzel für Texte, ohne Kürzel nur die Nummer", () => {
+  assert.equal(patientName("4711", "M.K."), "4711 · M.K.");
+  assert.equal(patientName("4711", null), "4711");
+  assert.equal(patientName("4711"), "4711");
+});
+
+test("Kürzel kommt nie in die Kopierzeilen", () => {
+  const r = fixtures[Object.keys(fixtures)[0]];
+  const plain = dictationCopy(stored(r));
+  const labelled = dictationCopy({ ...stored(r), patient_label: "M.K." });
+  assert.deepEqual(labelled, plain);
+  assert.ok(!labelled.evident.join("\n").includes("M.K."));
 });
 
 test("Vorschau des Transkripts", () => {

@@ -67,11 +67,13 @@ export type DictationContent = {
   adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
 };
 // `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).
+// `patient_label`: Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident – nie in den Kopierzeilen.
 // `dentist_id`: Behandler beim Start der Aufnahme; zählt nur beim ersten Speichern (dentists.ts).
-export type DictationBody = DictationContent & { patient?: string; dentist_id?: number | null };
+export type DictationBody = DictationContent & { patient?: string; patient_label?: string; dentist_id?: number | null };
 export type StoredDictation = DictationContent & {
   id: string;
   patient: string | null;
+  patient_label?: string | null; // Kürzel des Patienten
   patient_id: number | null;
   revision: number; // „übertragen“ löscht nur genau die angezeigte Fassung
   created_at: string;
@@ -84,6 +86,7 @@ export type DentistRef = { id: number; name: string };
 export type PatientSummary = {
   id: number;
   number: string; // Evident-Patientennummer
+  label?: string | null; // Kürzel (Initialen), solange etwas offen ist
   created_at: string;
   updated_at: string; // jüngstes Diktat
   dictations: number; // offen
@@ -142,8 +145,11 @@ export const api = {
   listPatients: () => request<PatientList>("/api/v1/patients"),
   createPatient: (number: string) => request<PatientSummary>("/api/v1/patients", json("POST", { number })),
   getPatient: (id: number) => request<PatientDetail>(`/api/v1/patients/${id}`),
-  appendDictation: (patientId: number, dictationId: string) =>
-    request<StoredDictation>(`/api/v1/patients/${patientId}/dictations`, json("POST", { dictation_id: dictationId })),
+  appendDictation: (patientId: number, dictationId: string, label: string | null = null) =>
+    request<StoredDictation>(
+      `/api/v1/patients/${patientId}/dictations`,
+      json("POST", label ? { dictation_id: dictationId, label } : { dictation_id: dictationId }),
+    ),
   markTransferred: (patientId: number, seen: StoredDictation[]) =>
     request<PatientDetail>(
       `/api/v1/patients/${patientId}/transferred`,

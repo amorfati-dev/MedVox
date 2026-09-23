@@ -51,6 +51,25 @@
   letter-spacing: 0.04em;
   overflow-wrap: anywhere;
 }
+/* Kürzel (Initialen) neben der Nummer: kleiner, ohne Mono, damit es nie wie eine Ziffer wirkt. */
+.patient-initials {
+  font-size: var(--fs-transcript);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.initials {
+  margin-left: 0.5em;
+  font-family: var(--sans);
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--ink-2);
+}
+.initials-input {
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: 700;
+}
 .patient-change {
   font-size: var(--fs-small);
   font-weight: 700;

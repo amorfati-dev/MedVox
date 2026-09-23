@@ -11,6 +11,28 @@ export function normalizeNumber(raw: string): string {
   return raw.replace(/\D/g, "").slice(0, NUMBER_MAX);
 }
 
+// Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident: höchstens 4 Buchstaben, höchstens 2
+// direkt hintereinander, getrennt nur durch Punkt, Leerzeichen oder Bindestrich („MK“, „M. K.“, „A-B.“) –
+// keine Namen, keine Ziffern (wie der Server prüft). Nie gekürzt: Ungültiges bleibt stehen, bis es
+// korrigiert ist. Nie in den Kopierzeilen.
+export const LABEL_LETTERS = 4;
+const LABEL_PATTERN = /^\p{L}\.?(?:[ -]?\p{L}\.?){0,3}$/u;
+
+// Eingabe wie der Server sie speichert: Leerraum zusammengefasst, außen ohne Leerzeichen.
+export function normalizeLabel(raw: string): string {
+  return raw.normalize("NFC").replace(/\s+/g, " ").trim();
+}
+
+// Leer (kein Kürzel) oder gültige Initialen.
+export function isLabel(text: string): boolean {
+  return text === "" || (LABEL_PATTERN.test(text) && !/\p{L}{3}/u.test(text));
+}
+
+// Nummer mit Kürzel für Texte und Vorlesen („4711 · M.K.“); ohne Kürzel nur die Nummer.
+export function patientName(number: string, label?: string | null): string {
+  return label ? `${number} · ${label}` : number;
+}
+
 // Kopiertexte und Mehrkosten-Positionen eines gespeicherten Diktats.
 export type DictationCopy = {
   evident: string[]; // „Ziffern kopieren“: Evident-Zeilen mit Kurzformen

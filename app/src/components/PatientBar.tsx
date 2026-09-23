@@ -1,12 +1,15 @@
-// Aktiver Patient oben in der Steuerung: Evident-Nummer groß, „ohne Patient“ bernsteinfarben.
+// Aktiver Patient oben in der Steuerung: Evident-Nummer groß, darunter das Kürzel (falls eingegeben),
+// „ohne Patient“ bernsteinfarben.
 // Ein Tipp öffnet die Auswahl (Tastenfeld und offene Patienten). Darunter, ob das Diktat auf dem
 // Praxis-Mac gespeichert ist.
 import type { DictationSave } from "../hooks/useDictationSave";
+import { patientName } from "../patients";
 import { plural } from "../status";
 import { Icon } from "./Icon";
 
 type Props = {
   number: string | null;
+  label: string | null; // Kürzel (Initialen), nur zum Wiederfinden
   onOpen: () => void;
   locked: boolean; // laufendes Diktat mit Patient oder Ergebnis: Wechsel erst danach
   save: DictationSave;
@@ -19,7 +22,7 @@ const SAVE_TEXT = {
   übertragen: "Bereits übertragen – wird nicht mehr gespeichert",
 } as const;
 
-export function PatientBar({ number, onOpen, locked, save }: Props) {
+export function PatientBar({ number, label, onOpen, locked, save }: Props) {
   return (
     <div className="patient">
       <button
@@ -27,12 +30,13 @@ export function PatientBar({ number, onOpen, locked, save }: Props) {
         className={number ? "patient-bar" : "patient-bar patient-none"}
         onClick={onOpen}
         disabled={locked}
-        aria-label={number ? `Patient ${number} – wechseln` : "Ohne Patient – Patientennummer eingeben"}
+        aria-label={number ? `Patient ${patientName(number, label)} – wechseln` : "Ohne Patient – Patientennummer eingeben"}
       >
         <Icon name="user" />
         <span className="patient-text">
           <span className="patient-label">{number ? "Patient" : "Ohne Patient"}</span>
           <span className="patient-number">{number ?? "Nummer eingeben"}</span>
+          {number && label && <span className="patient-initials">{label}</span>}
         </span>
         {number && <span className="patient-change">Wechseln</span>}
       </button>

@@ -1,7 +1,8 @@
 """SQLite-Zugriff (stdlib sqlite3) für Sitzungen, Transfer-Codes, Diktate je Patient und Behandler.
 
 Die Datenbank enthält nie Audio und keine Patienten-Stammdaten; ein Patient ist nur die
-Evident-Patientennummer. Transkripte liegen als Transfer-Eintrag bis zum Ablauf der TTL darin
+Evident-Patientennummer, auf Wunsch mit Kürzel (Initialen, `patients.label`), das nur so lange bleibt,
+wie der Patient offene Diktate hat. Transkripte liegen als Transfer-Eintrag bis zum Ablauf der TTL darin
 und als Diktat eines Patienten, bis es als übertragen markiert ist – höchstens 24 Stunden
 (`medvox/patients.py`); danach bleibt nur ein Grabstein (ID und Zeitpunkt) für sieben Tage,
 damit ein iPad es nicht neu anlegt. `secure_delete` sorgt dafür, dass SQLite gelöschte Zeilen in der Datei
@@ -98,8 +99,8 @@ ADDED_COLUMNS = {
     ],
     # Behandler beim Start der Aufnahme, danach unveränderlich; NULL = ohne Behandler (Pilotdaten)
     "dictations": [("dentist_id", "INTEGER")],
-    # Behandler des ersten Diktats: wer den Patienten eröffnet hat
-    "patients": [("dentist_id", "INTEGER")],
+    # Behandler des ersten Diktats: wer den Patienten eröffnet hat; Kürzel (Initialen) zum Wiederfinden
+    "patients": [("dentist_id", "INTEGER"), ("label", "TEXT")],
 }
 
 # Erster Eintrag der Behandlerliste bei leerer Liste: bei einer neuen Datenbank und beim ersten Start
@@ -148,6 +149,14 @@ def bury(conn: sqlite3.Connection, where: str, params: tuple, now: float) -> int
     return conn.execute(f"DELETE FROM dictations WHERE {where}", params).rowcount
 
 
+def drop_labels(conn: sqlite3.Connection) -> None:
+    """Kürzel lebt wie der Inhalt: übertragen und nichts mehr offen, bleibt nur die Nummer."""
+    conn.execute(
+        "UPDATE patients SET label = NULL WHERE label IS NOT NULL AND transferred_at IS NOT NULL"
+        " AND id NOT IN (SELECT patient_id FROM dictations WHERE patient_id IS NOT NULL)"
+    )
+
+
 def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
     """Entfernt abgelaufene Sitzungen, Transfer-Einträge, Diktate, Patienten, Grabsteine und Abholungen (WP-11)."""
     now = time.time() if now is None else now
@@ -157,6 +166,7 @@ def purge_expired(conn: sqlite3.Connection, now: float | None = None) -> None:
     conn.execute("DELETE FROM patients WHERE expires_at <= ?", (now,))
     # Diktate eines gelöschten Patienten nie verwaist stehen lassen.
     bury(conn, "patient_id IS NOT NULL AND patient_id NOT IN (SELECT id FROM patients)", (), now)
+    drop_labels(conn)
     conn.execute("DELETE FROM dictation_tombstones WHERE closed_at <= ?", (now - TOMBSTONE_S,))
     conn.execute(
         "DELETE FROM handovers WHERE dictation_id NOT IN (SELECT id FROM dictations)"

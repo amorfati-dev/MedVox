@@ -15,7 +15,7 @@ import { PatientPicker } from "../components/PatientPicker";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import { dentistApi, filterByDentist, filterChoices, type Dentist } from "../dentists";
 import { usePatientList } from "../hooks/usePatientList";
-import { dictationCopy, patientState, STATE_LABEL } from "../patients";
+import { dictationCopy, patientName, patientState, STATE_LABEL } from "../patients";
 
 type Props = { onLogout: () => void };
 
@@ -66,19 +66,19 @@ export function Patienten({ onLogout }: Props) {
       data.setDetail(after);
       setMessage(
         after.items.length === 0
-          ? `Patient ${after.number} als übertragen markiert – Text und Ziffern sind auf dem Praxis-Mac gelöscht.`
+          ? `Patient ${patientName(after.number, detail.label)} als übertragen markiert – Text und Ziffern sind auf dem Praxis-Mac gelöscht.`
           : `${after.items.length === 1 ? "Ein Diktat ist" : `${after.items.length} Diktate sind`} inzwischen neu oder geändert – bitte prüfen und erneut markieren.`,
       );
     });
 
-  const assign = (d: StoredDictation, number: string | null) => {
+  const assign = (d: StoredDictation, number: string | null, label: string | null) => {
     setAssigning(null);
     if (number === null || number === d.patient) return;
     void act(async () => {
       const patient = await api.createPatient(number);
-      await api.appendDictation(patient.id, d.id);
+      const moved = await api.appendDictation(patient.id, d.id, label);
       setSelected({ kind: "patient", id: patient.id });
-      setMessage(`Diktat Patient ${number} zugeordnet.`);
+      setMessage(`Diktat Patient ${patientName(number, moved.patient_label)} zugeordnet.`);
     });
   };
 
@@ -147,6 +147,7 @@ export function Patienten({ onLogout }: Props) {
         <div className="section-head">
           <h2 className="patient-head">
             Patient <span className="mono">{detail.number}</span>
+            {detail.label && <span className="initials">{detail.label}</span>}
           </h2>
           <span className={`state-chip state-${state === "übertragen" ? "done" : state}`}>{STATE_LABEL[state]}</span>
         </div>
@@ -194,8 +195,8 @@ export function Patienten({ onLogout }: Props) {
           })}
         </div>
         <p className="muted small">
-          „Als übertragen markieren“ löscht Text und Ziffern dieses Patienten sofort auf dem Praxis-Mac; nur Nummer und
-          Uhrzeit bleiben bis zum Ablauf der 24 Stunden in der Liste.
+          „Als übertragen markieren“ löscht Text, Ziffern und Kürzel dieses Patienten sofort auf dem Praxis-Mac; nur
+          Nummer und Uhrzeit bleiben bis zum Ablauf der 24 Stunden in der Liste.
         </p>
       </section>
     );
@@ -254,7 +255,7 @@ export function Patienten({ onLogout }: Props) {
         <PatientPicker
           title="Patient zuordnen"
           current={assigning.patient}
-          onChoose={(number) => assign(assigning, number)}
+          onChoose={(number, label) => assign(assigning, number, label)}
           onClose={() => setAssigning(null)}
         />
       )}

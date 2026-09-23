@@ -128,7 +128,9 @@ Beobachtet: ______________________________________________________
 ## 7. Mehrere Patienten hintereinander, übertragen im Büro
 
 1. [ ] iPad: oben links auf „Ohne Patient" tippen, Evident-Nummer über das Tastenfeld eingeben
-       (z. B. 4711), **OK** → die Nummer steht groß oben links.
+       (z. B. 4711), ins Feld darunter das Kürzel „M.K.", **OK** → die Nummer steht groß oben links,
+       darunter „M.K.". Im Büro steht „M.K." neben 4711 (Liste und Kopf), nie im Kopiertext; nach
+       **Als übertragen markieren** ist das Kürzel weg.
 2. [ ] Diktieren → unter der Nummer „Gespeichert – im Büro unter ‚Patienten'".
 3. [ ] **Neu** → zweites Diktat für denselben Patienten.
 4. [ ] **Nächster Patient** → Tastenfeld erscheint; 4711 steht rechts unter „Offene Patienten".
