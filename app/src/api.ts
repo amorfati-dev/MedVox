@@ -248,6 +248,11 @@ export function splitBlocks(lines: string[], allPrivate = false): EvidentBlocks 
   return allPrivate ? { kasse: [], privat: lines } : { kasse: lines, privat: [] };
 }
 
+// Übergebene Positionen nur privat (GOZ/GOÄ, Zuzahlung): dann sind Zeilen ohne Leerzeile der Privatblock.
+export function onlyPrivate(positions: TransferPosition[]): boolean {
+  return positions.length > 0 && positions.every((p) => p.kind === "goz" || p.kind === "zuzahlung");
+}
+
 function toothLines(suggestions: Suggestion[], shortForms: boolean): string[] {
   const lines = new Map<number | null, Line>();
   for (const s of suggestions) {

@@ -1,59 +1,68 @@
 // Schon per Kurzcode abgeholte Stände eines Diktats mit dem aktuellen vergleichen: je Zahn und
 // Position mit Anzahl (so wie in den Evident-Zeilen, "36,wf*3"), damit Rezeption und Büro nur die
-// Änderung eintragen. Mit Endung, damit `node --test` das Modul direkt laden kann.
-import type { Handover } from "./api.ts";
+// Änderung eintragen – getrennt nach Kassen- und Privatblock (evidentBlocks), weil Evident nach
+// einer Privatposition alles Folgende privat setzt. Mit Endung für `node --test`.
+import { splitBlocks, type EvidentBlocks, type Handover } from "./api.ts";
 
-// Evident-Zeilen ("36,13c,wf*2"; ohne Zahn ",01") als Zahn → Position → Anzahl.
-type Counts = Map<string, Map<string, number>>;
+type Block = keyof EvidentBlocks;
+type Entry = { block: Block; tooth: string; form: string; n: number };
 
-function counts(lines: string[], into: Counts = new Map()): Counts {
-  for (const line of lines) {
-    const [tooth, ...tokens] = line.split(",");
-    const row = into.get(tooth) ?? new Map<string, number>();
-    into.set(tooth, row);
-    for (const token of tokens) {
-      const m = /^(.+)\*(\d+)$/.exec(token);
-      const [form, n] = m ? [m[1], Number(m[2])] : [token, 1];
-      // Jede Abholung nach der ersten trägt nur die Änderung ein: in Evident steht das Höchste.
-      row.set(form, Math.max(row.get(form) ?? 0, n));
+// Positionen der Blöcke als „Zahn,Position“ → Eintrag; die Leerzeile zwischen den Blöcken zählt nicht.
+function entries(blocks: EvidentBlocks, into = new Map<string, Entry>(), blockOf?: Map<string, Entry>): Map<string, Entry> {
+  for (const block of ["kasse", "privat"] as const) {
+    for (const line of blocks[block]) {
+      if (line === "") continue;
+      const [tooth, ...tokens] = line.split(",");
+      for (const token of tokens) {
+        const m = /^(.+)\*(\d+)$/.exec(token);
+        const [form, n] = m ? [m[1], Number(m[2])] : [token, 1];
+        const key = `${tooth},${form}`;
+        // Jede Abholung nach der ersten trägt nur die Änderung ein: in Evident steht das Höchste.
+        const was = into.get(key);
+        into.set(key, { block: blockOf?.get(key)?.block ?? block, tooth, form, n: Math.max(was?.n ?? 0, n) });
+      }
     }
   }
   return into;
 }
 
-function token(form: string, n: number): string {
-  return n > 1 ? `${form}*${n}` : form;
-}
-
-// Positionen aus `a`, die in `b` ganz fehlen, als Evident-Zeilen.
-function absent(a: Counts, b: Counts): string[] {
-  const out: string[] = [];
-  for (const [tooth, row] of a) {
-    const rest = [...row].filter(([form]) => !b.get(tooth)?.has(form)).map(([form, n]) => token(form, n));
-    if (rest.length > 0) out.push([tooth, ...rest].join(","));
+// Einträge als Evident-Zeilen je Block, Zähne in der Reihenfolge ihres ersten Auftretens.
+function lines(list: Entry[]): EvidentBlocks {
+  const out: EvidentBlocks = { kasse: [], privat: [] };
+  for (const block of ["kasse", "privat"] as const) {
+    const teeth = new Map<string, string[]>();
+    for (const e of list.filter((x) => x.block === block)) {
+      const tokens = teeth.get(e.tooth) ?? [];
+      tokens.push(e.n > 1 ? `${e.form}*${e.n}` : e.form);
+      teeth.set(e.tooth, tokens);
+    }
+    const ordered = [...teeth].sort(([a], [b]) => Number(a === "") - Number(b === ""));
+    out[block] = ordered.map(([tooth, tokens]) => [tooth, ...tokens].join(","));
   }
   return out;
 }
 
 export type HandoverDiff = {
-  added: string[]; // ganz neu seit den Abholungen – nur diese in Evident nachtragen
-  removed: string[]; // schon abgeholt, jetzt nicht mehr im Diktat – in Evident prüfen
-  changed: string[]; // nur die Anzahl geändert, als Satz ("36: wf jetzt 3× statt 2× – 1× nachtragen")
+  added: EvidentBlocks; // ganz neu seit den Abholungen – nur diese in Evident nachtragen
+  removed: EvidentBlocks; // schon abgeholt, jetzt nicht mehr im Diktat – in Evident prüfen
+  changed: { kasse: string[]; privat: string[] }; // nur die Anzahl geändert, als Satz
 };
 
-export function handoverDiff(current: string[], earlier: Handover[]): HandoverDiff {
-  const now = counts(current);
-  const before = new Map() as Counts;
-  for (const h of earlier) counts(h.codes, before);
-  const changed: string[] = [];
-  for (const [tooth, row] of now) {
-    for (const [form, n] of row) {
-      const was = before.get(tooth)?.get(form);
-      if (was === undefined || was === n) continue;
-      const where = tooth === "" ? "ohne Zahn" : tooth;
-      const what = n > was ? `${n - was}× nachtragen` : `${was - n}× zu viel in Evident – prüfen`;
-      changed.push(`${where}: ${form} jetzt ${n}× statt ${was}× – ${what}`);
-    }
+// `allPrivate`: übergebene Zeilen ohne Leerzeile sind der Privatblock (wie splitBlocks).
+export function handoverDiff(current: EvidentBlocks, earlier: Handover[], allPrivate = false): HandoverDiff {
+  const now = entries(current);
+  const before = new Map<string, Entry>();
+  for (const h of earlier) entries(splitBlocks(h.codes, allPrivate), before, now);
+  const changed: HandoverDiff["changed"] = { kasse: [], privat: [] };
+  for (const [key, e] of now) {
+    const was = before.get(key)?.n;
+    if (was === undefined || was === e.n) continue;
+    const what = e.n > was ? `${e.n - was}× nachtragen` : `${was - e.n}× zu viel in Evident – prüfen`;
+    changed[e.block].push(`${e.tooth || "ohne Zahn"}: ${e.form} jetzt ${e.n}× statt ${was}× – ${what}`);
   }
-  return { added: absent(now, before), removed: absent(before, now), changed };
+  return {
+    added: lines([...now].filter(([k]) => !before.has(k)).map(([, e]) => e)),
+    removed: lines([...before].filter(([k]) => !now.has(k)).map(([, e]) => e)),
+    changed,
+  };
 }

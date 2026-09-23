@@ -134,7 +134,18 @@ export function Patienten({ onLogout }: Props) {
           </DictationCard>
         ))}
         {confirm === `übertragen-${detail.id}` &&
-          handedOver.map((d) => <HandoverWarning key={d.id} earlier={d.handovers ?? []} current={dictationCopy(d).evident} />)}
+          handedOver.map((d) => {
+            const copy = dictationCopy(d);
+            return (
+              <HandoverWarning
+                key={d.id}
+                earlier={d.handovers ?? []}
+                current={copy.blocks}
+                allPrivate={copy.allPrivate}
+                labelled={d.patient_type === "kasse"}
+              />
+            );
+          })}
         <div className="actions patient-actions">
           {detail.items.length > 0 &&
             (handedOver.length > 0 && confirm !== `übertragen-${detail.id}` ? (

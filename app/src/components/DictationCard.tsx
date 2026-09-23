@@ -1,7 +1,7 @@
 // Ein gespeichertes Diktat im Büro: Transkript, Evident-Zeilen je Zahn, Mehrkosten und dieselben
 // Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern) – Format unverändert (patients.ts).
 import type { ReactNode } from "react";
-import { evidentText, splitBlocks, type StoredDictation } from "../api";
+import { evidentText, type StoredDictation } from "../api";
 import { clock, dictationCopy } from "../patients";
 import { CopayTable } from "./CopayTable";
 import { CopyButton } from "./CopyButton";
@@ -13,8 +13,7 @@ type Props = { d: StoredDictation; title: string; children?: ReactNode };
 
 export function DictationCard({ d, title, children }: Props) {
   const copy = dictationCopy(d);
-  // Kassenpatient: Kassenblock, Leerzeile, Privatblock – wie an der Rezeption (splitBlocks).
-  const allPrivate = copy.positions.length > 0 && copy.positions.every((p) => p.kind === "goz" || p.kind === "zuzahlung");
+  const labelled = d.patient_type === "kasse";
   return (
     <article className="dictation">
       <div className="section-head">
@@ -23,10 +22,10 @@ export function DictationCard({ d, title, children }: Props) {
         </h3>
         {d.patient_type && <span className={`badge badge-${d.patient_type}`}>{PATIENT_LABEL[d.patient_type]}</span>}
       </div>
-      <HandoverWarning earlier={d.handovers ?? []} current={copy.evident} />
+      <HandoverWarning earlier={d.handovers ?? []} current={copy.blocks} allPrivate={copy.allPrivate} labelled={labelled} />
       <p className="transcript">{d.transcript || <span className="muted">(leer)</span>}</p>
       <h2>Ziffern für Evident</h2>
-      <EvidentLines blocks={splitBlocks(copy.evident, allPrivate)} labelled={d.patient_type === "kasse"} />
+      <EvidentLines blocks={copy.blocks} labelled={labelled} />
       <CopayTable positions={copy.positions} />
       <div className="actions">
         <CopyButton label="Text kopieren" text={d.transcript} primary />

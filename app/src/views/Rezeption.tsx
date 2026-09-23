@@ -8,6 +8,7 @@ import {
   CODE_LENGTH,
   evidentText,
   normalizeCode,
+  onlyPrivate,
   splitBlocks,
   type TransferData,
 } from "../api";
@@ -58,7 +59,7 @@ export function Rezeption() {
   // Kassenpatient: Kassenblock, Leerzeile, Privatblock (Privatpositionen immer zuletzt, siehe evidentBlocks).
   const kasse = data?.patient_type === "kasse";
   const positions = data?.positions ?? [];
-  const allPrivate = positions.length > 0 && positions.every((p) => p.kind === "goz" || p.kind === "zuzahlung");
+  const allPrivate = onlyPrivate(positions);
   const blocks = splitBlocks(data?.codes ?? [], allPrivate);
 
   return (
@@ -110,7 +111,7 @@ export function Rezeption() {
                 <span className={`badge badge-${data.patient_type}`}>{PATIENT_LABEL[data.patient_type]}</span>
               )}
             </div>
-            <HandoverWarning earlier={data.earlier ?? []} current={data.codes} />
+            <HandoverWarning earlier={data.earlier ?? []} current={blocks} allPrivate={allPrivate} labelled={kasse} />
             <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
             <h2>Ziffern für Evident</h2>
             <EvidentLines blocks={blocks} labelled={kasse} />

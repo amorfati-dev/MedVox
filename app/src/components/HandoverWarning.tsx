@@ -1,15 +1,18 @@
 // Warnung, wenn ein Stand dieses Diktats schon per Kurzcode an der Rezeption abgeholt wurde:
 // wann, was damals übergeben wurde und was seitdem neu ist (handoverDiff) – nie still doppelt eintragen.
-import { splitBlocks, type Handover } from "../api";
+// Beim Kassenpatienten wie überall Kassen- und Privatblock getrennt (erst Kasse, dann Privat).
+import { splitBlocks, type EvidentBlocks, type Handover } from "../api";
 import { handoverDiff } from "../handover";
 import { clock } from "../patients";
 import { EvidentLines } from "./EvidentLines";
 
-type Props = { earlier: Handover[]; current: string[] };
+type Props = { earlier: Handover[]; current: EvidentBlocks; allPrivate: boolean; labelled: boolean };
 
-export function HandoverWarning({ earlier, current }: Props) {
+export function HandoverWarning({ earlier, current, allPrivate, labelled }: Props) {
   if (earlier.length === 0) return null;
-  const diff = handoverDiff(current, earlier);
+  const diff = handoverDiff(current, earlier, allPrivate);
+  const changed = [...diff.changed.kasse, ...diff.changed.privat.map((c) => (labelled ? `${c} (Privatleistung)` : c))];
+  const removed = diff.removed.kasse.length + diff.removed.privat.length > 0;
   return (
     <div className="handed-over" role="alert">
       <p>
@@ -19,25 +22,25 @@ export function HandoverWarning({ earlier, current }: Props) {
       {earlier.map((h) => (
         <div key={h.fetched_at}>
           <p>Abgeholt um {clock(h.fetched_at)} Uhr:</p>
-          <EvidentLines blocks={splitBlocks(h.codes)} />
+          <EvidentLines blocks={splitBlocks(h.codes, allPrivate)} labelled={labelled} />
         </div>
       ))}
       <p>Neu seitdem:</p>
-      <EvidentLines blocks={splitBlocks(diff.added)} />
-      {diff.changed.length > 0 && (
+      <EvidentLines blocks={diff.added} labelled={labelled} />
+      {changed.length > 0 && (
         <>
           <p>Anzahl geändert:</p>
           <ul className="codes-lines">
-            {diff.changed.map((line) => (
+            {changed.map((line) => (
               <li key={line}>{line}</li>
             ))}
           </ul>
         </>
       )}
-      {diff.removed.length > 0 && (
+      {removed && (
         <>
           <p>Abgeholt, aber nicht mehr im Diktat – in Evident prüfen:</p>
-          <EvidentLines blocks={splitBlocks(diff.removed)} />
+          <EvidentLines blocks={diff.removed} labelled={labelled} />
         </>
       )}
     </div>
