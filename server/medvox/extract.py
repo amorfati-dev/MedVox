@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from medvox.extract_billing import co_payment_offers, drop_included, flag_not_beside, surcharge
 from medvox.extract_build import Builder, Draft, Tagged
 from medvox.extract_catalog import Catalog, load_catalog
+from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
 from medvox.extract_text import TextContext
@@ -73,7 +74,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     added = surcharge(catalog, primaries + extra, builder.dictated_surcharges, notes, patient)
     ordered = _ordered(primaries, extra + ([added] if added else []))
     planned = [d for d in drafts if d.planned]
-    suggestions = [_suggestion(catalog, ctx, d, patient) for d in ordered + planned]
+    suggestions = [_suggestion(catalog, ctx, d, patient) for d in apply_limits(ordered + planned)]
     return Extraction(suggestions, list(dict.fromkeys(notes)), patient)
 
 
@@ -113,6 +114,8 @@ def _suggestion(catalog: Catalog, ctx: TextContext, d: Draft, patient: str) -> S
         reason = f"{head}: {co.note} – {reason}"
     elif d.alternative_to is not None and not d.reason:
         reason = f"Privat-Alternative zu {d.alternative_to.entry.label} ({reason})"
+    if d.limit_note:
+        reason += f" – {d.limit_note}"
     if d.planned:
         reason = f"geplant („{d.plan}“), nicht abrechnen – {reason}"
     teeth = (d.fdi,) if d.fdi is not None else d.context

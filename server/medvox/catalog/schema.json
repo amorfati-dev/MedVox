@@ -88,6 +88,16 @@
           "uniqueItems": true,
           "items": {"type": "string", "minLength": 3}
         },
+        "max_per": {
+          "description": "Höchstzahl laut amtlichem Text: count-mal je unit (Diktat = eine Sitzung; kieferhaelfte = je Kieferhälfte oder Frontzahnbereich). unbegrenzt ohne count, wo der Text keine Grenze nennt. Fehlt das Feld, gilt unbegrenzt (noch nicht geprüft). Der Extraktor begrenzt die Anzahl darauf.",
+          "type": "object",
+          "required": ["unit"],
+          "additionalProperties": false,
+          "properties": {
+            "unit": {"enum": ["sitzung", "kieferhaelfte", "zahn", "kanal", "flaeche", "unbegrenzt"]},
+            "count": {"type": "integer", "minimum": 1}
+          }
+        },
         "surfaces_to_code": {
           "description": "Füllungs-Familien: Flächenzahl 1..4 (4 = mehr als dreiflächig) -> Ziffer im selben System.",
           "type": "object",

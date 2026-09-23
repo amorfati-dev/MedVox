@@ -2,7 +2,7 @@
 
 Lädt ``catalog/catalog_v1.json`` einmal und stellt bereit: Einträge nach System
 und Ziffer, die Keyword-Liste für den Abgleich, die Abrechnungseinheit je
-Eintrag (je Kanal / je Zahn / je Sitzung), die Paare derselben Leistung in BEMA und
+Eintrag (je Kanal / je Zahn / je Sitzung), die Höchstzahl (``max_per``), die Paare derselben Leistung in BEMA und
 GOZ/GOÄ (``equivalent``), die Zuzahlungs-Liste (``zuzahlung``) und die im Regeltext
 notierten Privat-Gegenstücke einer BEMA-Position. Der erweiterte Katalog wird bewusst
 nicht geladen: der Extraktor darf nur Ziffern aus ``catalog_v1.json`` vorschlagen.
@@ -74,6 +74,7 @@ class Entry:
     equivalents: tuple[Link, ...] = ()
     co_payment: CoPayment | None = None  # nur GOZ/GOÄ
     evident: str | None = None  # vom Behandler bestätigte Evident-Kurzform ("l1"), sonst None
+    limit: tuple[str, int] | None = None  # max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; None = unbegrenzt
 
     @property
     def key(self) -> tuple[str, str]:
@@ -110,9 +111,11 @@ class Catalog:
             links = tuple(Link(x["system"], x["code"], x.get("note")) for x in e.get("equivalent", []))
             z = e.get("zuzahlung")
             co = CoPayment(z["allowed"], tuple(z["basis"]), z["note"]) if z else None
+            m = e.get("max_per")
+            limit = (m["unit"], m["count"]) if m and "count" in m else None
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
-                tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"),
+                tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"), limit,
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}

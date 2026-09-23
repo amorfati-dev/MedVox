@@ -43,6 +43,7 @@ class Draft:
     alternative_to: Draft | None = None
     reason: str = ""
     surfaces: int | None = None  # diktierte Flächenzahl 1..4 bei Füllungen, None wenn nicht erkannt
+    limit_note: str = ""  # Höchstzahl laut Katalog angewandt (extract_limits), steht in der Begründung
 
     @property
     def key(self) -> tuple[str, str, int | None, bool]:
