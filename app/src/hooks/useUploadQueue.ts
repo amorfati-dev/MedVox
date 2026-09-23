@@ -18,6 +18,8 @@ export type UploadQueue = {
   codes: string[];
   kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
   suggestions: Suggestion[]; // Vorschläge aller Abschnitte in Diktatreihenfolge (Zahnzuordnung)
+  planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
+  notes: string[]; // Hinweise aller Abschnitte, ohne Wiederholungen
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   lastLatency: number | null;
   error: string | null;
@@ -40,6 +42,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
   const [codes, setCodes] = useState<string[]>([]);
   const [kinds, setKinds] = useState<Record<string, SuggestionKind>>({});
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [planned, setPlanned] = useState<Suggestion[]>([]);
+  const [notes, setNotes] = useState<string[]>([]);
   const [resultType, setResultType] = useState<PatientType | null>(null);
   const [lastLatency, setLastLatency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +79,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
           setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
           setKinds((prev) => ({ ...prev, ...kindsOf(result.suggestions) }));
           setSuggestions((prev) => [...prev, ...result.suggestions]);
+          setPlanned((prev) => [...prev, ...(result.planned ?? [])]);
+          setNotes((prev) => Array.from(new Set([...prev, ...(result.notes ?? [])])));
           setResultType(result.patient_type);
           setLastLatency(result.latency_s);
           setError(null);
@@ -135,6 +141,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     setCodes([]);
     setKinds({});
     setSuggestions([]);
+    setPlanned([]);
+    setNotes([]);
     setResultType(null);
     setLastLatency(null);
     setError(null);
@@ -150,6 +158,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     codes,
     kinds,
     suggestions,
+    planned,
+    notes,
     resultType,
     lastLatency,
     error,

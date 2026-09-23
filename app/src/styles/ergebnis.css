@@ -1,81 +1,35 @@
-/* Ergebnis: Ziffern, Evident-Zeilen, Patiententyp-Etikett, Kurzcode-Tafel. */
-.codes-line,
-.codes-lines {
-  font-size: 1.35rem;
-  font-family: var(--mono);
-  margin: 0 0 8px;
+/* Ergebnis: Kopfzeile, Transkript, Liste nach Zahn, Mehrkosten-Rahmen, Optionen, Geplantes,
+   Hinweise, Leiste unten, Kurzcode-Tafel. Türkis = Kasse, Indigo = Privat/Zuzahlung, Bernstein = prüfen. */
+.empty {
+  margin: 24px 0;
+  font-size: var(--fs-reason);
 }
-.codes-lines {
-  list-style: none;
-  padding: 0;
-}
-.chip-short {
-  font-weight: 400;
-  opacity: 0.7;
-}
-.toothless-hint {
-  font-family: var(--sans);
-  font-size: var(--fs-small);
-  font-weight: 700;
-  color: var(--warn);
-}
-.chips {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.result-head {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--tap-gap);
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 12px;
 }
-.chip {
-  font: inherit;
-  min-height: var(--tap);
-  padding: 6px 18px;
-  border-radius: 32px;
-  border: 2px solid var(--line);
-  background: var(--surface);
-  color: var(--ink-2);
-  text-decoration: line-through;
-  cursor: pointer;
-}
-.chip-active {
-  border-color: var(--kasse);
-  background: var(--kasse-bg);
-  color: var(--ink);
-  text-decoration: none;
+.counts {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-reason);
   font-weight: 600;
+  color: var(--ink-2);
 }
-.chip-zuzahlung {
-  border-style: dashed;
+.counts-check {
+  color: var(--warn);
 }
-.chip-zuzahlung.chip-active {
-  border-color: var(--privat);
-  background: var(--privat-bg);
-}
-.chip-tag {
-  margin-left: 8px;
-  font-size: var(--fs-label);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--privat);
-}
-.legend {
-  font-size: var(--fs-small);
-  margin: 8px 0 0;
-}
-.section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+.counts-check .icon {
+  vertical-align: -3px;
 }
 .badge {
   display: inline-block;
-  font-size: var(--fs-label);
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 12px;
+  font-size: var(--fs-small);
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 999px;
   color: var(--on-solid);
   white-space: nowrap;
 }
@@ -85,20 +39,191 @@
 .badge-privat {
   background: var(--privat);
 }
-.transfer-result {
-  text-align: center;
-  margin-top: 12px;
+.notice {
+  font-size: var(--fs-reason);
 }
-.transfer-code {
-  font-size: var(--fs-code);
-  letter-spacing: 0.25em;
+.transcript-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+.list-title {
+  margin: 18px 0 8px;
+}
+
+/* Zahnblock: Kopf mit der kopierten Evident-Zeile */
+.tooth {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.tooth-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.tooth-head h3 {
+  margin: 0;
+  font-size: var(--fs-reason);
+  font-weight: 800;
+}
+.tooth-line {
   font-family: var(--mono);
-  font-weight: 700;
-  margin: 8px 0 12px;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
 }
-.qr {
-  display: block;
-  margin: 0 auto;
-  image-rendering: pixelated;
-  border-radius: 8px;
+.tooth-none {
+  border-color: var(--warn);
+}
+.tooth-none .tooth-head {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.tooth-none .tooth-line {
+  color: var(--warn);
+}
+.rows,
+.options,
+.notes ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Zeile: ganze Fläche tippbar */
+.row + .row,
+.rows > .frame,
+.rows > .option,
+.frame + .row {
+  border-top: 1px solid var(--line);
+}
+.row-main {
+  display: grid;
+  grid-template-columns: 44px auto minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 14px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 16px;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: none;
+  border-left: 6px solid transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+div.row-main {
+  cursor: default;
+}
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  border-radius: 10px;
+  border: 3px solid var(--kasse);
+  background: var(--kasse);
+  color: var(--on-solid);
+}
+.box .icon {
+  width: 26px;
+  height: 26px;
+  stroke-width: 3.2;
+}
+.row-code {
+  font-family: var(--mono);
+  font-size: var(--fs-ziffer);
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  min-width: 5ch;
+}
+.row-count {
+  margin-left: 6px;
+  font-size: var(--fs-reason);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.row-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.row-title {
+  font-size: var(--fs-reason);
+  font-weight: 700;
+}
+.row-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: var(--fs-label);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--kasse);
+  background: var(--kasse-bg);
+  white-space: nowrap;
+}
+.row-meta,
+.row-reason,
+.row-hint {
+  font-size: var(--fs-reason);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.row-hint {
+  font-weight: 700;
+  color: var(--privat);
+}
+/* BEMA/Kassenanteil türkis, GOZ/Zuzahlung indigo */
+.row-bema > .row-main,
+.row-kassenanteil > .row-main {
+  border-left-color: var(--kasse);
+}
+.row-goz > .row-main,
+.row-zuzahlung > .row-main {
+  border-left-color: var(--privat);
+}
+.row-goz .box,
+.row-zuzahlung .box {
+  border-color: var(--privat);
+  background: var(--privat);
+}
+.row-goz .row-tag,
+.row-zuzahlung .row-tag {
+  color: var(--privat);
+  background: var(--privat-bg);
+}
+.row-zuzahlung .row-code {
+  color: var(--privat);
+}
+/* abgewählt: leeres Kästchen, Ziffer durchgestrichen, Zeile bleibt */
+.row-off > .row-main .box {
+  background: transparent;
+  border-color: var(--line);
+}
+.row-off > .row-main .row-code {
+  color: var(--ink-2);
+  text-decoration: line-through;
+  text-decoration-thickness: 3px;
+}
+.row-off > .row-main {
+  border-left-color: var(--line);
 }

@@ -27,7 +27,7 @@ Datum: ____________  Mac: ____________  iPad/iOS-Version: ____________
 ## 1. Diktat auf dem iPad – Ergebnis in höchstens 3 Sekunden
 
 1. [ ] iPad: MedVox vom Home-Bildschirm öffnen, anmelden.
-2. [ ] Link „Gerätetest" (`/check`): alle Zeilen ✓, „Mikrofon testen" erlaubt.
+2. [ ] ⋯-Menü → „Gerätetest" (`/check`): „Alles bereit", jede Kachel ✓, „Mikrofon testen" erlaubt.
 3. [ ] Im Behandlungszimmer „Aufnehmen", etwa 30 Sekunden diktieren, z. B.:
        „Zahn drei sechs mesial okklusal distal Karies profunda. Infiltrationsanästhesie mit
        Artikain. Kofferdam gelegt. Zahn drei sechs mesial okklusal distal Kompositfüllung in
@@ -56,7 +56,7 @@ Beobachtet: ______________________________________________________
 
 ## 3. Kurzcode an die Rezeption, Einfügen in Evident
 
-1. [ ] iPad: „An Rezeption senden" → sechsstelliger Code und QR-Code erscheinen.
+1. [ ] iPad: „An Rezeption" (Leiste unten) → sechsstelliger Code und QR-Code erscheinen.
        Code: ______
 2. [ ] Rezeptions-PC: `https://<LAN-IP>/transfer` öffnen, Code eingeben → Text und Ziffern
        erscheinen.

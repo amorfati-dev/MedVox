@@ -1,19 +1,23 @@
 // Diktat-Ansicht: links die Steuerung (Schalter Kasse/Privat, Statusfeld, Aufnahmeknopf),
-// rechts das Ergebnis (Transkript, Ziffern, Kopieren, Übergabe an die Rezeption).
-// Im Querformat (≥ 900 px) zwei Spalten, im Hochformat untereinander (styles/diktat.css).
+// rechts das Ergebnis (Kopfzeile, Transkript, Liste nach Zahn, Geplantes, Hinweise) mit der
+// Leiste Text · Ziffern · An Rezeption. Im Querformat (≥ 900 px) zwei Spalten, im Hochformat
+// untereinander (styles/diktat.css). Die Aufnahme- und Warteschlangenlogik liegt in useDictation.
 import { useMemo, useState } from "react";
-import { api, ApiError, evidentLines, evidentOf, evidentText } from "../api";
-import { CodeChips } from "../components/CodeChips";
-import { CopyButton } from "../components/CopyButton";
-import { EvidentLines } from "../components/EvidentLines";
+import { api, ApiError, evidentText } from "../api";
 import { Controls } from "../components/Controls";
+import { CopyButton } from "../components/CopyButton";
+import { Icon } from "../components/Icon";
 import { MoreMenu } from "../components/MoreMenu";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
+import { ResultHead, ResultList } from "../components/ResultList";
 import { StatusPanel } from "../components/StatusPanel";
 import { ThemeSwitch } from "../components/ThemeSwitch";
-import { TransferPanel } from "../components/TransferPanel";
+import { TransferBoard } from "../components/TransferBoard";
 import { useDictation } from "../hooks/useDictation";
 import { usePatientType } from "../hooks/usePatientType";
+import { useSelection } from "../hooks/useSelection";
+import { useTransfer } from "../hooks/useTransfer";
+import { countGroups, uniquePlanned } from "../result";
 import { formatSeconds, plural, uiState } from "../status";
 import { Login } from "./Login";
 
@@ -24,14 +28,10 @@ const UNSUPPORTED = "Dieser Browser kann nicht aufnehmen – bitte Safari auf de
 export function Diktat({ onLogout }: Props) {
   const [patientType, setPatientType] = usePatientType();
   const d = useDictation(patientType);
-  // Abgewählte Ziffern merken; neu vorgeschlagene gelten damit automatisch als gewählt.
-  const [deselected, setDeselected] = useState<ReadonlySet<string>>(() => new Set());
-  const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
-  // Kopier- und Übergabeformat für Evident: je Zahn eine Zeile, Zahn vorn.
-  const evident = useMemo(() => evidentLines(d.suggestions, activeCodes), [d.suggestions, activeCodes]);
-  // Dieselben Zeilen nur mit amtlichen Ziffern („Nur Ziffern“) und die Kurzformen für die Chips.
-  const numbers = useMemo(() => evidentLines(d.suggestions, activeCodes, false), [d.suggestions, activeCodes]);
-  const forms = useMemo(() => evidentOf(d.suggestions), [d.suggestions]);
+  const sel = useSelection(d.codes, d.suggestions);
+  const plans = useMemo(() => uniquePlanned(d.planned), [d.planned]);
+  const counts = useMemo(() => countGroups(sel.groups, plans), [sel.groups, plans]);
+  const transfer = useTransfer(d.transcript, sel.evident, d.sessionExpired);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
@@ -51,21 +51,14 @@ export function Diktat({ onLogout }: Props) {
     }
   };
 
-  const toggleCode = (code: string) =>
-    setDeselected((prev) => {
-      const next = new Set(prev);
-      if (!next.delete(code)) next.add(code);
-      return next;
-    });
-
   const startNew = () => {
-    setDeselected(new Set());
+    sel.clear();
     void d.start();
   };
 
   const clear = () => {
     d.reset();
-    setDeselected(new Set());
+    sel.clear();
   };
 
   // Sitzung abgelaufen: Anmeldung anzeigen, Diktat und offene Abschnitte bleiben im Speicher.
@@ -78,13 +71,16 @@ export function Diktat({ onLogout }: Props) {
     );
   }
 
-  const state = uiState({ ...d, error: d.supported ? d.error : UNSUPPORTED });
+  const error = d.supported ? d.error : UNSUPPORTED;
+  const state = uiState({ ...d, error });
   const summary = [
     d.lastLatency !== null ? formatSeconds(d.lastLatency) : "",
-    plural(activeCodes.length, "Ziffer", "Ziffern"),
+    plural(counts.positions, "Ziffer", "Ziffern"),
+    counts.planned > 0 ? `${counts.planned} geplant` : "",
   ]
     .filter(Boolean)
     .join(" · ");
+  const hasResult = d.transcript !== "" || sel.groups.length > 0 || plans.length > 0;
 
   return (
     <div className="diktat ipad">
@@ -105,11 +101,11 @@ export function Diktat({ onLogout }: Props) {
             level={d.level}
             waiting={d.waiting}
             uploading={d.uploading}
-            error={d.supported ? d.error : UNSUPPORTED}
+            error={error}
             rejected={d.discardable}
             summary={summary}
           />
-          <Controls state={state} d={d} onNew={startNew} onClear={clear} handedOver={false} />
+          <Controls state={state} d={d} onNew={startNew} onClear={clear} handedOver={transfer.result !== null} />
         </div>
         {logoutError && (
           <p role="alert" className="error">
@@ -119,38 +115,54 @@ export function Diktat({ onLogout }: Props) {
       </aside>
 
       <main className="result">
-        <section className="card">
-          <h2>Transkript</h2>
-          <p className="transcript" aria-live="polite">
-            {d.transcript || <span className="muted">Noch nichts diktiert.</span>}
+        {transfer.result && <TransferBoard result={transfer.result} />}
+        {hasResult ? (
+          <ResultHead counts={counts} resultType={d.resultType} numbersText={evidentText(sel.numbers)} />
+        ) : (
+          <p className="muted empty">Noch nichts diktiert – „Aufnehmen“ antippen und sprechen.</p>
+        )}
+        {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
+          <p className="notice">
+            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „Aufnehmen“ beginnt ein neues Diktat als{" "}
+            {PATIENT_LABEL[patientType]}.
           </p>
-          <div className="actions">
-            <CopyButton label="Text kopieren" text={d.transcript} primary />
-          </div>
-        </section>
+        )}
+        {d.transcript && (
+          <section className="transcript-box">
+            <h2>Transkript</h2>
+            <p className="transcript" aria-live="polite">
+              {d.transcript}
+            </p>
+          </section>
+        )}
+        {hasResult && (
+          <ResultList
+            groups={sel.groups}
+            planned={plans}
+            notes={d.notes}
+            onToggle={sel.toggleCode}
+            onAdopt={sel.toggleOption}
+          />
+        )}
 
-        <section className="card">
-          <div className="section-head">
-            <h2>Ziffern</h2>
-            {d.resultType && (
-              <span className={`badge badge-${d.resultType}`}>für {PATIENT_LABEL[d.resultType]}</span>
-            )}
-          </div>
-          {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
-            <p className="notice">
-              Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „Aufnehmen“ beginnt ein neues Diktat als{" "}
-              {PATIENT_LABEL[patientType]}.
+        <footer className="bottom-bar">
+          {transfer.error && (
+            <p role="alert" className="error bottom-error">
+              {transfer.error}
             </p>
           )}
-          <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} forms={forms} onToggle={toggleCode} />
-          {evident.length > 0 && <EvidentLines lines={evident} />}
-          <div className="actions">
-            <CopyButton label="Ziffern kopieren" text={evidentText(evident)} />
-            <CopyButton label="Nur Ziffern" text={evidentText(numbers)} />
-          </div>
-        </section>
-
-        <TransferPanel transcript={d.transcript} codes={evident} onUnauthorized={d.sessionExpired} />
+          <CopyButton label="Text kopieren" text={d.transcript} />
+          <CopyButton label="Ziffern kopieren" text={evidentText(sel.evident)} />
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={transfer.busy || !d.transcript}
+            onClick={() => void transfer.send()}
+          >
+            <Icon name="send" />
+            {transfer.busy ? "Sende …" : "An Rezeption"}
+          </button>
+        </footer>
       </main>
     </div>
   );

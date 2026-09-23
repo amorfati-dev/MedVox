@@ -47,8 +47,32 @@ Einfügen in Evident immer lesen.
 | „PZR" | 1040 (GOZ) |
 | „BEMA dreizehn a", „GOZ zwei eins null null" | genau diese Ziffer |
 
-Zu jeder BEMA-Ziffer zeigt MedVox das Privat-Gegenstück als *Alternative* (nicht in den
-kopierten Ziffern). Die Umschaltung Kasse/Privat kommt mit einer späteren Version.
+Vor dem Diktat **Kassenpatient** oder **Privatpatient** wählen (Schalter oben links; während
+eines Diktats gesperrt). Beim Kassenpatienten erscheint eine mögliche Zuzahlung (z. B. GOZ 2100
+zur Füllung 13c) als **Option** gestrichelt unter ihrer Leistung – **abgewählt**. Erst ein Tipp
+auf die Option übernimmt sie; dann wird sie wie jede gewählte Position kopiert und an die
+Rezeption gesendet. Ohne Tipp kommt sie nirgends hin.
+
+## Die Anzeige am iPad
+
+| Statusfeld | Bedeutung | Knopf |
+|---|---|---|
+| **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kreis **Aufnehmen** – beginnt ein neues Diktat |
+| **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Quadrat **Stopp**; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
+| **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | gesperrt – warten |
+| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** (neues Diktat, ersetzt das Ergebnis), **Nächster Patient** (Bildschirm leeren) |
+| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** |
+| **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen** |
+
+Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile, die
+„Ziffern kopieren" liefert. Jede Zeile: Kästchen · Ziffer · Leistung · „wegen: …". Antippen
+wählt ab (Ziffer durchgestrichen, Zeile bleibt) – die Auswahl gilt für die Ziffer an allen
+Zähnen. Farben: **Türkis** = Kasse/BEMA, **Indigo** = Privat/GOZ/Zuzahlung, **Bernstein** =
+prüfen (Streifen „Prüfen: …" unter der Zeile). Kassenanteil und Zuzahlung am selben Zahn stehen
+in einem Rahmen „Mehrkosten Zahn 46 · Kasse zahlt 13a · Patient zahlt 2150 · Vereinbarung nötig".
+Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint). Die Leiste unten:
+**Text kopieren** · **Ziffern kopieren** · **An Rezeption**; „Nur Ziffern" steht in der Kopfzeile.
+Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Gerätetest und Abmelden.
 
 ## „Ziffern kopieren" für Evident
 
@@ -58,7 +82,8 @@ kommagetrennt, in der Reihenfolge der Vorschläge. Mehrere Zähne stehen in der 
 Reihenfolge untereinander; der OP-Zuschlag 0500–0530 steht beim operierten Zahn. Positionen ohne
 Zahn (01, Ä1, 107) kommen in eine letzte Zeile ohne Zahnnummer – die nimmt Evident so nicht an.
 MedVox markiert diese Zeile am iPad und an der Rezeption mit „ohne Zahn – in Evident manuell
-eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Chips fehlen.
+eintragen"; der Hinweis selbst wird nicht mitkopiert. Abgewählte Zeilen fehlen, übernommene
+Zuzahlungs-Optionen stehen wie jede Position in ihrer Zahnzeile.
 
 Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie, Zahn drei sechs
 mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):
@@ -76,7 +101,7 @@ Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a
 `48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte
 Positionen stehen einmal mit Anzahl, hinter Kurzform wie Ziffer: drei Kanäle an 36 → `36,wf*3`,
 `11,2410*3` (für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen).
-Die Chips zeigen beides („41a · l1").
+Die Liste zeigt beides: die amtliche Ziffer groß, die Kurzform klein darunter („Evident: l1").
 „Nur Ziffern" kopiert dieselben Zeilen nur mit amtlichen Ziffern (`36,35*3`), so geschrieben wie im
 Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption gibt es nur „Ziffern kopieren".
 
@@ -96,7 +121,8 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption gibt e
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.
-- Ein Abschnitt dauert höchstens 60 s – bei längeren Diktaten „Weiter" antippen.
+- Ein Abschnitt dauert höchstens 60 s – bei längeren Diktaten „Abschnitt anhängen" antippen.
+  Hat MedVox bei 60 s selbst angehalten, geht es mit „Weiter aufnehmen" im selben Diktat weiter.
 - Echte Praxisakustik (Absauger, Maske) ist schlechter als die Testaufnahmen: nah ans iPad
   sprechen. Wiederkehrende Hörfehler notieren – sie kommen ins Wörterbuch bzw. in den
   Prompt (`infra/whisper/prompt.txt`).

@@ -50,6 +50,9 @@
     padding-top: max(16px, env(safe-area-inset-top));
     padding-right: max(20px, env(safe-area-inset-right));
   }
+  .result > * {
+    flex-shrink: 0;
+  }
 }
 
 /* iPad hoch / iPad mini: Statusfeld und Knopf in einer Zeile oben. */

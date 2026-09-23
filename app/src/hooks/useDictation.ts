@@ -35,6 +35,8 @@ export type Dictation = {
   codes: string[];
   kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
   suggestions: Suggestion[]; // Vorschläge aller Abschnitte (Zahnzuordnung für Evident)
+  planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
+  notes: string[]; // Hinweise aller Abschnitte
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   error: string | null;
   lastLatency: number | null;
@@ -238,6 +240,8 @@ export function useDictation(patientType: PatientType): Dictation {
     codes: uploads.codes,
     kinds: uploads.kinds,
     suggestions: uploads.suggestions,
+    planned: uploads.planned,
+    notes: uploads.notes,
     resultType: uploads.resultType,
     error: uploads.error,
     lastLatency: uploads.lastLatency,

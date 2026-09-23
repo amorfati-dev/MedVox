@@ -172,7 +172,7 @@ und sind vom Behandler zu prüfen.
   „36 o Karies, 37 mo Karies, Füllungen“ ordnet die Füllung nur 37 zu – Zähne direkt hinter der
   Leistung nennen oder je Zahn einen Satz.
 - Fehlt die Flächenzahl, die Kanalzahl oder bei Entfernung/AIT der Zahn, kommt der kleinste
-  Vorschlag mit Hinweis in `decide` (die heutige Ergebnisansicht zeigt `decide` noch nicht).
+  Vorschlag mit Hinweis in `decide` (in der App als Prüfstreifen „Prüfen: …“ unter der Zeile).
 - Plan-Marker wirken nur im eigenen Teilsatz; „danach“ oder Zeitangaben ohne Marker („morgen
   Extraktion“) gelten als erbracht. Verneinung nur direkt an der Leistung.
 - Enthaltensein ist nur für 31 in 28 und 11 in 34 hinterlegt; „nicht neben“ aus dem Katalog wird

@@ -12,6 +12,7 @@ export type Suggestion = {
   title: string;
   kind: SuggestionKind;
   count: number;
+  points?: number | null; // BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punkte; wird nie angezeigt (Patient schaut mit)
   teeth: number[];
   reason: string;
   decide: string[];
@@ -24,7 +25,9 @@ export type TranscribeResult = {
   duration_s: number;
   latency_s: number;
   codes: string[];
-  suggestions: Suggestion[];
+  suggestions: Suggestion[]; // erbracht: Hauptvorschläge und Optionen (`alternative`)
+  planned?: Suggestion[]; // nur geplant – nie abrechnen
+  notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
 // `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,l1,13a"), siehe evidentLines.
