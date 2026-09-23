@@ -80,6 +80,7 @@ def test_label_follows_the_unassigned_dictation(logged_in: TestClient) -> None:
         ("Ö.-Ü.", "Ö.-Ü."),
         ("U\u0308.", "Ü."),
         ("A. B. C. D.", "A. B. C. D."),
+        ("AB-CD", "AB-CD"),
     ],
 )
 def test_label_accepts_initials(logged_in: TestClient, raw: str, stored: str) -> None:
@@ -88,7 +89,7 @@ def test_label_accepts_initials(logged_in: TestClient, raw: str, stored: str) ->
 
 
 @pytest.mark.parametrize(
-    "raw", ["Mueller", "Max Musterma", "ABCDE", "M.K. 1980", "M..K.", "M--K", ".MK", "<b>", "123"]
+    "raw", ["Max", "Muel", "Mueller", "Max Musterma", "A.B.C.D.E.", "A-BCD", "M.K. 1980", "M..K.", "M--K", ".MK", "<b>", "123"]
 )
 def test_label_rejects_anything_but_initials(logged_in: TestClient, raw: str) -> None:
     response = logged_in.put(f"{DICTATIONS}/diktat-0001", json={**DICTATION, "patient": "4711", "patient_label": raw})

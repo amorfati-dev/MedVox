@@ -28,8 +28,8 @@ NUMBER_PATTERN = r"^[0-9]{1,12}$"  # Evident-Patientennummer, nur Ziffern
 DictationId = Annotated[str, Path(pattern=r"^[A-Za-z0-9-]{8,64}$")]
 Text = Annotated[str, Field(max_length=2_000)]
 Code = Annotated[str, Field(max_length=64)]
-# Initialen: höchstens 4 Buchstaben, je einer mit Punkt dahinter, getrennt nur durch Punkt, Leerzeichen, Bindestrich
-LABEL_PATTERN = re.compile(r"[^\W\d_]\.?(?:[ -]?[^\W\d_]\.?){0,3}")
+# Initialen: höchstens 4 Buchstaben, höchstens 2 direkt hintereinander, getrennt durch Punkt, Leerzeichen, Bindestrich
+LABEL_PATTERN = re.compile(r"(?!.*[^\W\d_]{3})[^\W\d_]\.?(?:[ -]?[^\W\d_]\.?){0,3}")
 LABEL_INVALID = "Kürzel: nur Initialen, höchstens 4 Buchstaben, z. B. „M.K.“ – keine Namen, keine Ziffern."
 
 

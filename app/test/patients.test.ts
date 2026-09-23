@@ -7,7 +7,7 @@ import { test } from "node:test";
 import { evidentText, type PatientSummary, type StoredDictation, type TranscribeResult } from "../src/api.ts";
 import {
   dictationCopy,
-  finishLabel,
+  isLabel,
   normalizeLabel,
   normalizeNumber,
   patientName,
@@ -106,21 +106,21 @@ test("Patientennummer: nur Ziffern, höchstens 12", () => {
   assert.equal(normalizeNumber("12345678901234"), "123456789012");
 });
 
-test("Kürzel: nur Initialen, höchstens 4 Buchstaben, keine Ziffern", () => {
-  for (const ok of ["MK", "M.K.", "M. K.", "A-B.", "Ö.Ü.", "A. B. C. D."]) assert.equal(normalizeLabel(ok), ok);
-  assert.equal(normalizeLabel("  Ö.  Ü-1980"), "Ö. Ü-");
-  assert.equal(normalizeLabel("Mueller"), "Muel");
-  assert.equal(normalizeLabel("Max Musterma"), "Max M");
-  assert.equal(normalizeLabel("M..K"), "M.K");
-  assert.equal(normalizeLabel("<b>"), "b");
-  assert.equal(normalizeLabel("U\u0308"), "Ü");
+test("Kürzel: Initialen gelten, höchstens 4 Buchstaben, höchstens 2 hintereinander", () => {
+  for (const ok of ["", "MK", "M.K.", "M. K.", "A-B.", "Ö.Ü.", "A. B. C. D.", "AB-CD"]) assert.ok(isLabel(ok), ok);
 });
 
-test("Kürzel zum Speichern: ohne Trenner am Ende, leer = keins", () => {
-  assert.equal(finishLabel("M. K. "), "M. K.");
-  assert.equal(finishLabel("A-"), "A");
-  assert.equal(finishLabel("  "), null);
-  assert.equal(finishLabel("1980"), null);
+test("Kürzel: Namen, Namensanfänge und Ziffern werden abgelehnt, nicht gekürzt", () => {
+  for (const bad of ["Max", "Muel", "Mueller", "Max Musterma", "A.B.C.D.E.", "A-BCD", "M.K. 1980", "M..K", "M--K", ".MK", "<b>"]) {
+    assert.equal(normalizeLabel(bad), bad.trim());
+    assert.ok(!isLabel(normalizeLabel(bad)), bad);
+  }
+});
+
+test("Kürzel wie gespeichert: Leerraum zusammengefasst, Umlaut zusammengesetzt", () => {
+  assert.equal(normalizeLabel("  M.   K.  "), "M. K.");
+  assert.equal(normalizeLabel("U\u0308."), "Ü.");
+  assert.equal(normalizeLabel("   "), "");
 });
 
 test("Nummer mit Kürzel für Texte, ohne Kürzel nur die Nummer", () => {

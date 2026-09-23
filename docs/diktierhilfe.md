@@ -172,8 +172,10 @@ beim Code nur „Dieses Diktat wurde bereits am … übertragen … – nicht er
 und keine Ziffern.
 
 **Datenschutz – Kürzel zur Nummer:** das Feld „Kürzel" ist freiwillig und nimmt nur Initialen auf:
-höchstens 4 Buchstaben, getrennt nur durch Punkt, Leerzeichen oder Bindestrich („MK", „M. K.",
-„A-B.") – keine Ziffern (also kein Geburtsdatum) und **keine Namen**; „Mueller" lehnt der Praxis-Mac ab. Das ist vertretbar, weil keine neue Datenkategorie entsteht: die
+höchstens 4 Buchstaben, höchstens 2 direkt hintereinander, getrennt nur durch Punkt, Leerzeichen oder
+Bindestrich („MK", „M. K.", „A-B.") – keine Ziffern (also kein Geburtsdatum) und **keine Namen**. Tippt
+man „Max" oder „Mueller", bleibt die Eingabe stehen, darunter erscheint „Nur Initialen …" und **OK**
+bleibt gesperrt, bis das Kürzel stimmt oder das Feld leer ist; gekürzt wird nie. Das ist vertretbar, weil keine neue Datenkategorie entsteht: die
 Evident-Nummer ist schon ein Personenbezug, und Initialen machen ihn für uns nur lesbarer. Das Kürzel
 liegt nur auf dem Praxis-Mac, nie in der Cloud, nie in Protokollen, Fehlermeldungen oder im
 Kopiertext für Evident, und es wird gelöscht wie der Inhalt: beim Übertragen (Büro oder Kurzcode),

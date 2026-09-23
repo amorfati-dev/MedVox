@@ -3,7 +3,7 @@
 // Wunsch das Kürzel (Initialen) zum Wiederfinden in Evident; leer lässt ein vorhandenes stehen.
 import { useEffect, useState } from "react";
 import { api, ApiError, type PatientSummary } from "../api";
-import { clock, finishLabel, LABEL_LETTERS, LABEL_MAX, NUMBER_MAX, normalizeLabel, normalizeNumber, pickable } from "../patients";
+import { clock, isLabel, LABEL_LETTERS, NUMBER_MAX, normalizeLabel, normalizeNumber, pickable } from "../patients";
 import { plural } from "../status";
 import { Icon } from "./Icon";
 
@@ -22,6 +22,8 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
   const [label, setLabel] = useState("");
   const [open, setOpen] = useState<PatientSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const initials = normalizeLabel(label);
+  const labelOk = isLabel(initials);
 
   useEffect(() => {
     let alive = true;
@@ -41,7 +43,7 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
   const press = (key: string) => {
     if (key === "OK") {
       const known = open?.find((p) => p.number === digits)?.label ?? null;
-      if (digits) onChoose(digits, finishLabel(label) ?? known);
+      if (digits && labelOk) onChoose(digits, initials || known);
     } else if (key === "⌫") setDigits((d) => d.slice(0, -1));
     else setDigits((d) => normalizeNumber(d + key));
   };
@@ -78,8 +80,8 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
             <input
               className="initials-input"
               value={label}
-              onChange={(e) => setLabel(normalizeLabel(e.target.value))}
-              maxLength={LABEL_MAX}
+              onChange={(e) => setLabel(e.target.value)}
+              aria-invalid={!labelOk}
               placeholder="Kürzel (optional), z. B. M.K."
               aria-label="Kürzel des Patienten, optional"
               autoComplete="off"
@@ -88,13 +90,18 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
               spellCheck={false}
               enterKeyHint="done"
             />
+            {!labelOk && (
+              <p className="error small" role="alert">
+                Nur Initialen, z. B. M.K. – höchstens {LABEL_LETTERS} Buchstaben, keine Namen.
+              </p>
+            )}
             <div className="keypad">
               {KEYS.map((key) => (
                 <button
                   key={key}
                   type="button"
                   className={key === "OK" ? "btn btn-primary key" : "btn key"}
-                  disabled={(key === "OK" || key === "⌫") && !digits}
+                  disabled={((key === "OK" || key === "⌫") && !digits) || (key === "OK" && !labelOk)}
                   aria-label={key === "⌫" ? "Letzte Ziffer löschen" : key === "OK" ? "Nummer übernehmen" : key}
                   onClick={() => press(key)}
                 >
