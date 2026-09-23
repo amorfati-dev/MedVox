@@ -44,6 +44,7 @@ z. B. `export MEDVOX_PASSWORD_HASH='pbkdf2_sha256$...'`; ohne ihn antwortet
 | `MEDVOX_DB_PATH` | `~/Library/Application Support/MedVox/medvox.db` | SQLite mit Sitzungen und Transfer-Codes |
 | `MEDVOX_TRANSFER_TTL_S` | `900` | Lebensdauer eines Kurzcodes (15 min) |
 | `MEDVOX_SESSION_TTL_S` | `2592000` | Lebensdauer der Login-Sitzung (30 Tage) |
+| `MEDVOX_DENTIST_IDLE_S` | `1800` | So lange ohne Bedienung, dann fragt das iPad neu, wer diktiert (30 min) |
 | `MEDVOX_FFMPEG` | `ffmpeg` | Pfad zum ffmpeg-Binary |
 | `MEDVOX_TMP_DIR` | System-Temp | Verzeichnis für die kurzlebigen Audio-Dateien |
 
@@ -61,16 +62,21 @@ kommt, sonst direkt vom Peer.
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
 | `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB), optional `patient_type` = `kasse` (Standard) \| `privat` | `{"transcript", "patient_type", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `patient_type` der Typ, für den die Vorschläge gelten; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative, kind, evident` (Evident-Kurzform aus dem Katalog oder `null`) mit `kind` = `bema` \| `goz` (Privatleistung, auch GOÄ) \| `zuzahlung` (Privatleistung beim Kassenpatienten); siehe „Regel-Extraktor“. Unbekannter `patient_type`: 422 |
-| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}], "dictation_id"?: str, "dictation_revision"?: int}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil); `dictation_id`/`dictation_revision` verknüpfen den Code mit genau diesem Stand des gespeicherten Diktats (siehe unten) | `{"code": "ABC123", "expires_at": iso8601}` |
-| `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at", "patient_type", "positions", "earlier"}` (ältere Einträge: `null`/`[]`; `earlier` = schon abgeholte Stände desselben Diktats) oder 404; 410 ohne Inhalt, wenn das verknüpfte Diktat schon übertragen ist (Code danach gelöscht); 429 bei > 10 Abrufen/min/IP |
-| `PUT /dictations/{id}` | ja | JSON `{"patient"?: "4711", "transcript", "patient_type", "codes", "suggestions", "planned", "notes", "deselected", "adopted"}` – Stand eines Diktats, `id` vom iPad (8–64 Zeichen `A-Za-z0-9-`); `patient` = Evident-Nummer (1–12 Ziffern, Patient wird bei Bedarf angelegt), ohne `patient` bleibt die Zuordnung (neu: „ohne Patient“); ein schon zugeordnetes Diktat wechselt durch `patient` nie den Patienten (Umhängen nur im Büro) | Diktat mit `id, patient, patient_id, revision, created_at, updated_at` und den Feldern der Anfrage; jede Änderung erhöht `revision`, die 24 Stunden zählen ab der ersten Speicherung; 410, wenn das Diktat schon übertragen, gelöscht oder abgelaufen ist |
+| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}], "dictation_id"?: str, "dictation_revision"?: int, "dentist_id"?: int}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil); `dictation_id`/`dictation_revision` verknüpfen den Code mit genau diesem Stand des gespeicherten Diktats (siehe unten); der Behandler ist der des gespeicherten Diktats, sonst `dentist_id` | `{"code": "ABC123", "expires_at": iso8601}` |
+| `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at", "patient_type", "positions", "earlier", "dentist_name"}` (ältere Einträge: `null`/`[]`; `earlier` = schon abgeholte Stände desselben Diktats) oder 404; 410 ohne Inhalt, wenn das verknüpfte Diktat schon übertragen ist (Code danach gelöscht); 429 bei > 10 Abrufen/min/IP |
+| `PUT /dictations/{id}` | ja | JSON `{"patient"?: "4711", "dentist_id"?: 3, "transcript", "patient_type", "codes", "suggestions", "planned", "notes", "deselected", "adopted"}` – Stand eines Diktats, `id` vom iPad (8–64 Zeichen `A-Za-z0-9-`); `patient` = Evident-Nummer (1–12 Ziffern, Patient wird bei Bedarf angelegt), ohne `patient` bleibt die Zuordnung (neu: „ohne Patient“); ein schon zugeordnetes Diktat wechselt durch `patient` nie den Patienten (Umhängen nur im Büro); `dentist_id` (Behandler beim Start der Aufnahme) zählt nur beim ersten Speichern und ändert sich danach nie, unbekannte ID = ohne Behandler | Diktat mit `id, patient, patient_id, revision, created_at, updated_at, dentist_id, dentist_name` und den Feldern der Anfrage; jede Änderung erhöht `revision`, die 24 Stunden zählen ab der ersten Speicherung; 410, wenn das Diktat schon übertragen, gelöscht oder abgelaufen ist |
 | `DELETE /dictations/{id}` | ja | – | 204 oder 404 |
-| `POST /patients` | ja | JSON `{"number": "4711"}` | Patient `{id, number, created_at, updated_at, dictations, transferred, transferred_at}` – vorhandener mit derselben Nummer oder neu |
+| `PUT /dictations/{id}/dentist` | ja | JSON `{"dentist_id": 3}` | Behandler eines Diktats ohne Behandler nachtragen (Büro, „Behandler fehlt“); der Patient bekommt ihn als Eröffner, falls er noch keinen hat. Das Diktat; 409, wenn es schon einen Behandler hat (bleibt unverändert); 404, wenn Diktat oder Behandler fehlen |
+| `POST /patients` | ja | JSON `{"number": "4711"}` | Patient `{id, number, created_at, updated_at, dictations, transferred, transferred_at, dentist_id, dentist_name, dentists, without_dentist}` – vorhandener mit derselben Nummer oder neu; `dentist_*` = Behandler des ersten Diktats (hat den Patienten eröffnet), `dentists` = er und die Behandler der offenen Diktate (`[{id, name}]`), `without_dentist` = offene Diktate ohne Behandler |
 | `GET /patients` | ja | – | `{"patients": [...], "unassigned": [Diktat, ...]}` – jüngstes Diktat zuerst; `dictations` offen, `transferred` schon übertragen |
 | `GET /patients/{id}` | ja | – | Patient plus `items`: offene Diktate in Diktatreihenfolge; 404 |
 | `POST /patients/{id}/dictations` | ja | JSON `{"dictation_id": "…"}` | hängt ein gespeichertes Diktat (z. B. „ohne Patient“) an diesen Patienten; 404 |
 | `POST /patients/{id}/transferred` | ja | JSON `{"seen": [{"id", "revision"}]}` – die im Büro angezeigten Diktate | löscht genau diese Fassungen sofort und vermerkt Zeit und Anzahl; neuere oder geänderte bleiben in `items` offen |
 | `DELETE /patients/{id}` | ja | – | 204 (mit allen Diktaten) oder 404 |
+| `GET /dentists` | ja | – | `{"dentists": [{id, name, practitioner_id, active}], "idle_s": 1800}` – aktive zuerst; `idle_s` aus `MEDVOX_DENTIST_IDLE_S` |
+| `POST /dentists` | ja | JSON `{"name": "Dr. Hartmann", "practitioner_id"?: "12"}` (Name 1–60 Zeichen, Nummer ≤ 20 Zeichen `A-Za-z0-9./-`) | der neue Behandler |
+| `PATCH /dentists/{id}` | ja | JSON mit beliebigen von `name`, `practitioner_id` (leer = keine), `active` | der geänderte Behandler; 404 |
+| `DELETE /dentists/{id}` | ja | – | inaktiv setzen (nie löschen): der Behandler mit `active: false`; 404 |
 
 Fehler tragen eine deutsche Meldung in `{"detail": "…"}`: 400 unlesbare oder leere
 Aufnahme, 401 nicht angemeldet, 413 zu groß oder zu lang, 415 falscher Typ,
@@ -107,11 +113,19 @@ Weitere Abrufe desselben Codes innerhalb der TTL liefern den Inhalt erneut, ohne
 Wird der Code nie abgerufen, bleibt das Diktat offen und läuft normal ab. Ohne `dictation_id`
 (ältere iPad-Versionen) bleibt alles wie bisher.
 
+Behandler (`medvox/dentists.py`, Tabelle `dentists`): nur Zuordnung für Abrechnung und
+Nachvollziehbarkeit, keine Anmeldung und keine Rechte – jeder Angemeldete sieht alle Patienten und
+darf die Liste pflegen. Ist die Liste leer – bei einer neuen Datenbank und beim ersten Start einer
+bestehenden nach dem Update –, legt der Server einen Eintrag „Behandler 1“ an (in der App umbenennen). Bestehende Datenbanken bekommen beim Start `dictations.dentist_id`,
+`patients.dentist_id` und `transfers.dentist_id` per `ALTER TABLE`; Einträge aus der Zeit davor
+bleiben ohne Behandler (`null`) und funktionieren unverändert; das Büro trägt ihn nachträglich ein
+(`PUT /dictations/{id}/dentist`, `medvox/attribution.py`), danach ist er wie jeder andere fest.
+
 ## Module
 
 `medvox/settings.py` (Umgebung), `transcribe.py` (ffmpeg → whisper, Temp-Dateien),
 `auth.py` (PBKDF2, Sitzungen), `transfer.py` (Kurzcodes), `handovers.py` (abgeholte Kurzcodes je Diktat), `patients.py` (Diktate je Patient,
-Aufbewahrung), `ratelimit.py` (Client-IP, Fenster),
+Aufbewahrung), `dentists.py` (Behandlerliste), `attribution.py` (Behandler nachtragen), `ratelimit.py` (Client-IP, Fenster),
 `db.py` (SQLite, Aufräumen), `lexicon.py`/`normalize*.py`/`extract*.py` (Text-Pipeline),
 `routes_*.py` (HTTP-Schicht), `main.py` (App-Fabrik). Tests in `tests/`, whisper und
 ffmpeg dort per `httpx.MockTransport` bzw. Shell-Fake ersetzt.

@@ -36,6 +36,8 @@ class TransferCreate(BaseModel):
     # gespeichertes Diktat (PUT /dictations/{id}), das der Abruf als übertragen schließt
     dictation_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9-]{8,64}$")
     dictation_revision: int | None = Field(default=None, ge=1)  # gespeicherter Stand genau dieses Inhalts
+    # Behandler des Diktats, falls es noch nicht gespeichert ist (sonst gilt der gespeicherte)
+    dentist_id: int | None = Field(default=None, ge=1)
 
 
 class TransferCreated(BaseModel):
@@ -61,6 +63,7 @@ class TransferRead(BaseModel):
     patient_type: str | None = None
     positions: list[TransferPosition] = []
     earlier: list[HandoverOut] = []  # schon abgeholte Stände desselben Diktats: nur die Änderung eintragen
+    dentist_name: str | None = None  # Behandler, dem das Diktat gehört; None = ohne Behandler
 
 
 @router.post("/transfer", response_model=TransferCreated, dependencies=[Depends(require_session)])
@@ -75,6 +78,7 @@ def create(body: TransferCreate, request: Request) -> TransferCreated:
         [p.model_dump() for p in body.positions],
         body.dictation_id,
         body.dictation_revision,
+        body.dentist_id,
     )
     log.info("Transfer angelegt (%d Zeichen, %d Ziffern)", len(body.transcript), len(body.codes))
     return TransferCreated(code=entry.code, expires_at=transfer.iso(entry.expires_at))
@@ -102,4 +106,5 @@ def read(code: str, request: Request) -> TransferRead:
         patient_type=entry.patient_type,
         positions=[TransferPosition(**p) for p in entry.positions],
         earlier=[handover_out(h) for h in entry.earlier],
+        dentist_name=entry.dentist_name,
     )

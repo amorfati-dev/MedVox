@@ -55,6 +55,7 @@ class Settings:
     transfer_lookups_per_min: int = 10
     login_attempts_per_min: int = 10
     purge_interval_s: float = 5 * 60
+    dentist_idle_s: int = 30 * 60  # so lange ohne Bedienung, dann fragt das iPad neu, wer diktiert
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -68,6 +69,7 @@ class Settings:
             db_path=Path(os.environ.get("MEDVOX_DB_PATH", str(DEFAULT_DB_PATH))),
             transfer_ttl_s=_env_int("MEDVOX_TRANSFER_TTL_S", cls.transfer_ttl_s),
             session_ttl_s=_env_int("MEDVOX_SESSION_TTL_S", cls.session_ttl_s),
+            dentist_idle_s=_env_int("MEDVOX_DENTIST_IDLE_S", cls.dentist_idle_s),
             ffmpeg=os.environ.get("MEDVOX_FFMPEG", cls.ffmpeg),
             tmp_dir=Path(tmp) if tmp else None,
         )

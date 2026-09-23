@@ -14,7 +14,15 @@ from contextlib import asynccontextmanager
 import httpx
 from fastapi import FastAPI
 
-from medvox import __version__, db, routes_auth, routes_patients, routes_transcribe, routes_transfer
+from medvox import (
+    __version__,
+    db,
+    routes_auth,
+    routes_dentists,
+    routes_patients,
+    routes_transcribe,
+    routes_transfer,
+)
 from medvox.ratelimit import RateLimiter
 from medvox.settings import Settings
 
@@ -60,6 +68,7 @@ def create_app(
     app.include_router(routes_auth.router)
     app.include_router(routes_transfer.router)
     app.include_router(routes_patients.router)
+    app.include_router(routes_dentists.router)
     return app
 
 

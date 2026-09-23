@@ -1,5 +1,8 @@
 // Zugriff auf die MedVox-API (server/). Alle Fehler werden als ApiError mit
-// deutscher Meldung geworfen, damit die Ansichten sie direkt anzeigen können.
+// deutscher Meldung geworfen, damit die Ansichten sie direkt anzeigen können (http.ts).
+import { json, request } from "./http.ts";
+
+export { ApiError } from "./http.ts";
 
 export type Health = { status: string; whisper: "ok" | "down" | string };
 // Patiententyp: wählt je Leistung BEMA (Kasse) oder GOZ/GOÄ (Privat).
@@ -43,6 +46,7 @@ export type TransferDetails = { patient_type: PatientType; positions: TransferPo
 // `patient_type`/`positions` fehlen bei Einträgen älterer iPad-Versionen.
 export type TransferData = {
   transcript: string;
+  dentist_name?: string | null; // Behandler des Diktats; fehlt bei Diktaten ohne Behandler
   codes: string[];
   created_at: string;
   patient_type?: PatientType | null;
@@ -63,7 +67,8 @@ export type DictationContent = {
   adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
 };
 // `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).
-export type DictationBody = DictationContent & { patient?: string };
+// `dentist_id`: Behandler beim Start der Aufnahme; zählt nur beim ersten Speichern (dentists.ts).
+export type DictationBody = DictationContent & { patient?: string; dentist_id?: number | null };
 export type StoredDictation = DictationContent & {
   id: string;
   patient: string | null;
@@ -72,7 +77,10 @@ export type StoredDictation = DictationContent & {
   created_at: string;
   updated_at: string;
   handovers?: Handover[]; // schon per Kurzcode an der Rezeption abgeholte Stände
+  dentist_id?: number | null; // Behandler beim Start der Aufnahme, danach unveränderlich
+  dentist_name?: string | null;
 };
+export type DentistRef = { id: number; name: string };
 export type PatientSummary = {
   id: number;
   number: string; // Evident-Patientennummer
@@ -81,59 +89,13 @@ export type PatientSummary = {
   dictations: number; // offen
   transferred: number; // schon übertragen (Inhalt gelöscht)
   transferred_at: string | null;
+  dentist_id?: number | null; // Behandler des ersten Diktats (hat den Patienten eröffnet)
+  dentist_name?: string | null;
+  dentists?: DentistRef[]; // dieser und die Behandler der offenen Diktate (Filter im Büro)
+  without_dentist?: number; // offene Diktate ohne Behandler („Behandler fehlt“)
 };
 export type PatientDetail = PatientSummary & { items: StoredDictation[] };
 export type PatientList = { patients: PatientSummary[]; unassigned: StoredDictation[] };
-
-export class ApiError extends Error {
-  readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-  }
-}
-
-const MESSAGES: Record<number, string> = {
-  401: "Nicht angemeldet.",
-  404: "Nicht gefunden.",
-  410: "Dieses Diktat wurde bereits übertragen.",
-  413: "Aufnahme zu lang (maximal 60 Sekunden).",
-  415: "Audioformat wird vom Server nicht unterstützt.",
-  429: "Zu viele Abfragen – bitte kurz warten.",
-  502: "Praxis-Mac antwortet nicht – MedVox-Dienst auf dem Praxis-Mac prüfen.",
-  503: "Whisper nicht bereit – Transkriptionsdienst auf dem Praxis-Mac prüfen.",
-  504: "Praxis-Mac antwortet zu langsam – bitte erneut versuchen.",
-};
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(path, init);
-  } catch {
-    throw new ApiError(0, "Server nicht erreichbar – WLAN und Praxis-Mac prüfen.");
-  }
-  if (!res.ok) {
-    let detail = "";
-    try {
-      const body = (await res.json()) as { detail?: unknown };
-      if (typeof body.detail === "string") detail = body.detail;
-    } catch {
-      /* Body ohne JSON */
-    }
-    throw new ApiError(res.status, detail || MESSAGES[res.status] || `Serverfehler (HTTP ${res.status}).`);
-  }
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
-}
-
-function json(method: string, body: unknown): RequestInit {
-  return {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  };
-}
 
 export const api = {
   health: () => request<Health>("/api/v1/health"),
@@ -150,7 +112,14 @@ export const api = {
 
   // `link`: gespeichertes Diktat; der erste Abruf des Kurzcodes schließt genau diesen Stand wie
   // „übertragen“ im Büro. War es schon übertragen, lehnt der Abruf mit 410 ab.
-  createTransfer: (transcript: string, codes: string[], details?: TransferDetails, link?: HandoverLink | null) =>
+  // `dentist`: Behandler des Diktats für die Rezeption, falls es noch nicht gespeichert ist.
+  createTransfer: (
+    transcript: string,
+    codes: string[],
+    details?: TransferDetails,
+    link?: HandoverLink | null,
+    dentist?: number | null,
+  ) =>
     request<TransferCreated>(
       "/api/v1/transfer",
       json("POST", {
@@ -158,6 +127,7 @@ export const api = {
         codes,
         ...details,
         ...(link ? { dictation_id: link.id, ...(link.revision !== null ? { dictation_revision: link.revision } : {}) } : {}),
+        ...(dentist != null ? { dentist_id: dentist } : {}),
       }),
     ),
   getTransfer: (code: string) =>

@@ -72,8 +72,39 @@ prüfen (Streifen „Prüfen: …" unter der Zeile). Kassenanteil und Zuzahlung 
 in einem Rahmen „Mehrkosten Zahn 46 · Kasse zahlt 13a · Patient zahlt 2150 · Vereinbarung nötig".
 Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint). Die Leiste unten:
 **Text kopieren** · **Ziffern kopieren** · **An Rezeption**; „Nur Ziffern" steht in der Kopfzeile.
-Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste, Gerätetest
-und Abmelden.
+Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste,
+Behandlerliste, Gerätetest und Abmelden.
+
+## Wer diktiert – mehrere Behandler, geteilte iPads
+
+Alle Behandler sehen alle Patienten (Gemeinschaftspraxis). Der Name am iPad sagt nur, **wer** ein
+Diktat aufgenommen hat – für Abrechnung und Nachvollziehbarkeit. Es ist keine Anmeldung: das
+Praxis-Passwort bleibt das einzige.
+
+1. **Ganz oben links steht, wer diktiert:** „Es diktiert **Dr. Hartmann**". Wer das iPad
+   aufnimmt, schaut zuerst dorthin. Falscher Name? Antippen und sich selbst wählen – ein Tipp.
+2. **Das iPad fragt von selbst**, bernsteinfarben **„Wer diktiert jetzt?"**:
+   - beim ersten Öffnen auf einem iPad,
+   - nach **„An Rezeption"** – vor dem nächsten Diktat (der Kurzcode bleibt so lange stehen),
+   - nach **30 Minuten ohne Bedienung** (einstellbar auf dem Praxis-Mac, `MEDVOX_DENTIST_IDLE_S`)
+     – die Auswahl öffnet sich gleich. Der zuletzt Gewählte ist hervorgehoben, dann reicht ein
+     Tipp auf den eigenen Namen.
+
+   Sonst bleibt die Wahl auf dem iPad, auch nach dem Neuladen, bis jemand wechselt.
+3. **Der Name gilt ab dem Start der Aufnahme** für das ganze Diktat und ändert sich danach nie –
+   auch nicht, wenn später jemand anderes das iPad nimmt. Während einer Aufnahme ist der Wechsel
+   gesperrt („Diktat von …"). Wechselt jemand, während noch ein fertiges Ergebnis auf dem
+   Bildschirm steht, bleibt dieses beim bisherigen Behandler gespeichert und der Bildschirm wird frei.
+4. **Ein Patient, zwei Behandler** ist normal: jedes Diktat behält seinen Behandler; beim Patienten
+   steht, wer ihn eröffnet hat (erstes Diktat).
+5. **Behandlerliste** (⋯ → Behandlerliste oder `https://medvox.local/behandler`, jeder Angemeldete):
+   Name, wie er erscheinen soll („Dr. Hartmann"), optional die Evident-/BEMA-Behandlernummer.
+   Wer die Praxis verlässt, wird **inaktiv gesetzt** – er erscheint nicht mehr zur Auswahl, seine
+   Diktate behalten den Namen. Gelöscht wird niemand.
+6. **Eigener Name fehlt?** Zuerst in der Behandlerliste anlegen – ohne Behandler diktieren geht nur,
+   solange die Liste noch gar keinen aktiven Behandler hat. Ein Diktat ohne Behandler (auch aus der
+   Zeit vor der Behandlerliste) steht im Büro bernsteinfarben als **„Behandler fehlt"** und bekommt
+   dort mit **Behandler zuordnen** seinen Behandler – einmal zugeordnet, bleibt er.
 
 ## Mehrere Patienten hintereinander, übertragen im Büro
 
@@ -102,9 +133,13 @@ wenn man danach eine andere Nummer wählt. Hat das Büro ein Diktat inzwischen u
 dort – das iPad hängt es beim nächsten Speichern nicht zurück.
 
 **Im Büro** (Rezeptions-PC oder iPad, angemeldet): `https://medvox.local/patienten` (am iPad: ⋯ →
-Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Anzahl der Diktate,
-Uhrzeit und Zustand **offen** / **übertragen**; Diktate „ohne Patient" stehen bernsteinfarben
-ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Rechts je Diktat Text, Evident-Zeilen
+Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Behandler, Anzahl der
+Diktate, Uhrzeit und Zustand **offen** / **übertragen**; darüber der Filter **Behandler: Alle** –
+ein Tipp auf einen Namen zeigt nur dessen Patienten (eröffnet oder mitdiktiert), **Alle** wieder
+alles. Der Filter versteckt nichts dauerhaft und ändert nichts am Kopiertext; Diktate „ohne Patient" stehen bernsteinfarben
+ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Fehlt einem Diktat der Behandler, steht
+**Behandler fehlt** (links beim Patienten und rechts beim Diktat); **Behandler zuordnen** trägt ihn
+nach. Rechts je Diktat der Behandler, Text, Evident-Zeilen
 und Mehrkosten mit **Text kopieren**, **Ziffern kopieren** und **Nur Ziffern** – dasselbe Format
 wie am iPad. Danach **Als übertragen markieren**: Text und Ziffern sind sofort vom Praxis-Mac
 gelöscht, in der Liste bleibt nur „übertragen" mit Uhrzeit. Kam inzwischen am iPad etwas dazu,
@@ -118,7 +153,8 @@ bis sich die Adresse des Macs ändert.
 **Aufbewahrung:** ein Diktat bleibt, bis es als übertragen markiert ist – **höchstens 24 Stunden**,
 dann löscht der Praxis-Mac es von selbst, auch wenn es vergessen wurde. Was am Abend nicht
 übertragen ist, ist am nächsten Tag weg. Der Kurzcode („An Rezeption") funktioniert daneben wie
-bisher für die sofortige Übergabe (15 Minuten). Sobald die Rezeption den Kurzcode abruft, gilt
+bisher für die sofortige Übergabe (15 Minuten); die Rezeption sieht dabei, von welchem Behandler das
+Diktat ist. Sobald die Rezeption den Kurzcode abruft, gilt
 das gespeicherte Diktat als übertragen: es verschwindet aus der Patientenliste (beim Patienten
 steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht. Wurde das Diktat nach dem
 Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den Stand des Codes ab;

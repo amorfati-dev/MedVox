@@ -17,7 +17,8 @@ export type IconName =
   | "send"
   | "spinner"
   | "plus"
-  | "user";
+  | "user"
+  | "badge";
 
 const PATHS: Record<IconName, string> = {
   mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3M8 21h8",
@@ -37,6 +38,7 @@ const PATHS: Record<IconName, string> = {
   spinner: "M12 3a9 9 0 1 0 9 9",
   plus: "M12 5v14M5 12h14",
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
+  badge: "M4 5h16v14H4zM9 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16.5a3 3 0 0 1 6 0M14.5 10h3.5M14.5 13.5h3",
 };
 
 type Props = { name: IconName; className?: string };
