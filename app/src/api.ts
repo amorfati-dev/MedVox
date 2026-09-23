@@ -91,6 +91,7 @@ export class ApiError extends Error {
 const MESSAGES: Record<number, string> = {
   401: "Nicht angemeldet.",
   404: "Nicht gefunden.",
+  410: "Dieses Diktat wurde bereits übertragen.",
   413: "Aufnahme zu lang (maximal 60 Sekunden).",
   415: "Audioformat wird vom Server nicht unterstützt.",
   429: "Zu viele Abfragen – bitte kurz warten.",
@@ -141,12 +142,17 @@ export const api = {
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
-  createTransfer: (transcript: string, codes: string[], details?: TransferDetails) =>
-    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes, ...details })),
+  // `dictationId`: gespeichertes Diktat; der Abruf des Kurzcodes schließt es wie „übertragen“ im Büro.
+  createTransfer: (transcript: string, codes: string[], details?: TransferDetails, dictationId?: string | null) =>
+    request<TransferCreated>(
+      "/api/v1/transfer",
+      json("POST", { transcript, codes, ...details, ...(dictationId ? { dictation_id: dictationId } : {}) }),
+    ),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
 
-  // Diktate je Patient: am Stuhl speichern, im Büro übertragen (höchstens 24 Stunden).
+  // Diktate je Patient: am Stuhl speichern, im Büro übertragen (höchstens 24 Stunden). Ein schon
+// übertragenes, gelöschtes oder abgelaufenes Diktat lehnt der Server mit 410 ab.
   saveDictation: (id: string, body: DictationBody) =>
     request<StoredDictation>(`/api/v1/dictations/${encodeURIComponent(id)}`, json("PUT", body)),
   deleteDictation: (id: string) =>

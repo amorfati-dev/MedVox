@@ -10,6 +10,10 @@ bleiben, bis sie als übertragen markiert sind, höchstens 24 Stunden nach ihrer
 (`medvox/patients.py`, fest, nicht per Umgebung verlängerbar). Abgelaufene Kurzcodes,
 Sitzungen und Patientendiktate werden bei jedem Zugriff, beim Start und alle 5 Minuten aus
 der SQLite-Datei entfernt (`secure_delete`, gelöschte Zeilen werden überschrieben).
+Ein übertragenes, gelöschtes oder abgelaufenes Diktat hinterlässt einen Grabstein
+(`dictation_tombstones`: nur Diktat-ID und Zeitpunkt, kein Inhalt, keine Patientennummer), der
+sieben Tage bleibt; solange lehnt `PUT /dictations/{id}` diese ID mit 410 ab, damit ein iPad ein
+schon übertragenes Diktat nie wieder offen anlegt.
 
 ## Voraussetzungen
 
@@ -57,9 +61,9 @@ kommt, sonst direkt vom Peer.
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
 | `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB), optional `patient_type` = `kasse` (Standard) \| `privat` | `{"transcript", "patient_type", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `patient_type` der Typ, für den die Vorschläge gelten; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative, kind, evident` (Evident-Kurzform aus dem Katalog oder `null`) mit `kind` = `bema` \| `goz` (Privatleistung, auch GOÄ) \| `zuzahlung` (Privatleistung beim Kassenpatienten); siehe „Regel-Extraktor“. Unbekannter `patient_type`: 422 |
-| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}]}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil) | `{"code": "ABC123", "expires_at": iso8601}` |
+| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}], "dictation_id"?: str}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil); `dictation_id` verknüpft den Code mit dem gespeicherten Diktat (siehe unten) | `{"code": "ABC123", "expires_at": iso8601}` |
 | `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at", "patient_type", "positions"}` (ältere Einträge: `null`/`[]`) oder 404; 429 bei > 10 Abrufen/min/IP |
-| `PUT /dictations/{id}` | ja | JSON `{"patient"?: "4711", "transcript", "patient_type", "codes", "suggestions", "planned", "notes", "deselected", "adopted"}` – Stand eines Diktats, `id` vom iPad (8–64 Zeichen `A-Za-z0-9-`); `patient` = Evident-Nummer (1–12 Ziffern, Patient wird bei Bedarf angelegt), ohne `patient` bleibt die Zuordnung (neu: „ohne Patient“) | Diktat mit `id, patient, patient_id, revision, created_at, updated_at` und den Feldern der Anfrage; jede Änderung erhöht `revision`, die 24 Stunden zählen ab der ersten Speicherung |
+| `PUT /dictations/{id}` | ja | JSON `{"patient"?: "4711", "transcript", "patient_type", "codes", "suggestions", "planned", "notes", "deselected", "adopted"}` – Stand eines Diktats, `id` vom iPad (8–64 Zeichen `A-Za-z0-9-`); `patient` = Evident-Nummer (1–12 Ziffern, Patient wird bei Bedarf angelegt), ohne `patient` bleibt die Zuordnung (neu: „ohne Patient“); ein schon zugeordnetes Diktat wechselt durch `patient` nie den Patienten (Umhängen nur im Büro) | Diktat mit `id, patient, patient_id, revision, created_at, updated_at` und den Feldern der Anfrage; jede Änderung erhöht `revision`, die 24 Stunden zählen ab der ersten Speicherung; 410, wenn das Diktat schon übertragen, gelöscht oder abgelaufen ist |
 | `DELETE /dictations/{id}` | ja | – | 204 oder 404 |
 | `POST /patients` | ja | JSON `{"number": "4711"}` | Patient `{id, number, created_at, updated_at, dictations, transferred, transferred_at}` – vorhandener mit derselben Nummer oder neu |
 | `GET /patients` | ja | – | `{"patients": [...], "unassigned": [Diktat, ...]}` – jüngstes Diktat zuerst; `dictations` offen, `transferred` schon übertragen |
@@ -73,6 +77,15 @@ Aufnahme, 401 nicht angemeldet, 413 zu groß oder zu lang, 415 falscher Typ,
 500 ffmpeg fehlt oder Konvertierung zu langsam, 502 whisper-server meldet Fehler,
 503 whisper-server nicht erreichbar.
 Kurzcodes bestehen aus 6 Zeichen ohne 0/O/1/I und sind innerhalb der TTL mehrfach abrufbar.
+
+Kurzcode und Patientenliste sind nie zwei Wege zu demselben Diktat: Beim Anlegen schickt das iPad
+die ID des gespeicherten Diktats als `dictation_id` mit; sie steht in der Spalte
+`transfers.dictation_id` (bestehende Datenbanken bekommen sie beim Start per `ALTER TABLE`, wie
+`patient_type` und `positions_json`). Der erste erfolgreiche Abruf `GET /transfer/{code}` schließt
+dieses Diktat wie „übertragen“ im Büro: Inhalt gelöscht, Grabstein gesetzt, beim Patienten Zeit
+und Anzahl vermerkt – auch wenn das iPad es noch gar nicht gespeichert hatte (sein späteres
+Speichern bekommt dann 410). Wird der Code nie abgerufen, bleibt das Diktat offen und läuft
+normal ab. Ohne `dictation_id` (ältere iPad-Versionen) bleibt alles wie bisher.
 
 ## Module
 

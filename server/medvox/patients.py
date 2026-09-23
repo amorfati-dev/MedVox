@@ -10,7 +10,9 @@ und wird spätestens 24 Stunden nach seiner Anlage gelöscht – was zuerst eint
 löscht den Inhalt sofort; die Patientenzeile bleibt nur mit Nummer, Zeiten und Anzahl stehen,
 damit die Liste den Zustand zeigt, und läuft mit ihrem jüngsten Diktat ab. Aufgeräumt wird wie
 beim Kurzcode-Transfer bei jedem Schreiben und Lesen (`db.purge_expired`), beim Start und
-periodisch (`main.py`).
+periodisch (`main.py`). Ein übertragenes, gelöschtes oder abgelaufenes Diktat hinterlässt einen
+Grabstein ohne Inhalt (`db.bury`); Speichern unter dieser ID wird abgelehnt (`DictationClosed`),
+damit es nie wieder offen erscheint und nicht zweimal nach Evident geht.
 """
 
 from __future__ import annotations
@@ -24,6 +26,10 @@ from pathlib import Path
 from medvox import db
 
 RETENTION_S = 24 * 3600  # harte Grenze, nicht per Umgebung verlängerbar
+
+
+class DictationClosed(Exception):
+    """Das Diktat ist schon übertragen, gelöscht oder abgelaufen und darf nicht neu entstehen."""
 
 
 @dataclass(frozen=True)
@@ -141,16 +147,21 @@ def save_dictation(
 ) -> Dictation:
     """Legt das Diktat an oder ersetzt seinen Inhalt (iPad speichert nach jeder Änderung).
 
-    Mit `number` gehört es danach diesem Patienten (angelegt, falls nötig); ohne bleibt die
-    bisherige Zuordnung – ein neues Diktat liegt dann „ohne Patient“ bereit. Die 24 Stunden
-    zählen ab der ersten Speicherung und verlängern sich durch Änderungen nicht.
+    `number` ordnet nur ein neues Diktat oder eines „ohne Patient“ zu (Patient angelegt, falls
+    nötig); ein schon zugeordnetes bleibt bei seinem Patienten, auch wenn das Büro es umgehängt
+    hat. Die 24 Stunden zählen ab der ersten Speicherung und verlängern sich durch Änderungen
+    nicht. Hat die ID einen Grabstein, gibt es `DictationClosed`.
     """
     now = time.time() if now is None else now
     payload = json.dumps(data, ensure_ascii=False)
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
+        if conn.execute("SELECT 1 FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone():
+            raise DictationClosed(dictation_id)
         row = conn.execute("SELECT patient_id, expires_at FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
-        patient_id = _patient_id(conn, number, now) if number else (row["patient_id"] if row else None)
+        patient_id = row["patient_id"] if row else None
+        if patient_id is None and number:
+            patient_id = _patient_id(conn, number, now)
         if row is None:
             expires = now + RETENTION_S
             conn.execute(
@@ -192,7 +203,7 @@ def delete_dictation(db_path: Path, dictation_id: str, now: float | None = None)
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
-        return conn.execute("DELETE FROM dictations WHERE id = ?", (dictation_id,)).rowcount > 0
+        return db.bury(conn, "id = ?", (dictation_id,), now) > 0
 
 
 def mark_transferred(
@@ -210,7 +221,8 @@ def mark_transferred(
             return None
         rows = conn.execute("SELECT id, revision FROM dictations WHERE patient_id = ?", (patient_id,)).fetchall()
         done = [r["id"] for r in rows if seen.get(r["id"]) == r["revision"]]
-        conn.executemany("DELETE FROM dictations WHERE id = ?", [(d,) for d in done])
+        for d in done:
+            db.bury(conn, "id = ?", (d,), now)
         if done or not rows:
             conn.execute(
                 "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + ? WHERE id = ?",
@@ -224,5 +236,21 @@ def delete_patient(db_path: Path, patient_id: int, now: float | None = None) -> 
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
-        conn.execute("DELETE FROM dictations WHERE patient_id = ?", (patient_id,))
+        db.bury(conn, "patient_id = ?", (patient_id,), now)
         return conn.execute("DELETE FROM patients WHERE id = ?", (patient_id,)).rowcount > 0
+
+
+def close_handed_over(conn: sqlite3.Connection, dictation_id: str, now: float) -> None:
+    """Kurzcode abgerufen: das verknüpfte Diktat gilt als übertragen wie im Büro.
+
+    Der Grabstein entsteht auch, wenn das iPad das Diktat noch gar nicht gespeichert hat – sein
+    Speichern wird dann abgelehnt, statt das Diktat ein zweites Mal offen anzulegen.
+    """
+    row = conn.execute("SELECT patient_id FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+    db.bury(conn, "id = ?", (dictation_id,), now)
+    conn.execute("INSERT OR IGNORE INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
+    if row is not None and row["patient_id"] is not None:
+        conn.execute(
+            "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",
+            (now, row["patient_id"]),
+        )

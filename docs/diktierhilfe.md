@@ -89,10 +89,17 @@ Von Zimmer zu Zimmer diktieren und erst im Büro nach Evident übertragen:
 3. **Noch ein Diktat für denselben Patienten:** **Neu** – es kommt als weiteres Diktat dazu.
 4. **Nächster Patient:** der Knopf leert den Bildschirm und fragt gleich die nächste Nummer ab.
 5. **Nummer vergessen?** Das Diktat ist trotzdem gespeichert, als „ohne Patient". Nummer oben
-   nachtragen, solange es noch am Bildschirm steht – oder später im Büro zuordnen.
+   nachtragen, solange es noch am Bildschirm steht – oder später im Büro zuordnen. Beim
+   Nachtragen fragt MedVox immer nach, mit der Nummer in der Frage: **„Ja, Patient 4711
+   zuordnen"** oder **„Nein, neues Diktat für 4711"**. „Nein" lässt das Diktat „ohne Patient"
+   gespeichert und leert den Bildschirm für den neuen Patienten. So landet ein Diktat nie
+   unbemerkt beim falschen Patienten – etwa wenn man im nächsten Zimmer auf „Ohne Patient"
+   statt auf **Nächster Patient** tippt. Dasselbe gilt beim Antippen eines offenen Patienten.
 
-Während ein Diktat mit Patient läuft (Aufnahme, Senden, unterbrochen), ist der Wechsel gesperrt;
-ein fertiges Diktat bleibt beim bisherigen Patienten, wenn man danach eine andere Nummer wählt.
+Während ein Diktat läuft (Aufnahme, Senden, unterbrochen) und schon einem Patienten gehört oder
+ein Ergebnis hat, ist der Wechsel gesperrt; ein fertiges Diktat bleibt beim bisherigen Patienten,
+wenn man danach eine andere Nummer wählt. Hat das Büro ein Diktat inzwischen umgehängt, bleibt es
+dort – das iPad hängt es beim nächsten Speichern nicht zurück.
 
 **Im Büro** (Rezeptions-PC oder iPad, angemeldet): `https://<LAN-IP>/patienten` (am iPad: ⋯ →
 Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Anzahl der Diktate,
@@ -106,7 +113,14 @@ bleibt das offen und wird gemeldet.
 **Aufbewahrung:** ein Diktat bleibt, bis es als übertragen markiert ist – **höchstens 24 Stunden**,
 dann löscht der Praxis-Mac es von selbst, auch wenn es vergessen wurde. Was am Abend nicht
 übertragen ist, ist am nächsten Tag weg. Der Kurzcode („An Rezeption") funktioniert daneben wie
-bisher für die sofortige Übergabe (15 Minuten).
+bisher für die sofortige Übergabe (15 Minuten). Sobald die Rezeption den Kurzcode abruft, gilt
+das gespeicherte Diktat als übertragen: es verschwindet aus der Patientenliste (beim Patienten
+steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht.
+
+**„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
+das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann
+nicht mehr gespeichert und nicht wieder angelegt; „An Rezeption" ist gesperrt. **Neues Diktat
+beginnen** (oder **Neu** / **Nächster Patient**) – nichts anderes ist nötig.
 
 ## „Ziffern kopieren" für Evident
 

@@ -32,6 +32,8 @@ class TransferCreate(BaseModel):
     codes: list[str] = Field(default_factory=list, max_length=100)
     patient_type: Literal["kasse", "privat"] | None = None  # ältere iPad-Versionen senden nichts
     positions: list[TransferPosition] = Field(default_factory=list, max_length=200)
+    # gespeichertes Diktat (PUT /dictations/{id}), das der Abruf als übertragen schließt
+    dictation_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9-]{8,64}$")
 
 
 class TransferCreated(BaseModel):
@@ -57,6 +59,7 @@ def create(body: TransferCreate, request: Request) -> TransferCreated:
         settings.transfer_ttl_s,
         body.patient_type,
         [p.model_dump() for p in body.positions],
+        body.dictation_id,
     )
     log.info("Transfer angelegt (%d Zeichen, %d Ziffern)", len(body.transcript), len(body.codes))
     return TransferCreated(code=entry.code, expires_at=transfer.iso(entry.expires_at))

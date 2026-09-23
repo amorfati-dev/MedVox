@@ -25,6 +25,7 @@ NUMBER_PATTERN = r"^[0-9]{1,12}$"  # Evident-Patientennummer, nur Ziffern
 DictationId = Annotated[str, Path(pattern=r"^[A-Za-z0-9-]{8,64}$")]
 Text = Annotated[str, Field(max_length=2_000)]
 Code = Annotated[str, Field(max_length=64)]
+CLOSED = "Dieses Diktat wurde bereits übertragen (oder ist gelöscht bzw. älter als 24 Stunden) – bitte ein neues Diktat beginnen."
 
 
 class PatientCreate(BaseModel):
@@ -153,9 +154,12 @@ def delete(patient_id: int, request: Request) -> Response:
 
 @router.put("/dictations/{dictation_id}", response_model=DictationOut)
 def save(dictation_id: DictationId, body: DictationIn, request: Request) -> DictationOut:
-    """Speichert den Stand eines Diktats (anlegen oder ersetzen); mit `patient` beim Patienten."""
+    """Speichert den Stand eines Diktats (anlegen oder ersetzen); 410, wenn es schon übertragen ist."""
     data = body.model_dump(exclude={"patient"})
-    saved = patients.save_dictation(_db(request), dictation_id, data, body.patient)
+    try:
+        saved = patients.save_dictation(_db(request), dictation_id, data, body.patient)
+    except patients.DictationClosed:
+        raise HTTPException(status_code=410, detail=CLOSED) from None
     log.info("Diktat gespeichert (%d Zeichen, %d Ziffern)", len(body.transcript), len(body.codes))
     return _dictation_out(saved)
 

@@ -4,7 +4,10 @@ Dazu, rein informativ für die Rezeption: der Patiententyp und je Position Zahn,
 (bema, goz, zuzahlung, kassenanteil). Kopiert wird weiterhin nur `codes` (Evident-Zeilen).
 
 Sechsstellige Codes aus einem verwechslungsfreien Alphabet (ohne 0/O/1/I),
-TTL 15 Minuten, innerhalb der TTL mehrfach abrufbar. Abgelaufene Einträge
+TTL 15 Minuten, innerhalb der TTL mehrfach abrufbar. Nennt das iPad beim Anlegen die ID des
+gespeicherten Diktats (`dictation_id`), schließt der erste Abruf dieses Diktat wie „übertragen“
+im Büro (`patients.close_handed_over`) – Kurzcode und Patientenliste sind nie zwei Wege zu
+demselben Diktat. Abgelaufene Einträge
 werden bei jedem Schreiben und Lesen entfernt; zusätzlich räumt `main.py`
 beim Start und periodisch auf (WP-11).
 """
@@ -18,7 +21,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
-from medvox import db
+from medvox import db, patients
 
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 CODE_LENGTH = 6
@@ -50,6 +53,7 @@ def create_transfer(
     ttl_s: int,
     patient_type: str | None = None,
     positions: list[dict] | None = None,
+    dictation_id: str | None = None,
 ) -> Transfer:
     """Speichert einen Eintrag unter einem neuen, noch unbenutzten Code."""
     positions = list(positions or [])
@@ -63,20 +67,22 @@ def create_transfer(
                 break
         conn.execute(
             "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at,"
-            " patient_type, positions_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions)),
+            " patient_type, positions_json, dictation_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions), dictation_id),
         )
     return Transfer(code, transcript, list(codes), now, now + ttl_s, patient_type, positions)
 
 
 def get_transfer(db_path: Path, code: str) -> Transfer | None:
-    """Liefert den Eintrag, solange er nicht abgelaufen ist; sonst None."""
+    """Liefert den Eintrag, solange er nicht abgelaufen ist; sonst None. Schließt das verknüpfte Diktat."""
     now = time.time()
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
         row = conn.execute(
             "SELECT * FROM transfers WHERE code = ?", (code.strip().upper(),)
         ).fetchone()
+        if row is not None and row["dictation_id"]:
+            patients.close_handed_over(conn, row["dictation_id"], now)
     if row is None:
         return None
     return Transfer(

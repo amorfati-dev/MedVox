@@ -48,6 +48,24 @@ export function pickable(patients: PatientSummary[]): PatientSummary[] {
   return patients.filter((p) => patientState(p) !== "übertragen");
 }
 
+// Was eine am iPad gewählte Nummer mit dem Diktat auf dem Bildschirm macht. `onScreen`: keins
+// (noch kein Ergebnis), offen (Ergebnis, wird gespeichert) oder übertragen (vom Server abgelehnt).
+// bleiben: nichts ändert sich; wechseln: nur der aktive Patient wechselt; neu: Bildschirm leeren,
+// das bisherige Diktat bleibt, wo es ist; fragen: das Diktat „ohne Patient“ nie still zuordnen,
+// sondern erst nachfragen, ob es dieser Patient ist.
+export type PickAction = "bleiben" | "wechseln" | "neu" | "fragen";
+
+export function pickAction(
+  current: string | null,
+  next: string | null,
+  onScreen: "keins" | "offen" | "übertragen",
+): PickAction {
+  if (next === current) return "bleiben";
+  if (onScreen === "keins") return "wechseln";
+  if (current !== null || next === null || onScreen === "übertragen") return "neu";
+  return "fragen";
+}
+
 // Uhrzeit „10:42“ aus einem ISO-Zeitstempel des Servers.
 export function clock(iso: string | null): string {
   if (!iso) return "";

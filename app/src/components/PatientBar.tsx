@@ -8,7 +8,7 @@ import { Icon } from "./Icon";
 type Props = {
   number: string | null;
   onOpen: () => void;
-  locked: boolean; // laufendes Diktat mit Patient: Wechsel erst danach
+  locked: boolean; // laufendes Diktat mit Patient oder Ergebnis: Wechsel erst danach
   save: DictationSave;
 };
 
@@ -16,6 +16,7 @@ const SAVE_TEXT = {
   speichert: "Wird gespeichert …",
   gespeichert: "Gespeichert – im Büro unter „Patienten“",
   fehler: "Noch nicht gespeichert – wird wiederholt",
+  übertragen: "Bereits übertragen – wird nicht mehr gespeichert",
 } as const;
 
 export function PatientBar({ number, onOpen, locked, save }: Props) {

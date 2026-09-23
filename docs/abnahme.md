@@ -130,7 +130,10 @@ Beobachtet: ______________________________________________________
 4. [ ] **Nächster Patient** → Tastenfeld erscheint; 4711 steht rechts unter „Offene Patienten".
        Zweite Nummer (z. B. 4712) eingeben, diktieren.
 5. [ ] **Nächster Patient** → „Ohne Patient weiter" wählen, diktieren → „Gespeichert ohne Patient".
-       Danach oben die Nummer 4713 eintragen → das Diktat gehört jetzt 4713.
+       Danach oben die Nummer 4713 eintragen → Nachfrage „Das Diktat auf dem Bildschirm Patient 4713
+       zuordnen?" → **Ja, Patient 4713 zuordnen** → das Diktat gehört jetzt 4713.
+       Gegenprobe: noch ein Diktat ohne Nummer, oben 4714 eintragen → **Nein, neues Diktat für 4714**
+       → Bildschirm leer, 4714 oben; das Diktat bleibt „ohne Patient" (Schritt 7).
 6. [ ] Noch ein Diktat ohne Nummer aufnehmen und **nicht** zuordnen.
 7. [ ] Rezeptions-PC: `https://<LAN-IP>/patienten` (mit dem Praxis-Passwort anmelden) → oben
        „Ohne Patient", darunter 4713, 4712, 4711 (jüngstes zuerst), 4711 mit „2 Diktate", alle „offen".
@@ -143,7 +146,11 @@ Beobachtet: ______________________________________________________
 11. [ ] Am nächsten Morgen: die gestern nicht übertragenen Patienten sind aus der Liste
        verschwunden (spätestens 24 Stunden nach dem Diktat), Gegenprobe (0 = in Ordnung):
        `sqlite3 ~/Library/Application\ Support/MedVox/medvox.db "select count(*) from dictations where created_at < cast(strftime('%s','now') as real) - 86400"`
-12. [ ] Der Kurzcode („An Rezeption", Prüfung 3) funktioniert unverändert daneben.
+12. [ ] Der Kurzcode („An Rezeption", Prüfung 3) funktioniert unverändert daneben. Diktat für 4715
+       aufnehmen, **An Rezeption**, Code am Rezeptions-PC abrufen → in `/patienten` steht 4715 als
+       „übertragen", nicht als „offen".
+13. [ ] Danach am iPad beim selben Diktat eine Ziffer abwählen → „Dieses Diktat wurde bereits
+       übertragen"; in `/patienten` erscheint es **nicht** wieder als offen.
 
 Beobachtet: ______________________________________________________
 

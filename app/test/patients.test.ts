@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { evidentText, type PatientSummary, type StoredDictation, type TranscribeResult } from "../src/api.ts";
-import { dictationCopy, normalizeNumber, patientState, pickable, preview } from "../src/patients.ts";
+import { dictationCopy, normalizeNumber, patientState, pickable, pickAction, preview } from "../src/patients.ts";
 import { buildGroups, copyLines, optionKey, positionsOf } from "../src/result.ts";
 
 type Golden = Record<string, Record<string, { evident: string[]; numbers: string[] }>>;
@@ -99,4 +99,20 @@ test("Patientennummer: nur Ziffern, höchstens 12", () => {
 test("Vorschau des Transkripts", () => {
   assert.equal(preview("  Zahn 36   mod "), "Zahn 36 mod");
   assert.equal(preview("a".repeat(80), 10), `${"a".repeat(9)} …`);
+});
+
+test("Nummer am iPad: ein Diktat ohne Patient wird nie still zugeordnet", () => {
+  // Diktat ohne Nummer auf dem Bildschirm, danach Patient 4711 eingetippt oder aus der Liste gewählt.
+  assert.equal(pickAction(null, "4711", "offen"), "fragen");
+  // Kein Ergebnis am Bildschirm: nur der aktive Patient wechselt.
+  assert.equal(pickAction(null, "4711", "keins"), "wechseln");
+  assert.equal(pickAction("4711", "4712", "keins"), "wechseln");
+  // Das Diktat gehört schon einem Patienten: es bleibt dort, der Bildschirm wird frei.
+  assert.equal(pickAction("4711", "4712", "offen"), "neu");
+  assert.equal(pickAction("4711", null, "offen"), "neu");
+  // Schon übertragen: nichts mehr zuzuordnen, nur neu beginnen.
+  assert.equal(pickAction(null, "4711", "übertragen"), "neu");
+  // Dieselbe Nummer noch einmal: nichts ändert sich.
+  assert.equal(pickAction("4711", "4711", "offen"), "bleiben");
+  assert.equal(pickAction(null, null, "offen"), "bleiben");
 });

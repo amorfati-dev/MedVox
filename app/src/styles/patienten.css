@@ -120,6 +120,14 @@
 .picker-head h2 {
   margin: 0;
 }
+.assign {
+  width: min(560px, 100%);
+}
+.assign-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
 .picker-body {
   display: grid;
   gap: 20px;

@@ -3,9 +3,11 @@
 // Leiste Text · Ziffern · An Rezeption. Im Querformat (≥ 900 px) zwei Spalten, im Hochformat
 // untereinander (styles/diktat.css). Die Aufnahme- und Warteschlangenlogik liegt in useDictation.
 // Jedes Diktat wird beim aktiven Patienten (Evident-Nummer) auf dem Praxis-Mac gespeichert
-// (useDictationSave), ohne Nummer als „ohne Patient“; im Büro unter /patienten übertragen.
+// (useDictationSave), ohne Nummer als „ohne Patient“; im Büro unter /patienten übertragen. Eine
+// später gewählte Nummer ordnet es erst nach Nachfrage zu (AssignDialog).
 import { useMemo, useState } from "react";
 import { api, ApiError, evidentText, type DictationBody } from "../api";
+import { AssignDialog } from "../components/AssignDialog";
 import { Controls } from "../components/Controls";
 import { CopyButton } from "../components/CopyButton";
 import { CopyPreview } from "../components/CopyPreview";
@@ -23,6 +25,7 @@ import { useDictationSave } from "../hooks/useDictationSave";
 import { usePatientType } from "../hooks/usePatientType";
 import { useSelection } from "../hooks/useSelection";
 import { useTransfer } from "../hooks/useTransfer";
+import { pickAction } from "../patients";
 import { countGroups, positionsOf, uniquePlanned } from "../result";
 import { formatSeconds, plural, uiState, type UiState } from "../status";
 import { Login } from "./Login";
@@ -57,6 +60,7 @@ export function Diktat({ onLogout }: Props) {
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const [patient, setPatient] = useState<string | null>(null); // Evident-Nummer, null = ohne Patient
   const [picking, setPicking] = useState(false);
+  const [asking, setAsking] = useState<string | null>(null); // Nummer, für die die Zuordnung erfragt wird
   const hasResult = d.transcript !== "" || d.suggestions.length > 0 || d.planned.length > 0;
   const body = useMemo<DictationBody | null>(
     () =>
@@ -76,6 +80,7 @@ export function Diktat({ onLogout }: Props) {
     [hasResult, patient, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted],
   );
   const save = useDictationSave(body, d.sessionExpired);
+  const closed = save.state === "übertragen";
 
   const logout = async () => {
     setLogoutError(null);
@@ -118,13 +123,23 @@ export function Diktat({ onLogout }: Props) {
     setPicking(true);
   };
 
-  // Ohne Patient aufgenommen: die Nummer ordnet das Diktat zu. Gehört es schon einem anderen
-  // Patienten, bleibt es dort gespeichert und der Bildschirm wird für den neuen Patienten frei.
+  // Gehört das Diktat schon einem Patienten, bleibt es dort gespeichert und der Bildschirm wird frei;
+  // ein Diktat „ohne Patient“ bekommt die Nummer nur nach Nachfrage.
   const choosePatient = (number: string | null) => {
     setPicking(false);
-    if (number === patient) return;
-    if (hasResult && patient !== null) clear();
+    const action = pickAction(patient, number, !hasResult ? "keins" : closed ? "übertragen" : "offen");
+    if (action === "bleiben") return;
+    if (action === "fragen" && number !== null) return setAsking(number);
+    if (action === "neu") clear();
     setPatient(number);
+  };
+
+  // Antwort auf die Nachfrage: zuordnen oder das Diktat „ohne Patient“ lassen und neu beginnen.
+  const answer = (assign: boolean) => {
+    if (asking === null) return;
+    if (!assign) clear();
+    setPatient(asking);
+    setAsking(null);
   };
 
   // Sitzung abgelaufen: Anmeldung anzeigen, Diktat und offene Abschnitte bleiben im Speicher.
@@ -155,7 +170,7 @@ export function Diktat({ onLogout }: Props) {
           <ThemeSwitch />
           <MoreMenu onLogout={logout} />
         </header>
-        <PatientBar number={patient} onOpen={() => setPicking(true)} locked={running && patient !== null} save={save} />
+        <PatientBar number={patient} onOpen={() => setPicking(true)} locked={running && (patient !== null || hasResult)} save={save} />
         <PatientSwitch value={patientType} onChange={setPatientType} disabled={running} />
         {running && (
           <p className="switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
@@ -189,6 +204,14 @@ export function Diktat({ onLogout }: Props) {
 
       <main className="result">
         {transfer.result && <TransferBoard result={transfer.result} />}
+        {closed && (
+          <div className="notice" role="alert">
+            <p>Dieses Diktat wurde bereits übertragen – es wird nicht mehr gespeichert.</p>
+            <button type="button" className="btn btn-primary" onClick={clear}>
+              Neues Diktat beginnen
+            </button>
+          </div>
+        )}
         {hasResult ? (
           <ResultHead counts={counts} resultType={d.resultType} numbersText={evidentText(sel.numbers)} />
         ) : (
@@ -230,8 +253,8 @@ export function Diktat({ onLogout }: Props) {
           <button
             type="button"
             className="btn btn-primary"
-            disabled={transfer.busy || !d.transcript}
-            onClick={() => void transfer.send()}
+            disabled={transfer.busy || !d.transcript || closed}
+            onClick={() => void transfer.send(save.id())}
           >
             <Icon name="send" />
             {transfer.busy ? "Sende …" : "An Rezeption"}
@@ -246,6 +269,9 @@ export function Diktat({ onLogout }: Props) {
           onClose={() => setPicking(false)}
           allowNone
         />
+      )}
+      {asking !== null && (
+        <AssignDialog number={asking} onAssign={() => answer(true)} onNew={() => answer(false)} onCancel={() => setAsking(null)} />
       )}
     </div>
   );

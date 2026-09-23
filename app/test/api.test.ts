@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { codeOf, evidentLines, evidentOf, evidentText, isToothless, kindsOf, normalizeCode, parsePatientType, type Suggestion } from "../src/api.ts";
+import { api, codeOf, evidentLines, evidentOf, evidentText, isToothless, kindsOf, normalizeCode, parsePatientType, type Suggestion } from "../src/api.ts";
 
 test("normalizeCode: Großschreibung, nur erlaubtes Alphabet, 6 Zeichen", () => {
   assert.equal(normalizeCode("abc234"), "ABC234");
@@ -121,4 +121,18 @@ test("parsePatientType: unbekannte Werte gelten als Kasse", () => {
   assert.equal(parsePatientType("kasse"), "kasse");
   assert.equal(parsePatientType(null), "kasse");
   assert.equal(parsePatientType("PRIVAT"), "kasse");
+});
+
+test("createTransfer: nennt das gespeicherte Diktat, ohne ID wie bisher", async (t) => {
+  const bodies: unknown[] = [];
+  t.mock.method(globalThis, "fetch", async (_url: string, init: RequestInit) => {
+    bodies.push(JSON.parse(String(init.body)));
+    return new Response(JSON.stringify({ code: "ABCDEF", expires_at: "" }), { status: 200 });
+  });
+  await api.createTransfer("Zahn 36", ["36,13c"], undefined, "diktat-0001");
+  await api.createTransfer("Zahn 36", ["36,13c"], undefined, null);
+  assert.deepEqual(bodies, [
+    { transcript: "Zahn 36", codes: ["36,13c"], dictation_id: "diktat-0001" },
+    { transcript: "Zahn 36", codes: ["36,13c"] },
+  ]);
 });
