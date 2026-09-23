@@ -13,7 +13,7 @@ test-integration: sync
 	uv run pytest -m integration -s
 
 dev: sync
-	uv run uvicorn medvox.main:app --host 127.0.0.1 --port 8000 --reload
+	uv run uvicorn medvox.main:app --host 127.0.0.1 --port 8000 --reload --timeout-graceful-shutdown 3
 
 # Fragt ein Passwort ab und gibt den Wert für MEDVOX_PASSWORD_HASH aus.
 set-password: sync

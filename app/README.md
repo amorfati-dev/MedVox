@@ -7,7 +7,7 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 | Pfad | Zweck |
 |---|---|
 | `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), „Rückgängig“ |
-| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt); am iPad korrigierte Diktate mit „am iPad korrigiert“ und aufklappbarem Original (nur lesen) |
+| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), neue Diktate erscheinen sofort (Live-Strom, `live.ts`; ohne Strom Abgleich alle 30 s, Anzeige „Live“/„Abgleich alle 30 s“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt); am iPad korrigierte Diktate mit „am iPad korrigiert“ und aufklappbarem Original (nur lesen) |
 | `/behandler` | Behandlerliste (mit Anmeldung): Name, optionale Behandlernummer, aktiv/inaktiv – nur Zuordnung, keine Rechte |
 | `/transfer` | Rezeption: Kurzcode eingeben (oder per QR-Link `?code=…`), Behandler des Diktats sehen, Text/Ziffern/beides kopieren – ohne Anmeldung |
 | `/check` | Gerätetest: HTTPS, MediaRecorder-Formate, Mikrofon, Server-Health |
@@ -74,6 +74,7 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
 6. Patient: oben links antippen, Nummer eingeben (oder einen offenen Patienten antippen); nach dem Diktat
    steht darunter „Gespeichert“. Ohne Nummer diktiert: „Gespeichert ohne Patient“, Nummer oben nachtragen.
    Am PC `https://medvox.local/patienten` öffnen: der Patient steht mit Anzahl und Uhrzeit oben in der Liste.
+   Bleibt die Seite offen (oben „Live“), erscheint das nächste Diktat dort ohne Neuladen in unter einer Sekunde.
 7. Korrektur: „Bearbeiten“ am Transkript, ein Wort ändern (z. B. „zweiflächig“ → „dreiflächig“),
    „Übernehmen · Ziffern neu berechnen“: grüner Streifen „Ziffern neu berechnet: 13b → 13c an Zahn 36“ mit
    „Rückgängig“, am Transkript „korrigiert“. „Ziffer ändern oder ergänzen · Zahn 36“: 13c antippen ersetzt
