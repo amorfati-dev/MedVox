@@ -2993,7 +2993,6 @@
       "system": "GOZ",
       "area": "Chirurgie",
       "title": "Osteotomie (Zahn/Implantat)",
-      "evident": "ost1",
       "points": 350,
       "keywords": [
         "osteotomie privat",
@@ -3864,7 +3863,6 @@
       "system": "GOÄ",
       "area": "Röntgen",
       "title": "OPG (Panoramaschichtaufnahme)",
-      "evident": "opg",
       "points": 400,
       "keywords": [
         "opg privat",
@@ -3906,7 +3904,6 @@
       "system": "GOÄ",
       "area": "Röntgen",
       "title": "Panoramaaufnahme(n) eines Kiefers",
-      "evident": "pan1",
       "points": 250,
       "keywords": [
         "pan1 privat",

@@ -120,11 +120,12 @@ export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
 // Das leere Zahnfeld kennzeichnet die Zeile für die Anzeige; kopiert wird sie ohne (evidentText).
 // Mit `shortForms` (Standard) steht die Evident-Kurzform aus dem Katalog statt der Ziffer ("l1"
 // statt "41a"), sonst die Ziffer; ohne `shortForms` nur amtliche Ziffern („Nur Ziffern“).
-type Line = { tooth: number | null; counts: Map<string, number>; labels: Map<string, string> };
+type Line = { tooth: number | null; counts: Map<string, number>; forms: Map<string, string> };
 
 // `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
 // `active`: ausgewählte Chips im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
-// Mehrfach erbrachte Positionen stehen einmal mit Anzahl: "36,wf*3" (Evident nimmt keine Wiederholung).
+// Mehrfach erbrachte Positionen: "*Anzahl" ist nur hinter Kurzformen bestätigt ("36,wf*3"); amtliche
+// Ziffern werden wiederholt ("36,35,35,35"), bis der Behandler etwas anderes bestätigt.
 export function evidentLines(suggestions: Suggestion[], active: string[], shortForms = true): string[] {
   const chosen = new Set(active.map(codeOf));
   const lines = new Map<number | null, Line>();
@@ -133,18 +134,19 @@ export function evidentLines(suggestions: Suggestion[], active: string[], shortF
     const tooth = s.teeth.length > 0 ? s.teeth[0] : null;
     let line = lines.get(tooth);
     if (!line) {
-      line = { tooth, counts: new Map(), labels: new Map() };
+      line = { tooth, counts: new Map(), forms: new Map() };
       lines.set(tooth, line);
     }
     // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal (wie die Chips).
     line.counts.set(s.code, Math.max(line.counts.get(s.code) ?? 0, s.count));
-    line.labels.set(s.code, (shortForms && s.evident) || s.code);
+    if (shortForms && s.evident) line.forms.set(s.code, s.evident);
   }
   const ordered = [...lines.values()].sort((a, b) => Number(a.tooth === null) - Number(b.tooth === null));
-  return ordered.map(({ tooth, counts, labels }) => {
-    const codes = [...counts].map(([code, n]) => {
-      const label = labels.get(code) ?? code;
-      return n > 1 ? `${label}*${n}` : label;
+  return ordered.map(({ tooth, counts, forms }) => {
+    const codes = [...counts].flatMap(([code, n]) => {
+      const form = forms.get(code);
+      if (form) return [n > 1 ? `${form}*${n}` : form];
+      return Array<string>(n).fill(code);
     });
     return [tooth === null ? "" : String(tooth), ...codes].join(",");
   });

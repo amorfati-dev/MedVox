@@ -215,8 +215,8 @@ def test_markdown_review_tables(catalog):
 def test_evident_short_forms_are_only_the_confirmed_ones(catalog, extended):
     forms = {(e["system"], e["code"]): e["evident"] for e in catalog["entries"] + extended["entries"] if "evident" in e}
     assert forms == {
-        ("BEMA", "41a"): "l1", ("BEMA", "35"): "wf", ("BEMA", "47a"): "ost1", ("GOZ", "3030"): "ost1",
-        ("BEMA", "Ä935d"): "opg", ("GOÄ", "Ä5004"): "opg", ("BEMA", "Ä935a"): "pan1", ("GOÄ", "Ä5002"): "pan1",
+        ("BEMA", "41a"): "l1", ("BEMA", "35"): "wf", ("BEMA", "47a"): "ost1",
+        ("BEMA", "Ä935d"): "opg", ("BEMA", "Ä935a"): "pan1",
     }
 
 

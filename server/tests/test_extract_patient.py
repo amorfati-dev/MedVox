@@ -249,4 +249,4 @@ def test_suggestions_carry_the_evident_short_form():
         ("35", "wf", 3, [36]), ("41a", "l1", 1, [36]),
     ]
     privat = build_response("Zahn vier acht Osteotomie. OPG.", 1, 1, "privat")
-    assert {s.code: s.evident for s in privat.suggestions} == {"3030": "ost1", "Ä5004": "opg", "0500": None}
+    assert {s.code: s.evident for s in privat.suggestions} == {"3030": None, "Ä5004": None, "0500": None}
