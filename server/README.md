@@ -53,7 +53,7 @@ kommt, sonst direkt vom Peer.
 | `POST /login` | nein | JSON `{"password": "…"}` | 204 + HttpOnly-Cookie `medvox_session` (SameSite=Strict); 401 falsches Passwort, 429 bei > 10 Versuchen/min/IP, 503 kein Hash konfiguriert |
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
-| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB) | `{"transcript", "duration_s", "latency_s", "codes": []}` – `codes` füllt erst der Regel-Extraktor (WP-8) |
+| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB) | `{"transcript", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist lexikon-korrigiert; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative` (siehe „Regel-Extraktor“) |
 | `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str]}` | `{"code": "ABC123", "expires_at": iso8601}` |
 | `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at"}` oder 404; 429 bei > 10 Abrufen/min/IP |
 
@@ -67,7 +67,7 @@ Kurzcodes bestehen aus 6 Zeichen ohne 0/O/1/I und sind innerhalb der TTL mehrfac
 
 `medvox/settings.py` (Umgebung), `transcribe.py` (ffmpeg → whisper, Temp-Dateien),
 `auth.py` (PBKDF2, Sitzungen), `transfer.py` (Kurzcodes), `ratelimit.py` (Client-IP, Fenster),
-`db.py` (SQLite, Aufräumen),
+`db.py` (SQLite, Aufräumen), `lexicon.py`/`normalize*.py`/`extract*.py` (Text-Pipeline),
 `routes_*.py` (HTTP-Schicht), `main.py` (App-Fabrik). Tests in `tests/`, whisper und
 ffmpeg dort per `httpx.MockTransport` bzw. Shell-Fake ersetzt.
 
@@ -93,3 +93,58 @@ sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und An
 nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste der Zahnbezüge
 (FDI-Nummer plus Flächen). Ausprobieren mit `python -m medvox.normalize --demo` oder
 `python -m medvox.normalize "Zahn drei sechs mod Karies"`.
+
+## Regel-Extraktor (WP-8)
+
+`medvox.extract.extract(text, teeth)` ist reine Rechenarbeit (kein Modell, kein I/O) über dem
+normalisierten Text und schlägt nur Ziffern aus `catalog/catalog_v1.json` vor. Module:
+`extract_catalog.py` (Katalog laden, Einheit je Kanal/Zahn/Sitzung, Privat-Gegenstücke aus dem
+Regeltext), `extract_match.py` (diktierte Ziffern „BEMA 13a“ zuerst, dann Keywords mit
+Longest-Match-wins, groß/klein- und umlautunabhängig), `extract_text.py` (Sätze, Zahngruppen,
+Plan-Marker, Verneinung, Anzahlen), `extract_build.py` (Regelfamilien), `extract_billing.py`
+(Enthaltensein, „nicht neben“, Privat-Alternativen, Zuschlag), `extract_rules.py` (die festen
+Fachtabellen zum Nachlesen).
+
+- **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 – ein Zählwort („dreiflächig“, „MOD“,
+  „BEMA 13a“) vor den am Zahn diktierten Flächen; Widerspruch wird markiert. Flächenwörter allein
+  („36 mod Karies“) lösen keine Füllung aus.
+- **Ein-/mehrwurzelig** (43/44, AIT a/b, 4050/4055) aus der FDI-Nummer. Zahnentfernung braucht ein
+  Handlungswort (Extraktion, Osteotomie, X1, Ost1); Befundwörter (retiniert, Längsfraktur) wählen nur
+  die Ziffer (48 statt 47a, 45 statt 43/44).
+- **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl („3 Kanäle“),
+  ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
+- **Geplant:** „geplant/planen, nächste Sitzung, Termin, Indikation zur, Überweisung, Wiedervorlage,
+  in 2 Wochen …“ machen den Teilsatz (mit Doppelpunkt den Rest des Satzes) zum Plan: `planned`,
+  nie in `codes`. „ohne/kein/nicht“ direkt an der Leistung verhindert den Vorschlag (Hinweis in `notes`).
+- **BEMA und GOZ gemischt:** der Versichertenstatus schränkt nichts ein. Nennt der Katalog ein
+  Privat-Gegenstück, erscheint es zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
+- **Zuschlag 0500–0530:** genau einer je Sitzung, aus der Punktzahl der höchstbewerteten erbrachten
+  chirurgischen GOZ-Leistung (auch einer Privat-Alternative, dann selbst Alternative); die
+  Begründung nennt Ziffer und Punkte. BEMA-Punkte zählen nie für GOZ-Stufen. Ist eine Punktzahl
+  unbekannt (null oder GOZ-Gegenstück nicht im Katalog, z. B. 3020 zu BEMA 45), wird keine Stufe
+  geraten, sondern ein Hinweis ausgegeben.
+
+Abnahme: die zwölf Diktate aus Anhang B (`tests/test_extract_acceptance.py`), auf Ziffernebene
+Precision 92 % (23/25), Recall 96 % (23/24). Die Erwartungen stammen vom selben Autor wie die Regeln
+und sind vom Behandler zu prüfen.
+
+### Bekannte Grenzen
+
+- Kontext außerhalb des Katalogs fehlt: „Fluoridierung“ ergibt IP4 und „Mundhygieneinstruktion“ MHU
+  auch bei PZR eines Erwachsenen (d05); Alter und PAR-Strecke werden nicht erkannt.
+- Keywords müssen in dieser Reihenfolge diktiert werden: „Spülung mit Chlorhexidin“ trifft
+  „chlorhexidin spülung“ (BEMA 105) nicht (d12) – Abhilfe über zusätzliche Katalog-Keywords.
+- Befundwörter als Keywords: „Karies profunda“ ergibt 25 (Cp), „Längsfraktur“ ergibt 45 (X3) –
+  jeweils mit Hinweis zu prüfen; „Füllung intakt“ in einem Befund würde als Füllung gelesen.
+- Zahnzuordnung: Zähne direkt hinter der Leistung, sonst die letzte Zahngruppe davor im selben Satz.
+  „36 o Karies, 37 mo Karies, Füllungen“ ordnet die Füllung nur 37 zu – Zähne direkt hinter der
+  Leistung nennen oder je Zahn einen Satz.
+- Fehlt die Flächenzahl, die Kanalzahl oder bei Entfernung/AIT der Zahn, kommt der kleinste
+  Vorschlag mit Hinweis in `decide` (die heutige Ergebnisansicht zeigt `decide` noch nicht).
+- Plan-Marker wirken nur im eigenen Teilsatz; „danach“ oder Zeitangaben ohne Marker („morgen
+  Extraktion“) gelten als erbracht. Verneinung nur direkt an der Leistung.
+- Enthaltensein ist nur für 31 in 28 und 11 in 34 hinterlegt; „nicht neben“ aus dem Katalog wird
+  markiert, nicht automatisch aufgelöst. Weitere Abrechnungsausschlüsse (Frequenzen, Halbjahr)
+  prüft der Extraktor nicht.
+- Zuschlag nur für chirurgische GOZ-Positionen im Katalog v1 (3000–3040); 4090/4130 und Implantate
+  fehlen im Katalog.
