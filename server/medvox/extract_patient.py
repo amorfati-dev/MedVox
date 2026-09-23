@@ -72,6 +72,8 @@ def co_payment_basis(catalog: Catalog, ctx: TextContext, drafts: list[Draft]) ->
                              and o.fdi == d.fdi for o in drafts):
             words = ", ".join(dict.fromkeys(ctx.original(t.hit.start, t.hit.end) for t in d.hits))
             decide = [_bema_terms(f, basis) for f in d.decide]
+            if d.surfaces is None and d.entry.family.count(d.entry.code) > 1:  # Inlay 2170: 13c oder 13d
+                decide.append("Flächenzahl nicht erkannt – 13a–d prüfen")
             share = Draft(basis, d.fdi, False, list(d.hits), d.count, d.context, decide, surfaces=d.surfaces)
             share.reason = f"Kassenanteil: Basis der Zuzahlung {d.entry.label} – wegen: {words}"
             result.append(share)

@@ -182,6 +182,20 @@ def test_inlay_basis_follows_surfaces_dictated_at_the_tooth():
     assert all(s.decide == () for s in result.suggestions)
 
 
+def test_inlay_basis_uses_surfaces_separated_from_the_tooth_by_commas():
+    # So schreibt Whisper: die Flächen stehen durch Kommas getrennt hinter der Ziffer.
+    result = run("Zahn drei sechs, GOZ 2170, mesial, okklusal, distal, bukkal.", "kasse")
+    assert billable_codes(result.suggestions) == ["13d", "2170"]
+    assert all(s.decide == () for s in result.suggestions)
+
+
+def test_inlay_basis_without_surface_count_is_flagged_not_guessed():
+    result = run("Keramikinlay drei sechs, GOZ 2170", "kasse")
+    basis, goz = [s for s in result.suggestions if not s.alternative]
+    assert (basis.system, goz.code) == ("BEMA", "2170")
+    assert "Flächenzahl nicht erkannt – 13a–d prüfen" in basis.decide
+
+
 def test_basis_decide_hint_names_bema_codes():
     result = run("Mehrschichttechnik drei sechs.", "kasse")
     basis, goz = [s for s in result.suggestions if not s.alternative]

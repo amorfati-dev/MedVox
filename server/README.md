@@ -94,7 +94,8 @@ längere Läufe nur direkt hinter "Zahn"/"Regio" ("Zahn 1 6 2 6" → 16, 26), so
 ("Sondierungstiefen 3 2 3 2 2 3"), Dosierungsschemata ("1-1-1") und Kommalisten ("1, 6, 2, 6")
 unverändert bleiben. Quadrantenangaben werden aufgelöst
 ("Oberkiefer rechts sechs" → 16), Flächen werden zu Buchstaben ("mesial okklusal distal" →
-"mod"), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
+"mod"; später im Satz folgende Flächen gehören zum Zahn davor, solange kein anderer Zahn
+dazwischen steht: "Zahn 36, GOZ 2170, mesial, okklusal" → 36 mo), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
 sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und Anzahlen ("28 Zähne")
 nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste der Zahnbezüge
 (FDI-Nummer plus Flächen). Ausprobieren mit `python -m medvox.normalize --demo` oder
@@ -134,7 +135,8 @@ Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_mat
     `kind: "zuzahlung"` und Basis und Grundlage in `reason`. Eine als GOZ diktierte Mehrkosten-Füllung oder
     ein Inlay bringt ihre BEMA-Basis nach Flächenzahl als Kassenanteil mit („adhäsive Kompositfüllung 36
     zweiflächig“ → 13b und 2080, „Keramikinlay 36 dreiflächig“ → 13c und 2170), außer die Basis ist am Zahn
-    schon erbracht. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
+    schon erbracht. Ist die Flächenzahl unbekannt und deckt die GOZ-Ziffer mehrere BEMA-Stufen ab (2170 =
+    drei- oder vierflächig), trägt die Basis „Flächenzahl nicht erkannt – 13a–d prüfen“. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
     13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Andere diktierte Privatziffern werden
     auf ihr BEMA-Paar umgestellt („Osteotomie privat“ → 47a) oder mit Hinweis in `notes` weggelassen
     (keine Kassenleistung, z. B. „Implantat entfernt“, Oberflächenanästhesie).

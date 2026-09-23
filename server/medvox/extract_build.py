@@ -42,7 +42,7 @@ class Draft:
     plan: str | None = None
     alternative_to: Draft | None = None
     reason: str = ""
-    surfaces: int | None = None  # Flächenzahl 1..4 bei Füllungen
+    surfaces: int | None = None  # diktierte Flächenzahl 1..4 bei Füllungen, None wenn nicht erkannt
 
     @property
     def key(self) -> tuple[str, str, int | None, bool]:
@@ -155,8 +155,10 @@ class Builder:
                 flag = flag or "Zahn nicht diktiert"
             spoken = [h for h in self._surface_words if tooth and tooth in h.teeth
                       and set(h.hit.keyword) == set(tooth.surfaces)]
+            known = dictated or (said and len(chosen | said) == 1)  # sonst nur aus der Ziffer abgeleitet
             for t in own + mine + spoken:
-                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0]).surfaces = min(count, 4)
+                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0]).surfaces = (
+                    min(count, 4) if known else None)
 
     # --- Zahnentfernung ----------------------------------------------------------------
 
