@@ -12,6 +12,7 @@ export type Suggestion = {
   title: string;
   kind: SuggestionKind;
   count: number;
+  points?: number | null; // BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punkte; wird nie angezeigt (Patient schaut mit)
   teeth: number[];
   reason: string;
   decide: string[];
@@ -24,11 +25,25 @@ export type TranscribeResult = {
   duration_s: number;
   latency_s: number;
   codes: string[];
-  suggestions: Suggestion[];
+  suggestions: Suggestion[]; // erbracht: Hauptvorschläge und Optionen (`alternative`)
+  planned?: Suggestion[]; // nur geplant – nie abrechnen
+  notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
+// Art einer übergebenen Position; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
+export type PositionKind = "bema" | "goz" | "zuzahlung" | "kassenanteil";
+// Übergebene Position, nur zur Anzeige an der Rezeption (kopiert wird `codes`).
+export type TransferPosition = { tooth: number | null; code: string; kind: PositionKind };
+export type TransferDetails = { patient_type: PatientType; positions: TransferPosition[] };
 // `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,l1,13a"), siehe evidentLines.
-export type TransferData = { transcript: string; codes: string[]; created_at: string };
+// `patient_type`/`positions` fehlen bei Einträgen älterer iPad-Versionen.
+export type TransferData = {
+  transcript: string;
+  codes: string[];
+  created_at: string;
+  patient_type?: PatientType | null;
+  positions?: TransferPosition[];
+};
 
 export class ApiError extends Error {
   readonly status: number; // 0 = Netzwerk/Server nicht erreichbar
@@ -45,7 +60,9 @@ const MESSAGES: Record<number, string> = {
   413: "Aufnahme zu lang (maximal 60 Sekunden).",
   415: "Audioformat wird vom Server nicht unterstützt.",
   429: "Zu viele Abfragen – bitte kurz warten.",
+  502: "Praxis-Mac antwortet nicht – MedVox-Dienst auf dem Praxis-Mac prüfen.",
   503: "Whisper nicht bereit – Transkriptionsdienst auf dem Praxis-Mac prüfen.",
+  504: "Praxis-Mac antwortet zu langsam – bitte erneut versuchen.",
 };
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -90,8 +107,8 @@ export const api = {
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
-  createTransfer: (transcript: string, codes: string[]) =>
-    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes })),
+  createTransfer: (transcript: string, codes: string[], details?: TransferDetails) =>
+    request<TransferCreated>("/api/v1/transfer", json("POST", { transcript, codes, ...details })),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),
 };
@@ -107,7 +124,7 @@ export function codeOf(copyCode: string): string {
   return copyCode.replace(/^\d+x\s+/, "");
 }
 
-// Evident-Kurzform je Ziffer der erbrachten Hauptvorschläge (für die Chips: "41a · l1").
+// Evident-Kurzform je Ziffer der erbrachten Hauptvorschläge (z. B. 41a → "l1").
 export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
   const forms: Record<string, string> = {};
   for (const s of suggestions) if (!s.alternative && s.evident) forms[s.code] = s.evident;
@@ -123,7 +140,7 @@ export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
 type Line = { tooth: number | null; counts: Map<string, number>; forms: Map<string, string> };
 
 // `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
-// `active`: ausgewählte Chips im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
+// `active`: ausgewählte Ziffern im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
 // Mehrfach erbrachte Positionen stehen einmal mit "*Anzahl", hinter Kurzform wie Ziffer ("36,wf*3",
 // "11,2410*3"); für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen.
 export function evidentLines(suggestions: Suggestion[], active: string[], shortForms = true): string[] {
@@ -137,7 +154,7 @@ export function evidentLines(suggestions: Suggestion[], active: string[], shortF
       line = { tooth, counts: new Map(), forms: new Map() };
       lines.set(tooth, line);
     }
-    // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal (wie die Chips).
+    // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal.
     line.counts.set(s.code, Math.max(line.counts.get(s.code) ?? 0, s.count));
     if (shortForms && s.evident) line.forms.set(s.code, s.evident);
   }

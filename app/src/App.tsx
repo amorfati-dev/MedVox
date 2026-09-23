@@ -41,16 +41,18 @@ export function App() {
   }
   if (session === "server-weg") {
     return (
-      <main className="page narrow">
+      <main className="page narrow ipad">
         <h1>MedVox</h1>
         <p role="alert" className="error">
           Server nicht erreichbar – WLAN und Praxis-Mac prüfen.
         </p>
-        <p>
-          <button type="button" className="btn" onClick={() => window.location.reload()}>
+        <p className="actions">
+          <button type="button" className="btn btn-primary" onClick={() => window.location.reload()}>
             Erneut versuchen
-          </button>{" "}
-          <a href="/check">Gerätetest</a>
+          </button>
+          <a className="btn" href="/check">
+            Gerätetest
+          </a>
         </p>
       </main>
     );

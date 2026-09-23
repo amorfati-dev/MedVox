@@ -1,0 +1,164 @@
+/* Statusfeld (Farbe + Symbol + Wort) und Aufnahmeknopf (Kreis ⇄ Quadrat). */
+.status {
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  min-width: 0;
+}
+.status p {
+  margin: 0;
+}
+.status-word {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-state);
+  font-weight: 800;
+  line-height: 1.15;
+}
+.status-word .icon {
+  width: 34px;
+  height: 34px;
+}
+.status-detail,
+.status-cause {
+  margin-top: 6px !important;
+  font-size: var(--fs-reason);
+}
+.status-cause {
+  font-weight: 600;
+}
+.status-senden {
+  background: var(--busy-bg);
+  border-color: var(--busy-bg);
+  color: var(--busy);
+}
+.status-fertig {
+  background: var(--ok-bg);
+  border-color: var(--ok-bg);
+  color: var(--ok);
+}
+.status-fortsetzbar {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.status-fehler {
+  background: var(--err-bg);
+  border-color: var(--err);
+  color: var(--err);
+}
+.status-aufnahme {
+  background: var(--rec);
+  border-color: var(--rec);
+  color: var(--on-rec);
+}
+.rec-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--on-rec);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.status-clock {
+  font-size: var(--fs-clock);
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px !important;
+}
+.progress,
+.level {
+  position: relative;
+  height: 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+  background: var(--on-rec-track);
+  overflow: hidden;
+}
+.level {
+  height: 8px;
+}
+.progress-fill,
+.level-fill {
+  position: relative;
+  height: 100%;
+  background: var(--on-rec);
+}
+.level-fill {
+  transition: width 60ms linear;
+}
+.progress-hatch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: repeating-linear-gradient(135deg, var(--on-rec-hatch) 0 4px, transparent 4px 9px);
+}
+
+/* Aufnahmeknopf: Kreis ⇄ Quadrat */
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.record {
+  --record-size: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: var(--record-size);
+  height: var(--record-size);
+  border-radius: 50%;
+  border: none;
+  background: var(--rec);
+  color: var(--on-rec);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--rec-shadow);
+  -webkit-tap-highlight-color: transparent;
+  transition: border-radius 150ms ease;
+}
+.record-icon {
+  width: 44px;
+  height: 44px;
+}
+.record-stopp {
+  border-radius: 28px;
+}
+.record-stopp .record-icon {
+  fill: currentColor;
+}
+.record-neu {
+  --record-size: 120px;
+}
+.record-erneut {
+  background: var(--warn);
+  color: var(--on-solid);
+  box-shadow: none;
+}
+.record:disabled {
+  background: var(--busy-bg);
+  color: var(--busy);
+  box-shadow: none;
+  cursor: default;
+}
+.btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.btn-text small {
+  font-size: var(--fs-label);
+  font-weight: 400;
+  color: var(--ink-2);
+}
+

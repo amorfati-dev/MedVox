@@ -26,7 +26,7 @@ export function Login({ onLogin, notice }: Props) {
   };
 
   return (
-    <main className="page narrow">
+    <main className="page narrow ipad">
       <h1>MedVox</h1>
       <p className="muted">Lokale Diktat-Transkription für die Praxis.</p>
       {notice && (
@@ -45,7 +45,7 @@ export function Login({ onLogin, notice }: Props) {
           required
           autoFocus
         />
-        <button type="submit" className="btn btn-primary" disabled={busy || !password}>
+        <button type="submit" className="btn btn-primary btn-block" disabled={busy || !password}>
           {busy ? "Anmelden …" : "Anmelden"}
         </button>
         {error && (
@@ -54,8 +54,13 @@ export function Login({ onLogin, notice }: Props) {
           </p>
         )}
       </form>
-      <p className="muted">
-        <a href="/check">Gerätetest</a> · <a href="/transfer">Rezeption</a>
+      <p className="actions">
+        <a className="btn" href="/check">
+          Gerätetest
+        </a>
+        <a className="btn" href="/transfer">
+          Rezeption
+        </a>
       </p>
     </main>
   );

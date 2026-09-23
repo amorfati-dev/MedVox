@@ -1,0 +1,141 @@
+// Eine Zeile der Ergebnisliste: Kästchen · Ziffer · Leistung · „wegen: …“ · Prüfstreifen.
+// Die ganze Zeile ist die Tippfläche (Handschuhe). Abgewählte Zeilen bleiben stehen, durchgestrichen.
+import type { Suggestion } from "../api";
+import type { Frame, Option, Row, Tag } from "../result";
+import { Icon } from "./Icon";
+
+const TAG_LABEL: Record<Tag, (s: Suggestion) => string> = {
+  bema: (s) => s.system,
+  goz: (s) => s.system,
+  kassenanteil: () => "Kassenanteil",
+  zuzahlung: () => "Zuzahlung",
+};
+
+function Checks({ decide }: { decide: string[] }) {
+  return decide.map((text) => (
+    <p key={text} className="check-strip">
+      <Icon name="warn" />
+      <span>
+        <strong>Prüfen:</strong> {text}
+      </span>
+    </p>
+  ));
+}
+
+function Teeth({ s }: { s: Suggestion }) {
+  return s.teeth.length > 1 ? <span className="row-meta">Zähne {s.teeth.join(", ")}</span> : null;
+}
+
+type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void };
+
+export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
+  const { s, tag, count, selected } = row;
+  return (
+    <li className={`row row-${tag}${selected ? "" : " row-off"}`}>
+      <button
+        type="button"
+        className="row-main"
+        role="checkbox"
+        aria-checked={selected}
+        aria-label={`${s.system} ${s.code}${count > 1 ? `, ${count}-mal` : ""}, ${s.title}${selected ? "" : ", abgewählt"}`}
+        onClick={() => onToggle(s.code)}
+      >
+        <span className="box" aria-hidden="true">
+          {selected && <Icon name="check" />}
+        </span>
+        <span className="row-code">
+          {s.code}
+          {count > 1 && <span className="row-count">{count}×</span>}
+        </span>
+        <span className="row-body">
+          <span className="row-title">
+            {s.title} <span className="row-tag">{TAG_LABEL[tag](s)}</span>
+          </span>
+          {s.evident && <span className="row-meta">Evident: {s.evident}</span>}
+          <Teeth s={s} />
+          <span className="row-reason">{s.reason}</span>
+        </span>
+      </button>
+      <Checks decide={s.decide} />
+      {row.options.length > 0 && (
+        <ul className="options">
+          {row.options.map((o) => (
+            <OptionRow key={o.key} option={o} onAdopt={onAdopt} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+type OptionProps = { option: Option; onAdopt: (key: string) => void };
+
+// Option (`alternative`): Zuzahlungs-Optionen sind abgewählt voreingestellt und per Tipp übernehmbar;
+// andere Optionen (Privat-Gegenstück ohne Paar) bleiben ein Hinweis.
+export function OptionRow({ option, onAdopt }: OptionProps) {
+  const { s, adoptable, adopted } = option;
+  const label = adopted ? "Zuzahlung · übernommen" : adoptable ? "Option · Zuzahlung möglich" : "Option · nur Hinweis";
+  const body = (
+    <>
+      <span className="box" aria-hidden="true">
+        {adopted && <Icon name="check" />}
+      </span>
+      <span className="row-code">{s.code}</span>
+      <span className="row-body">
+        <span className="row-title">
+          {s.title} <span className="row-tag">{label}</span>
+        </span>
+        <Teeth s={s} />
+        <span className="row-reason">{s.reason}</span>
+        {adoptable && !adopted && <span className="row-hint">Antippen, um mit abzurechnen</span>}
+      </span>
+    </>
+  );
+  return (
+    <li className={`option${adopted ? " option-on" : ""}${adoptable ? "" : " option-info"}`}>
+      {adoptable ? (
+        <button
+          type="button"
+          className="row-main"
+          role="checkbox"
+          aria-checked={adopted}
+          aria-label={`Option ${s.system} ${s.code}, ${s.title}, ${adopted ? "übernommen" : "nicht übernommen"}`}
+          onClick={() => onAdopt(option.key)}
+        >
+          {body}
+        </button>
+      ) : (
+        <div className="row-main">{body}</div>
+      )}
+      <Checks decide={s.decide} />
+    </li>
+  );
+}
+
+type FrameProps = { frame: Frame; tooth: number | null } & Omit<RowProps, "row">;
+
+// Mehrkosten: Kassenanteil und Zuzahlung am selben Zahn in einem Rahmen.
+export function FrameRows({ frame, tooth, onToggle, onAdopt }: FrameProps) {
+  const { basis, copay } = frame;
+  const where = tooth === null ? "" : ` Zahn ${tooth}`;
+  return (
+    <li className="frame">
+      <p className="frame-head">
+        {basis ? (
+          <>
+            Mehrkosten{where} · Kasse zahlt <strong>{basis.s.code}</strong> · Patient zahlt{" "}
+            <strong>{copay.s.code}</strong> · Vereinbarung nötig
+          </>
+        ) : (
+          <>
+            Zuzahlung · Patient zahlt <strong>{copay.s.code}</strong> · Vereinbarung nötig
+          </>
+        )}
+      </p>
+      <ul className="rows">
+        {basis && <ResultRow row={basis} onToggle={onToggle} onAdopt={onAdopt} />}
+        <ResultRow row={copay} onToggle={onToggle} onAdopt={onAdopt} />
+      </ul>
+    </li>
+  );
+}

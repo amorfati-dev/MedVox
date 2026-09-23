@@ -1,0 +1,161 @@
+/* Diktat-Ansicht: Layout (quer zwei Spalten, hoch untereinander), Steuerung, Statusfeld, Aufnahmeknopf. */
+.diktat {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: max(16px, env(safe-area-inset-top)) 20px 20px max(20px, env(safe-area-inset-left));
+}
+.control-head {
+  display: flex;
+  align-items: center;
+  gap: var(--tap-gap);
+}
+.control-head h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--kasse);
+}
+.control-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.result {
+  min-width: 0;
+  padding: 16px 20px 0;
+}
+
+/* iPad quer: links Steuerung (420 px), rechts Ergebnis; beide Spalten scrollen für sich. */
+@media (min-width: 900px) {
+  .diktat {
+    display: grid;
+    grid-template-columns: 420px minmax(0, 1fr);
+    height: 100vh;
+    height: 100dvh;
+  }
+  .control {
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .result {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+  .result > * {
+    flex-shrink: 0;
+  }
+}
+
+/* iPad hoch / iPad mini: Statusfeld und Knopf in einer Zeile oben. */
+@media (max-width: 899px) {
+  .control {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .control-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+  }
+  .control-main .controls {
+    width: 230px;
+  }
+  .control-main .record:not(.record-neu) {
+    --record-size: 150px;
+  }
+}
+
+.switch {
+  display: flex;
+  width: 100%;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.switch-option {
+  flex: 1;
+  min-height: var(--tap);
+  font: inherit;
+  font-weight: 700;
+  border: none;
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.switch-option + .switch-option {
+  border-left: 2px solid var(--line);
+}
+.switch-option:disabled {
+  cursor: default;
+}
+.switch-on.switch-kasse {
+  background: var(--kasse);
+  color: var(--on-solid);
+}
+.switch-on.switch-privat {
+  background: var(--privat);
+  color: var(--on-solid);
+}
+.switch-option:disabled:not(.switch-on) {
+  opacity: 0.45;
+}
+.switch-hint {
+  margin: -6px 0 0;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+/* ⋯-Menü */
+.more {
+  position: relative;
+}
+.more-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-menu);
+}
+.more-item {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+.more-item + .more-item {
+  border-top: 1px solid var(--line);
+}
+
+.transcript {
+  font-size: var(--fs-transcript);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin: 0 0 8px;
+  min-height: 2.5em;
+}

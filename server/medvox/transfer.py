@@ -1,5 +1,8 @@
 """Kurzcode-Transfer: Transkript + Ziffern für den Rezeptions-PC (WP-10).
 
+Dazu, rein informativ für die Rezeption: der Patiententyp und je Position Zahn, Ziffer und Art
+(bema, goz, zuzahlung, kassenanteil). Kopiert wird weiterhin nur `codes` (Evident-Zeilen).
+
 Sechsstellige Codes aus einem verwechslungsfreien Alphabet (ohne 0/O/1/I),
 TTL 15 Minuten, innerhalb der TTL mehrfach abrufbar. Abgelaufene Einträge
 werden bei jedem Schreiben und Lesen entfernt; zusätzlich räumt `main.py`
@@ -11,7 +14,7 @@ from __future__ import annotations
 import json
 import secrets
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -36,10 +39,20 @@ class Transfer:
     codes: list[str]
     created_at: float
     expires_at: float
+    patient_type: str | None = None  # kasse | privat; None bei älteren iPad-Versionen
+    positions: list[dict] = field(default_factory=list)  # {"tooth", "code", "kind"}
 
 
-def create_transfer(db_path: Path, transcript: str, codes: list[str], ttl_s: int) -> Transfer:
+def create_transfer(
+    db_path: Path,
+    transcript: str,
+    codes: list[str],
+    ttl_s: int,
+    patient_type: str | None = None,
+    positions: list[dict] | None = None,
+) -> Transfer:
     """Speichert einen Eintrag unter einem neuen, noch unbenutzten Code."""
+    positions = list(positions or [])
     now = time.time()
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
@@ -49,11 +62,11 @@ def create_transfer(db_path: Path, transcript: str, codes: list[str], ttl_s: int
             if exists is None:
                 break
         conn.execute(
-            "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at)"
-            " VALUES (?, ?, ?, ?, ?)",
-            (code, transcript, json.dumps(codes), now, now + ttl_s),
+            "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at,"
+            " patient_type, positions_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions)),
         )
-    return Transfer(code, transcript, list(codes), now, now + ttl_s)
+    return Transfer(code, transcript, list(codes), now, now + ttl_s, patient_type, positions)
 
 
 def get_transfer(db_path: Path, code: str) -> Transfer | None:
@@ -72,4 +85,6 @@ def get_transfer(db_path: Path, code: str) -> Transfer | None:
         json.loads(row["codes_json"]),
         row["created_at"],
         row["expires_at"],
+        row["patient_type"],
+        json.loads(row["positions_json"]),
     )

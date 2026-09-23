@@ -1,0 +1,192 @@
+/* Grundlagen: Seite, Schrift, Knöpfe, Eingabefelder, Karten, Meldungen. */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+}
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+.page.narrow {
+  max-width: 560px;
+}
+/* iPad-Ansichten (Diktat, Anmeldung): größere Grundschrift für Armlänge */
+.ipad {
+  font-size: var(--fs-base);
+}
+h1 {
+  font-size: 1.5rem;
+  margin: 0.2rem 0 0.6rem;
+}
+h2 {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink-2);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+a {
+  color: var(--kasse);
+}
+.muted {
+  color: var(--ink-2);
+}
+.error {
+  color: var(--err);
+  font-weight: 600;
+}
+.notice {
+  color: var(--kasse);
+  font-weight: 600;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin: 12px 0;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.topbar nav {
+  display: flex;
+  gap: var(--tap-gap);
+  align-items: center;
+}
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+input {
+  width: 100%;
+  min-height: var(--tap);
+  font: inherit;
+  padding: 12px 16px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+input:focus {
+  outline: none;
+  border-color: var(--kasse);
+}
+:focus-visible {
+  outline: 3px solid var(--kasse);
+  outline-offset: 2px;
+}
+
+/* Knöpfe: mindestens 64 px hoch, ganze Fläche tippbar */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--tap);
+  padding: 10px 22px;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: var(--kasse);
+  border-color: var(--kasse);
+  color: var(--on-solid);
+}
+.btn-warn {
+  background: var(--warn);
+  border-color: var(--warn);
+  color: var(--on-solid);
+}
+.btn-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.btn-block {
+  width: 100%;
+}
+.btn-icon {
+  min-width: var(--tap);
+  padding: 10px 14px;
+}
+.icon {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tap-gap);
+  margin-top: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.icon-spin {
+  animation: spin 0.9s linear infinite;
+}
+.link {
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--kasse);
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.theme-label {
+  font-size: var(--fs-small);
+}

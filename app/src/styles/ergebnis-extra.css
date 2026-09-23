@@ -1,0 +1,191 @@
+/* Ergebnis, zweiter Teil: Optionen, Mehrkosten-Rahmen, Prüfstreifen, Geplantes, Hinweise,
+   Leiste unten, Kurzcode-Tafel. */
+
+/* Option: eingerückt unter ihrer Leistung, gestrichelt indigo, leeres Kästchen */
+.options {
+  padding: 0 12px 12px 58px;
+}
+.option {
+  border: 2px dashed var(--privat);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.option > .row-main {
+  border-left: none;
+  border-radius: 10px;
+}
+.option .box {
+  border-color: var(--privat);
+  background: transparent;
+}
+.option .row-code {
+  color: var(--privat);
+}
+.option .row-tag {
+  color: var(--privat);
+  background: var(--privat-bg);
+}
+.option-on {
+  border-style: solid;
+  background: var(--privat-bg);
+}
+.option-on .box {
+  background: var(--privat);
+  color: var(--on-solid);
+}
+.option-info {
+  border-color: var(--line);
+}
+.option-info .box {
+  border-color: var(--line);
+}
+.rows > .option {
+  margin: 8px 12px;
+}
+
+/* Mehrkosten: gemeinsamer Rahmen für Kassenanteil und Zuzahlung */
+.frame {
+  margin: 10px 12px;
+  border: 2px solid var(--privat);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.rows > .frame {
+  border-top: 2px solid var(--privat);
+}
+.frame-head {
+  margin: 0;
+  padding: 8px 14px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--privat);
+  background: var(--privat-bg);
+}
+
+/* Prüfhinweis: Bernstein-Streifen unter der Zeile */
+.check-strip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 16px 12px 74px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border-left: 5px solid var(--warn);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: var(--fs-reason);
+}
+.check-strip .icon {
+  margin-top: 2px;
+}
+
+/* Geplant: Kalender statt Kästchen, Ziffer grau */
+.planned .rows {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.box-plan {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+.row-planned .row-code {
+  color: var(--ink-2);
+}
+.notes li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: var(--fs-reason);
+  color: var(--ink-2);
+}
+.notes .icon {
+  margin-top: 2px;
+}
+
+/* Leiste unten: bleibt beim Scrollen stehen */
+.bottom-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tap-gap);
+  margin-top: auto;
+  padding: 14px 0 max(14px, env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+.bottom-bar .btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.bottom-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+.result > .notes,
+.result > .planned {
+  margin-bottom: 18px;
+}
+
+/* Kurzcode-Tafel nach „An Rezeption“ */
+.board {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  border: 2px solid var(--kasse);
+  border-radius: var(--radius);
+  background: var(--kasse-bg);
+}
+.board-text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.board h2 {
+  color: var(--kasse);
+  margin: 0;
+}
+.board p {
+  margin: 0;
+  font-size: var(--fs-reason);
+}
+.transfer-code {
+  font-size: var(--fs-code) !important;
+  letter-spacing: 0.22em;
+  font-family: var(--mono);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 4px 0 !important;
+  color: var(--ink);
+}
+.qr {
+  display: block;
+  image-rendering: pixelated;
+  border-radius: 8px;
+}
+
+/* Evident-Zeilen als Block (Rezeption) */
+.codes-lines {
+  list-style: none;
+  padding: 0;
+  font-size: 1.35rem;
+  font-family: var(--mono);
+  margin: 0 0 8px;
+}
+.codes-line {
+  font-family: var(--mono);
+}
+.toothless-hint {
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--warn);
+}

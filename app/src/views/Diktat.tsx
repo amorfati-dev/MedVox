@@ -1,29 +1,49 @@
-// Diktat-Ansicht: Schalter Kasse/Privat, großer Aufnahmeknopf, Pegel und Countdown,
-// Transkript in gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
+// Diktat-Ansicht: links die Steuerung (Schalter Kasse/Privat, Statusfeld, Aufnahmeknopf),
+// rechts das Ergebnis (Kopfzeile, Transkript, Liste nach Zahn, Geplantes, Hinweise) mit der
+// Leiste Text · Ziffern · An Rezeption. Im Querformat (≥ 900 px) zwei Spalten, im Hochformat
+// untereinander (styles/diktat.css). Die Aufnahme- und Warteschlangenlogik liegt in useDictation.
 import { useMemo, useState } from "react";
-import { api, ApiError, evidentLines, evidentOf, evidentText } from "../api";
-import { CodeChips } from "../components/CodeChips";
+import { api, ApiError, evidentText } from "../api";
+import { Controls } from "../components/Controls";
 import { CopyButton } from "../components/CopyButton";
-import { EvidentLines } from "../components/EvidentLines";
+import { Icon } from "../components/Icon";
+import { MoreMenu } from "../components/MoreMenu";
 import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
-import { TransferPanel } from "../components/TransferPanel";
-import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
+import { ResultHead, ResultList } from "../components/ResultList";
+import { StatusPanel } from "../components/StatusPanel";
+import { ThemeSwitch } from "../components/ThemeSwitch";
+import { TransferBoard } from "../components/TransferBoard";
+import { useDictation } from "../hooks/useDictation";
 import { usePatientType } from "../hooks/usePatientType";
+import { useSelection } from "../hooks/useSelection";
+import { useTransfer } from "../hooks/useTransfer";
+import { countGroups, positionsOf, uniquePlanned } from "../result";
+import { formatSeconds, plural, uiState, type UiState } from "../status";
 import { Login } from "./Login";
 
 type Props = { onLogout: () => void };
 
+const UNSUPPORTED = "Dieser Browser kann nicht aufnehmen – bitte Safari auf dem iPad verwenden.";
+
+// Rechte Spalte, solange noch kein Ergebnis da ist.
+const EMPTY: Partial<Record<UiState, string>> = {
+  bereit: "Noch nichts diktiert – „Aufnehmen“ antippen und sprechen.",
+  aufnahme: "Aufnahme läuft – das Ergebnis erscheint nach „Stopp“.",
+  senden: "Der Praxis-Mac schreibt ab …",
+  fortsetzbar: "Das Aufgenommene ist gesichert und wird gesendet, sobald der Praxis-Mac antwortet.",
+};
+
 export function Diktat({ onLogout }: Props) {
   const [patientType, setPatientType] = usePatientType();
   const d = useDictation(patientType);
-  // Abgewählte Ziffern merken; neu vorgeschlagene gelten damit automatisch als gewählt.
-  const [deselected, setDeselected] = useState<ReadonlySet<string>>(() => new Set());
-  const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
-  // Kopier- und Übergabeformat für Evident: je Zahn eine Zeile, Zahn vorn.
-  const evident = useMemo(() => evidentLines(d.suggestions, activeCodes), [d.suggestions, activeCodes]);
-  // Dieselben Zeilen nur mit amtlichen Ziffern („Nur Ziffern“) und die Kurzformen für die Chips.
-  const numbers = useMemo(() => evidentLines(d.suggestions, activeCodes, false), [d.suggestions, activeCodes]);
-  const forms = useMemo(() => evidentOf(d.suggestions), [d.suggestions]);
+  const sel = useSelection(d.codes, d.suggestions);
+  const plans = useMemo(() => uniquePlanned(d.planned), [d.planned]);
+  const counts = useMemo(() => countGroups(sel.groups, plans), [sel.groups, plans]);
+  const details = useMemo(
+    () => (d.resultType ? { patient_type: d.resultType, positions: positionsOf(sel.groups) } : null),
+    [d.resultType, sel.groups],
+  );
+  const transfer = useTransfer(d.transcript, sel.evident, details, d.sessionExpired);
   const recording = d.phase === "aufnahme";
   const sending = d.phase === "sende";
   const resumable = d.phase === "fortsetzbar";
@@ -43,21 +63,14 @@ export function Diktat({ onLogout }: Props) {
     }
   };
 
-  const toggleCode = (code: string) =>
-    setDeselected((prev) => {
-      const next = new Set(prev);
-      if (!next.delete(code)) next.add(code);
-      return next;
-    });
-
   const startNew = () => {
-    setDeselected(new Set());
+    sel.clear();
     void d.start();
   };
 
   const clear = () => {
     d.reset();
-    setDeselected(new Set());
+    sel.clear();
   };
 
   // Sitzung abgelaufen: Anmeldung anzeigen, Diktat und offene Abschnitte bleiben im Speicher.
@@ -70,122 +83,99 @@ export function Diktat({ onLogout }: Props) {
     );
   }
 
-  return (
-    <main className="page">
-      <header className="topbar">
-        <h1>MedVox</h1>
-        <nav>
-          <a href="/check">Gerätetest</a>
-          <button type="button" className="link" onClick={logout}>
-            Abmelden
-          </button>
-        </nav>
-      </header>
+  const error = d.supported ? d.error : UNSUPPORTED;
+  const state = uiState({ ...d, error });
+  const summary = [
+    d.lastLatency !== null ? formatSeconds(d.lastLatency) : "",
+    plural(counts.positions, "Ziffer", "Ziffern"),
+    counts.planned > 0 ? `${counts.planned} geplant` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const hasResult = d.transcript !== "" || sel.groups.length > 0 || plans.length > 0;
 
-      <section className="card recorder">
+  return (
+    <div className="diktat ipad">
+      <aside className="control" aria-label="Aufnahme">
+        <header className="control-head">
+          <h1>MedVox</h1>
+          <ThemeSwitch />
+          <MoreMenu onLogout={logout} />
+        </header>
         <PatientSwitch value={patientType} onChange={setPatientType} disabled={recording || sending || resumable} />
         {(recording || sending || resumable) && (
-          <p className="muted switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
+          <p className="switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
         )}
-        {!d.supported && (
-          <p role="alert" className="error">
-            Dieser Browser unterstützt keine Audioaufnahme. Bitte Safari auf dem iPad verwenden.
-          </p>
-        )}
-        <button
-          type="button"
-          className={recording ? "record record-active" : "record"}
-          disabled={!d.supported || sending}
-          onClick={recording ? d.stop : resumable ? d.resume : startNew}
-          aria-label={recording ? "Aufnahme beenden" : resumable ? "Diktat fortsetzen" : "Aufnahme starten"}
-        >
-          {sending ? "Transkribiere …" : recording ? "Stopp" : resumable ? "Weiter" : "Aufnehmen"}
-        </button>
-        <div className="meter" aria-hidden="true">
-          <div className="meter-fill" style={{ width: `${Math.round(d.level * 100)}%` }} />
+        <div className="control-main">
+          <StatusPanel
+            state={state}
+            seconds={d.seconds}
+            level={d.level}
+            waiting={d.waiting}
+            uploading={d.uploading}
+            error={error}
+            rejected={d.discardable}
+            summary={summary}
+          />
+          <Controls state={state} d={d} onNew={startNew} onClear={clear} handedOver={transfer.result !== null} />
         </div>
-        <p className={recording && d.remaining <= 10 ? "countdown warn" : "countdown"} aria-live="polite">
-          {recording
-            ? `${d.seconds} s · noch ${d.remaining} s`
-            : sending
-              ? "Audio wird auf dem Praxis-Mac transkribiert …"
-              : resumable
-                ? d.discardable
-                  ? "Dieser Abschnitt wird vom Server abgelehnt – verwerfen, damit die übrigen Abschnitte übertragen werden."
-                  : d.waiting > 0
-                    ? `Unterbrochen – „Erneut senden“ überträgt ${d.waiting === 1 ? "den wartenden Abschnitt" : `die ${d.waiting} wartenden Abschnitte`}, „Weiter“ überträgt und nimmt weiter auf.`
-                    : "Unterbrochen – „Weiter“ hängt den nächsten Abschnitt an, „Neues Diktat“ beginnt neu."
-                : `Bereit · maximal ${MAX_SECONDS} s pro Abschnitt`}
-        </p>
-        {d.retryable && (
-          <button type="button" className="btn" onClick={d.retry}>
-            Erneut senden
-          </button>
-        )}
-        {d.discardable && (
-          <button type="button" className="btn" onClick={d.dropSegment}>
-            Diesen Abschnitt verwerfen
-          </button>
-        )}
-        {resumable && (
-          <button type="button" className="btn" onClick={clear}>
-            Neues Diktat (nächster Patient)
-          </button>
-        )}
-        {recording && (
-          <button type="button" className="btn" onClick={d.next}>
-            Weiter (Abschnitt hochladen, neuen starten)
-          </button>
-        )}
-        {recording && d.uploading && <p className="muted">Vorheriger Abschnitt wird transkribiert …</p>}
-        {d.error && (
-          <p role="alert" className="error">
-            {d.error}
-          </p>
-        )}
         {logoutError && (
           <p role="alert" className="error">
             {logoutError}
           </p>
         )}
-      </section>
+      </aside>
 
-      <section className="card">
-        <h2>Transkript</h2>
-        <p className="transcript" aria-live="polite">
-          {d.transcript || <span className="muted">Noch nichts diktiert.</span>}
-        </p>
-        {d.lastLatency !== null && <p className="muted">Transkription in {d.lastLatency.toFixed(1)} s.</p>}
-        <div className="actions">
-          <CopyButton label="Text kopieren" text={d.transcript} primary />
-          <button type="button" className="btn" disabled={!d.transcript || recording || d.uploading} onClick={clear}>
-            Verwerfen
-          </button>
-        </div>
-      </section>
-
-      <section className="card">
-        <div className="section-head">
-          <h2>Ziffern</h2>
-          {d.resultType && (
-            <span className={`badge badge-${d.resultType}`}>für {PATIENT_LABEL[d.resultType]}</span>
-          )}
-        </div>
+      <main className="result">
+        {transfer.result && <TransferBoard result={transfer.result} />}
+        {hasResult ? (
+          <ResultHead counts={counts} resultType={d.resultType} numbersText={evidentText(sel.numbers)} />
+        ) : (
+          <p className="muted empty">{EMPTY[state] ?? EMPTY.bereit}</p>
+        )}
         {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
           <p className="notice">
-            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „Aufnehmen“ beginnt ein neues Diktat als{" "}
+            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „{state === "fertig" ? "Neu" : "Aufnehmen"}“ beginnt ein neues Diktat als{" "}
             {PATIENT_LABEL[patientType]}.
           </p>
         )}
-        <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} forms={forms} onToggle={toggleCode} />
-        {evident.length > 0 && <EvidentLines lines={evident} />}
-        <div className="actions">
-          <CopyButton label="Ziffern kopieren" text={evidentText(evident)} />
-          <CopyButton label="Nur Ziffern" text={evidentText(numbers)} />
-        </div>
-      </section>
+        {d.transcript && (
+          <section className="transcript-box">
+            <h2>Transkript</h2>
+            <p className="transcript" aria-live="polite">
+              {d.transcript}
+            </p>
+          </section>
+        )}
+        {hasResult && (
+          <ResultList
+            groups={sel.groups}
+            planned={plans}
+            notes={d.notes}
+            onToggle={sel.toggleCode}
+            onAdopt={sel.toggleOption}
+          />
+        )}
 
-      <TransferPanel transcript={d.transcript} codes={evident} onUnauthorized={d.sessionExpired} />
-    </main>
+        <footer className="bottom-bar">
+          {transfer.error && (
+            <p role="alert" className="error bottom-error">
+              {transfer.error}
+            </p>
+          )}
+          <CopyButton label="Text kopieren" text={d.transcript} />
+          <CopyButton label="Ziffern kopieren" text={evidentText(sel.evident)} />
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={transfer.busy || !d.transcript}
+            onClick={() => void transfer.send()}
+          >
+            <Icon name="send" />
+            {transfer.busy ? "Sende …" : "An Rezeption"}
+          </button>
+        </footer>
+      </main>
+    </div>
   );
 }

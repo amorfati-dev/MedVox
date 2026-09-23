@@ -1,0 +1,2135 @@
+{
+ "d01-kasse": {
+  "transcript": "Zahn 36 mesial okklusal distal Karies profunda, Infiltrationsanästhesie mit Artikain, Kompositfüllung in Adhäsivtechnik, dreiflächig, Kofferdam gelegt.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "13c",
+   "25",
+   "40",
+   "12"
+  ],
+  "suggestions": [
+   {
+    "code": "13c",
+    "system": "BEMA",
+    "title": "Füllung, dreiflächig",
+    "points": 53,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kompositfüllung, Adhäsivtechnik, dreiflächig, mod",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "Zuzahlung möglich zu BEMA 13c: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13c, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: Kompositfüllung, Adhäsivtechnik, dreiflächig, mod",
+    "decide": [],
+    "planned": false,
+    "alternative": true,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "25",
+    "system": "BEMA",
+    "title": "Indirekte Überkappung",
+    "points": 6,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Karies profunda",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "40",
+    "system": "BEMA",
+    "title": "Infiltrationsanästhesie",
+    "points": 8,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Infiltrationsanästhesie, Artikain",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "12",
+    "system": "BEMA",
+    "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
+    "points": 10,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kofferdam gelegt",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d01-privat": {
+  "transcript": "Zahn 36 mesial okklusal distal Karies profunda, Infiltrationsanästhesie mit Artikain, Kompositfüllung in Adhäsivtechnik, dreiflächig, Kofferdam gelegt.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2100",
+   "2330",
+   "0090",
+   "2040"
+  ],
+  "suggestions": [
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kompositfüllung, Adhäsivtechnik, dreiflächig, mod (BEMA 13c ↔ GOZ 2100, für Privatpatienten GOZ)",
+    "decide": [
+     "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2330",
+    "system": "GOZ",
+    "title": "Indirekte Überkappung, je Kavität",
+    "points": 110,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Karies profunda (BEMA 25 ↔ GOZ 2330, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "0090",
+    "system": "GOZ",
+    "title": "Infiltrationsanästhesie",
+    "points": 60,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Infiltrationsanästhesie, Artikain (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+    "decide": [
+     "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2040",
+    "system": "GOZ",
+    "title": "Kofferdam (Spanngummi)",
+    "points": 65,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kofferdam gelegt (BEMA 12 ↔ GOZ 2040, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d02-kasse": {
+  "transcript": "Eingehende Untersuchung, PSI Code 3 im zweiten und dritten Sextanten, Vitalitätsprüfung an 16 positiv, Zahnfilm 16 angefertigt.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "01",
+   "04",
+   "8",
+   "Ä925a"
+  ],
+  "suggestions": [
+   {
+    "code": "01",
+    "system": "BEMA",
+    "title": "Eingehende Untersuchung",
+    "points": 18,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Eingehende Untersuchung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "04",
+    "system": "BEMA",
+    "title": "PSI (Parodontaler Screening-Index)",
+    "points": 12,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: PSI Code",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "8",
+    "system": "BEMA",
+    "title": "Sensibilitätsprüfung",
+    "points": 6,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalitätsprüfung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "Ä925a",
+    "system": "BEMA",
+    "title": "Zahnfilm, bis 2 Aufnahmen",
+    "points": 12,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Zahnfilm",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d02-privat": {
+  "transcript": "Eingehende Untersuchung, PSI Code 3 im zweiten und dritten Sextanten, Vitalitätsprüfung an 16 positiv, Zahnfilm 16 angefertigt.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "0010",
+   "4005",
+   "0070",
+   "Ä5000"
+  ],
+  "suggestions": [
+   {
+    "code": "0010",
+    "system": "GOZ",
+    "title": "Eingehende Untersuchung",
+    "points": 100,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Eingehende Untersuchung (BEMA 01 ↔ GOZ 0010, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4005",
+    "system": "GOZ",
+    "title": "Gingival-/Parodontalindex (z. B. PSI)",
+    "points": 80,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: PSI Code (BEMA 04 ↔ GOZ 4005, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "0070",
+    "system": "GOZ",
+    "title": "Vitalitätsprüfung, je Sitzung",
+    "points": 50,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalitätsprüfung (BEMA 8 ↔ GOZ 0070, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "Ä5000",
+    "system": "GOÄ",
+    "title": "Zahnfilm, je Projektion",
+    "points": 50,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Zahnfilm (BEMA Ä925a ↔ GOÄ Ä5000, für Privatpatienten GOÄ)",
+    "decide": [
+     "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d03-kasse": {
+  "transcript": "Extraktion 47 wegen Längsfraktur, Leitungsanästhesie, Zahn mehrwurzelig, Wundversorgung mit Naht, Nachkontrolle in einer Woche.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "45",
+   "41a"
+  ],
+  "suggestions": [
+   {
+    "code": "45",
+    "system": "BEMA",
+    "title": "Extraktion, tieffrakturierter Zahn",
+    "points": 40,
+    "teeth": [
+     47
+    ],
+    "count": 1,
+    "reason": "wegen: Extraktion, Längsfraktur, mehrwurzelig",
+    "decide": [
+     "tieffrakturiert laut Diktat – sonst 44"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "41a",
+    "system": "BEMA",
+    "title": "Leitungsanästhesie, intraoral",
+    "points": 12,
+    "teeth": [
+     47
+    ],
+    "count": 1,
+    "reason": "wegen: Leitungsanästhesie",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": "l1"
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d03-privat": {
+  "transcript": "Extraktion 47 wegen Längsfraktur, Leitungsanästhesie, Zahn mehrwurzelig, Wundversorgung mit Naht, Nachkontrolle in einer Woche.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "3020",
+   "0100",
+   "0500"
+  ],
+  "suggestions": [
+   {
+    "code": "3020",
+    "system": "GOZ",
+    "title": "Extraktion, tief frakturierter/zerstörter Zahn",
+    "points": 270,
+    "teeth": [
+     47
+    ],
+    "count": 1,
+    "reason": "wegen: Extraktion, Längsfraktur, mehrwurzelig (BEMA 45 ↔ GOZ 3020, für Privatpatienten GOZ)",
+    "decide": [
+     "tieffrakturiert laut Diktat – sonst 3010"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "0100",
+    "system": "GOZ",
+    "title": "Leitungsanästhesie, intraoral",
+    "points": 70,
+    "teeth": [
+     47
+    ],
+    "count": 1,
+    "reason": "wegen: Leitungsanästhesie (BEMA 41a ↔ GOZ 0100, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": "l1"
+   },
+   {
+    "code": "0500",
+    "system": "GOZ",
+    "title": "Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130)",
+    "points": 400,
+    "teeth": [
+     47
+    ],
+    "count": 1,
+    "reason": "Zuschlag zu GOZ 3020 Extraktion, tief frakturierter/zerstörter Zahn (270 Punkte, höchstbewertete chirurgische Leistung der Sitzung) → Stufe 250–499 Punkte",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d04-kasse": {
+  "transcript": "25 Pulpitis, Trepanation, Vitalexstirpation, Wurzelkanalaufbereitung 1 Kanal, elektrometrische Längenbestimmung, medikamentöse Einlage mit Kalziumhydroxid, provisorischer Verschluss.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "28",
+   "32",
+   "2400",
+   "34"
+  ],
+  "suggestions": [
+   {
+    "code": "28",
+    "system": "BEMA",
+    "title": "Vitalexstirpation, je Kanal",
+    "points": 18,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalexstirpation",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "32",
+    "system": "BEMA",
+    "title": "Wurzelkanalaufbereitung, je Kanal",
+    "points": 29,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Wurzelkanalaufbereitung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2400",
+    "system": "GOZ",
+    "title": "Elektrometrische Längenbestimmung",
+    "points": 70,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. – wegen: elektrometrische Längenbestimmung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "34",
+    "system": "BEMA",
+    "title": "Medikamentöse Einlage",
+    "points": 15,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Einlage mit Kalziumhydroxid",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": [
+   "BEMA 31 (Trepanation eines pulpatoten Zahnes) ist in BEMA 28 enthalten – nicht vorgeschlagen",
+   "BEMA 11 (Provisorischer Verschluss / unvollendete Füllung) ist in BEMA 34 enthalten – nicht vorgeschlagen"
+  ]
+ },
+ "d04-privat": {
+  "transcript": "25 Pulpitis, Trepanation, Vitalexstirpation, Wurzelkanalaufbereitung 1 Kanal, elektrometrische Längenbestimmung, medikamentöse Einlage mit Kalziumhydroxid, provisorischer Verschluss.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2360",
+   "2410",
+   "2400",
+   "2430"
+  ],
+  "suggestions": [
+   {
+    "code": "2360",
+    "system": "GOZ",
+    "title": "Vitalexstirpation, je Kanal",
+    "points": 110,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalexstirpation (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2410",
+    "system": "GOZ",
+    "title": "Wurzelkanalaufbereitung, je Kanal",
+    "points": 392,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Wurzelkanalaufbereitung (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2400",
+    "system": "GOZ",
+    "title": "Elektrometrische Längenbestimmung",
+    "points": 70,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: elektrometrische Längenbestimmung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2430",
+    "system": "GOZ",
+    "title": "Medikamentöse Einlage",
+    "points": 204,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: Einlage mit Kalziumhydroxid (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": [
+   "GOZ 2390 (Trepanation, als selbstständige Leistung) ist in GOZ 2360 enthalten – nicht vorgeschlagen",
+   "GOZ 2020 (Temporärer speicheldichter Verschluss) ist in GOZ 2430 enthalten – nicht vorgeschlagen"
+  ]
+ },
+ "d05-kasse": {
+  "transcript": "Professionelle Zahnreinigung, 28 Zähne, Entfernung harter und weicher Beläge, Politur, lokale Fluoridierung mit Elmex Gelee, Mundhygieneinstruktion.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "28x 1040",
+   "IP4",
+   "MHU"
+  ],
+  "suggestions": [
+   {
+    "code": "1040",
+    "system": "GOZ",
+    "title": "Professionelle Zahnreinigung, je Zahn",
+    "points": 28,
+    "teeth": [],
+    "count": 28,
+    "reason": "Zuzahlung (eigenständige Privatleistung): Keine Kassenleistung; privat vereinbar, auch in derselben Sitzung nach vollständig erbrachter BEMA 107. – wegen: Professionelle Zahnreinigung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "IP4",
+    "system": "BEMA",
+    "title": "Lokale Fluoridierung",
+    "points": 12,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Fluoridierung, Elmex Gelee",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "MHU",
+    "system": "BEMA",
+    "title": "Patientenindividuelle Mundhygieneunterweisung",
+    "points": 45,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Mundhygieneinstruktion",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d05-privat": {
+  "transcript": "Professionelle Zahnreinigung, 28 Zähne, Entfernung harter und weicher Beläge, Politur, lokale Fluoridierung mit Elmex Gelee, Mundhygieneinstruktion.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "28x 1040",
+   "1020",
+   "1000"
+  ],
+  "suggestions": [
+   {
+    "code": "1040",
+    "system": "GOZ",
+    "title": "Professionelle Zahnreinigung, je Zahn",
+    "points": 28,
+    "teeth": [],
+    "count": 28,
+    "reason": "wegen: Professionelle Zahnreinigung",
+    "decide": [
+     "laut Katalog nicht neben 1020 in derselben Sitzung – eine wählen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "1020",
+    "system": "GOZ",
+    "title": "Lokale Fluoridierung, je Sitzung",
+    "points": 50,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Fluoridierung, Elmex Gelee (BEMA IP4 ↔ GOZ 1020, für Privatpatienten GOZ)",
+    "decide": [
+     "laut Katalog nicht neben 1040 in derselben Sitzung – eine wählen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "1000",
+    "system": "GOZ",
+    "title": "Mundhygienestatus und Unterweisung (mind. 25 min)",
+    "points": 200,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Mundhygieneinstruktion (BEMA MHU ↔ GOZ 1000, für Privatpatienten GOZ)",
+    "decide": [
+     "kein inhaltsgleiches GOZ-Gegenstück; KZV BW vergleicht MHU mit GOZ 1000 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d06-kasse": {
+  "transcript": "14 distal okklusal Sekundärkaries unter alter Amalgamfüllung, Amalgam entfernt, Unterfüllung mit Glasionomerzement, Kompositfüllung MOD, dreiflächig, GOZ 2100 als Zusatzleistung.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "13c",
+   "2100"
+  ],
+  "suggestions": [
+   {
+    "code": "13c",
+    "system": "BEMA",
+    "title": "Füllung, dreiflächig",
+    "points": 53,
+    "teeth": [
+     14
+    ],
+    "count": 1,
+    "reason": "wegen: Glasionomerzement, Kompositfüllung, mod, dreiflächig",
+    "decide": [
+     "Flächen „do“ an 14 diktiert, Ziffer nach 3 Flächen gewählt – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     14
+    ],
+    "count": 1,
+    "reason": "Zuzahlung zu BEMA 13c: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13c, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: GOZ 2100, mod, dreiflächig",
+    "decide": [
+     "Flächen „do“ an 14 diktiert, Ziffer nach 3 Flächen gewählt – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d06-privat": {
+  "transcript": "14 distal okklusal Sekundärkaries unter alter Amalgamfüllung, Amalgam entfernt, Unterfüllung mit Glasionomerzement, Kompositfüllung MOD, dreiflächig, GOZ 2100 als Zusatzleistung.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2100"
+  ],
+  "suggestions": [
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     14
+    ],
+    "count": 1,
+    "reason": "wegen: Glasionomerzement, Kompositfüllung, GOZ 2100, mod, dreiflächig (BEMA 13c ↔ GOZ 2100, für Privatpatienten GOZ)",
+    "decide": [
+     "Flächen „do“ an 14 diktiert, Ziffer nach 3 Flächen gewählt – prüfen",
+     "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d07-kasse": {
+  "transcript": "Präparation 26 für Vollkeramikkrone, Stufenpräparation, Abformung mit Polyether, Bissregistrat, Provisorium aus Kunststoff eingegliedert, Farbnahme A 3.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [],
+  "suggestions": [],
+  "planned": [],
+  "notes": []
+ },
+ "d07-privat": {
+  "transcript": "Präparation 26 für Vollkeramikkrone, Stufenpräparation, Abformung mit Polyether, Bissregistrat, Provisorium aus Kunststoff eingegliedert, Farbnahme A 3.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [],
+  "suggestions": [],
+  "planned": [],
+  "notes": []
+ },
+ "d08-kasse": {
+  "transcript": "Kind 8 Jahre, Fissurenversiegelung 16, 26, 36 und 46, IP5, vorher Reinigung und Ätzung mit Phosphorsäure.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "4x IP5"
+  ],
+  "suggestions": [
+   {
+    "code": "IP5",
+    "system": "BEMA",
+    "title": "Fissurenversiegelung 6er/7er, je Zahn",
+    "points": 16,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "IP5",
+    "system": "BEMA",
+    "title": "Fissurenversiegelung 6er/7er, je Zahn",
+    "points": 16,
+    "teeth": [
+     26
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "IP5",
+    "system": "BEMA",
+    "title": "Fissurenversiegelung 6er/7er, je Zahn",
+    "points": 16,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "IP5",
+    "system": "BEMA",
+    "title": "Fissurenversiegelung 6er/7er, je Zahn",
+    "points": 16,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d08-privat": {
+  "transcript": "Kind 8 Jahre, Fissurenversiegelung 16, 26, 36 und 46, IP5, vorher Reinigung und Ätzung mit Phosphorsäure.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "4x 2000"
+  ],
+  "suggestions": [
+   {
+    "code": "2000",
+    "system": "GOZ",
+    "title": "Fissurenversiegelung, je Zahn",
+    "points": 90,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5 (BEMA IP5 ↔ GOZ 2000, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2000",
+    "system": "GOZ",
+    "title": "Fissurenversiegelung, je Zahn",
+    "points": 90,
+    "teeth": [
+     26
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5 (BEMA IP5 ↔ GOZ 2000, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2000",
+    "system": "GOZ",
+    "title": "Fissurenversiegelung, je Zahn",
+    "points": 90,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5 (BEMA IP5 ↔ GOZ 2000, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2000",
+    "system": "GOZ",
+    "title": "Fissurenversiegelung, je Zahn",
+    "points": 90,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "wegen: Fissurenversiegelung, IP5 (BEMA IP5 ↔ GOZ 2000, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d09-kasse": {
+  "transcript": "OPG angefertigt, 38 retiniert und verlagert, Indikation zur Osteotomie, Aufklärung über Risiken erfolgt, Überweisung zum Oralchirurgen, BEMA Ziffer Ä935d.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "Ä935d",
+   "Ä1"
+  ],
+  "suggestions": [
+   {
+    "code": "Ä935d",
+    "system": "BEMA",
+    "title": "OPG (Orthopantomogramm)",
+    "points": 36,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "wegen: OPG angefertigt, BEMA Ziffer Ä935d",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": "opg"
+   },
+   {
+    "code": "Ä1",
+    "system": "BEMA",
+    "title": "Beratung",
+    "points": 9,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "wegen: Aufklärung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [
+   {
+    "code": "48",
+    "system": "BEMA",
+    "title": "Osteotomie, retinierter/verlagerter Zahn",
+    "points": 78,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "geplant („Indikation zur“), nicht abrechnen – wegen: Osteotomie, retiniert, verlagert",
+    "decide": [],
+    "planned": true,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "notes": []
+ },
+ "d09-privat": {
+  "transcript": "OPG angefertigt, 38 retiniert und verlagert, Indikation zur Osteotomie, Aufklärung über Risiken erfolgt, Überweisung zum Oralchirurgen, BEMA Ziffer Ä935d.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "Ä5004",
+   "Ä1"
+  ],
+  "suggestions": [
+   {
+    "code": "Ä5004",
+    "system": "GOÄ",
+    "title": "OPG (Panoramaschichtaufnahme)",
+    "points": 400,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "wegen: OPG angefertigt, BEMA Ziffer Ä935d (BEMA Ä935d ↔ GOÄ Ä5004, für Privatpatienten GOÄ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": "opg"
+   },
+   {
+    "code": "Ä1",
+    "system": "GOÄ",
+    "title": "Beratung",
+    "points": 80,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "wegen: Aufklärung (BEMA Ä1 ↔ GOÄ Ä1, für Privatpatienten GOÄ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [
+   {
+    "code": "3040",
+    "system": "GOZ",
+    "title": "Osteotomie, retinierter/verlagerter Zahn",
+    "points": 540,
+    "teeth": [
+     38
+    ],
+    "count": 1,
+    "reason": "geplant („Indikation zur“), nicht abrechnen – wegen: Osteotomie, retiniert, verlagert (BEMA 48 ↔ GOZ 3040, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": true,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "notes": []
+ },
+ "d10-kasse": {
+  "transcript": "Parodontitis Stadium 3 Grad B, antiinfektiöse Therapie geschlossen, Kürettage 17-27, Sondierungstiefen bis 6 Millimeter, Blutung auf Sondierung positiv, UPT in 3 Monaten.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "6x AITb",
+   "8x AITa"
+  ],
+  "suggestions": [
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     17
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     15
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     14
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     13
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     12
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     11
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     21
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     22
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     23
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     24
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITa",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, einwurzeliger Zahn",
+    "points": 14,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     26
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "AITb",
+    "system": "BEMA",
+    "title": "Antiinfektiöse Therapie, mehrwurzeliger Zahn",
+    "points": 26,
+    "teeth": [
+     27
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d10-privat": {
+  "transcript": "Parodontitis Stadium 3 Grad B, antiinfektiöse Therapie geschlossen, Kürettage 17-27, Sondierungstiefen bis 6 Millimeter, Blutung auf Sondierung positiv, UPT in 3 Monaten.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "6x 4075",
+   "8x 4070"
+  ],
+  "suggestions": [
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     17
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     15
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     14
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     13
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     12
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     11
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     21
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     22
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     23
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     24
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4070",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, einwurzeliger Zahn",
+    "points": 100,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITa ↔ GOZ 4070, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     26
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4075",
+    "system": "GOZ",
+    "title": "Geschlossene Kürettage, mehrwurzeliger Zahn",
+    "points": 130,
+    "teeth": [
+     27
+    ],
+    "count": 1,
+    "reason": "wegen: antiinfektiöse Therapie, Kürettage (BEMA AITb ↔ GOZ 4075, für Privatpatienten GOZ)",
+    "decide": [
+     "KZV BW vergleicht AIT mit GOZ 4050 + 4070 (ggf. 4080) – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d11-kasse": {
+  "transcript": "36, 37 okklusal Karies, Füllungen mit Komposit, jeweils einflächig, BEMA 13a 2x, Zusatzleistung GOZ 2060.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2x 13a",
+   "2x 2060"
+  ],
+  "suggestions": [
+   {
+    "code": "13a",
+    "system": "BEMA",
+    "title": "Füllung, einflächig",
+    "points": 33,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Füllungen, Komposit, BEMA 13a, einflächig",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "13a",
+    "system": "BEMA",
+    "title": "Füllung, einflächig",
+    "points": 33,
+    "teeth": [
+     37
+    ],
+    "count": 1,
+    "reason": "wegen: Füllungen, Komposit, BEMA 13a, einflächig",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2060",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, einflächig",
+    "points": 527,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "Zuzahlung zu BEMA 13a: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13a, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: GOZ 2060, einflächig",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "2060",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, einflächig",
+    "points": 527,
+    "teeth": [
+     37
+    ],
+    "count": 1,
+    "reason": "Zuzahlung zu BEMA 13a: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13a, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: GOZ 2060, einflächig",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d11-privat": {
+  "transcript": "36, 37 okklusal Karies, Füllungen mit Komposit, jeweils einflächig, BEMA 13a 2x, Zusatzleistung GOZ 2060.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2x 2060"
+  ],
+  "suggestions": [
+   {
+    "code": "2060",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, einflächig",
+    "points": 527,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Füllungen, Komposit, BEMA 13a, GOZ 2060, einflächig (BEMA 13a ↔ GOZ 2060, für Privatpatienten GOZ)",
+    "decide": [
+     "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2060",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, einflächig",
+    "points": 527,
+    "teeth": [
+     37
+    ],
+    "count": 1,
+    "reason": "wegen: Füllungen, Komposit, BEMA 13a, GOZ 2060, einflächig (BEMA 13a ↔ GOZ 2060, für Privatpatienten GOZ)",
+    "decide": [
+     "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [],
+  "notes": []
+ },
+ "d12-kasse": {
+  "transcript": "48 Perikoronitis, Spülung mit Chlorhexidin, Einlage, Ibuprofen 600 verordnet, Wiedervorlage in 2 Tagen, danach Extraktion 48 planen.",
+  "patient_type": "kasse",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [],
+  "suggestions": [],
+  "planned": [
+   {
+    "code": "44",
+    "system": "BEMA",
+    "title": "Extraktion, mehrwurzeliger Zahn",
+    "points": 15,
+    "teeth": [
+     48
+    ],
+    "count": 1,
+    "reason": "geplant („planen“), nicht abrechnen – wegen: Extraktion",
+    "decide": [],
+    "planned": true,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "notes": []
+ },
+ "d12-privat": {
+  "transcript": "48 Perikoronitis, Spülung mit Chlorhexidin, Einlage, Ibuprofen 600 verordnet, Wiedervorlage in 2 Tagen, danach Extraktion 48 planen.",
+  "patient_type": "privat",
+  "duration_s": 10.0,
+  "latency_s": 0.8,
+  "codes": [],
+  "suggestions": [],
+  "planned": [
+   {
+    "code": "3010",
+    "system": "GOZ",
+    "title": "Extraktion, mehrwurzeliger Zahn",
+    "points": 110,
+    "teeth": [
+     48
+    ],
+    "count": 1,
+    "reason": "geplant („planen“), nicht abrechnen – wegen: Extraktion (BEMA 44 ↔ GOZ 3010, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": true,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "notes": []
+ },
+ "abnahme-kasse": {
+  "transcript": "Zahn 36 mesial okklusal distal Karies profunda. Infiltrationsanästhesie mit Artikain. Kofferdam gelegt. Zahn 36 mesial okklusal distal Kompositfüllung in Adhäsivtechnik. Zahn 46 Vitalitätsprüfung positiv. Zahnsteinentfernung. Zahn 16 Wurzelkanalaufbereitung geplant. Zahn 46 Inlay aus Keramik, GOZ 2150. Kein OPG.",
+  "patient_type": "kasse",
+  "duration_s": 30.0,
+  "latency_s": 0.8,
+  "codes": [
+   "13c",
+   "25",
+   "40",
+   "12",
+   "8",
+   "107",
+   "13a",
+   "2150"
+  ],
+  "suggestions": [
+   {
+    "code": "13c",
+    "system": "BEMA",
+    "title": "Füllung, dreiflächig",
+    "points": 53,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kompositfüllung, Adhäsivtechnik, mod",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "Zuzahlung möglich zu BEMA 13c: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13c, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: Kompositfüllung, Adhäsivtechnik, mod",
+    "decide": [],
+    "planned": false,
+    "alternative": true,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "25",
+    "system": "BEMA",
+    "title": "Indirekte Überkappung",
+    "points": 6,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Karies profunda",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "40",
+    "system": "BEMA",
+    "title": "Infiltrationsanästhesie",
+    "points": 8,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Infiltrationsanästhesie, Artikain",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "12",
+    "system": "BEMA",
+    "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
+    "points": 10,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Kofferdam gelegt",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "8",
+    "system": "BEMA",
+    "title": "Sensibilitätsprüfung",
+    "points": 6,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalitätsprüfung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "107",
+    "system": "BEMA",
+    "title": "Entfernung harter Zahnbeläge (Zahnstein)",
+    "points": 16,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Zahnsteinentfernung",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "13a",
+    "system": "BEMA",
+    "title": "Füllung, einflächig",
+    "points": 33,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "Kassenanteil: Basis der Zuzahlung GOZ 2150 – wegen: Inlay, GOZ 2150",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2150",
+    "system": "GOZ",
+    "title": "Einlagefüllung (Inlay), einflächig",
+    "points": 1141,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "Zuzahlung zu BEMA 13a/13b/13c/13d: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt die vergleichbare BEMA-13-Füllung, Patient den Rest; Begleitanästhesie und Kofferdam sind privat. – wegen: Inlay, GOZ 2150",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "zuzahlung",
+    "evident": null
+   }
+  ],
+  "planned": [
+   {
+    "code": "32",
+    "system": "BEMA",
+    "title": "Wurzelkanalaufbereitung, je Kanal",
+    "points": 29,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "geplant („geplant“), nicht abrechnen – wegen: Wurzelkanalaufbereitung",
+    "decide": [
+     "Kanalzahl nicht diktiert – je Kanal berechnen"
+    ],
+    "planned": true,
+    "alternative": false,
+    "kind": "bema",
+    "evident": null
+   }
+  ],
+  "notes": [
+   "verneint, nicht vorgeschlagen: „Kein OPG.“"
+  ]
+ },
+ "abnahme-privat": {
+  "transcript": "Zahn 36 mesial okklusal distal Karies profunda. Infiltrationsanästhesie mit Artikain. Kofferdam gelegt. Zahn 36 mesial okklusal distal Kompositfüllung in Adhäsivtechnik. Zahn 46 Vitalitätsprüfung positiv. Zahnsteinentfernung. Zahn 16 Wurzelkanalaufbereitung geplant. Zahn 46 Inlay aus Keramik, GOZ 2150. Kein OPG.",
+  "patient_type": "privat",
+  "duration_s": 30.0,
+  "latency_s": 0.8,
+  "codes": [
+   "2100",
+   "2330",
+   "0090",
+   "2040",
+   "0070",
+   "4050",
+   "2150"
+  ],
+  "suggestions": [
+   {
+    "code": "2100",
+    "system": "GOZ",
+    "title": "Kompositfüllung adhäsiv, dreiflächig",
+    "points": 642,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Kompositfüllung, Adhäsivtechnik, mod (BEMA 13c ↔ GOZ 2100, für Privatpatienten GOZ)",
+    "decide": [
+     "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2330",
+    "system": "GOZ",
+    "title": "Indirekte Überkappung, je Kavität",
+    "points": 110,
+    "teeth": [
+     36
+    ],
+    "count": 1,
+    "reason": "wegen: Karies profunda (BEMA 25 ↔ GOZ 2330, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "0090",
+    "system": "GOZ",
+    "title": "Infiltrationsanästhesie",
+    "points": 60,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Infiltrationsanästhesie, Artikain (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+    "decide": [
+     "Zahn nicht diktiert – je Zahn",
+     "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2040",
+    "system": "GOZ",
+    "title": "Kofferdam (Spanngummi)",
+    "points": 65,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Kofferdam gelegt (BEMA 12 ↔ GOZ 2040, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "0070",
+    "system": "GOZ",
+    "title": "Vitalitätsprüfung, je Sitzung",
+    "points": 50,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "wegen: Vitalitätsprüfung (BEMA 8 ↔ GOZ 0070, für Privatpatienten GOZ)",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "4050",
+    "system": "GOZ",
+    "title": "Zahnsteinentfernung, einwurzeliger Zahn",
+    "points": 10,
+    "teeth": [],
+    "count": 1,
+    "reason": "wegen: Zahnsteinentfernung (BEMA 107 ↔ GOZ 4050, für Privatpatienten GOZ)",
+    "decide": [
+     "Zahn nicht diktiert – 4050/4055 je Zahn wählen",
+     "BEMA 107 gilt je Sitzung, GOZ 4050/4055 je Zahn – Zähne prüfen"
+    ],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   },
+   {
+    "code": "2150",
+    "system": "GOZ",
+    "title": "Einlagefüllung (Inlay), einflächig",
+    "points": 1141,
+    "teeth": [
+     46
+    ],
+    "count": 1,
+    "reason": "wegen: Inlay, GOZ 2150",
+    "decide": [],
+    "planned": false,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "planned": [
+   {
+    "code": "2410",
+    "system": "GOZ",
+    "title": "Wurzelkanalaufbereitung, je Kanal",
+    "points": 392,
+    "teeth": [
+     16
+    ],
+    "count": 1,
+    "reason": "geplant („geplant“), nicht abrechnen – wegen: Wurzelkanalaufbereitung (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+    "decide": [
+     "Kanalzahl nicht diktiert – je Kanal berechnen"
+    ],
+    "planned": true,
+    "alternative": false,
+    "kind": "goz",
+    "evident": null
+   }
+  ],
+  "notes": [
+   "verneint, nicht vorgeschlagen: „Kein OPG.“"
+  ]
+ }
+}

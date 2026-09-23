@@ -54,8 +54,8 @@ kommt, sonst direkt vom Peer.
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
 | `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB), optional `patient_type` = `kasse` (Standard) \| `privat` | `{"transcript", "patient_type", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `patient_type` der Typ, für den die Vorschläge gelten; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative, kind, evident` (Evident-Kurzform aus dem Katalog oder `null`) mit `kind` = `bema` \| `goz` (Privatleistung, auch GOÄ) \| `zuzahlung` (Privatleistung beim Kassenpatienten); siehe „Regel-Extraktor“. Unbekannter `patient_type`: 422 |
-| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str]}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn) | `{"code": "ABC123", "expires_at": iso8601}` |
-| `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at"}` oder 404; 429 bei > 10 Abrufen/min/IP |
+| `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}]}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil) | `{"code": "ABC123", "expires_at": iso8601}` |
+| `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at", "patient_type", "positions"}` (ältere Einträge: `null`/`[]`) oder 404; 429 bei > 10 Abrufen/min/IP |
 
 Fehler tragen eine deutsche Meldung in `{"detail": "…"}`: 400 unlesbare oder leere
 Aufnahme, 401 nicht angemeldet, 413 zu groß oder zu lang, 415 falscher Typ,
@@ -172,7 +172,7 @@ und sind vom Behandler zu prüfen.
   „36 o Karies, 37 mo Karies, Füllungen“ ordnet die Füllung nur 37 zu – Zähne direkt hinter der
   Leistung nennen oder je Zahn einen Satz.
 - Fehlt die Flächenzahl, die Kanalzahl oder bei Entfernung/AIT der Zahn, kommt der kleinste
-  Vorschlag mit Hinweis in `decide` (die heutige Ergebnisansicht zeigt `decide` noch nicht).
+  Vorschlag mit Hinweis in `decide` (in der App als Prüfstreifen „Prüfen: …“ unter der Zeile).
 - Plan-Marker wirken nur im eigenen Teilsatz; „danach“ oder Zeitangaben ohne Marker („morgen
   Extraktion“) gelten als erbracht. Verneinung nur direkt an der Leistung.
 - Enthaltensein ist nur für 31 in 28 und 11 in 34 hinterlegt; „nicht neben“ aus dem Katalog wird
