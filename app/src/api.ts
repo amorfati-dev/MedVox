@@ -124,7 +124,7 @@ export function codeOf(copyCode: string): string {
   return copyCode.replace(/^\d+x\s+/, "");
 }
 
-// Evident-Kurzform je Ziffer der erbrachten Hauptvorschläge (für die Chips: "41a · l1").
+// Evident-Kurzform je Ziffer der erbrachten Hauptvorschläge (z. B. 41a → "l1").
 export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
   const forms: Record<string, string> = {};
   for (const s of suggestions) if (!s.alternative && s.evident) forms[s.code] = s.evident;
@@ -140,7 +140,7 @@ export function evidentOf(suggestions: Suggestion[]): Record<string, string> {
 type Line = { tooth: number | null; counts: Map<string, number>; forms: Map<string, string> };
 
 // `suggestions`: erbrachte Vorschläge aller Abschnitte in Diktatreihenfolge;
-// `active`: ausgewählte Chips im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
+// `active`: ausgewählte Ziffern im Kopierformat ("2x 41a") – abgewählte Ziffern fehlen.
 // Mehrfach erbrachte Positionen stehen einmal mit "*Anzahl", hinter Kurzform wie Ziffer ("36,wf*3",
 // "11,2410*3"); für Ziffern nach Auskunft des Behandlers, im Pilot noch an Evident zu prüfen.
 export function evidentLines(suggestions: Suggestion[], active: string[], shortForms = true): string[] {
@@ -154,7 +154,7 @@ export function evidentLines(suggestions: Suggestion[], active: string[], shortF
       line = { tooth, counts: new Map(), forms: new Map() };
       lines.set(tooth, line);
     }
-    // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal (wie die Chips).
+    // Wiederholt ein späterer Abschnitt dieselbe Ziffer am selben Zahn, zählt sie einmal.
     line.counts.set(s.code, Math.max(line.counts.get(s.code) ?? 0, s.count));
     if (shortForms && s.evident) line.forms.set(s.code, s.evident);
   }
