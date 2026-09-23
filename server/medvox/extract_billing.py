@@ -119,14 +119,12 @@ def _contains(text: str, part: str) -> bool:
 
 def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list[str]) -> Draft | None:
     """Genau ein GOZ-Zuschlag je Sitzung aus der höchstbewerteten erbrachten chirurgischen GOZ-Leistung."""
-    surgical = [d for d in drafts if not d.planned and d.entry.system == "GOZ"
+    # Nur eine selbst als GOZ erbrachte Leistung trägt den Zuschlag. BEMA-Chirurgie und ihr bloß
+    # angebotenes Privat-Gegenstück lösen ihn nie aus: der Zuschlag gilt nur für Privatpatienten.
+    surgical = [d for d in drafts if not d.planned and d.entry.system == "GOZ" and d.alternative_to is None
                 and d.entry.area == "Chirurgie" and d.entry.code not in SURCHARGE_CODES]
     known = [d for d in surgical if d.entry.points is not None]
     unknown = [d.entry.label for d in surgical if d.entry.points is None]
-    for d in drafts:
-        if not d.planned and d.entry.system == "BEMA" and d.entry.area == "Chirurgie":
-            unknown += [f"GOZ {c.code} (Privat-Gegenstück zu {d.entry.label})" for c in catalog.counterparts(d.entry)
-                        if c.system == "GOZ" and c.code.startswith("3") and not catalog.get("GOZ", c.code)]
     driver = max(known, key=lambda d: d.entry.points or 0, default=None)
     said = sorted({t.hit.entry.code for t in dictated})
     if unknown:
@@ -147,9 +145,6 @@ def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list
     span = f"{lo}–{hi}" if hi else f"ab {lo}"
     result.reason = (f"Zuschlag zu {driver.entry.label} {driver.entry.title} ({driver.entry.points} Punkte, "
                      f"höchstbewertete chirurgische Leistung der Sitzung) → Stufe {span} Punkte")
-    if driver.alternative_to is not None:
-        result.alternative_to = driver.alternative_to
-        result.reason += f"; nur bei Privatabrechnung von {driver.entry.label} statt {driver.alternative_to.entry.label}"
     if said and said != [code]:
         result.decide.append(f"diktiert war {', '.join(said)} – Stufe aus den Punkten ist {code}")
     return result

@@ -184,12 +184,20 @@ def test_surcharge_table_matches_catalog_rules():
 
 
 def test_captains_example_l1_l1_ost1():
+    # Der Zuschlag gilt nur für Privatpatienten: das Beispiel des Behandlers in der GOZ-Lesart.
+    result = run("Leitungsanästhesie privat, Leitungsanästhesie privat, Osteotomie privat drei acht.")
+    assert billable_codes(result.suggestions) == ["2x 0100", "3030", "0500"]
+    (zuschlag,) = [s for s in result.suggestions if s.code in {"0500", "0510", "0520", "0530"}]
+    assert zuschlag.code == "0500" and not zuschlag.alternative
+    assert "GOZ 3030" in zuschlag.reason and "350 Punkte" in zuschlag.reason
+
+
+def test_bema_surgery_never_triggers_surcharge():
+    # "L1, L1, Ost1" wird als BEMA gelesen; das angebotene Privat-Gegenstück GOZ 3030 zieht keinen Zuschlag nach.
     result = run("L1, L1, Ost1 an drei acht.")
     assert billable_codes(result.suggestions) == ["2x 41a", "47a"]
-    (zuschlag,) = [s for s in result.suggestions if s.code in {"0500", "0510", "0520", "0530"}]
-    assert zuschlag.code == "0500" and zuschlag.alternative
-    assert "GOZ 3030" in zuschlag.reason and "350 Punkte" in zuschlag.reason
-    assert [s.code for s in result.suggestions if s.alternative] == ["0100", "3030", "0500"]
+    assert not [s for s in result.suggestions if s.code.startswith("05")]
+    assert not [note for note in result.notes if "Zuschlag" in note]
 
 
 def test_surcharge_once_from_highest_goz_position():
@@ -214,10 +222,11 @@ def test_unknown_points_are_reported_not_guessed(monkeypatch):
     assert any("nicht bestimmbar" in note and "GOZ 3030" in note for note in result.notes)
 
 
-def test_missing_goz_counterpart_blocks_surcharge_with_note():
+def test_bema_extraction_without_goz_counterpart_gives_no_surcharge_note():
     result = run("Extraktion vier sieben wegen Längsfraktur.")
     assert billable_codes(result.suggestions) == ["45"]
-    assert any("GOZ 3020" in note and "nicht bestimmbar" in note for note in result.notes)
+    assert not [s for s in result.suggestions if s.code.startswith("05")]
+    assert not [note for note in result.notes if "Zuschlag" in note]
 
 
 # --- BEMA und GOZ gemischt -----------------------------------------------------------------

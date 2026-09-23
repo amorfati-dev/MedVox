@@ -119,11 +119,12 @@ Fachtabellen zum Nachlesen).
   nie in `codes`. „ohne/kein/nicht“ direkt an der Leistung verhindert den Vorschlag (Hinweis in `notes`).
 - **BEMA und GOZ gemischt:** der Versichertenstatus schränkt nichts ein. Nennt der Katalog ein
   Privat-Gegenstück, erscheint es zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
-- **Zuschlag 0500–0530:** genau einer je Sitzung, aus der Punktzahl der höchstbewerteten erbrachten
-  chirurgischen GOZ-Leistung (auch einer Privat-Alternative, dann selbst Alternative); die
-  Begründung nennt Ziffer und Punkte. BEMA-Punkte zählen nie für GOZ-Stufen. Ist eine Punktzahl
-  unbekannt (null oder GOZ-Gegenstück nicht im Katalog, z. B. 3020 zu BEMA 45), wird keine Stufe
-  geraten, sondern ein Hinweis ausgegeben.
+- **Zuschlag 0500–0530:** nur für Privatpatienten, also nur aus selbst als GOZ erbrachter Chirurgie
+  (z. B. „Osteotomie privat“ oder „GOZ 3030“); genau einer je Sitzung, aus der Punktzahl der
+  höchstbewerteten erbrachten chirurgischen GOZ-Leistung. Die Begründung nennt Ziffer und Punkte.
+  BEMA-Chirurgie (z. B. „L1, L1, Ost1“ → 41a, 47a) und ihr angebotenes Privat-Gegenstück lösen nie
+  einen Zuschlag aus. Ist eine Punktzahl unbekannt (null), wird keine Stufe geraten, sondern ein
+  Hinweis ausgegeben.
 
 Abnahme: die zwölf Diktate aus Anhang B (`tests/test_extract_acceptance.py`), auf Ziffernebene
 Precision 92 % (23/25), Recall 96 % (23/24). Die Erwartungen stammen vom selben Autor wie die Regeln
