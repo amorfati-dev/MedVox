@@ -63,7 +63,7 @@ TERMS: tuple[str, ...] = (
     # Paro / Prophylaxe
     "Zahnreinigung", "Beläge", "Zahnstein", "Fluoridierung", "Elmex", "Mundhygieneinstruktion", "Mundhygiene",
     "Kürettage", "Kürette", "UPT", "PZR", "PAR", "antiinfektiös", "Therapie", "Chlorhexidin", "Spülung", "Stadium", "Grad",
-    "Blutung", "Milchzahn", "Milchzähne", "IP",
+    "Blutung", "blutet", "Nachblutung", "Blutungsneigung", "Sickerblutung", "Milchzahn", "Milchzähne", "IP",
     # Medikation / Verwaltung
     "Ibuprofen", "Amoxicillin", "Clindamycin", "Paracetamol", "Wiedervorlage", "verordnet", "Rezept",
     # Flächen und Lage
@@ -84,6 +84,11 @@ ALIASES: dict[tuple[str, ...], str] = {
     ("bis", "registrat"): "Bissregistrat", ("biss", "registrat"): "Bissregistrat",
     ("composite",): "Komposit",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
+    # Blutung: Whisper trennt Komposita, deren erster Teil allein kein Wort ist, und schreibt
+    # „BOP“ (Blutung auf Sondierung) wie den Namen „Bob“. „Blutung auf Sondierung“ selbst
+    # braucht keinen Eintrag – beide Wörter sind Begriffe und werden einzeln geschützt.
+    ("sicker", "blutung"): "Sickerblutung", ("blutungs", "neigung"): "Blutungsneigung",
+    ("bob",): "BOP",
 }
 
 # Häufige deutsche Wörter, die nie zu einem Begriff "korrigiert" werden dürfen.

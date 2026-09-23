@@ -1,6 +1,6 @@
 // Rezeptions-Ansicht (/transfer): Kurzcode eingeben, Text und Ziffern abholen.
 import { useEffect, useState, type FormEvent } from "react";
-import { api, ApiError, CODE_LENGTH, joinCodes, normalizeCode, type TransferData } from "../api";
+import { api, ApiError, CODE_LENGTH, evidentText, normalizeCode, type TransferData } from "../api";
 import { CopyButton } from "../components/CopyButton";
 
 export function Rezeption() {
@@ -37,7 +37,9 @@ export function Rezeption() {
     void lookup(code);
   };
 
-  const both = data ? `${data.transcript}\n\nZiffern: ${joinCodes(data.codes)}` : "";
+  // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,41a,13a"), eine je Zahn.
+  const codes = data ? evidentText(data.codes) : "";
+  const both = data ? `${data.transcript}\n\nZiffern:\n${codes}` : "";
 
   return (
     <main className="page narrow">
@@ -76,10 +78,10 @@ export function Rezeption() {
           <h2>Diktat</h2>
           <p className="transcript">{data.transcript || <span className="muted">(leer)</span>}</p>
           <h2>Ziffern</h2>
-          <p className="codes-line">{data.codes.length ? joinCodes(data.codes) : <span className="muted">keine</span>}</p>
+          <p className="codes-line">{codes || <span className="muted">keine</span>}</p>
           <div className="actions">
             <CopyButton label="Text kopieren" text={data.transcript} primary />
-            <CopyButton label="Ziffern kopieren" text={joinCodes(data.codes)} />
+            <CopyButton label="Ziffern kopieren" text={codes} />
             <CopyButton label="Beides kopieren" text={both} />
           </div>
         </section>

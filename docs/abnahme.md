@@ -62,7 +62,8 @@ Beobachtet: ______________________________________________________
        erscheinen.
 3. [ ] „Text kopieren" → in Evident in die Dokumentation einfügen (Strg+V): Umlaute, Absätze
        und Zahnnummern kommen richtig an.
-4. [ ] „Ziffern kopieren" → in Evident einfügen: Format „13c, 40, 12, …".
+4. [ ] „Ziffern kopieren" → in Evident einfügen: je Zahn eine Zeile „36,Ä925a,41a,13a",
+       Positionen ohne Zahn („01,107") in der letzten Zeile (siehe `docs/diktierhilfe.md`).
 5. [ ] Zeit vom Tippen auf „Senden" bis zum Text in Evident: ______ s
 
 Beobachtet: ______________________________________________________

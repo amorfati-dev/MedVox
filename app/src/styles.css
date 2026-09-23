@@ -196,6 +196,7 @@ input {
   min-height: 2.5em;
 }
 .codes-line {
+  white-space: pre-line; /* eine Evident-Zeile je Zahn */
   font-size: 1.35rem;
   font-family: ui-monospace, Menlo, monospace;
   margin: 0 0 8px;

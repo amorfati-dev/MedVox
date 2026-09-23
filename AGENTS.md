@@ -14,6 +14,7 @@ Betrieb: `make install` / `make status` im Repo-Root. Die installierten Dienste 
 - BEMA/GOZ/GOÄ-Katalog: `server/medvox/catalog/` (Aufbau, Regeln und Pflege in dessen `README.md`). Einzige Quelle, aus der der Extraktor Ziffern vorschlagen darf; Punktwerte nur aus den amtlichen Quellen, sonst `null` – nie raten.
 - Patiententyp: eine diktierte Leistung ist ein Paar BEMA/GOZ (`equivalent`, Ost1 = 47a/3030), `kasse` wählt BEMA plus nur Privatpositionen mit `zuzahlung.allowed`, `privat` nur GOZ/GOÄ. Den Zuschlag 0500–0530 gibt es nur bei `privat`. Paare und Zuzahlungs-Liste prüft der Behandler in `catalog/PRUEFLISTE.md` (`make catalog-review`).
 - Zahnnummern sind zweistellige FDI-Nummern ("36", "16, 26"). Diktiert wird "drei sechs", nie "sechsunddreißig".
+- „Ziffern kopieren" (iPad, Rezeption, Übergabe) liefert das Evident-Format: je Zahn eine Zeile `36,Ä925a,41a,13a`, Positionen ohne Zahn in der letzten Zeile – Evident nimmt Positionen nur hinter einem Zahn an. Beispiel und Regeln: `docs/diktierhilfe.md`, Code: `evidentLines` in `app/src/api.ts`.
 - Audio wird nie persistiert: nur temporär bis zur Transkription, danach gelöscht. Keine Patienten-Stammdaten, Logs ohne Transkripttext.
 - Der alte Cloud-Prototyp (Google STT + Gemini) ist nur in der Git-Historie vor diesem Neuaufbau; seine BEMA/GOZ-Daten waren fachlich falsch und werden nicht übernommen.
 
