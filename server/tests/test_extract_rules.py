@@ -254,6 +254,11 @@ def test_bema_and_goz_surgery_on_same_tooth_are_exclusive():
     assert [s.alternative for s in zuschlag] == [True]
     assert any("GOZ 3030" in f and "BEMA 47a" in f for f in zuschlag[0].decide)
 
+    result = run("Osteotomie drei acht, GOZ drei null drei null, Zuschlag GOZ null fünf drei null")
+    zuschlag = [s for s in result.suggestions if s.code.startswith("05")]
+    assert [(s.code, s.alternative) for s in zuschlag] == [("0500", True)]
+    assert "diktiert war 0530 – Stufe aus den Punkten ist 0500" in zuschlag[0].decide
+
 
 def test_private_alternative_never_replaces_bema():
     result = run("Infiltrationsanästhesie, Zahnfilm eins sechs.")

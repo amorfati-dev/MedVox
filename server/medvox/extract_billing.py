@@ -151,6 +151,18 @@ def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list
            and d.entry.code not in SURCHARGE_CODES and any(t.hit.entry.system == "GOZ" for t in d.hits)]
     surgical = [d for d in goz if d.alternative_to is None]
     undecided = [d for d in goz if d.alternative_to is not None]
+    if surgical or not undecided or not dictated:
+        return _surcharge(catalog, surgical, dictated, notes)
+    result = _surcharge(catalog, undecided, dictated, notes)
+    if result:
+        rival = max(undecided, key=lambda d: d.entry.points or 0)
+        result.alternative_to = rival.alternative_to
+        result.decide.insert(0, f"Zuschlag nur, wenn {rival.entry.label} statt {rival.alternative_to.entry.label} "
+                                f"gewählt wird (Privatpatient)")
+    return result
+
+
+def _surcharge(catalog: Catalog, surgical: list[Draft], dictated: list, notes: list[str]) -> Draft | None:
     known = [d for d in surgical if d.entry.points is not None]
     unknown = [d.entry.label for d in surgical if d.entry.points is None]
     driver = max(known, key=lambda d: d.entry.points or 0, default=None)
@@ -161,13 +173,6 @@ def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list
         notes.append(f"Zuschlag 0500–0530 nicht bestimmbar: Punktzahl von {', '.join(dict.fromkeys(unknown))} "
                      f"unbekannt{hint}")
         return _dictated_only(dictated, "Stufe nicht nachprüfbar (Punktzahl unbekannt)")
-    if driver is None and undecided and dictated:
-        rival = undecided[0]
-        d = Draft(dictated[0].hit.entry, None, False, list(dictated), 1)
-        d.alternative_to = rival.alternative_to
-        d.decide.append(f"Zuschlag nur, wenn {rival.entry.label} statt {rival.alternative_to.entry.label} "
-                        f"gewählt wird (Privatpatient)")
-        return d
     if driver is None:
         return _dictated_only(dictated, "keine erbrachte chirurgische GOZ-Leistung erkannt")
     bracket = surcharge_for(driver.entry.points or 0)
