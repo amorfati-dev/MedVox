@@ -66,6 +66,18 @@ def test_each_tooth_gets_its_own_filling():
     assert billable_codes(result.suggestions) == ["2x 13a"]
 
 
+@pytest.mark.parametrize("dictation", [
+    "Füllung drei sechs okklusal distal. Füllung drei sieben mesial okklusal distal.",
+    "Drei sechs okklusal distal Füllung, drei sieben mesial okklusal distal Füllung.",
+    "Füllung drei sechs okklusal distal, drei sieben mesial okklusal distal.",
+    "Füllung drei sechs okklusal distal. Füllung drei sieben, dreiflächig.",
+])
+def test_surface_count_belongs_to_its_own_tooth(dictation):
+    result = run(dictation)
+    assert by_tooth(result) == {36: "13b", 37: "13c"}
+    assert not any("prüfen" in flag for s in performed(result) for flag in s.decide)
+
+
 # --- ein-/mehrwurzelig, Zahnentfernung ------------------------------------------------------
 
 

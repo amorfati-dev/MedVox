@@ -102,14 +102,14 @@ class TextContext:
     def clause(self, pos: int) -> tuple[int, int]:
         """Teilsatz um ``pos``; Kommas innerhalb einer Zahnaufzählung ("16, 26 und 36") trennen nicht."""
         s, e = self.sentence(pos)
-        commas = [m.end() for m in _COMMA.finditer(self.folded, s, e) if not self._in_group(m.start())]
+        commas = [m.end() for m in _COMMA.finditer(self.folded, s, e) if not self.in_group(m.start())]
         cuts = [s, *commas, e]
         for a, b in zip(cuts, cuts[1:]):
             if a <= pos < b:
                 return a, b
         return s, e
 
-    def _in_group(self, pos: int) -> bool:
+    def in_group(self, pos: int) -> bool:
         return any(g.start <= pos < g.end for g in self.groups)
 
     def _plan_spans(self) -> list[tuple[int, int, str]]:

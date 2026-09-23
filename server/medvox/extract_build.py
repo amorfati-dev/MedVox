@@ -57,6 +57,7 @@ class Builder:
         self.catalog, self.ctx = catalog, ctx
         self.drafts: dict[tuple[str, str, int | None, bool], Draft] = {}
         self.dictated_surcharges: list[Tagged] = []
+        self._surface_words: list[Tagged] = []
 
     def add(self, entry: Entry, fdi: int | None, t: Tagged, count: int = 1, flag: str | None = None,
             like: Tagged | None = None) -> Draft:
@@ -110,8 +111,11 @@ class Builder:
     # --- Füllungen --------------------------------------------------------------------
 
     def _fillings(self, tagged: list[Tagged]) -> None:
-        hints = [t for t in tagged if surface_count_word(t.hit.keyword) and not t.hit.code_word]
-        acts = [t for t in tagged if t not in hints]
+        """Flächenzahl-Wörter in einer Zahngruppe ("37 mod") stecken schon in den Flächen des Zahns."""
+        counts = [t for t in tagged if surface_count_word(t.hit.keyword) and not t.hit.code_word]
+        hints = [t for t in counts if not self.ctx.in_group(t.hit.start)]
+        acts = [t for t in tagged if t not in counts]
+        self._surface_words = [t for t in counts if t not in hints]
         for planned in (False, True):
             for family in dict.fromkeys(t.hit.entry.family for t in acts):
                 group = [t for t in acts if t.hit.entry.family == family and (t.plan is not None) == planned]
@@ -119,14 +123,17 @@ class Builder:
                     self._filling_family(family, group, hints)
 
     def _filling_family(self, family: tuple[str, ...], acts: list[Tagged], hints: list[Tagged]) -> None:
-        sentences = {t.sentence for t in acts}
-        near = [h for h in hints if h.sentence in sentences]
-        explicit = {t.hit.entry.family.index(t.hit.entry.code) + 1 for t in acts if t.hit.code_word}
-        said = {h.hit.entry.family.index(h.hit.entry.code) + 1 for h in near}
+        near = [h for h in hints if h.sentence in {t.sentence for t in acts}]
         teeth = _unique(tooth for t in acts for tooth in t.teeth) or _unique(
             tooth for h in near for tooth in h.teeth)
-        chosen = explicit or said
         for tooth in teeth or [None]:
+            own = [t for t in acts if tooth is None or tooth in t.teeth] or acts
+            own += [t for t in acts if not t.teeth and t not in own]
+            sentences = {t.sentence for t in own if t.teeth} or {t.sentence for t in own}
+            mine = [h for h in near if h.sentence in sentences and (tooth is None or not h.teeth or tooth in h.teeth)]
+            explicit = {t.hit.entry.family.index(t.hit.entry.code) + 1 for t in own if t.hit.code_word}
+            said = {h.hit.entry.family.index(h.hit.entry.code) + 1 for h in mine}
+            chosen = explicit or said
             dictated = len(set(tooth.surfaces)) if tooth and tooth.surfaces else None
             flag = None
             if len(chosen) == 1:
@@ -143,7 +150,9 @@ class Builder:
             entry = self.catalog.get(acts[0].hit.entry.system, family[min(count, 4) - 1])
             if tooth is None:
                 flag = flag or "Zahn nicht diktiert"
-            for t in acts + near:
+            spoken = [h for h in self._surface_words if tooth and tooth in h.teeth
+                      and set(h.hit.keyword) == set(tooth.surfaces)]
+            for t in own + mine + spoken:
                 self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0])
 
     # --- Zahnentfernung ----------------------------------------------------------------
