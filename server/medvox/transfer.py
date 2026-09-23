@@ -6,8 +6,10 @@ Dazu, rein informativ für die Rezeption: der Patiententyp und je Position Zahn,
 Sechsstellige Codes aus einem verwechslungsfreien Alphabet (ohne 0/O/1/I),
 TTL 15 Minuten, innerhalb der TTL mehrfach abrufbar. Nennt das iPad beim Anlegen die ID des
 gespeicherten Diktats (`dictation_id`), schließt der erste Abruf dieses Diktat wie „übertragen“
-im Büro (`patients.close_handed_over`) – Kurzcode und Patientenliste sind nie zwei Wege zu
-demselben Diktat. Abgelaufene Einträge
+im Büro (`patients.hand_over`), genau in dem Stand, den der Code trägt (`dictation_revision`).
+Ist das Diktat schon vorher übertragen worden, gibt der Code nichts mehr heraus und wird
+gelöscht (`AlreadyTransferred`) – Kurzcode und Patientenliste sind nie zwei Wege zu demselben
+Diktat. Abgelaufene Einträge
 werden bei jedem Schreiben und Lesen entfernt; zusätzlich räumt `main.py`
 beim Start und periodisch auf (WP-11).
 """
@@ -35,6 +37,14 @@ def iso(ts: float) -> str:
     return datetime.fromtimestamp(ts, tz=UTC).isoformat(timespec="seconds")
 
 
+class AlreadyTransferred(Exception):
+    """Das verknüpfte Diktat war beim ersten Abruf schon übertragen, gelöscht oder abgelaufen."""
+
+    def __init__(self, closed_at: float) -> None:
+        super().__init__(closed_at)
+        self.closed_at = closed_at
+
+
 @dataclass(frozen=True)
 class Transfer:
     code: str
@@ -54,6 +64,7 @@ def create_transfer(
     patient_type: str | None = None,
     positions: list[dict] | None = None,
     dictation_id: str | None = None,
+    dictation_revision: int | None = None,
 ) -> Transfer:
     """Speichert einen Eintrag unter einem neuen, noch unbenutzten Code."""
     positions = list(positions or [])
@@ -67,22 +78,36 @@ def create_transfer(
                 break
         conn.execute(
             "INSERT INTO transfers (code, transcript, codes_json, created_at, expires_at,"
-            " patient_type, positions_json, dictation_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions), dictation_id),
+            " patient_type, positions_json, dictation_id, dictation_revision) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                code, transcript, json.dumps(codes), now, now + ttl_s, patient_type, json.dumps(positions),
+                dictation_id, dictation_revision,
+            ),
         )
     return Transfer(code, transcript, list(codes), now, now + ttl_s, patient_type, positions)
 
 
 def get_transfer(db_path: Path, code: str) -> Transfer | None:
-    """Liefert den Eintrag, solange er nicht abgelaufen ist; sonst None. Schließt das verknüpfte Diktat."""
+    """Liefert den Eintrag, solange er nicht abgelaufen ist; sonst None.
+
+    Der erste Abruf schließt das verknüpfte Diktat; war es schon übertragen, wird der Code
+    gelöscht und `AlreadyTransferred` ausgelöst.
+    """
     now = time.time()
+    closed_at = None
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
         row = conn.execute(
             "SELECT * FROM transfers WHERE code = ?", (code.strip().upper(),)
         ).fetchone()
-        if row is not None and row["dictation_id"]:
-            patients.close_handed_over(conn, row["dictation_id"], now)
+        if row is not None and row["dictation_id"] and row["handed_over_at"] is None:
+            closed_at = patients.hand_over(conn, row["dictation_id"], row["dictation_revision"], now)
+            if closed_at is None:
+                conn.execute("UPDATE transfers SET handed_over_at = ? WHERE code = ?", (now, row["code"]))
+            else:
+                conn.execute("DELETE FROM transfers WHERE code = ?", (row["code"],))
+    if closed_at is not None:
+        raise AlreadyTransferred(closed_at)
     if row is None:
         return None
     return Transfer(

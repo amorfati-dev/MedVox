@@ -115,7 +115,12 @@ dann löscht der Praxis-Mac es von selbst, auch wenn es vergessen wurde. Was am 
 übertragen ist, ist am nächsten Tag weg. Der Kurzcode („An Rezeption") funktioniert daneben wie
 bisher für die sofortige Übergabe (15 Minuten). Sobald die Rezeption den Kurzcode abruft, gilt
 das gespeicherte Diktat als übertragen: es verschwindet aus der Patientenliste (beim Patienten
-steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht.
+steht „übertragen"), damit es nicht ein zweites Mal nach Evident geht. Wurde das Diktat nach dem
+Kurzcode noch geändert (z. B. eine Ziffer abgewählt), holt die Rezeption den Stand des Codes ab;
+die Änderung bleibt in der Patientenliste offen, bernsteinfarben markiert: „Ein früherer Stand
+wurde um … per Kurzcode abgeholt … bitte bewusst prüfen, nur die Änderung nachtragen". Hat das
+Büro das Diktat schon übertragen, zeigt die Rezeption beim Code nur „Dieses Diktat wurde bereits
+am … übertragen … – nicht erneut in Evident eintragen" und keine Ziffern.
 
 **„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
 das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann

@@ -4,7 +4,7 @@
 // ankommen – auch für ein Diktat, das am Bildschirm schon vom nächsten abgelöst wurde. Lehnt der
 // Server ein Diktat als schon übertragen ab (410), wird es nie wieder gespeichert.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, ApiError, type DictationBody } from "../api";
+import { api, ApiError, type DictationBody, type HandoverLink } from "../api";
 import { newDictationId } from "../patients";
 
 const RETRY_MS = 5000;
@@ -18,7 +18,7 @@ export type DictationSave = {
   state: SaveState;
   error: string | null;
   backlog: number; // abgelöste Diktate, deren Speichern noch aussteht
-  id: () => string | null; // ID des gespeicherten Diktats am Bildschirm (für den Kurzcode)
+  handover: () => HandoverLink | null; // Diktat am Bildschirm und sein gespeicherter Stand (für den Kurzcode)
   detach: () => void; // Diktat ist fertig: das nächste bekommt eine neue ID
   discard: () => void; // Diktat verwerfen: auch den gespeicherten Stand löschen
 };
@@ -32,6 +32,7 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
   const [backlog, setBacklog] = useState(0);
   const current = useRef<string | null>(null); // ID des Diktats am Bildschirm
   const saved = useRef<string | null>(null); // zuletzt gespeicherter Stand (JSON) des aktuellen Diktats
+  const revision = useRef<number | null>(null); // Revision dieses Stands auf dem Praxis-Mac
   const closed = useRef<string | null>(null); // aktuelles Diktat, das der Server als übertragen ablehnt
   const left = useRef<string | null>(null); // Stand des abgelösten Diktats: nie unter neuer ID anlegen
   const reported = useRef(false); // abgelaufene Sitzung nur einmal je Fehlerserie melden
@@ -57,9 +58,10 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
     try {
       while (jobs.current.size > 0) {
         const [id, job] = jobs.current.entries().next().value as [string, Job];
+        let stored: number | null = null;
         try {
           if (job === "löschen") await api.deleteDictation(id).catch(ignoreMissing);
-          else await api.saveDictation(id, job);
+          else stored = (await api.saveDictation(id, job)).revision;
         } catch (e) {
           if (e instanceof ApiError && e.status === 410) {
             jobs.current.delete(id);
@@ -79,7 +81,10 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
         }
         // Kam während der Anfrage ein neuerer Stand, bleibt dessen Auftrag stehen.
         if (jobs.current.get(id) === job) jobs.current.delete(id);
-        if (id === current.current && job !== "löschen") saved.current = JSON.stringify(job);
+        if (id === current.current && job !== "löschen") {
+          saved.current = JSON.stringify(job);
+          revision.current = stored;
+        }
         reported.current = false;
         setError(null);
         setState("speichert");
@@ -101,6 +106,7 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
       if (json === left.current) return;
       current.current = newDictationId();
       saved.current = null;
+      revision.current = null;
     }
     if (json === saved.current || current.current === closed.current) return;
     jobs.current.delete(current.current); // Reihenfolge: der neueste Stand kommt ans Ende
@@ -116,7 +122,12 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
     [],
   );
 
-  const currentId = useCallback(() => (current.current === closed.current ? null : current.current), []);
+  // Revision nur, wenn genau der Stand am Bildschirm gespeichert ist; sonst schließt der Kurzcode nichts Neueres.
+  const handover = useCallback((): HandoverLink | null => {
+    const id = current.current;
+    if (id === null || id === closed.current) return null;
+    return { id, revision: saved.current !== null && !jobs.current.has(id) ? revision.current : null };
+  }, []);
 
   const detach = useCallback(() => {
     left.current = body === null ? null : JSON.stringify(body);
@@ -138,7 +149,7 @@ export function useDictationSave(body: DictationBody | null, onUnauthorized: () 
     show();
   }, [body, run, show]);
 
-  return { state, error, backlog, id: currentId, detach, discard };
+  return { state, error, backlog, handover, detach, discard };
 }
 
 function ignoreMissing(e: unknown): void {

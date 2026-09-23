@@ -52,6 +52,7 @@ class DictationOut(DictationIn):
     revision: int
     created_at: str
     updated_at: str
+    handed_over_at: str | None = None  # früherer Stand per Kurzcode abgeholt, dieser danach geändert
 
 
 class PatientOut(BaseModel):
@@ -98,6 +99,7 @@ def _dictation_out(d: patients.Dictation) -> DictationOut:
     return DictationOut(
         **d.data, patient=d.number, id=d.id, patient_id=d.patient_id, revision=d.revision,
         created_at=iso(d.created_at), updated_at=iso(d.updated_at),
+        handed_over_at=iso(d.handed_over_at) if d.handed_over_at is not None else None,
     )
 
 

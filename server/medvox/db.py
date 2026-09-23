@@ -30,7 +30,9 @@ CREATE TABLE IF NOT EXISTS transfers (
     expires_at  REAL NOT NULL,
     patient_type    TEXT,
     positions_json  TEXT NOT NULL DEFAULT '[]',
-    dictation_id    TEXT
+    dictation_id    TEXT,
+    dictation_revision  INTEGER,
+    handed_over_at  REAL
 );
 -- Patient = nur die Evident-Nummer. Die Zeile bleibt nach „übertragen“ ohne Inhalt stehen,
 -- damit die Liste den Zustand zeigt; sie läuft ab, wenn ihr jüngstes Diktat abliefe.
@@ -52,7 +54,8 @@ CREATE TABLE IF NOT EXISTS dictations (
     created_at  REAL NOT NULL,
     updated_at  REAL NOT NULL,
     expires_at  REAL NOT NULL,
-    data_json   TEXT NOT NULL
+    data_json   TEXT NOT NULL,
+    handed_over_at  REAL  -- früherer Stand per Kurzcode abgeholt, dieser danach geändert
 );
 -- Grabstein eines übertragenen, gelöschten oder abgelaufenen Diktats: nur ID und Zeitpunkt, kein
 -- Inhalt, keine Patientennummer. Solange er liegt, wird die ID nie wieder angelegt.
@@ -70,6 +73,8 @@ ADDED_TRANSFER_COLUMNS = [
     ("patient_type", "TEXT"),
     ("positions_json", "TEXT NOT NULL DEFAULT '[]'"),
     ("dictation_id", "TEXT"),  # gespeichertes Diktat, das der Abruf des Kurzcodes schließt
+    ("dictation_revision", "INTEGER"),  # genau dieser Stand wurde übergeben; None = noch nicht gespeichert
+    ("handed_over_at", "REAL"),  # erster Abruf; weitere Abrufe schließen nichts mehr
 ]
 
 

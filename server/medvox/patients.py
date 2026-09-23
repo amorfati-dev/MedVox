@@ -52,6 +52,7 @@ class Dictation:
     created_at: float
     updated_at: float
     data: dict
+    handed_over_at: float | None = None  # früherer Stand per Kurzcode abgeholt, danach geändert
 
 
 _PATIENT_SQL = (
@@ -70,7 +71,7 @@ def _patient(row: sqlite3.Row) -> Patient:
 def _dictation(row: sqlite3.Row) -> Dictation:
     return Dictation(
         row["id"], row["patient_id"], row["number"], row["revision"],
-        row["created_at"], row["updated_at"], json.loads(row["data_json"]),
+        row["created_at"], row["updated_at"], json.loads(row["data_json"]), row["handed_over_at"],
     )
 
 
@@ -240,17 +241,31 @@ def delete_patient(db_path: Path, patient_id: int, now: float | None = None) -> 
         return conn.execute("DELETE FROM patients WHERE id = ?", (patient_id,)).rowcount > 0
 
 
-def close_handed_over(conn: sqlite3.Connection, dictation_id: str, now: float) -> None:
-    """Kurzcode abgerufen: das verknüpfte Diktat gilt als übertragen wie im Büro.
+def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None, now: float) -> float | None:
+    """Erster Abruf eines Kurzcodes: genau der übergebene Stand (`revision`) gilt als übertragen.
 
-    Der Grabstein entsteht auch, wenn das iPad das Diktat noch gar nicht gespeichert hat – sein
-    Speichern wird dann abgelehnt, statt das Diktat ein zweites Mal offen anzulegen.
+    Rückgabe: Zeitpunkt, zu dem das Diktat schon vorher geschlossen wurde (Büro, Löschen, Ablauf
+    oder ein anderer Kurzcode) – dann darf der Code nichts mehr herausgeben; sonst None.
+    Unverändert: löschen wie „übertragen“ im Büro. Danach geändert (oder beim Anlegen des Codes
+    noch nicht gespeichert): offen lassen, mit Vermerk der Abholzeit und neuer Revision, damit
+    das Büro die Änderung bewusst prüft. Noch gar nicht gespeichert: Grabstein, damit das
+    spätere Speichern abgelehnt wird statt ein zweites offenes Diktat anzulegen.
     """
-    row = conn.execute("SELECT patient_id FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
-    db.bury(conn, "id = ?", (dictation_id,), now)
-    conn.execute("INSERT OR IGNORE INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
-    if row is not None and row["patient_id"] is not None:
+    tomb = conn.execute("SELECT closed_at FROM dictation_tombstones WHERE id = ?", (dictation_id,)).fetchone()
+    if tomb is not None:
+        return float(tomb["closed_at"])
+    row = conn.execute("SELECT patient_id, revision FROM dictations WHERE id = ?", (dictation_id,)).fetchone()
+    if row is None:
+        conn.execute("INSERT INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
+    elif revision is not None and row["revision"] == revision:
+        db.bury(conn, "id = ?", (dictation_id,), now)
+        if row["patient_id"] is not None:
+            conn.execute(
+                "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",
+                (now, row["patient_id"]),
+            )
+    else:
         conn.execute(
-            "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",
-            (now, row["patient_id"]),
+            "UPDATE dictations SET handed_over_at = ?, revision = revision + 1 WHERE id = ?", (now, dictation_id)
         )
+    return None

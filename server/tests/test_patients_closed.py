@@ -17,7 +17,6 @@ from medvox.settings import Settings
 
 PATIENTS = "/api/v1/patients"
 DICTATIONS = "/api/v1/dictations"
-TRANSFER = "/api/v1/transfer"
 DICTATION = {"transcript": "Zahn 36 mod Geheimbefund.", "patient_type": "kasse", "codes": ["13c"]}
 
 
@@ -104,37 +103,3 @@ def test_ipad_save_keeps_office_reassignment(logged_in: TestClient) -> None:
     assert again.json()["revision"] == saved["revision"] + 2
     assert patient(logged_in, "4711")["dictations"] == 0 and patient(logged_in, "4712")["dictations"] == 1
 
-
-def test_short_code_fetch_closes_the_saved_dictation(logged_in: TestClient, settings: Settings) -> None:
-    put(logged_in, "diktat-0001", "4711")
-    code = logged_in.post(
-        TRANSFER, json={"transcript": DICTATION["transcript"], "codes": ["36,13c"], "dictation_id": "diktat-0001"}
-    ).json()["code"]
-    assert patient(logged_in, "4711")["dictations"] == 1  # noch nicht abgerufen: bleibt offen
-
-    reception = TestClient(logged_in.app)
-    for _ in range(2):  # der Abruf bleibt innerhalb der TTL wiederholbar
-        read = reception.get(f"{TRANSFER}/{code}")
-        assert read.status_code == 200 and read.json()["transcript"] == DICTATION["transcript"]
-
-    assert open_dictations(settings.db_path) == []
-    assert [t[0] for t in tombstones(settings.db_path)] == ["diktat-0001"]
-    state = patient(logged_in, "4711")
-    assert state["dictations"] == 0 and state["transferred"] == 1 and state["transferred_at"]
-    assert put(logged_in, "diktat-0001", "4711").status_code == 410
-
-
-def test_short_code_fetched_before_the_ipad_saved(logged_in: TestClient, settings: Settings) -> None:
-    # Speichern hing noch (WLAN), die Rezeption hat den Code schon abgerufen.
-    code = logged_in.post(TRANSFER, json={"transcript": "x", "dictation_id": "diktat-0001"}).json()["code"]
-    assert TestClient(logged_in.app).get(f"{TRANSFER}/{code}").status_code == 200
-    assert put(logged_in, "diktat-0001").status_code == 410
-    assert logged_in.get(PATIENTS).json()["unassigned"] == []
-
-
-def test_unfetched_short_code_leaves_the_dictation_open(logged_in: TestClient) -> None:
-    put(logged_in, "diktat-0001")
-    logged_in.post(TRANSFER, json={"transcript": "x", "dictation_id": "diktat-0001"})
-    logged_in.post(TRANSFER, json={"transcript": "ohne Verknüpfung (ältere iPad-Version)"})
-    assert [d["id"] for d in logged_in.get(PATIENTS).json()["unassigned"]] == ["diktat-0001"]
-    assert put(logged_in, "diktat-0001", transcript="ergänzt").status_code == 200

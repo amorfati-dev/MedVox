@@ -30,6 +30,8 @@ export type TranscribeResult = {
   notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
 };
 export type TransferCreated = { code: string; expires_at: string };
+// Gespeichertes Diktat hinter einem Kurzcode; `revision` null, solange dieser Stand noch nicht gespeichert ist.
+export type HandoverLink = { id: string; revision: number | null };
 // Art einer übergebenen Position; kassenanteil = BEMA-Basis einer Zuzahlung am selben Zahn.
 export type PositionKind = "bema" | "goz" | "zuzahlung" | "kassenanteil";
 // Übergebene Position, nur zur Anzeige an der Rezeption (kopiert wird `codes`).
@@ -66,6 +68,7 @@ export type StoredDictation = DictationContent & {
   revision: number; // „übertragen“ löscht nur genau die angezeigte Fassung
   created_at: string;
   updated_at: string;
+  handed_over_at?: string | null; // ein früherer Stand wurde per Kurzcode an der Rezeption abgeholt
 };
 export type PatientSummary = {
   id: number;
@@ -142,11 +145,17 @@ export const api = {
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
-  // `dictationId`: gespeichertes Diktat; der Abruf des Kurzcodes schließt es wie „übertragen“ im Büro.
-  createTransfer: (transcript: string, codes: string[], details?: TransferDetails, dictationId?: string | null) =>
+  // `link`: gespeichertes Diktat; der erste Abruf des Kurzcodes schließt genau diesen Stand wie
+  // „übertragen“ im Büro. War es schon übertragen, lehnt der Abruf mit 410 ab.
+  createTransfer: (transcript: string, codes: string[], details?: TransferDetails, link?: HandoverLink | null) =>
     request<TransferCreated>(
       "/api/v1/transfer",
-      json("POST", { transcript, codes, ...details, ...(dictationId ? { dictation_id: dictationId } : {}) }),
+      json("POST", {
+        transcript,
+        codes,
+        ...details,
+        ...(link ? { dictation_id: link.id, ...(link.revision !== null ? { dictation_revision: link.revision } : {}) } : {}),
+      }),
     ),
   getTransfer: (code: string) =>
     request<TransferData>(`/api/v1/transfer/${encodeURIComponent(code)}`),

@@ -151,6 +151,12 @@ Beobachtet: ______________________________________________________
        „übertragen", nicht als „offen".
 13. [ ] Danach am iPad beim selben Diktat eine Ziffer abwählen → „Dieses Diktat wurde bereits
        übertragen"; in `/patienten` erscheint es **nicht** wieder als offen.
+14. [ ] Diktat für 4716, **An Rezeption**, danach am iPad eine Ziffer abwählen, erst dann den alten
+       Code abrufen → Rezeption zeigt den Stand des Codes; in `/patienten` bleibt 4716 offen mit dem
+       bernsteinfarbenen Hinweis „Ein früherer Stand wurde um … per Kurzcode … abgeholt".
+15. [ ] Diktat für 4717, **An Rezeption**, Code **nicht** abrufen; im Büro 4717 **Als übertragen
+       markieren**; dann den Code abrufen → „Dieses Diktat wurde bereits am … übertragen … – nicht
+       erneut in Evident eintragen", keine Ziffern; erneuter Abruf → „Kein Diktat unter diesem Code".
 
 Beobachtet: ______________________________________________________
 

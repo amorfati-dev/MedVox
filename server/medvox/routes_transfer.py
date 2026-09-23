@@ -7,6 +7,7 @@ Anlegen erfordert die Sitzung des Behandlers; der Abruf ist ohne Login möglich
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -34,6 +35,7 @@ class TransferCreate(BaseModel):
     positions: list[TransferPosition] = Field(default_factory=list, max_length=200)
     # gespeichertes Diktat (PUT /dictations/{id}), das der Abruf als übertragen schließt
     dictation_id: str | None = Field(default=None, pattern=r"^[A-Za-z0-9-]{8,64}$")
+    dictation_revision: int | None = Field(default=None, ge=1)  # gespeicherter Stand genau dieses Inhalts
 
 
 class TransferCreated(BaseModel):
@@ -60,6 +62,7 @@ def create(body: TransferCreate, request: Request) -> TransferCreated:
         body.patient_type,
         [p.model_dump() for p in body.positions],
         body.dictation_id,
+        body.dictation_revision,
     )
     log.info("Transfer angelegt (%d Zeichen, %d Ziffern)", len(body.transcript), len(body.codes))
     return TransferCreated(code=entry.code, expires_at=transfer.iso(entry.expires_at))
@@ -69,7 +72,15 @@ def create(body: TransferCreate, request: Request) -> TransferCreated:
 def read(code: str, request: Request) -> TransferRead:
     limiter: ratelimit.RateLimiter = request.app.state.transfer_limiter
     limiter.check(request, "Zu viele Abrufe. Bitte eine Minute warten.")
-    entry = transfer.get_transfer(request.app.state.settings.db_path, code)
+    try:
+        entry = transfer.get_transfer(request.app.state.settings.db_path, code)
+    except transfer.AlreadyTransferred as done:
+        when = datetime.fromtimestamp(done.closed_at).strftime("%d.%m.%Y um %H:%M Uhr")
+        raise HTTPException(
+            status_code=410,
+            detail=f"Dieses Diktat wurde bereits am {when} übertragen (Büro oder anderer Kurzcode) oder gelöscht"
+            " – nicht erneut in Evident eintragen.",
+        ) from None
     if entry is None:
         raise HTTPException(status_code=404, detail="Kein Diktat unter diesem Code (oder abgelaufen).")
     return TransferRead(

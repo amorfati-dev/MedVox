@@ -129,9 +129,11 @@ test("createTransfer: nennt das gespeicherte Diktat, ohne ID wie bisher", async 
     bodies.push(JSON.parse(String(init.body)));
     return new Response(JSON.stringify({ code: "ABCDEF", expires_at: "" }), { status: 200 });
   });
-  await api.createTransfer("Zahn 36", ["36,13c"], undefined, "diktat-0001");
+  await api.createTransfer("Zahn 36", ["36,13c"], undefined, { id: "diktat-0001", revision: 3 });
+  await api.createTransfer("Zahn 36", ["36,13c"], undefined, { id: "diktat-0001", revision: null });
   await api.createTransfer("Zahn 36", ["36,13c"], undefined, null);
   assert.deepEqual(bodies, [
+    { transcript: "Zahn 36", codes: ["36,13c"], dictation_id: "diktat-0001", dictation_revision: 3 },
     { transcript: "Zahn 36", codes: ["36,13c"], dictation_id: "diktat-0001" },
     { transcript: "Zahn 36", codes: ["36,13c"] },
   ]);

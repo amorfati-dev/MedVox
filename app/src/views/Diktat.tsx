@@ -254,7 +254,7 @@ export function Diktat({ onLogout }: Props) {
             type="button"
             className="btn btn-primary"
             disabled={transfer.busy || !d.transcript || closed}
-            onClick={() => void transfer.send(save.id())}
+            onClick={() => void transfer.send(save.handover())}
           >
             <Icon name="send" />
             {transfer.busy ? "Sende …" : "An Rezeption"}
