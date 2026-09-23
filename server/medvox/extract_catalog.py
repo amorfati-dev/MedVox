@@ -136,8 +136,14 @@ class Catalog:
         return entry.co_payment is not None and entry.co_payment.allowed
 
     def find_code(self, system: str, folded_code: str) -> Entry | None:
-        """Eintrag zu einer diktierten Ziffer ("13a", "ae935d") im genannten System."""
-        return self._by_folded.get((system, folded_code))
+        """Eintrag zu einer diktierten Ziffer ("13a", "ae935d") im genannten System.
+
+        GOÄ-Ziffern auch ohne Ä („GOÄ 2430“ = Ä2430) – sonst träfe die Zahl die GOZ-Ziffer 2430.
+        """
+        entry = self._by_folded.get((system, folded_code))
+        if entry is None and system == "GOÄ" and folded_code.isdigit():
+            entry = self._by_folded.get((system, "ae" + folded_code))
+        return entry
 
     def is_code_word(self, entry: Entry, folded_keyword: str) -> bool:
         """Keyword ist die Ziffer selbst oder die amtliche Kurzbezeichnung ("ip5", "l1", "2060")."""

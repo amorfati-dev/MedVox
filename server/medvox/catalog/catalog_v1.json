@@ -1482,6 +1482,52 @@
       }
     },
     {
+      "code": "Ä161",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Eröffnung eines oberflächlichen Abszesses (Inzision)",
+      "evident": "inz1",
+      "abbrev": "Inz1",
+      "points": 15,
+      "keywords": [
+        "inzision",
+        "inzidiert",
+        "abszess eröffnet",
+        "abszesseröffnung",
+        "abszessinzision",
+        "abszess inzidiert",
+        "abszess gespalten",
+        "abszessspaltung",
+        "entlastungsschnitt",
+        "inz1",
+        "inz 1",
+        "ä161"
+      ],
+      "rules": [
+        "nur oberflächlicher, unmittelbar unter der Haut oder Schleimhaut gelegener Abszess",
+        "Wörter ohne Tiefe (Inzision, Abszess eröffnet) lassen oberflächlich/tiefliegend offen – der Extraktor fragt nach",
+        "tiefliegender Abszess: im BEMA keine Ziffer (Inz2 steht nicht im BEMA, Stand 1. Januar 2026)",
+        "Privatpatient: GOÄ Ä2428"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "GOÄ",
+          "code": "Ä2428"
+        }
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "neu, bitte prüfen"
+      }
+    },
+    {
       "code": "105",
       "system": "BEMA",
       "area": "Chirurgie",
@@ -4326,6 +4372,109 @@
       ],
       "review": {
         "status": "draft"
+      }
+    },
+    {
+      "code": "Ä2428",
+      "system": "GOÄ",
+      "area": "Chirurgie",
+      "title": "Eröffnung eines oberflächlichen Abszesses (Inzision)",
+      "evident": "inz1",
+      "points": 80,
+      "keywords": [
+        "oberflächliche inzision",
+        "oberflächlich inzidiert",
+        "oberflächlich eröffnet",
+        "oberflächlicher abszess",
+        "oberflächlichen abszess",
+        "submuköser abszess",
+        "submukösen abszess",
+        "submuköse inzision",
+        "inzision privat",
+        "ä2428"
+      ],
+      "rules": [
+        "GOÄ Abschnitt L VII, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "oberflächlich unter der Haut oder Schleimhaut liegender Abszess (auch Furunkel); tiefliegend: GOÄ Ä2430",
+        "kein Zuschlag 0500–0530 (keine GOZ-Leistung) und kein GOÄ-Zuschlag 442–445 (nicht in der Liste zu Abschnitt C VIII)",
+        "Kassenpatient: BEMA Ä161 (Inz1)"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "Ä161"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "Ä161"
+        ],
+        "note": "Kassenleistung BEMA Ä161 – privat nicht zusätzlich berechenbar.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "neu, bitte prüfen"
+      }
+    },
+    {
+      "code": "Ä2430",
+      "system": "GOÄ",
+      "area": "Chirurgie",
+      "title": "Eröffnung eines tiefliegenden Abszesses (Inzision)",
+      "evident": "inz2",
+      "points": 303,
+      "keywords": [
+        "tiefliegende inzision",
+        "tiefliegend inzidiert",
+        "tiefliegend eröffnet",
+        "tiefliegender abszess",
+        "tiefliegenden abszess",
+        "tiefe inzision",
+        "tief inzidiert",
+        "tiefer abszess",
+        "tiefen abszess",
+        "logenabszess",
+        "subperiostaler abszess",
+        "subperiostalen abszess",
+        "inz2",
+        "inz 2",
+        "ä2430"
+      ],
+      "rules": [
+        "GOÄ Abschnitt L VII, für Zahnärzte über § 6 Abs. 2 GOZ",
+        "tiefliegender Abszess; oberflächlich unter der Haut oder Schleimhaut: GOÄ Ä2428",
+        "kein Zuschlag 0500–0530 (keine GOZ-Leistung); stattdessen GOÄ-Zuschlag 442 (250–499 Punkte, Abschnitt C VIII, über § 6 Abs. 2 Nr. 2 GOZ) – nicht im Katalog v1, nicht neben 0500–0530 derselben Sitzung",
+        "Kassenpatient: keine BEMA-Ziffer für den tiefliegenden Abszess (BEMA kennt nur Ä161 Inz1)"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Im BEMA gibt es keine Ziffer für den tiefliegenden Abszess (nur Ä161 Inz1, oberflächlich); ob er beim Kassenpatienten privat vereinbart werden kann, ist nicht belegt – nicht vorgeschlagen.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "neu, bitte prüfen"
       }
     }
   ]

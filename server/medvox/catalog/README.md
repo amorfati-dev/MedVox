@@ -5,7 +5,7 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
 
 | Datei | Zweck |
 |---|---|
-| `catalog_v1.json` | die 60–96 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
+| `catalog_v1.json` | die 60–99 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
 | `catalog_extended.json` | weitere geprüfte Positionen (Prothetik, PAR-Chirurgie, UPT, Kinder-Früherkennung …), gleiches Schema; wird nicht geladen, Saat für den Vollimport in Phase 2 |
 | `schema.json` | JSON-Schema für beide Dateien |
 | `validate.py` | prüft Schema + Fachregeln, druckt die Review-Tabelle (`cd server && make catalog-check` prüft beide Kataloge) |
@@ -54,8 +54,10 @@ Paare (`equivalent`) verbinden BEMA und GOZ/GOÄ für dieselbe diktierte Leistun
 der Extraktor wählt mit dem Patiententyp genau eine Seite. Sie stehen immer beidseitig und nur innerhalb
 einer Datei (`validate.py` prüft beides). Mehrere Paare sind erlaubt, wenn eine BEMA-Leistung im GOZ
 aufgeteilt ist (BEMA 12 = GOZ 2030 oder 2040, BEMA 107 = GOZ 4050/4055 je Zahn, Ä925a–d = GOÄ Ä5000);
-dann entscheidet das diktierte Wort. `zuzahlung` ist ein Vorschlag zur Prüfung durch den Behandler, keine
-Rechtsberatung: `allowed: false` mit Begründung, wo die übliche Praxis umstritten oder nicht belegbar ist.
+dann entscheidet das diktierte Wort. Die Abszesseröffnung wählt die Tiefe: oberflächlich BEMA Ä161 (Inz1)
+= GOÄ Ä2428, tiefliegend nur GOÄ Ä2430 (kein BEMA-Paar, im BEMA ohne Ziffer); ein Wort ohne Tiefe
+(„Inzision") gibt einen Prüfhinweis statt einer stillen Wahl (`extract_rules.py`). `zuzahlung` ist ein
+Vorschlag zur Prüfung durch den Behandler, keine Rechtsberatung: `allowed: false` mit Begründung, wo die übliche Praxis umstritten oder nicht belegbar ist.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche` – oder `unbegrenzt` ohne `count`, wo

@@ -54,6 +54,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | 48 | Osteotomie, retinierter/verlagerter Zahn | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn |  | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3300 **(neu, bitte prüfen)** | Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren) |  | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | GOZ 3290 ist die reine Kontrolle; mit Behandlung (Tamponieren, Spülen) GOZ 3300 – prüfen | [Q1] [Q4] [Q3] |
+| ☐ | Ä161 | Eröffnung eines oberflächlichen Abszesses (Inzision) | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) |  | [Q1] [Q2] [Q3] |
 | ☐ | 105 | Lokale Schleimhautbehandlung / Druckstelle | GOZ 4020 **(neu, bitte prüfen)** | Lokalbehandlung Mundschleimhaut / Taschenspülung |  | [Q1] [Q4] [Q3] |
 | ☐ | 107 | Entfernung harter Zahnbeläge (Zahnstein) | GOZ 4050 | Zahnsteinentfernung, einwurzeliger Zahn | BEMA 107 gilt je Sitzung, GOZ 4050/4055 je Zahn – Zähne prüfen | [Q1] [Q4] [Q3] |
 | ☐ | 107 | Entfernung harter Zahnbeläge (Zahnstein) | GOZ 4055 | Zahnsteinentfernung, mehrwurzeliger Zahn |  | [Q1] [Q4] [Q3] |
@@ -138,6 +139,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 0510 | Zuschlag zu chirurgischen Leistungen (500–799 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
 | ☐ | nein | GOZ 0520 | Zuschlag zu chirurgischen Leistungen (800–1199 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
 | ☐ | nein | GOZ 0530 | Zuschlag zu chirurgischen Leistungen (ab 1200 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
+| ☐ | nein | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) | Ä161 | Kassenleistung BEMA Ä161 – privat nicht zusätzlich berechenbar. | [Q1] |
+| ☐ | nein | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | – | Im BEMA gibt es keine Ziffer für den tiefliegenden Abszess (nur Ä161 Inz1, oberflächlich); ob er beim Kassenpatienten privat vereinbart werden kann, ist nicht belegt – nicht vorgeschlagen. | [Q1] |
 
 ### Zuzahlung – Prophylaxe
 

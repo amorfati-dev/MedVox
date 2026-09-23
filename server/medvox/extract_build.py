@@ -10,13 +10,13 @@ getrennt gesammelt; Befundwörter gelten für beide.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
-    OSTEO_KINDS, REMOVAL, REMOVAL_ACT, ROOT_PAIRS, SURCHARGE_CODES, multi_rooted, removal_modifier,
-    surface_count_word,
+    OSTEO_KINDS, REMOVAL, REMOVAL_ACT, ROOT_PAIRS, SURCHARGE_CODES, incision_depth_open, incision_depth_stated,
+    multi_rooted, removal_modifier, surface_count_word,
 )
 from medvox.extract_text import TextContext
 from medvox.normalize import ToothRef
@@ -77,7 +77,7 @@ class Builder:
     def build(self, tagged: list[Tagged]) -> list[Draft]:
         fillings = [t for t in tagged if t.hit.entry.family]
         removals = [t for t in tagged if t.hit.entry.code in REMOVAL.get(t.hit.entry.system, {}).values()]
-        rest = [t for t in tagged if t not in fillings and t not in removals]
+        rest = _incision_depth([t for t in tagged if t not in fillings and t not in removals])
         self._fillings(fillings)
         self._removals(removals)
         sessions: dict[tuple[str, str, bool], list[Tagged]] = {}
@@ -231,9 +231,22 @@ class Builder:
     def _session(self, group: list[Tagged]) -> None:
         repeats = max(Counter(t.hit.keyword for t in group).values())
         times = max((self.ctx.times(t.hit.start, t.hit.end) or 0 for t in group), default=0)
+        flags = [incision_depth_open(t.hit) for t in group]
+        flag = flags[0] if all(flags) else None  # Tiefe offen, wenn kein Wort der Leistung sie nennt
         for t in group:
-            draft = self.add(t.hit.entry, None, t, max(repeats, times))
+            draft = self.add(t.hit.entry, None, t, max(repeats, times), flag)
             draft.context = _unique_fdi(draft.context + tuple(tooth.fdi for tooth in t.teeth))
+
+
+def _incision_depth(tagged: list[Tagged]) -> list[Tagged]:
+    """„Subperiostaler Abszess inzidiert“: ein Wort ohne Tiefe gehört zur Abszesseröffnung mit Tiefe im selben Satz."""
+    stated = [t for t in tagged if incision_depth_stated(t.hit)]
+    result = []
+    for t in tagged:
+        host = next((s for s in stated if s.sentence == t.sentence and (
+            not t.teeth or not s.teeth or set(t.teeth) & set(s.teeth))), None) if incision_depth_open(t.hit) else None
+        result.append(replace(t, hit=replace(t.hit, entry=host.hit.entry, via=None)) if host else t)
+    return result
 
 
 def _unique(items) -> list:

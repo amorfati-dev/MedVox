@@ -52,6 +52,31 @@ def private_only(entry, folded_keyword: str) -> str | None:
     rule = _PRIVATE_ONLY.get((entry.system, entry.code))
     return rule[1] if rule and rule[0].search(folded_keyword) else None
 
+# Abszesseröffnung: die Tiefe wählt die Ziffer – oberflächlich BEMA Ä161 (Inz1) = GOÄ Ä2428,
+# tiefliegend GOÄ Ä2430 (im BEMA ohne Ziffer). Die Tiefenwörter sind Keywords von Ä2428/Ä2430;
+# die übrigen Wörter von Ä161 („Inzision“, „Abszess eröffnet“) lassen die Tiefe offen, dann wird
+# nicht still eine Tiefe gewählt, sondern nachgefragt.
+INCISION_OPEN = ("BEMA", "Ä161")
+INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), ("GOÄ", "Ä2430")})
+_INCISION_DEPTH = {
+    "BEMA": "Tiefe nicht diktiert – Ä161 (Inz1) nur beim oberflächlichen Abszess; "
+            "für den tiefliegenden hat der BEMA keine Ziffer",
+    "GOÄ": "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen",
+}
+
+
+def incision_depth_open(hit) -> str | None:
+    """Prüfhinweis, wenn eine Abszesseröffnung ohne oberflächlich/tiefliegend diktiert wurde."""
+    origin = hit.via or hit.entry
+    if origin.key != INCISION_OPEN or hit.code_word:
+        return None
+    return _INCISION_DEPTH.get(hit.entry.system)
+
+
+def incision_depth_stated(hit) -> bool:
+    """Abszesseröffnung mit diktierter Tiefe („tiefliegenden Abszess“, „Inz1“)."""
+    return (hit.via or hit.entry).key in INCISION and not incision_depth_open(hit)
+
 # GOZ-Zuschläge zu chirurgischen Leistungen (Anlage 1, Abschnitt L): Ziffer, Punkte von, bis.
 SURCHARGES: tuple[tuple[str, int, int | None], ...] = (
     ("0500", 250, 499),
