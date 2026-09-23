@@ -45,7 +45,8 @@
 }
 .patient-number {
   font-family: var(--mono);
-  font-size: var(--fs-ziffer);
+  font-size: var(--fs-clock);
+  line-height: 1.1;
   font-weight: 800;
   letter-spacing: 0.04em;
   overflow-wrap: anywhere;
@@ -69,7 +70,7 @@
 }
 .patient-none .patient-number {
   font-family: var(--sans);
-  font-size: var(--fs-state);
+  font-size: var(--fs-transcript);
   color: var(--warn);
 }
 .patient-save {

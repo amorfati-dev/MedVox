@@ -33,14 +33,14 @@ export function PatientBar({ number, onOpen, locked, save }: Props) {
           <span className="patient-label">{number ? "Patient" : "Ohne Patient"}</span>
           <span className="patient-number">{number ?? "Nummer eingeben"}</span>
         </span>
-        <span className="patient-change">{number ? "Wechseln" : "Eingeben"}</span>
+        {number && <span className="patient-change">Wechseln</span>}
       </button>
       {locked && <p className="switch-hint">Der Patient gilt für das ganze laufende Diktat.</p>}
       {save.state !== "aus" && (
         <p className={`patient-save patient-save-${save.state}`} role="status">
           <Icon name={save.state === "gespeichert" ? "check" : save.state === "fehler" ? "warn" : "spinner"} />
           <span>
-            {SAVE_TEXT[save.state]}
+            {save.state === "gespeichert" && !number ? "Gespeichert ohne Patient – Nummer oben nachtragen" : SAVE_TEXT[save.state]}
             {save.state === "fehler" && save.error ? ` (${save.error})` : ""}
           </span>
         </p>
