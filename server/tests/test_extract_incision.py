@@ -133,8 +133,9 @@ def test_separate_abscesses_without_tooth_are_counted():
         ("Ä161", 1, (36,), DEPTH_OPEN_KASSE), ("Ä161", 1, (), "Zahn nicht diktiert")]
 
 
-def test_toothless_abscesses_keep_their_own_depth_and_teeth():
-    result = run("Oberflächlichen Abszess eröffnet. Abszess eröffnet.")
+@pytest.mark.parametrize("joint", [". ", ", "])  # Whisper schreibt oft ein Komma statt des Punkts
+def test_toothless_abscesses_keep_their_own_depth_and_teeth(joint):
+    result = run(f"Oberflächlichen Abszess eröffnet{joint}Abszess eröffnet.")
     assert [(s.code, s.count, s.decide) for s in performed(result)] == [
         ("Ä161", 1, ("Zahn nicht diktiert",)), ("Ä161", 1, ("Zahn nicht diktiert", DEPTH_OPEN_KASSE))]
     result = run("Oberflächliche Inzision vestibulär. Abszess eröffnet palatinal.", "privat")
@@ -152,8 +153,9 @@ def test_tooth_after_the_verb_belongs_to_the_abscess(dictation, patient, code, t
     assert (s.code, s.teeth) == (code, teeth)
 
 
-def test_two_incisions_at_one_tooth_are_one_position_with_a_hint():
-    result = run("Abszess eröffnet an drei sechs vestibulär. Abszess eröffnet an drei sechs palatinal.")
+@pytest.mark.parametrize("joint", [". Abszess", ", Abszess"])
+def test_two_incisions_at_one_tooth_are_one_position_with_a_hint(joint):
+    result = run(f"Abszess eröffnet an drei sechs vestibulär{joint} eröffnet an drei sechs palatinal.")
     [s] = performed(result)
     assert (s.code, s.count, s.teeth) == ("Ä161", 1, (36,))
     assert s.decide == (DEPTH_OPEN_KASSE,

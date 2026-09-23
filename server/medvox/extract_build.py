@@ -128,8 +128,13 @@ class Builder:
                 del self.drafts[key]
 
     def _incision_teeth(self, t: Tagged) -> Tagged:
-        """„Tiefliegenden Abszess eröffnet regio 37“: der Zahn nach dem Verb gehört zur Fundstelle."""
-        verb = INCISION_VERB.match(self.ctx.folded, t.hit.end) if t.hit.entry.key in INCISION else None
+        """Zahn nach dem Verb gehört zur Fundstelle; jedes Verb schließt einen Abszess ab, auch ohne Punkt."""
+        if t.hit.entry.key not in INCISION:
+            return t
+        s, e = t.sentence
+        t = replace(t, sentence=(max((m.end() for m in INCISION_VERB.finditer(self.ctx.folded, s, t.hit.start)),
+                                     default=s), e))
+        verb = INCISION_VERB.match(self.ctx.folded, t.hit.end)
         return replace(t, teeth=self.ctx.teeth_for(t.hit.start, verb.end())) if verb else t
 
     def _incision(self, t: Tagged) -> None:
