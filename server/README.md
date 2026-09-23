@@ -105,9 +105,10 @@ Plan-Marker, Verneinung, Anzahlen), `extract_build.py` (Regelfamilien), `extract
 (Enthaltensein, „nicht neben“, Privat-Alternativen, Zuschlag), `extract_rules.py` (die festen
 Fachtabellen zum Nachlesen).
 
-- **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 – ein Zählwort („dreiflächig“, „MOD“,
-  „BEMA 13a“) vor den am Zahn diktierten Flächen; Widerspruch wird markiert. Flächenwörter allein
-  („36 mod Karies“) lösen keine Füllung aus.
+- **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 je Zahn – ein freistehendes Zählwort
+  („dreiflächig“, „Kompositfüllung MOD“, „BEMA 13a“) gilt nur für die Zähne seines Satzes und geht
+  vor den am Zahn diktierten Flächen; Flächen direkt am Zahn („37 mod“) gelten nur für diesen Zahn.
+  Widerspruch wird markiert. Flächenwörter allein („36 mod Karies“) lösen keine Füllung aus.
 - **Ein-/mehrwurzelig** (43/44, AIT a/b, 4050/4055) aus der FDI-Nummer. Zahnentfernung braucht ein
   Handlungswort (Extraktion, Osteotomie, X1, Ost1); Befundwörter (retiniert, Längsfraktur) wählen nur
   die Ziffer (48 statt 47a, 45 statt 43/44).
