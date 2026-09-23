@@ -16,22 +16,21 @@ from medvox.normalize import _SF, _SURFACE_MOD, _SURFACE_WORD, _SURFACE_WORDS, n
 # damit das diktierte Wort danach wieder eingesetzt werden kann.
 _KEEP = "\x03"
 _KEPT = re.compile(rf"[modblpi]+{_KEEP}")
+_SURFACE = re.compile(f"{_SURFACE_WORD.pattern}|{_SURFACE_MOD.pattern}", re.I)
 
 
 def display_text(text: str) -> str:
     """Transkript mit FDI-Nummern und zusammengefügten Codes, Flächen wie diktiert."""
     originals: list[str] = []
 
-    def mark(letters: str):
-        def sub(m: re.Match) -> str:
-            originals.append(m.group())
-            return (letters or _SURFACE_WORDS[m.group(1).lower()]) + _SF + _KEEP
-        return sub
+    def mark(m: re.Match) -> str:
+        originals.append(m.group())
+        letters = _SURFACE_WORDS[m.group(1).lower()] if m.group(1) else "mod"
+        return letters + _SF + _KEEP
 
     def surfaces(t: str) -> str:
         # Wie `normalize._surfaces`, aber ohne Zusammenziehen zu „mod“: jedes Wort bleibt ein Token.
-        t = _SURFACE_WORD.sub(mark(""), t)
-        return _SURFACE_MOD.sub(mark("mod"), t)
+        return _SURFACE.sub(mark, t)
 
     shown = normalize(text, surfaces).text
     words = iter(originals)

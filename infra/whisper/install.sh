@@ -5,8 +5,7 @@
 #   infra/whisper/install.sh                      # Modell wird heruntergeladen (1,6 GB)
 #   infra/whisper/install.sh /pfad/zu/ggml-large-v3-turbo.bin
 #                                                 # vorhandene Modelldatei wird KOPIERT
-#                                                 # (z. B. die von OpenSuperWhisper – sie
-#                                                 # wird dabei nicht verändert)
+#                                                 # (die Quelle bleibt unverändert)
 #
 # Ergebnis: launchd-Agent de.medvox.whisper-server, lauscht auf 127.0.0.1:8178,
 # Prompt aus infra/whisper/prompt.txt. Prompt ändern → prompt.txt bearbeiten,
@@ -63,12 +62,6 @@ else
 fi
 
 # --- 3. Modell --------------------------------------------------------------
-# Ohne Argument und ohne eigenes Modell: vorhandene OpenSuperWhisper-Datei kopieren statt 1,6 GB laden.
-OSW_MODEL="$HOME/Library/Application Support/ru.starmel.OpenSuperWhisper/whisper-models/ggml-large-v3-turbo.bin"
-if [[ -z "$MODEL_SRC" && ! -f "$WHISPER_MODEL" && -f "$OSW_MODEL" ]]; then
-  MODEL_SRC="$OSW_MODEL"
-  ok "Modell von OpenSuperWhisper gefunden – wird kopiert, nicht heruntergeladen"
-fi
 if [[ -n "$MODEL_SRC" ]]; then
   [[ -f "$MODEL_SRC" ]] || die "Modelldatei nicht gefunden: $MODEL_SRC"
   if [[ -f "$WHISPER_MODEL" ]] && cmp -s "$MODEL_SRC" "$WHISPER_MODEL"; then
@@ -80,7 +73,8 @@ if [[ -n "$MODEL_SRC" ]]; then
 elif [[ -f "$WHISPER_MODEL" ]]; then
   ok "Modell vorhanden: $WHISPER_MODEL"
 else
-  log "Lade ggml-large-v3-turbo.bin (1,6 GB) von Hugging Face – einmalig, danach kein Internet nötig"
+  log "Kein Modell vorhanden – lade ggml-large-v3-turbo.bin (1,6 GB) von Hugging Face – einmalig, danach kein Internet nötig"
+  log "Vorhandene Datei stattdessen nutzen: make install MODEL=/pfad/zum/ggml-large-v3-turbo.bin"
   sh "$WHISPER_SRC/models/download-ggml-model.sh" large-v3-turbo "$MEDVOX_MODELS"
   [[ -f "$WHISPER_MODEL" ]] || die "Download fehlgeschlagen"
 fi

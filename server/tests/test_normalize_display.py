@@ -19,6 +19,11 @@ from medvox.normalize_display import display_text
         ("Kompositfüllung MOD, dreiflächig.", "Kompositfüllung MOD, dreiflächig."),
         ("Eins vier distale Karies.", "14 distale Karies."),
         ("Zahn 3-6 okklusal, Zahn 1 6 2 6 palatinal.", "Zahn 36 okklusal, Zahn 16 26 palatinal."),
+        ("Zahn drei sechs MOD, Zahn drei sieben okklusal.", "Zahn 36 MOD, Zahn 37 okklusal."),
+        (
+            "Kompositfüllung MOD an drei sechs, vier sechs distal Karies.",
+            "Kompositfüllung MOD an 36, 46 distal Karies.",
+        ),
     ],
 )
 def test_display_keeps_surface_words(dictated: str, shown: str) -> None:

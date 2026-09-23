@@ -29,8 +29,9 @@ make install          # ~5–10 Minuten beim ersten Mal, danach Sekunden
 Das Skript (`infra/install.sh`) prüft die Voraussetzungen, dann der Reihe nach:
 
 1. **Spracherkennung** (`infra/whisper/install.sh`): whisper.cpp bauen, Modell übernehmen,
-   Dienst einrichten. Das Modell (1,6 GB) wird von OpenSuperWhisper **kopiert**, falls dort
-   vorhanden, sonst heruntergeladen; eigene Datei: `make install MODEL=/pfad/ggml-large-v3-turbo.bin`.
+   Dienst einrichten. Das Modell (1,6 GB) wird heruntergeladen, falls noch keins installiert ist.
+   Liegt `ggml-large-v3-turbo.bin` schon auf dem Mac, wird diese Datei stattdessen **kopiert**:
+   `make install MODEL=/pfad/zum/ggml-large-v3-turbo.bin`.
 2. **Backend** (`infra/server/install.sh`): `server/` nach `…/MedVox/server` kopieren,
    Python-Pakete mit `uv` installieren, Dienst `de.medvox.server` laden.
 3. **App** (`infra/app/install.sh`): `npm ci && npm run build`, Ergebnis nach `…/MedVox/app`.
