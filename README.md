@@ -2,7 +2,8 @@
 
 Lokale Diktat-Transkription für die Zahnarztpraxis: Sprache auf dem iPad/iPhone
 aufnehmen, auf dem Praxis-Mac transkribieren, BEMA-/GOZ-Positionen vorschlagen
-und den Text per Kurzcode/QR an den Rezeptions-PC übergeben.
+und den Text per Kurzcode/QR an den Rezeptions-PC übergeben – oder je Patient (Evident-Nummer)
+sammeln und nach der Runde durch die Zimmer im Büro übertragen (höchstens 24 Stunden gespeichert).
 **Kein Byte verlässt das Praxis-LAN**, keine Cloud-Dienste, Audio wird nach der
 Transkription gelöscht.
 
@@ -13,7 +14,7 @@ Cloud-Prototyp-Version liegt nur noch in der Git-Historie.
 
 | Paket | Technik | Aufgabe |
 |---|---|---|
-| `server/` | Python 3.12, FastAPI | API auf dem Praxis-Mac: Transkription (whisper.cpp), Normalisierung, Katalog-Regeln, Kurzcode-Transfer |
+| `server/` | Python 3.12, FastAPI | API auf dem Praxis-Mac: Transkription (whisper.cpp), Normalisierung, Katalog-Regeln, Kurzcode-Transfer, Diktate je Patient |
 | `app/` | Vite + React + TypeScript (ohne UI-Framework) | PWA für iPad/iPhone und Rezeptions-Browser |
 | `infra/` | Shell + launchd | Installation auf dem Praxis-Mac: whisper-server, Backend, App und LAN-HTTPS (Caddy, eigene CA) – Anleitung in [`infra/README.md`](infra/README.md) |
 | `docs/` | Markdown | Abnahmeprotokoll und Diktierhilfe für die Praxis |
