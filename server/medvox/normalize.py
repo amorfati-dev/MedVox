@@ -1,11 +1,9 @@
 """Deterministischer Normalisierer für deutsche Zahnarzt-Diktate (WP-5).
 
-Wandelt ein (lexikon-korrigiertes) Transkript in die maschinenlesbare Form für
-den Regel-Extraktor: gesprochene und von Whisper geschriebene Zahnformen ->
-FDI-Nummern, Flächenwörter -> m/o/d/b/l/p/i, deutsche Zahlwörter -> Ziffern,
-BEMA/GOZ/Ä-Codes zusammengefügt. Reine Funktion, ohne I/O.
-``python -m medvox.normalize --demo`` gibt die Testdiktate des Reports zur
-manuellen Prüfung aus.
+Wandelt ein (lexikon-korrigiertes) Transkript in die maschinenlesbare Form für den Regel-Extraktor: gesprochene
+und von Whisper geschriebene Zahnformen -> FDI-Nummern, Flächenwörter -> m/o/d/b/l/p/i, deutsche Zahlwörter ->
+Ziffern, BEMA/GOZ/Ä-Codes zusammengefügt. Reine Funktion, ohne I/O.
+``python -m medvox.normalize --demo`` gibt die Testdiktate des Reports zur manuellen Prüfung aus.
 """
 
 from __future__ import annotations
@@ -137,7 +135,7 @@ def _codes(text: str) -> str:
 # --- Flächen ---------------------------------------------------------------------
 
 _SURFACE_WORDS = {"mesial": "m", "okklusal": "o", "occlusal": "o", "distal": "d", "bukkal": "b",
-                  "buccal": "b", "vestibulär": "b", "vestibulaer": "b", "lingual": "l",
+                  "buccal": "b", "bucal": "b", "vestibulär": "b", "vestibulaer": "b", "lingual": "l",
                   "palatinal": "p", "inzisal": "i", "incisal": "i"}
 _SURFACE_WORD = re.compile(rf"\b({_alt(_SURFACE_WORDS)})(?:e|en|er|es|em)?\b", re.I)
 _SURFACE_MOD = re.compile(r"(?<![^\W\d_])mod(?![^\W\d_])", re.I)
@@ -186,6 +184,8 @@ _TOOTH = re.compile(rf"(?<![\w{_NT}])(?<!\d[.:])\d\d(?![\w{_NT}])(?![.:]\d)(?!\s
 _RUN_GAP = re.compile(r"\s*(?:,|und|-)?\s*")
 _SURFACES_AFTER = re.compile(rf"\s*,?\s*([modblpi]{{1,5}}){_SF}")
 _SURFACES_BEFORE = re.compile(rf"([modblpi]{{1,5}}){_SF}\s+(?:Zahn\s+)?$")
+# "Zahn 36, GOZ 2170, modb": Flächen weiter hinten im Satz, bis zum nächsten Zahn und nicht vor ihm ("m an 37")
+_SURFACES_LATER = re.compile(rf"[^.;:!?]*?(?<![^\W\d_])([modblpi]{{1,5}}){_SF}(?!\s+(?i:(?:a[nm]|bei|vo[nm]|zum?|regio|de[sr]|Z[aä]hne?s?)\s+)*$)")
 
 
 def _quadrant(m: re.Match) -> int:
@@ -230,9 +230,9 @@ def _collect_teeth(text: str) -> list[ToothRef]:
                 numbers += expand_range(numbers.pop(), fdi)
             else:
                 numbers.append(fdi)
-        after = _SURFACES_AFTER.match(text, run[-1][1])
-        before = _SURFACES_BEFORE.search(text, 0, run[0][0])
-        surfaces = after.group(1) if after else before.group(1) if before else ""
+        later = _SURFACES_LATER.match(text, run[-1][1], hits[i][0] if i < len(hits) else len(text))
+        found = (_SURFACES_AFTER.match(text, run[-1][1]), _SURFACES_BEFORE.search(text, 0, run[0][0]), later)
+        surfaces = next((m.group(1) for m in found if m), "")
         teeth += [ToothRef(n, surfaces) for n in numbers[: len(numbers) - count]]
     return teeth
 

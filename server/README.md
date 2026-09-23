@@ -53,7 +53,7 @@ kommt, sonst direkt vom Peer.
 | `POST /login` | nein | JSON `{"password": "…"}` | 204 + HttpOnly-Cookie `medvox_session` (SameSite=Strict); 401 falsches Passwort, 429 bei > 10 Versuchen/min/IP, 503 kein Hash konfiguriert |
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
-| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB) | `{"transcript", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative` (siehe „Regel-Extraktor“) |
+| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB), optional `patient_type` = `kasse` (Standard) \| `privat` | `{"transcript", "patient_type", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `patient_type` der Typ, für den die Vorschläge gelten; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative, kind` mit `kind` = `bema` \| `goz` (Privatleistung, auch GOÄ) \| `zuzahlung` (Privatleistung beim Kassenpatienten); siehe „Regel-Extraktor“. Unbekannter `patient_type`: 422 |
 | `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str]}` | `{"code": "ABC123", "expires_at": iso8601}` |
 | `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at"}` oder 404; 429 bei > 10 Abrufen/min/IP |
 
@@ -94,7 +94,9 @@ längere Läufe nur direkt hinter "Zahn"/"Regio" ("Zahn 1 6 2 6" → 16, 26), so
 ("Sondierungstiefen 3 2 3 2 2 3"), Dosierungsschemata ("1-1-1") und Kommalisten ("1, 6, 2, 6")
 unverändert bleiben. Quadrantenangaben werden aufgelöst
 ("Oberkiefer rechts sechs" → 16), Flächen werden zu Buchstaben ("mesial okklusal distal" →
-"mod"), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
+"mod"; später im Satz folgende Flächen gehören zum Zahn davor, solange kein anderer Zahn
+dazwischen steht und sie nicht zum nächsten Zahn hinführen: "Zahn 36, GOZ 2170, mesial, okklusal"
+→ 36 mo, aber "Zahn 36 Füllung, Karies mesial an 37" → 36 ohne Fläche), deutsche Zahlwörter zu Ziffern ("BEMA dreizehn a" → "BEMA 13a", "Ibuprofen
 sechshundert" → "Ibuprofen 600"), während Codes ("GOZ 2100", "Ä935d") und Anzahlen ("28 Zähne")
 nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste der Zahnbezüge
 (FDI-Nummer plus Flächen). Ausprobieren mit `python -m medvox.normalize --demo` oder
@@ -102,45 +104,57 @@ nie als Zähne gelesen werden. Zusätzlich liefert es die strukturierte Liste de
 
 ## Regel-Extraktor (WP-8)
 
-`medvox.extract.extract(text, teeth)` ist reine Rechenarbeit (kein Modell, kein I/O) über dem
-normalisierten Text und schlägt nur Ziffern aus `catalog/catalog_v1.json` vor. Module:
-`extract_catalog.py` (Katalog laden, Einheit je Kanal/Zahn/Sitzung, Privat-Gegenstücke aus dem
-Regeltext), `extract_match.py` (diktierte Ziffern „BEMA 13a“ zuerst, dann Keywords mit
-Longest-Match-wins, groß/klein- und umlautunabhängig), `extract_text.py` (Sätze, Zahngruppen,
-Plan-Marker, Verneinung, Anzahlen), `extract_build.py` (Regelfamilien), `extract_billing.py`
-(Enthaltensein, „nicht neben“, Privat-Alternativen, Zuschlag), `extract_rules.py` (die festen
-Fachtabellen zum Nachlesen).
+`medvox.extract.extract(text, teeth, patient)` ist reine Rechenarbeit (kein Modell, kein I/O) über dem
+normalisierten Text und schlägt nur Ziffern aus `catalog/catalog_v1.json` vor; `patient` ist `kasse`
+(Standard) oder `privat`. Module: `extract_catalog.py` (Katalog laden, Einheit je Kanal/Zahn/Sitzung,
+Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_match.py` (diktierte Ziffern
+„BEMA 13a“ zuerst, dann Keywords mit Longest-Match-wins, groß/klein- und umlautunabhängig),
+`extract_text.py` (Sätze, Zahngruppen, Plan-Marker, Verneinung, Anzahlen), `extract_patient.py`
+(Patiententyp: Fundstellen auf ihr Paar umstellen, Rückfall ohne Paar), `extract_build.py`
+(Regelfamilien), `extract_billing.py` (Enthaltensein, „nicht neben“, Zuzahlungs-Angebote, Zuschlag),
+`extract_rules.py` (die festen Fachtabellen zum Nachlesen).
 
 - **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 je Zahn – ein freistehendes Zählwort
   („dreiflächig“, „Kompositfüllung MOD“, „BEMA 13a“) gilt nur für die Zähne seines Satzes und geht
   vor den am Zahn diktierten Flächen; Flächen direkt am Zahn („37 mod“) gelten nur für diesen Zahn.
   Widerspruch wird markiert. Flächenwörter allein („36 mod Karies“) lösen keine Füllung aus.
-- **Ein-/mehrwurzelig** (43/44, AIT a/b, 4050/4055) aus der FDI-Nummer. Zahnentfernung braucht ein
+- **Ein-/mehrwurzelig** (43/44, AIT a/b, 4050/4055, 4070/4075) aus der FDI-Nummer. Zahnentfernung braucht ein
   Handlungswort (Extraktion, Osteotomie, X1, Ost1); Befundwörter (retiniert, Längsfraktur) wählen nur
-  die Ziffer (48 statt 47a, 45 statt 43/44). „Implantat entfernt“ bleibt GOZ 3000 (Implantat, nicht Zahn).
+  die Ziffer (48 statt 47a, 45 statt 43/44). „Implantat entfernt“ bleibt GOZ 3000 (Implantat, nicht Zahn;
+  beim Kassenpatienten nur ein Hinweis, weil keine Kassenleistung).
 - **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl („3 Kanäle“),
   ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
 - **Geplant:** „geplant/planen, nächste Sitzung, Termin, Indikation zur, Überweisung, Wiedervorlage,
   in 2 Wochen …“ machen den Teilsatz (mit Doppelpunkt den Rest des Satzes) zum Plan: `planned`,
   nie in `codes`. „ohne/kein/nicht“ direkt an der Leistung verhindert den Vorschlag (Hinweis in `notes`).
-- **BEMA und GOZ gemischt:** der Patiententyp ist dem Extraktor noch nicht bekannt. Privatpatienten
-  bekommen nur Privatpositionen, Kassenpatienten nur BEMA plus die erlaubten Zuzahlungsleistungen
-  (hochwertige Kunststofffüllung, Endodontie); das setzt die Folgeaufgabe um. Bis dahin erscheint ein
-  Privat-Gegenstück aus dem Katalog zusätzlich als `alternative` (nicht in `codes`), nie als Ersatz.
-  Sind BEMA und GOZ für dieselbe Leistung am selben Zahn diktiert („Osteotomie 38, GOZ 3030“) und ist
-  das kein Zuzahlungsfall, wird die GOZ-Position zur `alternative` und beide tragen `decide`
-  („nur eine abrechnen“); ein Zuschlag entfällt, solange diese Wahl offen ist
-  (ein diktierter Zuschlag erscheint dann nur als `alternative` mit `decide`, die Stufe weiterhin aus
-  den Punkten der GOZ-Position).
-- **Zuschlag 0500–0530:** nur für Privatpatienten, also nur aus selbst als GOZ erbrachter Chirurgie
-  (z. B. „Osteotomie privat“ oder „GOZ 3030“); genau einer je Sitzung, aus der Punktzahl der
-  höchstbewerteten erbrachten chirurgischen GOZ-Leistung. Die Begründung nennt Ziffer und Punkte.
-  BEMA-Chirurgie (z. B. „L1, L1, Ost1“ → 41a, 47a) und ihr angebotenes Privat-Gegenstück lösen nie
-  einen Zuschlag aus. Ist eine Punktzahl unbekannt (null), wird keine Stufe geraten, sondern ein
-  Hinweis ausgegeben.
+- **Patiententyp (Kasse/Privat):** eine diktierte Leistung ist ein Paar aus BEMA- und GOZ/GOÄ-Ziffer
+  (Katalogfeld `equivalent`, z. B. Ost1 = BEMA 47a / GOZ 3030); der Patiententyp wählt genau eine davon,
+  nie beide. Umgestellt wird schon an der Fundstelle, sodass Flächenzahl, Zahnentfernung und
+  ein-/mehrwurzelig im Zielsystem gelten („Osteotomie 38, GOZ 3030“ ergibt eine einzige Position).
+  - `kasse`: BEMA-Positionen plus genau die Privatpositionen der Zuzahlungs-Liste (`zuzahlung.allowed`,
+    z. B. Mehrkostenfüllung GOZ 2060–2120, PZR 1040, elektrometrische Längenbestimmung 2400), mit
+    `kind: "zuzahlung"` und Basis und Grundlage in `reason`. Eine als GOZ diktierte Mehrkosten-Füllung oder
+    ein Inlay bringt ihre BEMA-Basis nach Flächenzahl als Kassenanteil mit („adhäsive Kompositfüllung 36
+    zweiflächig“ → 13b und 2080, „Keramikinlay 36 dreiflächig“ → 13c und 2170), außer die Basis ist am Zahn
+    schon erbracht. Ist die Flächenzahl unbekannt und deckt die GOZ-Ziffer mehrere BEMA-Stufen ab (2170 =
+    drei- oder vierflächig), trägt die Basis „Flächenzahl nicht erkannt – 13a–d prüfen“. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
+    13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Andere diktierte Privatziffern werden
+    auf ihr BEMA-Paar umgestellt („Osteotomie privat“ → 47a) oder mit Hinweis in `notes` weggelassen
+    (keine Kassenleistung, z. B. „Implantat entfernt“, Oberflächenanästhesie).
+  - `privat`: nur GOZ/GOÄ (`kind: "goz"`); BEMA-Leistungen ohne Privat-Paar (ATG, MHU, BEV) entfallen
+    mit Hinweis.
+  - Ohne hinterlegtes Paar gilt der Regeltext („Privatpatient: GOZ …“): stehen BEMA und GOZ derselben
+    Leistung am selben Zahn nebeneinander, wird die GOZ-Position zur `alternative` und beide tragen
+    `decide` („nur eine abrechnen“).
+- **Zuschlag 0500–0530:** nur beim Privatpatienten; genau einer je Sitzung, aus der Punktzahl der
+  höchstbewerteten erbrachten chirurgischen GOZ-Leistung – „L1, L1, Ost1“ ergibt dort 2x 0100, 3030 und
+  0500 (3030 hat 350 Punkte). Die Begründung nennt Ziffer und Punkte. Beim Kassenpatienten wird nie ein
+  Zuschlag erwogen; ein diktierter Zuschlag steht dann nur als Hinweis in `notes`. Ist eine Punktzahl
+  unbekannt (null), wird keine Stufe geraten, sondern ein Hinweis ausgegeben.
 
-Abnahme: die zwölf Diktate aus Anhang B (`tests/test_extract_acceptance.py`), auf Ziffernebene
-Precision 92 % (23/25), Recall 96 % (23/24). Die Erwartungen stammen vom selben Autor wie die Regeln
+Abnahme: die zwölf Diktate aus Anhang B (`tests/test_extract_acceptance.py`), beim Kassenpatienten auf
+Ziffernebene Precision 92 % (24/26), Recall 96 % (24/25); dieselben Diktate beim Privatpatienten stehen
+dort als `EXPECTED_PRIVAT`. Die Erwartungen stammen vom selben Autor wie die Regeln
 und sind vom Behandler zu prüfen.
 
 ### Bekannte Grenzen
@@ -149,6 +163,9 @@ und sind vom Behandler zu prüfen.
   auch bei PZR eines Erwachsenen (d05); Alter und PAR-Strecke werden nicht erkannt.
 - Keywords müssen in dieser Reihenfolge diktiert werden: „Spülung mit Chlorhexidin“ trifft
   „chlorhexidin spülung“ (BEMA 105) nicht (d12) – Abhilfe über zusätzliche Katalog-Keywords.
+- Privatpatient und Füllung: BEMA 13a–d wird auf die Kompositfüllung in Adhäsivtechnik GOZ 2060–2120
+  umgestellt, auch bei Glasionomer; die plastische Füllung ohne Adhäsivtechnik (GOZ 2050–2110) steht nur
+  im erweiterten Katalog.
 - Befundwörter als Keywords: „Karies profunda“ ergibt 25 (Cp), „Längsfraktur“ ergibt 45 (X3) –
   jeweils mit Hinweis zu prüfen; „Füllung intakt“ in einem Befund würde als Füllung gelesen.
 - Zahnzuordnung: Zähne direkt hinter der Leistung, sonst die letzte Zahngruppe davor im selben Satz.

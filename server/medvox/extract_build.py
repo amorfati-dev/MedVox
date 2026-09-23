@@ -42,6 +42,7 @@ class Draft:
     plan: str | None = None
     alternative_to: Draft | None = None
     reason: str = ""
+    surfaces: int | None = None  # diktierte Flächenzahl 1..4 bei Füllungen, None wenn nicht erkannt
 
     @property
     def key(self) -> tuple[str, str, int | None, bool]:
@@ -138,7 +139,9 @@ class Builder:
             flag = None
             if len(chosen) == 1:
                 count = next(iter(chosen))
-                if dictated and min(dictated, 4) != count:
+                if dictated and family[min(dictated, 4) - 1] == family[count - 1]:
+                    count = min(dictated, 4)
+                elif dictated:
                     flag = f"Flächen „{tooth.surfaces}“ an {tooth.fdi} diktiert, Ziffer nach {count} Flächen gewählt – prüfen"
             elif dictated:
                 count = dictated
@@ -152,8 +155,10 @@ class Builder:
                 flag = flag or "Zahn nicht diktiert"
             spoken = [h for h in self._surface_words if tooth and tooth in h.teeth
                       and set(h.hit.keyword) == set(tooth.surfaces)]
+            known = dictated or (said and len(chosen | said) == 1)  # sonst nur aus der Ziffer abgeleitet
             for t in own + mine + spoken:
-                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0])
+                self.add(entry, tooth.fdi if tooth else None, t, 1, flag, like=acts[0]).surfaces = (
+                    min(count, 4) if known else None)
 
     # --- Zahnentfernung ----------------------------------------------------------------
 
@@ -195,7 +200,7 @@ class Builder:
             if "fractured" in table:
                 alt = table[root] if root else f"{table['single']}/{table['multi']}"
                 return table["fractured"], f"tieffrakturiert laut Diktat – sonst {alt}"
-            flag = "tieffrakturiert laut Diktat: GOZ 3020 steht nicht im Katalog v1"
+            flag = f"tieffrakturiert laut Diktat: keine eigene {system}-Ziffer im Katalog v1"
             return table[root or "single"], flag if root else flag + "; ein-/mehrwurzelig prüfen"
         if root is None:
             return table["single"], "Zahn nicht diktiert – ein- oder mehrwurzelig prüfen"

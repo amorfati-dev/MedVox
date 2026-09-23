@@ -1,4 +1,7 @@
-"""WP-8: Regelfamilien des Extraktors einzeln (Flächen, Endo je Kanal, Plan, Zuschlag, BEMA/GOZ gemischt)."""
+"""WP-8: Regelfamilien des Extraktors einzeln (Flächen, Endo je Kanal, Plan, Zuschlag).
+
+Ohne Angabe gilt der Patiententyp ``kasse``; Paare und Zuzahlung: ``tests/test_extract_patient.py``.
+"""
 
 from __future__ import annotations
 
@@ -13,10 +16,10 @@ from medvox.lexicon import correct
 from medvox.normalize import normalize
 
 
-def run(dictation: str) -> Extraction:
+def run(dictation: str, patient: str = "kasse") -> Extraction:
     corrected, _ = correct(dictation)
     n = normalize(corrected)
-    return analyze(n.text, n.teeth)
+    return analyze(n.text, n.teeth, patient)
 
 
 def performed(result: Extraction) -> list[Suggestion]:
@@ -104,7 +107,11 @@ def test_osteotomy_of_retained_tooth():
 
 
 def test_implant_removal_keeps_catalog_code():
-    assert by_tooth(run("Implantat entfernt regio drei sechs.")) == {36: "3000"}
+    assert by_tooth(run("Implantat entfernt regio drei sechs.", "privat")) == {36: "3000"}
+    # Implantatentfernung ist keine Kassenleistung: nicht auf BEMA 43 umstellen, sondern weglassen.
+    result = run("Implantat entfernt regio drei sechs.")
+    assert result.suggestions == []
+    assert any("Implantatentfernung ist keine Kassenleistung" in note for note in result.notes)
 
 
 def test_ait_per_tooth_by_root_count():
@@ -187,9 +194,13 @@ def test_surcharge_table_matches_catalog_rules():
         assert (f"{lo} bis {hi} Punkten" if hi else f"{lo} und mehr Punkten") in rules
 
 
-def test_captains_example_l1_l1_ost1():
-    # Der Zuschlag gilt nur für Privatpatienten: das Beispiel des Behandlers in der GOZ-Lesart.
-    result = run("Leitungsanästhesie privat, Leitungsanästhesie privat, Osteotomie privat drei acht.")
+@pytest.mark.parametrize("dictation", [
+    "Leitungsanästhesie privat, Leitungsanästhesie privat, Osteotomie privat drei acht.",
+    "L1, L1, Ost1 an drei acht.",
+])
+def test_captains_example_l1_l1_ost1(dictation):
+    # Beispiel des Behandlers beim Privatpatienten: Ost1 = GOZ 3030 (350 Punkte) reicht für 0500.
+    result = run(dictation, "privat")
     assert billable_codes(result.suggestions) == ["2x 0100", "3030", "0500"]
     (zuschlag,) = [s for s in result.suggestions if s.code in {"0500", "0510", "0520", "0530"}]
     assert zuschlag.code == "0500" and not zuschlag.alternative
@@ -197,15 +208,21 @@ def test_captains_example_l1_l1_ost1():
 
 
 def test_bema_surgery_never_triggers_surcharge():
-    # "L1, L1, Ost1" wird als BEMA gelesen; das angebotene Privat-Gegenstück GOZ 3030 zieht keinen Zuschlag nach.
+    # Kassenpatient: "L1, L1, Ost1" ist BEMA; ein Zuschlag wird nie erwogen, auch kein Hinweis dazu.
     result = run("L1, L1, Ost1 an drei acht.")
     assert billable_codes(result.suggestions) == ["2x 41a", "47a"]
     assert not [s for s in result.suggestions if s.code.startswith("05")]
     assert not [note for note in result.notes if "Zuschlag" in note]
 
 
+def test_dictated_surcharge_is_not_proposed_for_statutory_patient():
+    result = run("Osteotomie drei acht, Zuschlag GOZ null fünf null null.")
+    assert billable_codes(result.suggestions) == ["47a"]
+    assert any("nur für Privatpatienten" in note for note in result.notes)
+
+
 def test_surcharge_once_from_highest_goz_position():
-    result = run("Osteotomie privat drei acht retiniert, Extraktion privat vier sieben, Osteotomie privat vier acht.")
+    result = run("Osteotomie drei acht retiniert, Extraktion vier sieben, Osteotomie vier acht.", "privat")
     zuschlaege = [s for s in result.suggestions if s.code.startswith("05")]
     assert [(s.code, s.alternative) for s in zuschlaege] == [("0510", False)]
     assert "GOZ 3040" in zuschlaege[0].reason and "540 Punkte" in zuschlaege[0].reason
@@ -221,7 +238,7 @@ def test_unknown_points_are_reported_not_guessed(monkeypatch):
         if entry["code"] == "3030":
             entry["points"] = None
     monkeypatch.setattr(extract_module, "load_catalog", lambda: Catalog(raw))
-    result = run("Osteotomie privat drei sieben.")
+    result = run("Osteotomie drei sieben.", "privat")
     assert not [s for s in result.suggestions if s.code.startswith("05")]
     assert any("nicht bestimmbar" in note and "GOZ 3030" in note for note in result.notes)
 
@@ -233,37 +250,7 @@ def test_bema_extraction_without_goz_counterpart_gives_no_surcharge_note():
     assert not [note for note in result.notes if "Zuschlag" in note]
 
 
-# --- BEMA und GOZ gemischt -----------------------------------------------------------------
-
-
-def test_mixed_bema_and_goz_in_one_session():
-    result = run("Drei sechs okklusal, Füllung mit Komposit, BEMA 13a, Zusatzleistung GOZ 2060, Kofferdam gelegt.")
-    assert billable_codes(result.suggestions) == ["13a", "2060", "12"]
-    assert [s.code for s in result.suggestions if s.alternative] == ["2040"]
-
-
-def test_bema_and_goz_surgery_on_same_tooth_are_exclusive():
-    result = run("Osteotomie drei acht, GOZ drei null drei null")
-    pair = [(s.code, s.alternative) for s in result.suggestions]
-    assert pair == [("47a", False), ("3030", True)]
-    assert all(any("BEMA 47a" in f and "GOZ 3030" in f for f in s.decide) for s in result.suggestions)
-
-    result = run("Osteotomie drei acht, GOZ drei null drei null, Zuschlag GOZ null fünf null null")
-    assert billable_codes(result.suggestions) == ["47a"]
-    zuschlag = [s for s in result.suggestions if s.code == "0500"]
-    assert [s.alternative for s in zuschlag] == [True]
-    assert any("GOZ 3030" in f and "BEMA 47a" in f for f in zuschlag[0].decide)
-
-    result = run("Osteotomie drei acht, GOZ drei null drei null, Zuschlag GOZ null fünf drei null")
-    zuschlag = [s for s in result.suggestions if s.code.startswith("05")]
-    assert [(s.code, s.alternative) for s in zuschlag] == [("0500", True)]
-    assert "diktiert war 0530 – Stufe aus den Punkten ist 0500" in zuschlag[0].decide
-
-
-def test_private_alternative_never_replaces_bema():
-    result = run("Infiltrationsanästhesie, Zahnfilm eins sechs.")
-    assert billable_codes(result.suggestions) == ["40", "Ä925a"]
-    assert [(s.system, s.code) for s in result.suggestions if s.alternative] == [("GOZ", "0090"), ("GOÄ", "Ä5000")]
+# --- unbekannte Ziffern ----------------------------------------------------------------------
 
 
 def test_unknown_dictated_code_is_noted():

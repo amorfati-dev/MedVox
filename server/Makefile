@@ -1,6 +1,6 @@
 # MedVox Server – Entwicklungsbefehle (benötigt `uv`, https://docs.astral.sh/uv/)
 
-.PHONY: sync test test-integration dev set-password catalog-check
+.PHONY: sync test test-integration dev set-password catalog-check catalog-review
 
 sync:
 	uv sync
@@ -23,3 +23,7 @@ set-password: sync
 catalog-check: sync
 	uv run python -m medvox.catalog.validate
 	uv run python -m medvox.catalog.validate --catalog medvox/catalog/catalog_extended.json
+
+# Prüfliste Paare/Zuzahlung (Markdown) aus Katalog v1 neu erzeugen
+catalog-review: sync
+	uv run python -m medvox.catalog.validate --markdown > medvox/catalog/PRUEFLISTE.md

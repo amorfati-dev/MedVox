@@ -10,6 +10,9 @@
   --danger: #b3261e;
   --record: #c62828;
   --ok: #1b7f3a;
+  --privat: #3b4fa0;
+  --copay: #8a5300;
+  --copay-bg: #fff3df;
   color-scheme: light;
 }
 * {
@@ -223,6 +226,83 @@ input {
   color: var(--text);
   text-decoration: none;
   font-weight: 600;
+}
+.chip-zuzahlung {
+  border-style: dashed;
+}
+.chip-zuzahlung.chip-active {
+  border-color: var(--copay);
+  background: var(--copay-bg);
+}
+.chip-tag {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--copay);
+}
+.legend {
+  font-size: 0.9rem;
+  margin: 8px 0 0;
+}
+.switch {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.switch-option {
+  flex: 1;
+  min-height: 52px;
+  font: inherit;
+  font-weight: 600;
+  border: none;
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+.switch-option + .switch-option {
+  border-left: 2px solid var(--line);
+}
+.switch-option:disabled {
+  cursor: default;
+}
+.switch-on.switch-kasse {
+  background: var(--primary);
+  color: var(--primary-text);
+}
+.switch-on.switch-privat {
+  background: var(--privat);
+  color: var(--primary-text);
+}
+.switch-option:disabled:not(.switch-on) {
+  opacity: 0.45;
+}
+.switch-hint {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 12px;
+  color: var(--primary-text);
+}
+.badge-kasse {
+  background: var(--primary);
+}
+.badge-privat {
+  background: var(--privat);
 }
 .transfer-result {
   text-align: center;

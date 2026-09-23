@@ -5,13 +5,14 @@ from __future__ import annotations
 import logging
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from medvox import transcribe
 from medvox.auth import require_session
 from medvox.extract import Suggestion, analyze, billable_codes
+from medvox.extract_patient import PATIENT_TYPES
 from medvox.lexicon import correct
 from medvox.normalize import normalize
 from medvox.normalize_display import display_text
@@ -41,10 +42,12 @@ class SuggestionOut(BaseModel):
     decide: list[str]
     planned: bool
     alternative: bool
+    kind: str  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
 
 
 class TranscribeResponse(BaseModel):
     transcript: str
+    patient_type: str = "kasse"  # Patiententyp, für den die Vorschläge gelten: kasse | privat
     duration_s: float
     latency_s: float
     codes: list[str]  # erbrachte Hauptvorschläge im Kopierformat ("13c", "2x 41a")
@@ -56,17 +59,17 @@ class TranscribeResponse(BaseModel):
 def _out(s: Suggestion) -> SuggestionOut:
     return SuggestionOut(
         code=s.code, system=s.system, title=s.title, points=s.points, teeth=list(s.teeth), count=s.count,
-        reason=s.reason, decide=list(s.decide), planned=s.planned, alternative=s.alternative,
+        reason=s.reason, decide=list(s.decide), planned=s.planned, alternative=s.alternative, kind=s.kind,
     )
 
 
-def build_response(text: str, duration_s: float, latency_s: float) -> TranscribeResponse:
+def build_response(text: str, duration_s: float, latency_s: float, patient_type: str = "kasse") -> TranscribeResponse:
     """Lexikon -> Normalisierer -> Extraktor; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert)."""
     corrected, _ = correct(text)
     normalized = normalize(corrected)
-    result = analyze(normalized.text, normalized.teeth)
+    result = analyze(normalized.text, normalized.teeth, patient_type)
     return TranscribeResponse(
-        transcript=display_text(corrected), duration_s=duration_s, latency_s=latency_s,
+        transcript=display_text(corrected), patient_type=result.patient, duration_s=duration_s, latency_s=latency_s,
         codes=billable_codes(result.suggestions),
         suggestions=[_out(s) for s in result.suggestions if not s.planned],
         planned=[_out(s) for s in result.suggestions if s.planned],
@@ -102,9 +105,16 @@ async def _read_limited(file: UploadFile, limit: int) -> bytes:
 
 
 @router.post("/transcribe", response_model=TranscribeResponse, dependencies=[Depends(require_session)])
-async def transcribe_upload(file: UploadFile, request: Request) -> TranscribeResponse:
-    """Nimmt eine Aufnahme entgegen und liefert das lexikon-korrigierte Transkript plus Ziffernvorschläge."""
+async def transcribe_upload(
+    file: UploadFile, request: Request, patient_type: str = Form("kasse")
+) -> TranscribeResponse:
+    """Nimmt eine Aufnahme entgegen und liefert das lexikon-korrigierte Transkript plus Ziffernvorschläge.
+
+    ``patient_type`` (Formularfeld, Standard ``kasse``) wählt je Leistung BEMA oder GOZ/GOÄ.
+    """
     settings = request.app.state.settings
+    if patient_type not in PATIENT_TYPES:
+        raise HTTPException(status_code=422, detail="Patiententyp muss „kasse“ oder „privat“ sein.")
     content_type = transcribe.media_type(file.content_type)
     if content_type is None:
         raise HTTPException(
@@ -119,4 +129,4 @@ async def transcribe_upload(file: UploadFile, request: Request) -> TranscribeRes
         )
     except transcribe.TranscribeError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
-    return build_response(result.text, result.duration_s, result.latency_s)
+    return build_response(result.text, result.duration_s, result.latency_s, patient_type)

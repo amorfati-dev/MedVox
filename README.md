@@ -27,6 +27,7 @@ cd server
 make test           # pytest
 make dev            # http://127.0.0.1:8000/api/v1/health
 make catalog-check  # BEMA/GOZ/GOÄ-Katalog prüfen, Review-Tabelle ausgeben
+make catalog-review # Prüfliste Paare/Zuzahlung (catalog/PRUEFLISTE.md) neu erzeugen
 ```
 
 App (benötigt Node ≥ 22.18; `npm test` führt TypeScript direkt aus):

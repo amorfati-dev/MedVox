@@ -1,21 +1,19 @@
 """Abrechnungsregeln über die ganze Sitzung (WP-8): Enthaltensein, „nicht neben“,
-Privat-Alternativen zu BEMA-Positionen und der GOZ-Zuschlag zu chirurgischen Leistungen.
+Zuzahlungs-Angebote, Privat-Gegenstücke ohne hinterlegtes Paar und der GOZ-Zuschlag.
 
-Der Patiententyp ist dem Extraktor noch nicht bekannt. Privatpatienten bekommen nur
-Privatpositionen, Kassenpatienten nur BEMA plus die erlaubten Zuzahlungsleistungen
-(hochwertige Kunststofffüllung, Endodontie); das setzt die Folgeaufgabe um. Bis dahin
-kommt ein Privat-Gegenstück aus dem Katalog als zusätzliche Alternative zur BEMA-Position.
-Sind BEMA und GOZ für dieselbe Leistung am selben Zahn erbracht diktiert und ist das kein
-Zuzahlungsfall, schließen sie sich aus: die GOZ-Position wird Alternative, beide tragen
-einen Entscheidungshinweis.
+Den Patiententyp setzt ``extract_patient`` vorher um: jede Leistung mit hinterlegtem Paar
+(``equivalent``) ist dann schon genau eine Ziffer im System des Patienten. Hier bleibt:
+einem Kassenpatienten wird das erlaubte Zuzahlungs-Gegenstück einer BEMA-Position
+(Mehrkostenfüllung) als zusätzliche Alternative angeboten; für Leistungen ohne Paar liefert
+der Regeltext („Privatpatient: GOZ …“) die Gegenstücke, und stehen BEMA und GOZ derselben
+Leistung am selben Zahn nebeneinander, trägt die GOZ-Position als Alternative einen
+Entscheidungshinweis. Der Zuschlag 0500–0530 gilt nur für Privatpatienten.
 """
 
 from __future__ import annotations
 
-import re
-
 from medvox.extract_build import Draft
-from medvox.extract_catalog import Catalog, Entry, fold
+from medvox.extract_catalog import Catalog, Entry, related
 from medvox.extract_rules import INCLUDED_IN, REMOVAL, ROOT_PAIRS, SURCHARGE_CODES, multi_rooted, surcharge_for
 
 
@@ -50,54 +48,65 @@ def _teeth(d: Draft) -> set[int]:
     return {d.fdi} if d.fdi is not None else set(d.context)
 
 
-# --- Privat-Alternativen ------------------------------------------------------------------
+# --- Gegenstücke -------------------------------------------------------------------------
 
 
-def alternatives(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
-    """Je erbrachter BEMA-Position die Privat-Gegenstücke aus dem Katalog als zusätzliche Kandidaten."""
-    primary = {d.key: d for d in drafts}
-    taken = set(primary)
+def translate_draft(catalog: Catalog, d: Draft, listed: Entry, hits: list) -> list[Draft]:
+    """Entwurf ``d`` als Entwürfe von ``listed``: Einheit je Zahn/Sitzung, ein-/mehrwurzelig aus der FDI-Nummer."""
+    unit = catalog.unit(listed)
+    count = d.count if unit == catalog.unit(d.entry) else 1
+    if d.fdi is not None:
+        fdis: list[int | None] = [d.fdi]
+    else:
+        fdis = [None] if unit == "session" else list(d.context) or [None]
+    result = []
+    for fdi in fdis:
+        entry = listed
+        if fdi is not None and entry.key in ROOT_PAIRS:
+            single, multi = ROOT_PAIRS[entry.key]
+            entry = catalog.get(entry.system, multi if multi_rooted(fdi) else single)
+        new = Draft(entry, fdi, d.planned, list(hits), count, d.context if fdi is None else ())
+        if d.entry.family or d.entry.code in REMOVAL.get(d.entry.system, {}).values():
+            new.decide += [f for f in d.decide if f not in new.decide]  # gleiche Herleitung
+        if fdi is None and unit != "session" and not new.decide:
+            new.decide.append("Zahn nicht diktiert – je Zahn")
+        result.append(new)
+    return result
+
+
+def co_payment_offers(catalog: Catalog, drafts: list[Draft]) -> list[Draft]:
+    """Kassenpatient: erlaubtes Zuzahlungs-Paar, das die erbrachte BEMA-Position als Basis nennt (Mehrkostenfüllung)."""
+    taken = {d.key for d in drafts}
     result: list[Draft] = []
     for d in drafts:
         if d.planned or d.entry.system != "BEMA":
             continue
-        for listed, hits in _counterpart_entries(catalog, d):
-            unit = catalog.unit(listed)
-            count = d.count if unit == catalog.unit(d.entry) else 1
-            if d.fdi is not None:
-                fdis: list[int | None] = [d.fdi]
-            else:
-                fdis = [None] if unit == "session" else list(d.context) or [None]
-            for fdi in fdis:
-                entry = listed
-                if fdi is not None and (entry.system, entry.code) in ROOT_PAIRS:
-                    single, multi = ROOT_PAIRS[(entry.system, entry.code)]
-                    entry = catalog.get(entry.system, multi if multi_rooted(fdi) else single)
-                key = (entry.system, entry.code, fdi, False)
-                if key in taken:
-                    rival = primary.get(key)
-                    if rival and rival.alternative_to is None and not _co_payment(d):
-                        _exclusive(d, rival)
-                        result.append(rival)
-                    continue
-                taken.add(key)
-                alt = Draft(entry, fdi, False, hits, count, d.context if fdi is None else ())
-                alt.alternative_to = d
-                if d.entry.family or d.entry.code in REMOVAL["BEMA"].values():
-                    alt.decide += [f for f in d.decide if f not in alt.decide]  # gleiche Herleitung
-                if fdi is None and unit != "session" and not alt.decide:
-                    alt.decide.append("Zahn nicht diktiert – je Zahn")
-                result.append(alt)
+        for listed, _link in catalog.equivalents(d.entry):
+            # Nur „neben“ (Basis nennt die BEMA-Ziffer), nicht „statt“ (2000 statt IP5 außerhalb der Altersgrenze).
+            if not catalog.co_payment_allowed(listed) or d.entry.code not in listed.co_payment.basis:
+                continue
+            for alt in translate_draft(catalog, d, listed, d.hits):
+                if alt.key not in taken:
+                    taken.add(alt.key)
+                    alt.alternative_to = d
+                    result.append(alt)
     return result
 
 
-def _co_payment(d: Draft) -> bool:
-    """Zuzahlungsfall laut Behandler: BEMA und GOZ dürfen hier nebeneinander stehen."""
-    return bool(d.entry.family) or d.entry.area == "Endodontie"
+def counterpart_drafts(catalog: Catalog, d: Draft) -> list[Draft]:
+    """Privat-Gegenstücke einer BEMA-Position laut Regeltext – Rückfall, wenn kein Paar hinterlegt ist."""
+    result: list[Draft] = []
+    seen = set()
+    for listed, hits in _counterpart_entries(catalog, d):
+        for c in translate_draft(catalog, d, listed, hits):
+            if c.key not in seen:
+                seen.add(c.key)
+                result.append(c)
+    return result
 
 
-def _exclusive(bema: Draft, rival: Draft) -> None:
-    """BEMA- und GOZ-Position derselben Leistung am selben Zahn: nur eine abrechnen."""
+def exclusive(bema: Draft, rival: Draft) -> None:
+    """BEMA- und GOZ-Position derselben Leistung am selben Zahn ohne hinterlegtes Paar: nur eine abrechnen."""
     rival.alternative_to = bema
     where = f" an {bema.fdi}" if bema.fdi is not None else ""
     flag = (f"{bema.entry.label} (Kassenpatient) oder {rival.entry.label} (Privatpatient) für dieselbe "
@@ -120,35 +129,31 @@ def _counterpart_entries(catalog: Catalog, d: Draft) -> list[tuple[Entry, list]]
     if d.entry.code in kinds:  # Zahnentfernung: gleiche Art im GOZ-Teil
         code = REMOVAL["GOZ"].get(kinds[d.entry.code])
         return [(catalog.get("GOZ", code), list(d.hits))] if code else []
-    related = []
+    found = []
     for e in listed:
-        hits = [t for t in d.hits if not t.hit.code_word and any(_related(t.hit.keyword, k) for k in e.keywords)]
+        hits = [t for t in d.hits if not t.hit.code_word and any(related(t.hit.keyword, k) for k in e.keywords)]
         if hits:
-            related.append((e, hits))
+            found.append((e, hits))
     main = [e for c in parts if c.main_rule and (e := catalog.get(c.system, c.code))]
-    return related or [(e, list(d.hits)) for e in main]
-
-
-def _related(trigger: str, keyword: str) -> bool:
-    """Privat-Keyword ("kofferdam privat") passt zum auslösenden Wort ("kofferdam gelegt")."""
-    core = re.sub(r"\s*\bprivat\b\s*", " ", fold(keyword)).strip()
-    return bool(core) and (_contains(trigger, core) or _contains(core, trigger))
-
-
-def _contains(text: str, part: str) -> bool:
-    return re.search(rf"(?<![a-z0-9]){re.escape(part)}(?![a-z0-9])", text) is not None
+    return found or [(e, list(d.hits)) for e in main]
 
 
 # --- Zuschlag ------------------------------------------------------------------------------
 
 
-def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list[str]) -> Draft | None:
-    """Genau ein GOZ-Zuschlag je Sitzung aus der höchstbewerteten erbrachten chirurgischen GOZ-Leistung."""
-    # Nur eine selbst als GOZ erbrachte Leistung trägt den Zuschlag. BEMA-Chirurgie, ihr bloß
-    # angebotenes Privat-Gegenstück und eine noch offene BEMA/GOZ-Wahl lösen ihn nie aus: der
-    # Zuschlag gilt nur für Privatpatienten.
+def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list[str],
+              patient: str) -> Draft | None:
+    """Privatpatient: genau ein GOZ-Zuschlag je Sitzung aus der höchstbewerteten chirurgischen GOZ-Leistung."""
+    # Der Zuschlag gilt nur für Privatpatienten: beim Kassenpatienten wird er nie erwogen, auch
+    # nicht diktiert. Beim Privatpatienten ist jede Chirurgie schon auf ihre GOZ-Ziffer umgestellt
+    # („Ost1“ = 3030), deren Punkte die Stufe bestimmen.
+    if patient != "privat":
+        if dictated:
+            notes.append("Zuschlag 0500–0530 diktiert: gilt nur für Privatpatienten – beim Kassenpatienten "
+                         "nicht vorgeschlagen")
+        return None
     goz = [d for d in drafts if not d.planned and d.entry.system == "GOZ" and d.entry.area == "Chirurgie"
-           and d.entry.code not in SURCHARGE_CODES and any(t.hit.entry.system == "GOZ" for t in d.hits)]
+           and d.entry.code not in SURCHARGE_CODES]
     surgical = [d for d in goz if d.alternative_to is None]
     undecided = [d for d in goz if d.alternative_to is not None]
     if surgical or not undecided or not dictated:
@@ -157,8 +162,7 @@ def surcharge(catalog: Catalog, drafts: list[Draft], dictated: list, notes: list
     if result:
         rival = max(undecided, key=lambda d: d.entry.points or 0)
         result.alternative_to = rival.alternative_to
-        result.decide.insert(0, f"Zuschlag nur, wenn {rival.entry.label} statt {rival.alternative_to.entry.label} "
-                                f"gewählt wird (Privatpatient)")
+        result.decide.insert(0, f"Zuschlag nur, wenn {rival.entry.label} abgerechnet wird")
     return result
 
 

@@ -40,10 +40,21 @@ def _errors_for(catalog: dict) -> list[str]:
 
 
 def test_catalog_v1_is_a_mini_catalog(catalog):
-    # Vorgabe des Behandlers: 60-80 Alltagspositionen. Die Obergrenze liegt bei 84,
-    # weil er im Review sechs Positionen ausdruecklich fuer v1 nachgefordert hat
-    # (Ae935a/Ae5002 Panoramaaufnahme eines Kiefers, GOZ 0500-0530 Chirurgie-Zuschlaege).
-    assert 60 <= len(catalog["entries"]) <= 84
+    # Vorgabe des Behandlers: 60-80 Alltagspositionen. Die Obergrenze liegt hoeher, weil er im Review
+    # sechs Positionen ausdruecklich fuer v1 nachgefordert hat (Ae935a/Ae5002, GOZ 0500-0530; 84 geprueft)
+    # und die Patiententyp-Umschaltung zwoelf Positionen nach v1 geholt hat: die GOZ-Paare von v1-BEMA-
+    # Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020, 4070, 4075) und die Inlays 2150-2170.
+    assert 60 <= len(catalog["entries"]) <= 96
+
+
+def test_positions_new_in_v1_are_marked_for_review(catalog):
+    marked = {e["code"] for e in catalog["entries"] if e["review"].get("note") == "neu, bitte prüfen"}
+    assert marked == {"2020", "2350", "3020", "3300", "1000", "4000", "4020", "4070", "4075", "2150", "2160", "2170"}
+    proc = subprocess.run(
+        [sys.executable, "-m", "medvox.catalog.validate", "--markdown"], cwd=SERVER_DIR, capture_output=True, text=True
+    )
+    assert "| GOZ 2350 **(neu, bitte prüfen)** |" in proc.stdout
+    assert "| GOZ 2060 |" in proc.stdout
 
 
 def test_extended_catalog_merges_cleanly_with_v1(catalog, extended):
@@ -145,3 +156,57 @@ def test_old_repo_errors_are_not_reproduced(catalog, extended):
 
 def test_schema_file_is_valid_json():
     json.loads(v.SCHEMA_PATH.read_text(encoding="utf-8"))
+
+
+# --- Paare und Zuzahlungs-Liste ------------------------------------------------------------
+
+
+def _entry(catalog: dict, system: str, code: str) -> dict:
+    return next(e for e in catalog["entries"] if (e["system"], e["code"]) == (system, code))
+
+
+def test_captains_pair_is_recorded_both_ways(catalog):
+    assert {"system": "GOZ", "code": "3030"} in _entry(catalog, "BEMA", "47a")["equivalent"]
+    assert {"system": "BEMA", "code": "47a"} in _entry(catalog, "GOZ", "3030")["equivalent"]
+
+
+def test_every_private_position_has_a_co_payment_decision(catalog, extended):
+    for e in catalog["entries"] + extended["entries"]:
+        assert (e["system"] != "BEMA") == ("zuzahlung" in e), e["code"]
+    assert _entry(catalog, "GOZ", "0500")["zuzahlung"]["allowed"] is False  # Zuschlag nur beim Privatpatienten
+
+
+def test_detects_one_sided_pair(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "GOZ", "3030")["equivalent"] = [{"system": "BEMA", "code": "48"}]
+    errors = _errors_for(broken)
+    assert any("BEMA 47a: Paar GOZ 3030 ist nicht beidseitig" in err for err in errors)
+
+
+def test_detects_pair_within_one_system(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "BEMA", "43")["equivalent"] = [{"system": "BEMA", "code": "44"}]
+    assert any("im anderen System" in err for err in _errors_for(broken))
+
+
+def test_detects_missing_or_misplaced_co_payment(catalog):
+    broken = copy.deepcopy(catalog)
+    moved = _entry(broken, "GOZ", "2060").pop("zuzahlung")
+    _entry(broken, "BEMA", "13a")["zuzahlung"] = moved
+    errors = _errors_for(broken)
+    assert any("GOZ 2060: 'zuzahlung' fehlt" in err for err in errors)
+    assert any("BEMA 13a: 'zuzahlung' gibt es nur bei GOZ/GOÄ" in err for err in errors)
+
+
+def test_markdown_review_tables(catalog):
+    proc = subprocess.run(
+        [sys.executable, "-m", "medvox.catalog.validate", "--markdown"], cwd=SERVER_DIR, capture_output=True, text=True
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert "| ☐ | 47a | " in proc.stdout and "| GOZ 3030 |" in proc.stdout
+    assert "### Zuzahlung – Konservierend" in proc.stdout and "| GOZ 2060 |" in proc.stdout
+    assert "\n## Quellen\n\n- Q1: [" in proc.stdout
+    assert "## Erweiterter Katalog" in proc.stdout and "| GOZ 2210 |" in proc.stdout
+    assert "keine Rechtsberatung" in proc.stdout
+    # PRUEFLISTE.md ist die erzeugte Fassung (make catalog-review) und darf nicht veralten
+    assert v.CATALOG_PATH.with_name("PRUEFLISTE.md").read_text(encoding="utf-8") == proc.stdout
