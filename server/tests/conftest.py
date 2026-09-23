@@ -50,6 +50,7 @@ class FakeWhisper:
 
     def __init__(self) -> None:
         self.mode = "ok"
+        self.text = WHISPER_TEXT
         self.requests: list[httpx.Request] = []
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
@@ -59,7 +60,7 @@ class FakeWhisper:
         if self.mode == "error":
             return httpx.Response(500, text="boom")
         if request.url.path == "/inference":
-            return httpx.Response(200, json={"text": WHISPER_TEXT})
+            return httpx.Response(200, json={"text": self.text})
         return httpx.Response(200, text="<html>whisper</html>")
 
 
