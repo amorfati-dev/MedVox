@@ -7,8 +7,11 @@ Diese Anleitung richtet den Mac in der Praxis als Server für MedVox ein:
 | **whisper-server** (`de.medvox.whisper-server`) | Spracherkennung lokal auf dem Mac (whisper.cpp, Modell `large-v3-turbo`, Deutsch, Dental-Prompt). Lauscht nur auf `127.0.0.1:8178` – nie im Netz. | `infra/whisper/` |
 | **Backend** (`de.medvox.server`) | FastAPI aus `server/`: Anmeldung, Transkription (ffmpeg → whisper-server), Ziffern-Vorschläge, Kurzcodes. Lauscht nur auf `127.0.0.1:8000`. Liest den Passwort-Hash aus `password-hash` (von `make set-password`). | `infra/server/` |
 | **Caddy** (`de.medvox.caddy`) | HTTPS im Praxis-LAN auf Port 443: liefert die App (`~/Library/Application Support/MedVox/app`, gebaut von `infra/app/install.sh`) aus und leitet `/api` an das Backend (`127.0.0.1:8000`) weiter – eine Adresse, eine Origin. Zertifikat von der eigenen Praxis-CA (mkcert). | `infra/tls/` |
+| **Name** (`de.medvox.mdns`) | Meldet per Bonjour/mDNS den Namen `medvox.local` mit der aktuellen Adresse des Macs im LAN an (`dns-sd -P`) und meldet ihn nach einem Netzwechsel von selbst neu an. Der Mac behält seinen eigenen Namen. | `infra/mdns/` |
 
-Alle drei laufen als `launchd`-Benutzeragenten: Sie starten beim Anmelden, laufen dauerhaft und werden nach einem Absturz automatisch neu gestartet. **Es verlässt kein Byte das Praxis-LAN** – der einzige Internetzugriff ist die einmalige Installation (Homebrew, whisper.cpp, Modell).
+**Die Adresse für iPad und Rezeptions-PC ist `https://medvox.local`** – in der Praxis, zu Hause, in jedem Netz dieselbe.
+
+Alle vier laufen als `launchd`-Benutzeragenten: Sie starten beim Anmelden, laufen dauerhaft und werden nach einem Absturz automatisch neu gestartet. **Es verlässt kein Byte das Praxis-LAN** – der einzige Internetzugriff ist die einmalige Installation (Homebrew, whisper.cpp, Modell).
 
 Alles, was die Skripte anlegen, liegt in `~/Library/Application Support/MedVox/` (whisper-Build, Modell, Zertifikate, Caddyfile, Kopie des Backends in `server/`, gebaute App in `app/`, Passwort-Hash, SQLite, Audio-Zwischenordner `tmp/`), `~/Library/LaunchAgents/de.medvox.*.plist` und `~/Library/Logs/MedVox/`. OpenSuperWhisper wird nicht angefasst.
 
@@ -17,7 +20,7 @@ Alles, was die Skripte anlegen, liegt in `~/Library/Application Support/MedVox/`
 1. **Xcode Command Line Tools:** im Terminal `xcode-select --install` – Dialog bestätigen, ein paar Minuten warten.
 2. **Homebrew:** falls `brew --version` nichts ausgibt, den Befehl von <https://brew.sh> ausführen.
 3. `brew install ffmpeg uv node` (Node ≥ 22.18). `make install` prüft alles und nennt genau, was fehlt.
-4. Mac ist im Praxis-WLAN/LAN und hat eine feste IP-Adresse (im Router: „DHCP-Reservierung" für den Mac – sonst ändert sich die Adresse und das Zertifikat passt nicht mehr, siehe Abschnitt 8).
+4. Mac ist im Praxis-WLAN/LAN. Eine feste IP-Adresse ist nicht nötig: die Geräte finden ihn unter `medvox.local` (Abschnitt 8).
 5. Repo geklont, Terminal im Repo-Verzeichnis (`cd ~/medvox` o. ä.).
 
 ## 2. Installieren – ein Befehl
@@ -35,14 +38,16 @@ Das Skript (`infra/install.sh`) prüft die Voraussetzungen, dann der Reihe nach:
 2. **Backend** (`infra/server/install.sh`): `server/` nach `…/MedVox/server` kopieren,
    Python-Pakete mit `uv` installieren, Dienst `de.medvox.server` laden.
 3. **App** (`infra/app/install.sh`): `npm ci && npm run build`, Ergebnis nach `…/MedVox/app`.
-4. **HTTPS** (`infra/tls/setup.sh`): Praxis-CA, Zertifikat, Caddy. Beim allerersten Mal
+4. **HTTPS** (`infra/tls/setup.sh`): Praxis-CA, Zertifikat (für `medvox.local` und die aktuelle LAN-IP), Caddy. Beim allerersten Mal
    fragt `mkcert -install` im Terminal nach dem **Mac-Passwort** (sudo – die Praxis-CA kommt in
    den System-Schlüsselbund). Dieser Schritt läuft deshalb nicht unbeaufsichtigt: am Terminal
    bleiben und das Passwort eingeben. Bricht der Lauf dort ab (Passwort nicht eingegeben,
    Fenster geschlossen), einfach **`make install` noch einmal** ausführen – die CA ist dann
    eingetragen, der zweite Lauf fragt nicht mehr und schließt die Installation ab.
-5. **Passwort**: ist noch keines gesetzt, fragt es jetzt danach (`make set-password`).
-6. **Prüfung** (`make status`) und Ausgabe der Adressen für iPad und Rezeptions-PC.
+5. **Name** (`infra/mdns/install.sh`): Dienst `de.medvox.mdns`, damit der Mac im LAN auf
+   `medvox.local` antwortet.
+6. **Passwort**: ist noch keines gesetzt, fragt es jetzt danach (`make set-password`).
+7. **Prüfung** (`make status`) und Ausgabe der Adresse `https://medvox.local` für iPad und Rezeptions-PC.
 
 Nach einem Update des Repos (`git pull`) einfach erneut `make install` – der Stand wird
 kopiert, die Dienste neu geladen. Danach darf das Repo woanders liegen: die Dienste laufen
@@ -55,14 +60,14 @@ Safari erlaubt das Mikrofon nur über HTTPS, und HTTPS braucht ein Zertifikat, d
 1. **Datei aufs Gerät:** Finder → `rootCA.pem` → Rechtsklick → *Teilen* → **AirDrop** an das iPad. (Alternative: als Mail-Anhang schicken und den Anhang auf dem iPad antippen.)
 2. iPad meldet „Profil geladen". **Einstellungen** öffnen → ganz oben *Profil geladen* antippen (oder *Allgemein → VPN & Geräteverwaltung*) → Profil „mkcert …" → **Installieren** → Gerätecode → nochmals **Installieren**.
 3. **Vertrauen aktivieren – ohne diesen Schritt bleibt Safari rot:** *Einstellungen → Allgemein → Info → Zertifikatsvertrauenseinstellungen* → Schalter bei „mkcert …" **einschalten** → *Weiter*.
-4. Safari: `https://<LAN-IP>` öffnen – kein Warnhinweis mehr. Dann *Teilen → Zum Home-Bildschirm*, damit die App als PWA startet.
+4. Safari: `https://medvox.local` öffnen – kein Warnhinweis mehr. Dann *Teilen → Zum Home-Bildschirm*, damit die App als PWA startet.
 
 ## 4. Praxis-CA auf dem Windows-Rezeptions-PC
 
 1. `rootCA.pem` auf den PC bringen (USB-Stick, Mail, Netzfreigabe) und in `rootCA.crt` umbenennen.
 2. Doppelklick → **Zertifikat installieren…** → *Aktueller Benutzer* (oder *Lokaler Computer*, braucht Admin) → *Alle Zertifikate in folgendem Speicher speichern* → *Durchsuchen…* → **Vertrauenswürdige Stammzertifizierungsstellen** → Fertig stellen → Sicherheitsabfrage mit *Ja*.
    Alternativ als Administrator in PowerShell: `Import-Certificate -FilePath rootCA.crt -CertStoreLocation Cert:\LocalMachine\Root`
-3. Edge/Chrome neu starten und `https://<LAN-IP>` öffnen. Firefox nutzt einen eigenen Speicher: `about:config` → `security.enterprise_roots.enabled` auf `true`.
+3. Edge/Chrome neu starten und `https://medvox.local` öffnen (Windows 10/11 löst `.local`-Namen selbst per mDNS auf). Firefox nutzt einen eigenen Speicher: `about:config` → `security.enterprise_roots.enabled` auf `true`.
 
 ## 5. Mac darf am Netzteil nicht einschlafen
 
@@ -81,14 +86,15 @@ make status           # eine Zeile je Baustein, Exit-Code 0 nur wenn alles funkt
 make restart-test     # jeden Dienst hart neu starten (launchctl kickstart -k), Rückkehr messen
 infra/whisper/status.sh   # Details Spracherkennung: Health-Check mit stummer 1-s-WAV, Log
 infra/whisper/smoke.sh    # spricht ein Diktat mit der Mac-Stimme "Anna" und prüft "36"/"drei sechs"
-infra/tls/check.sh        # Details HTTPS: Zertifikat-SANs, TLS-Kette, App und Backend über die LAN-IP
+infra/tls/check.sh        # Details HTTPS: Zertifikat-SANs, TLS-Kette, App und Backend unter medvox.local
 ```
 
 `make status` prüft Spracherkennung, Backend (inkl. Verbindung zur Spracherkennung),
-Passwort, HTTPS-Zugang (App **und** API über die LAN-IP), Zertifikat und dass keine
-Audiodatei im Zwischenordner liegen geblieben ist. Ein ausgefallenes Backend ist ein
-Fehler, keine Warnung. Hinweiszeilen (Ruhezustand am Netzteil, Zertifikat läuft in
-< 30 Tagen ab) zählen nicht als Fehler.
+Passwort, HTTPS-Zugang (App **und** API), den Namen `medvox.local` (löst er auf die aktuelle
+Adresse auf, antwortet HTTPS darunter?), Zertifikat und dass keine Audiodatei im
+Zwischenordner liegen geblieben ist. Ein ausgefallenes Backend ist ein Fehler, keine
+Warnung. Hinweiszeilen (Ruhezustand am Netzteil, Zertifikat läuft in < 30 Tagen ab,
+Ausweichadresse nach Netzwechsel nicht mehr im Zertifikat) zählen nicht als Fehler.
 
 Von Hand:
 
@@ -96,6 +102,8 @@ Von Hand:
 launchctl print gui/$(id -u)/de.medvox.whisper-server | grep state   # state = running
 launchctl print gui/$(id -u)/de.medvox.server | grep state
 launchctl print gui/$(id -u)/de.medvox.caddy | grep state
+launchctl print gui/$(id -u)/de.medvox.mdns | grep state
+dns-sd -G v4 medvox.local       # zeigt die Adresse, unter der medvox.local antwortet (Strg+C)
 tail -f ~/Library/Logs/MedVox/server.log
 ```
 
@@ -113,13 +121,14 @@ abgeschaltet (`--no-access-log`), weil Anfrage-URLs Kurzcodes enthalten.
 Zugriffslogs und Caddys Fehlerlog (`http.log.error`, etwa bei 502) sind bewusst
 abgeschaltet, damit keine Anfrage-URLs (und später keine Kurzcodes) auf der
 Platte landen – ein `caddy-access.log` aus einer früheren Fassung dieser
-Skripte löscht `setup.sh` beim nächsten Lauf.
+Skripte löscht `setup.sh` beim nächsten Lauf. `mdns.log` enthält nur, wann
+`medvox.local` mit welcher Adresse des Macs angemeldet wurde.
 
 Alle Logs sind auf 5 MiB gedeckelt: darüber wird der Inhalt nach `.1` (`.2`,
 `.3`) gesichert und die Datei geleert – von den Installationsskripten und bei
 jedem `make status`.
 
-Neustart eines Dienstes: `launchctl kickstart -k gui/$(id -u)/de.medvox.whisper-server` (bzw. `…/de.medvox.server`, `…/de.medvox.caddy`).
+Neustart eines Dienstes: `launchctl kickstart -k gui/$(id -u)/de.medvox.whisper-server` (bzw. `…/de.medvox.server`, `…/de.medvox.caddy`, `…/de.medvox.mdns`).
 
 Nach einem Neustart des Macs (`sudo shutdown -r now`, Abnahme Punkt 6): anmelden, 1 Minute warten, `make status` – muss „Alles in Ordnung." zeigen, ohne dass etwas von Hand gestartet wird.
 
@@ -134,25 +143,33 @@ infra/whisper/smoke.sh      # gegenprüfen
 
 Gleiches gilt für die Thread-Zahl: `infra/whisper/de.medvox.whisper-server.plist.template` anpassen, `install.sh` erneut ausführen. Die Ports liegen fest in `infra/common.sh`.
 
-## 8. Feste LAN-IP – und wenn sie sich doch ändert
+## 8. Adresse `https://medvox.local` – auch nach einem Netzwechsel
 
-Das Zertifikat gilt für genau eine IP-Adresse. Während der Entwicklung hat der Mac seine
-Adresse dreimal gewechselt (192.168.0.119 → .120 → .97); jedes Mal waren iPad und Rezeption
-danach ohne Verbindung. Deshalb **im Router eine feste Adresse für den Mac reservieren**
-(„DHCP-Reservierung", bei der FRITZ!Box: *Heimnetz → Netzwerk → Gerät bearbeiten → „Diesem
-Netzwerkgerät immer die gleiche IPv4-Adresse zuweisen"*). Dabei die Adresse nehmen, die der
-Mac gerade hat (`make status` zeigt sie), dann bleibt das Zertifikat gültig.
+iPad und Rezeptions-PC öffnen immer **`https://medvox.local`**. Der Dienst `de.medvox.mdns`
+meldet diesen Namen per Bonjour/mDNS mit der Adresse an, die der Mac gerade hat, und prüft
+alle 5 Sekunden, ob sie sich geändert hat (Praxis ↔ zu Hause, neue Adresse vom Router,
+WLAN kurz weg). Dann meldet er den Namen mit der neuen Adresse neu an. Das Zertifikat gilt
+für den Namen, nicht für die Adresse. **Nach einem Netzwechsel ist deshalb nichts neu zu
+tun** – kein `make install`, keine neue Adresse auf dem iPad, keine Zertifikatswarnung.
+Ein paar Sekunden nach dem Wechsel ist MedVox unter demselben Namen wieder da. Der Mac
+behält dabei seinen eigenen Namen (*Systemeinstellungen → Allgemein → Info → Name* bleibt,
+wie er ist); `medvox.local` kommt nur hinzu.
 
-Ändert sich die Adresse trotzdem (`make status` meldet „passt nicht zur LAN-IP"), stellt ein
-Befehl das Zertifikat neu aus:
+Wer MedVox früher unter der Zahlenadresse auf den Home-Bildschirm gelegt hat: einmal in
+Safari `https://medvox.local` öffnen, neu anmelden und erneut *Teilen → Zum Home-Bildschirm*
+– das alte Symbol kann weg (für das iPad sind es zwei verschiedene Adressen).
 
-```bash
-make install
-```
+**Ausweichadresse:** `https://<LAN-IP>` (die Zahl zeigt `make status` in der Zeile
+„HTTPS-Zugang") funktioniert weiterhin, bis sich die Adresse ändert. Sie ist nur für den
+Fall gedacht, dass ein Gerät `.local`-Namen nicht auflöst – etwa ein älterer Windows-PC
+oder ein Gästenetz, das Bonjour zwischen den Geräten sperrt. Ändert sich die Adresse, zeigt
+`make status` einen Hinweis; `make install` stellt das Zertifikat dann auch für die neue
+Zahl aus (gleiche Praxis-CA, auf den Geräten ist nichts neu zu installieren).
 
-Er (bzw. nur `infra/tls/setup.sh`) erkennt die neue IP, stellt ein neues Zertifikat aus (gleiche Praxis-CA – auf den Geräten muss **nichts** neu installiert werden) und lädt Caddy neu. `infra/tls/check.sh` warnt, wenn die IP nicht mehr im Zertifikat steht.
-
-Optional, damit die Adresse `https://medvox.local` statt der IP funktioniert: dem Mac den Bonjour-Namen `medvox` geben – *Systemeinstellungen → Allgemein → Info → Name* auf „medvox" (oder `sudo scutil --set LocalHostName medvox`). iPad und Windows (ab 10) lösen `medvox.local` dann per Bonjour/mDNS auf.
+`make status` zeigt in der Zeile „Name medvox.local", ob der Name auf die aktuelle Adresse
+auflöst und HTTPS darunter antwortet. Das prüft der Mac bei sich selbst; findet ein Gerät
+den Namen trotzdem nicht, sind beide wirklich im selben Netz? (Das iPad darf nicht im
+Gäste-WLAN hängen.)
 
 ## 9. Deinstallieren
 
@@ -162,6 +179,8 @@ launchctl bootout gui/$(id -u)/de.medvox.server \
   && rm -f ~/Library/LaunchAgents/de.medvox.server.plist  # Backend-Dienst weg
 launchctl bootout gui/$(id -u)/de.medvox.caddy \
   && rm -f ~/Library/LaunchAgents/de.medvox.caddy.plist   # Caddy-Dienst weg
+launchctl bootout gui/$(id -u)/de.medvox.mdns \
+  && rm -f ~/Library/LaunchAgents/de.medvox.mdns.plist    # Name medvox.local weg
 mkcert -uninstall                   # Praxis-CA aus dem macOS-Schlüsselbund entfernen
 ```
 
@@ -171,6 +190,8 @@ Was die Skripte angelegt haben, liegt danach noch in
 ## Technische Notizen
 
 - Die Ports stehen fest: whisper-server auf `127.0.0.1:8178`, Caddy auf 443. Port 443 braucht auf macOS keine Root-Rechte (seit 10.14 dürfen Benutzerprozesse Ports < 1024 binden), deshalb läuft Caddy als normaler Benutzeragent auf 443 – kein `:8443` in der Adresse.
+- Caddy lauscht auf allen Schnittstellen und wählt die Seite nach dem Namen: `https://medvox.local` funktioniert deshalb auch unter einer neuen Adresse, obwohl im Caddyfile noch die alte Zahl steht.
+- `de.medvox.mdns` läuft aus `…/MedVox/mdns/run.sh` (mit einer Kopie von `common.sh`, dieselbe `lan_ip`-Regel: Schnittstelle der Standardroute). `dns-sd -P` hält die Adresse fest, mit der es gestartet wurde; deshalb vergleicht `run.sh` alle 5 s die LAN-IP und startet `dns-sd` bei einer Änderung neu (ohne Netz: abgemeldet, bis wieder eine Adresse da ist). Nebenbei erscheint „MedVox" als `_https._tcp`-Dienst im Bonjour-Browser. Nur IPv4.
 - Caddy leitet `http://<IP>` auf HTTPS um, hält `admin off` (kein Admin-API-Port) und setzt `Cache-Control: no-store`.
 - whisper-server wird auf dem in `install.sh` festgelegten Commit von whisper.cpp gebaut (Stand der Messungen im Plan).
 - Pfad zur gebauten App für Caddy: `~/Library/Application Support/MedVox/app` (nie ein Repo-/Worktree-Pfad).

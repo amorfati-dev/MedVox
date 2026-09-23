@@ -6,9 +6,10 @@
 #   infra/tls/setup.sh   # fragt einmal nach dem Mac-Passwort: mkcert trägt die
 #                        # CA in den macOS-Schlüsselbund ein
 #
-# Erneut ausführen, wenn sich die LAN-IP geändert hat – das Zertifikat wird
-# automatisch neu ausgestellt. Umgebungsvariable: MEDVOX_LAN_IP (Standard:
-# automatisch ermittelt).
+# Die Geräte nutzen https://medvox.local – dafür gilt das Zertifikat in jedem
+# Netz. Die LAN-IP steht zusätzlich darin (Ausweichadresse); hat sie sich
+# geändert, stellt ein erneuter Lauf das Zertifikat für die neue IP aus.
+# Umgebungsvariable: MEDVOX_LAN_IP (Standard: automatisch ermittelt).
 
 source "$(dirname "$0")/../common.sh"
 
@@ -102,12 +103,12 @@ else
 fi
 
 # --- 5. Anleitung für die Geräte -------------------------------------------
-URL="https://$LAN_IP"
+URL="https://$MDNS_NAME"
 cat <<TXT
 
 ════════════════════════════════════════════════════════════════════════
  Fertig. Adresse der App im Praxis-LAN:   $URL
-                                          (oder https://medvox.local, siehe README)
+                                          (Ausweichadresse: https://$LAN_IP)
  Praxis-CA zum Verteilen:                 $ROOT
 
  iPad / iPhone – Praxis-CA einmalig installieren:

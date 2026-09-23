@@ -16,7 +16,7 @@ Cloud-Prototyp-Version liegt nur noch in der Git-Historie.
 |---|---|---|
 | `server/` | Python 3.12, FastAPI | API auf dem Praxis-Mac: Transkription (whisper.cpp), Normalisierung, Katalog-Regeln, Kurzcode-Transfer, Diktate je Patient |
 | `app/` | Vite + React + TypeScript (ohne UI-Framework) | PWA für iPad/iPhone und Rezeptions-Browser |
-| `infra/` | Shell + launchd | Installation auf dem Praxis-Mac: whisper-server, Backend, App und LAN-HTTPS (Caddy, eigene CA) – Anleitung in [`infra/README.md`](infra/README.md) |
+| `infra/` | Shell + launchd | Installation auf dem Praxis-Mac: whisper-server, Backend, App, LAN-HTTPS (Caddy, eigene CA) und der Name `medvox.local` (Bonjour) – Anleitung in [`infra/README.md`](infra/README.md) |
 | `docs/` | Markdown | Abnahmeprotokoll und Diktierhilfe für die Praxis |
 
 ## Entwicklung
@@ -48,7 +48,7 @@ Ein Befehl richtet alles ein bzw. zieht nach einem Update nach (Details:
 [`infra/README.md`](infra/README.md)):
 
 ```sh
-make install        # Spracherkennung, Backend, App, HTTPS – endet mit der Adresse für iPad und Rezeption
+make install        # Spracherkennung, Backend, App, HTTPS, Name – endet mit https://medvox.local für iPad und Rezeption
 make set-password   # Behandler-Passwort setzen oder ändern
 make status         # eine Zeile je Dienst; Exit-Code ≠ 0 bei jedem echten Problem
 make restart-test   # jeden Dienst hart neu starten und die Rückkehr messen

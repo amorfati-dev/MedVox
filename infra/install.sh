@@ -5,7 +5,8 @@
 #   make install MODEL=/pfad/ggml-large-v3-turbo.bin   # vorhandenes Modell kopieren
 #
 # Idempotent: prüft die Voraussetzungen, richtet Spracherkennung (whisper-server),
-# Backend (de.medvox.server), App und HTTPS (Caddy) ein und prüft am Ende alles.
+# Backend (de.medvox.server), App, HTTPS (Caddy) und den Namen medvox.local
+# (de.medvox.mdns) ein und prüft am Ende alles.
 # Erneut ausführen nach jedem Update des Repos – es wird nur nachgezogen, was fehlt.
 # Rückfragen: das Mac-Passwort (sudo), wenn mkcert die Praxis-CA erstmals in den
 # System-Schlüsselbund einträgt – deshalb nicht unbeaufsichtigt starten; bricht der Lauf
@@ -46,17 +47,20 @@ if (( ${#missing[@]} )); then
 fi
 
 # --- 2. Dienste ---------------------------------------------------------------
-log "1/4 Spracherkennung (whisper-server)"
+log "1/5 Spracherkennung (whisper-server)"
 "$INFRA_DIR/whisper/install.sh" ${MODEL:+"$MODEL"}
 
-log "2/4 Backend (de.medvox.server)"
+log "2/5 Backend (de.medvox.server)"
 "$INFRA_DIR/server/install.sh"
 
-log "3/4 App (PWA)"
+log "3/5 App (PWA)"
 "$INFRA_DIR/app/install.sh"
 
-log "4/4 HTTPS im Praxis-LAN (Caddy, Zertifikat) – beim ersten Mal fragt mkcert nach dem Mac-Passwort"
+log "4/5 HTTPS im Praxis-LAN (Caddy, Zertifikat) – beim ersten Mal fragt mkcert nach dem Mac-Passwort"
 "$INFRA_DIR/tls/setup.sh"
+
+log "5/5 Name $MDNS_NAME im LAN (Bonjour, de.medvox.mdns)"
+"$INFRA_DIR/mdns/install.sh"
 
 # --- 3. Passwort ------------------------------------------------------------
 if [[ ! -s "$PASSWORD_FILE" ]]; then
@@ -76,11 +80,13 @@ LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || echo '<LAN-IP>')}"
 cat <<TXT
 
 ════════════════════════════════════════════════════════════════════════
- MedVox ist installiert.
+ MedVox ist installiert. Die Adresse – in jedem Netz dieselbe:
 
- iPad / iPhone (Safari, dann „Zum Home-Bildschirm"):  https://$LAN_IP
- Rezeptions-PC (Edge/Chrome):                        https://$LAN_IP/transfer
- (statt der IP geht auch https://medvox.local, siehe infra/README.md)
+ iPad / iPhone (Safari, dann „Zum Home-Bildschirm"):  https://$MDNS_NAME
+ Rezeptions-PC (Edge/Chrome):                        https://$MDNS_NAME/transfer
+
+ Nach einem Netzwechsel ist nichts neu zu tun. Nur falls ein Gerät den
+ Namen nicht findet: https://$LAN_IP (gilt, bis sich die Adresse ändert).
 
  Zustand prüfen:   make status
  Abnahme:          docs/abnahme.md      Diktierhilfe: docs/diktierhilfe.md

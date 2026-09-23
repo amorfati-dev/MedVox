@@ -5,8 +5,8 @@
 #   make status
 #
 # Exit-Code 0 nur, wenn alles wirklich funktioniert: Spracherkennung, Backend
-# (inkl. Passwort), HTTPS-Zugang mit App und API, Zertifikat und keine
-# liegengebliebene Audiodatei. „Hinweis"-Zeilen zählen nicht als Fehler.
+# (inkl. Passwort), HTTPS-Zugang mit App und API, der Name medvox.local,
+# Zertifikat und keine liegengebliebene Audiodatei. „Hinweis"-Zeilen zählen nicht als Fehler.
 # Details je Dienst: infra/whisper/status.sh, infra/tls/check.sh.
 
 source "$(dirname "$0")/common.sh"
@@ -18,7 +18,7 @@ good()  { printf '\033[1;32m ✓\033[0m %-24s %s\n' "$1" "$2"; }
 bad()   { printf '\033[1;31m ✗\033[0m %-24s %s\n' "$1" "$2"; problems=$((problems + 1)); }
 hint()  { printf '\033[1;33m !\033[0m %-24s %s\n' "$1" "$2"; }
 
-for f in "$WHISPER_LOG" "$CADDY_LOG" "$SERVER_LOG"; do rotate_log "$f"; done
+for f in "$WHISPER_LOG" "$CADDY_LOG" "$SERVER_LOG" "$MDNS_LOG"; do rotate_log "$f"; done
 tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || true)}"
 
@@ -56,7 +56,8 @@ else
   bad "Passwort" "nicht gesetzt – Anmeldung unmöglich → make set-password"
 fi
 
-# 4. HTTPS-Zugang: Caddy läuft und liefert App und API über die LAN-IP.
+# 4. HTTPS-Zugang: Caddy läuft und liefert App und API unter medvox.local an der
+#    LAN-IP (Namensauflösung hier bewusst umgangen – die prüft Punkt 5).
 if ! launchd_running "$CADDY_LABEL"; then
   bad "HTTPS-Zugang (Caddy)" "Dienst läuft nicht → make install"
 elif [[ -z "$LAN_IP" ]]; then
@@ -64,19 +65,37 @@ elif [[ -z "$LAN_IP" ]]; then
 elif [[ ! -f "$ROOT" ]]; then
   bad "HTTPS-Zugang (Caddy)" "Praxis-CA fehlt → make install"
 else
-  url="https://$LAN_IP"
-  app_code="$(curl -sS --max-time 5 --cacert "$ROOT" -o "$tmp/index.html" -w '%{http_code}' "$url/" 2>/dev/null || true)"
-  api_code="$(curl -sS --max-time 5 --cacert "$ROOT" -o /dev/null -w '%{http_code}' "$url/api/v1/health" 2>/dev/null || true)"
+  url="https://$MDNS_NAME"
+  pin=(--resolve "$MDNS_NAME:$CADDY_HTTPS_PORT:$LAN_IP")
+  app_code="$(curl -sS --max-time 5 --cacert "$ROOT" "${pin[@]}" -o "$tmp/index.html" -w '%{http_code}' "$url/" 2>/dev/null || true)"
+  api_code="$(curl -sS --max-time 5 --cacert "$ROOT" "${pin[@]}" -o /dev/null -w '%{http_code}' "$url/api/v1/health" 2>/dev/null || true)"
   if [[ "$app_code" != 200 ]] || ! grep -q 'id="root"' "$tmp/index.html" 2>/dev/null; then
     bad "HTTPS-Zugang (Caddy)" "$url liefert die App nicht (HTTP ${app_code:-–}) → make install"
   elif [[ "$api_code" != 200 ]]; then
     bad "HTTPS-Zugang (Caddy)" "App da, aber $url/api antwortet mit HTTP ${api_code:-–} (Backend?)"
   else
-    good "HTTPS-Zugang (Caddy)" "$url – App und API erreichbar"
+    good "HTTPS-Zugang (Caddy)" "App und API erreichbar (Mac: $LAN_IP)"
   fi
 fi
 
-# 5. Zertifikat: passt zur aktuellen LAN-IP und ist noch lange genug gültig.
+# 5. Name medvox.local: Namensdienst läuft, der Name löst auf die aktuelle
+#    LAN-IP auf und HTTPS antwortet unter genau dieser Adresse.
+mdns_ip="$(mdns_address)"
+if ! launchd_running "$MDNS_LABEL"; then
+  bad "Name $MDNS_NAME" "Namensdienst läuft nicht → make install"
+elif [[ -z "$mdns_ip" ]]; then
+  bad "Name $MDNS_NAME" "löst nicht auf – Log: $MDNS_LOG"
+elif [[ -n "$LAN_IP" && "$mdns_ip" != "$LAN_IP" ]]; then
+  bad "Name $MDNS_NAME" "zeigt auf $mdns_ip statt $LAN_IP (in 10 s erneut prüfen) – Log: $MDNS_LOG"
+elif [[ ! -f "$ROOT" ]] \
+  || [[ "$(curl -sS --max-time 5 --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$MDNS_NAME/api/v1/health" 2>/dev/null || true)" != 200 ]]; then
+  bad "Name $MDNS_NAME" "löst auf $mdns_ip auf, aber https://$MDNS_NAME antwortet nicht"
+else
+  good "Name $MDNS_NAME" "https://$MDNS_NAME → $mdns_ip, HTTPS antwortet"
+fi
+
+# 6. Zertifikat: gilt für medvox.local und ist noch lange genug gültig. Die
+#    LAN-IP darin betrifft nur die Ausweichadresse – fehlt sie, ist das ein Hinweis.
 if [[ ! -f "$CERT" ]]; then
   bad "Zertifikat" "fehlt → make install"
 else
@@ -84,16 +103,18 @@ else
   until="$(openssl x509 -in "$CERT" -noout -enddate | cut -d= -f2)"
   if ! openssl x509 -in "$CERT" -noout -checkend 0 >/dev/null 2>&1; then
     bad "Zertifikat" "abgelaufen ($until) → make install"
-  elif [[ -n "$LAN_IP" && "$sans" != *"IPAddress:$LAN_IP,"* ]]; then
-    bad "Zertifikat" "passt nicht zur LAN-IP $LAN_IP (IP geändert?) → make install"
+  elif [[ "$sans" != *"DNS:$MDNS_NAME,"* ]]; then
+    bad "Zertifikat" "gilt nicht für $MDNS_NAME → make install"
   elif ! openssl x509 -in "$CERT" -noout -checkend $((30 * 24 * 3600)) >/dev/null 2>&1; then
     hint "Zertifikat" "läuft bald ab ($until) → make install stellt ein neues aus"
+  elif [[ -n "$LAN_IP" && "$sans" != *"IPAddress:$LAN_IP,"* ]]; then
+    hint "Zertifikat" "gilt für $MDNS_NAME; die Ausweichadresse https://$LAN_IP erst nach make install"
   else
     good "Zertifikat" "gültig bis $until, für ${LAN_IP:-?} und medvox.local"
   fi
 fi
 
-# 6. Datensparsamkeit: keine Audiodatei älter als 2 Minuten im Zwischenordner.
+# 7. Datensparsamkeit: keine Audiodatei älter als 2 Minuten im Zwischenordner.
 leftover="$( { find "$MEDVOX_TMP" -type f -mmin +2 2>/dev/null || true; } | wc -l | tr -d ' ')"
 if [[ "$leftover" == 0 ]]; then
   good "Audiodateien" "keine gespeichert ($MEDVOX_TMP ist leer)"

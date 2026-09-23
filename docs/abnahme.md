@@ -10,11 +10,11 @@ Ausgabe mit aufschreiben.
 
 - [ ] Im Repo-Verzeichnis auf dem Praxis-Mac: `make install` – am Terminal bleiben: beim
       ersten Mal fragt der Zertifikatsschritt nach dem **Mac-Passwort**. Abgebrochen? Einfach
-      `make install` noch einmal. Endet mit „Alles in Ordnung." und der Adresse `https://<LAN-IP>`.
-      Adresse: ______________________
-- [ ] Im Router eine **feste IP (DHCP-Reservierung)** für den Mac eingetragen – die Adresse, die
-      `make status` zeigt (`infra/README.md`, Abschnitt 8). Ändert sie sich doch einmal:
-      `make install` stellt das Zertifikat für die neue Adresse aus.
+      `make install` noch einmal. Endet mit „Alles in Ordnung." und der Adresse
+      `https://medvox.local` – die gilt in jedem Netz; nach einem Netzwechsel ist nichts neu zu
+      tun. `make status` zeigt „Name medvox.local … HTTPS antwortet".
+- [ ] Ausweichadresse notiert (Zeile „HTTPS-Zugang" in `make status`), nur für Geräte, die
+      `medvox.local` nicht finden (`infra/README.md`, Abschnitt 8): `https://`______________
 - [ ] `make set-password` – eigenes Passwort gesetzt (mind. 8 Zeichen).
 - [ ] Praxis-CA auf iPad und Rezeptions-PC installiert (`infra/README.md`, Abschnitte 3 und 4).
 - [ ] Ruhezustand am Netzteil aus (`infra/README.md`, Abschnitt 5); `make status` zeigt keinen
@@ -59,7 +59,7 @@ Beobachtet: ______________________________________________________
 
 1. [ ] iPad: „An Rezeption" (Leiste unten) → sechsstelliger Code und QR-Code erscheinen.
        Code: ______
-2. [ ] Rezeptions-PC: `https://<LAN-IP>/transfer` öffnen, Code eingeben → Text und Ziffern
+2. [ ] Rezeptions-PC: `https://medvox.local/transfer` öffnen, Code eingeben → Text und Ziffern
        erscheinen.
 3. [ ] „Text kopieren" → in Evident in die Dokumentation einfügen (Strg+V): Umlaute, Absätze
        und Zahnnummern kommen richtig an.
@@ -135,7 +135,7 @@ Beobachtet: ______________________________________________________
        Gegenprobe: noch ein Diktat ohne Nummer, oben 4714 eintragen → **Nein, neues Diktat für 4714**
        → Bildschirm leer, 4714 oben; das Diktat bleibt „ohne Patient" (Schritt 7).
 6. [ ] Noch ein Diktat ohne Nummer aufnehmen und **nicht** zuordnen.
-7. [ ] Rezeptions-PC: `https://<LAN-IP>/patienten` (mit dem Praxis-Passwort anmelden) → oben
+7. [ ] Rezeptions-PC: `https://medvox.local/patienten` (mit dem Praxis-Passwort anmelden) → oben
        „Ohne Patient", darunter 4713, 4712, 4711 (jüngstes zuerst), 4711 mit „2 Diktate", alle „offen".
 8. [ ] „Ohne Patient" → **Patient zuordnen** → Nummer eingeben → erscheint beim Patienten.
 9. [ ] 4711: je Diktat „Text kopieren", „Ziffern kopieren", „Nur Ziffern" → in Evident einfügen:

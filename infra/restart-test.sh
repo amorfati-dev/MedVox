@@ -35,7 +35,9 @@ LAN_IP="${MEDVOX_LAN_IP:-$(lan_ip || true)}"
 log "Dienste hart neu starten (launchctl kickstart -k)"
 probe "$WHISPER_LABEL" whisper_inference "$tmp/stille.wav"
 probe "$SERVER_LABEL" curl -fsS --max-time 2 "http://$API_UPSTREAM/api/v1/health"
-probe "$CADDY_LABEL" curl -fsS --max-time 2 --cacert "$MEDVOX_TLS/rootCA.pem" "https://$LAN_IP/api/v1/health"
+probe "$CADDY_LABEL" curl -fsS --max-time 2 --cacert "$MEDVOX_TLS/rootCA.pem" \
+  --resolve "$MDNS_NAME:$CADDY_HTTPS_PORT:$LAN_IP" "https://$MDNS_NAME/api/v1/health"
+probe "$MDNS_LABEL" wait_for_mdns "$LAN_IP" 1
 
 echo
 "$INFRA_DIR/status.sh" || fails=$((fails + 1))
