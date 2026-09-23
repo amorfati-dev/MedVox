@@ -27,7 +27,7 @@ export type TranscribeResult = {
   suggestions: Suggestion[];
 };
 export type TransferCreated = { code: string; expires_at: string };
-// `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,41a,13a"), siehe evidentLines.
+// `codes`: Evident-Zeilen, eine je Zahn ("36,Ä925a,l1,13a"), siehe evidentLines.
 export type TransferData = { transcript: string; codes: string[]; created_at: string };
 
 export class ApiError extends Error {

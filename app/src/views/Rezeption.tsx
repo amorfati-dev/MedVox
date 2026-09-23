@@ -38,7 +38,7 @@ export function Rezeption() {
     void lookup(code);
   };
 
-  // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,41a,13a"), eine je Zahn, siehe evidentLines.
+  // `codes` sind die Evident-Zeilen vom iPad ("36,Ä925a,l1,13a"), eine je Zahn, siehe evidentLines.
   const codes = data ? evidentText(data.codes) : "";
   const both = data ? `${data.transcript}\n\nZiffern:\n${codes}` : "";
 
