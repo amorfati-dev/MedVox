@@ -1,5 +1,5 @@
 // Büro, linke Spalte: Diktate „ohne Patient“ oben, dann alle Patienten, jüngstes Diktat zuerst –
-// mit Nummer, Behandler, Anzahl der Diktate, Uhrzeit und ob schon übertragen; „Behandler fehlt“, solange
+// mit Nummer und Kürzel, Behandler, Anzahl der Diktate, Uhrzeit und ob schon übertragen; „Behandler fehlt“, solange
 // ein offenes Diktat keinen hat.
 import type { PatientList } from "../api";
 import { dentistLabel, patientDentists } from "../dentists";
@@ -55,7 +55,10 @@ export function PatientListCard({ list, selected, onSelect, filtered }: Props) {
                   className={`plist-item${on({ kind: "patient", id: p.id })}`}
                   onClick={() => onSelect({ kind: "patient", id: p.id })}
                 >
-                  <span className="plist-number">{p.number}</span>
+                  <span className="plist-number">
+                    {p.number}
+                    {p.label && <span className="initials">{p.label}</span>}
+                  </span>
                   <span className={`state-chip state-${state === "übertragen" ? "done" : state}`}>{STATE_LABEL[state]}</span>
                   <span className="plist-meta">
                     {who && `${who} · `}

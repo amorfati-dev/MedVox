@@ -1,15 +1,18 @@
 // Nachfrage, bevor eine Nummer das Diktat „ohne Patient“ auf dem Bildschirm bekommt: nie still
 // zuordnen, damit kein Diktat beim falschen Patienten landet (pickAction in patients.ts).
 import { useEffect } from "react";
+import { patientName } from "../patients";
 
 type Props = {
   number: string;
+  label: string | null; // Kürzel, in der Frage hinter der Nummer
   onAssign: () => void; // Diktat auf dem Bildschirm diesem Patienten zuordnen
   onNew: () => void; // Diktat bleibt „ohne Patient“ gespeichert, neues Diktat für diesen Patienten
   onCancel: () => void;
 };
 
-export function AssignDialog({ number, onAssign, onNew, onCancel }: Props) {
+export function AssignDialog({ number: bare, label, onAssign, onNew, onCancel }: Props) {
+  const number = patientName(bare, label);
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === "Escape") onCancel();

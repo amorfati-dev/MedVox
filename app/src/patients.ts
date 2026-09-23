@@ -11,6 +11,22 @@ export function normalizeNumber(raw: string): string {
   return raw.replace(/\D/g, "").slice(0, NUMBER_MAX);
 }
 
+// Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident: Buchstaben, Punkt, Bindestrich,
+// Leerzeichen, höchstens 12 Zeichen – keine Ziffern (wie der Server bereinigt). Nie in den Kopierzeilen.
+export const LABEL_MAX = 12;
+export function normalizeLabel(raw: string): string {
+  return raw
+    .replace(/[^\p{L} .-]/gu, "")
+    .replace(/\s+/g, " ")
+    .trimStart()
+    .slice(0, LABEL_MAX);
+}
+
+// Nummer mit Kürzel für Texte und Vorlesen („4711 · M.K.“); ohne Kürzel nur die Nummer.
+export function patientName(number: string, label?: string | null): string {
+  return label ? `${number} · ${label}` : number;
+}
+
 // Kopiertexte und Mehrkosten-Positionen eines gespeicherten Diktats.
 export type DictationCopy = {
   evident: string[]; // „Ziffern kopieren“: Evident-Zeilen mit Kurzformen

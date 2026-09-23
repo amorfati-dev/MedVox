@@ -5,7 +5,16 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { evidentText, type PatientSummary, type StoredDictation, type TranscribeResult } from "../src/api.ts";
-import { dictationCopy, normalizeNumber, patientState, pickable, pickAction, preview } from "../src/patients.ts";
+import {
+  dictationCopy,
+  normalizeLabel,
+  normalizeNumber,
+  patientName,
+  patientState,
+  pickable,
+  pickAction,
+  preview,
+} from "../src/patients.ts";
 import { buildGroups, copyLines, optionKey, positionsOf } from "../src/result.ts";
 
 type Golden = Record<string, Record<string, { evident: string[]; numbers: string[] }>>;
@@ -94,6 +103,27 @@ test("Zustand in der Liste: offen, übertragen, noch kein Diktat", () => {
 test("Patientennummer: nur Ziffern, höchstens 12", () => {
   assert.equal(normalizeNumber("00 47-11a"), "004711");
   assert.equal(normalizeNumber("12345678901234"), "123456789012");
+});
+
+test("Kürzel: nur Buchstaben, Punkt, Bindestrich, höchstens 12, keine Ziffern", () => {
+  assert.equal(normalizeLabel("M.K."), "M.K.");
+  assert.equal(normalizeLabel("  Ö.  Ü-1980"), "Ö. Ü-");
+  assert.equal(normalizeLabel("Max Mustermann"), "Max Musterma");
+  assert.equal(normalizeLabel("<b>"), "b");
+});
+
+test("Nummer mit Kürzel für Texte, ohne Kürzel nur die Nummer", () => {
+  assert.equal(patientName("4711", "M.K."), "4711 · M.K.");
+  assert.equal(patientName("4711", null), "4711");
+  assert.equal(patientName("4711"), "4711");
+});
+
+test("Kürzel kommt nie in die Kopierzeilen", () => {
+  const r = fixtures[Object.keys(fixtures)[0]];
+  const plain = dictationCopy(stored(r));
+  const labelled = dictationCopy({ ...stored(r), patient_label: "M.K." });
+  assert.deepEqual(labelled, plain);
+  assert.ok(!labelled.evident.join("\n").includes("M.K."));
 });
 
 test("Vorschau des Transkripts", () => {

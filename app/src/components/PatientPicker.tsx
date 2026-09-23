@@ -1,15 +1,16 @@
 // Patient wählen: Evident-Nummer über ein großes Tastenfeld (Handschuhe) oder einen offenen Patienten
-// aus der Liste antippen. Am PC geht auch die Tastatur (Ziffern, Rücktaste, Eingabe, Esc).
+// aus der Liste antippen. Am PC geht auch die Tastatur (Ziffern, Rücktaste, Eingabe, Esc). Darunter auf
+// Wunsch das Kürzel (Initialen) zum Wiederfinden in Evident; leer lässt ein vorhandenes stehen.
 import { useEffect, useState } from "react";
 import { api, ApiError, type PatientSummary } from "../api";
-import { clock, NUMBER_MAX, normalizeNumber, pickable } from "../patients";
+import { clock, LABEL_MAX, NUMBER_MAX, normalizeLabel, normalizeNumber, pickable } from "../patients";
 import { plural } from "../status";
 import { Icon } from "./Icon";
 
 type Props = {
   title: string;
   current: string | null;
-  onChoose: (number: string | null) => void;
+  onChoose: (number: string | null, label: string | null) => void; // label: Kürzel, null = keins
   onClose: () => void;
   allowNone?: boolean; // „Ohne Patient weiter“ anbieten (am Stuhl)
 };
@@ -18,6 +19,7 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "OK"];
 
 export function PatientPicker({ title, current, onChoose, onClose, allowNone }: Props) {
   const [digits, setDigits] = useState("");
+  const [label, setLabel] = useState("");
   const [open, setOpen] = useState<PatientSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,15 +40,18 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
 
   const press = (key: string) => {
     if (key === "OK") {
-      if (digits) onChoose(digits);
+      const known = open?.find((p) => p.number === digits)?.label ?? null;
+      if (digits) onChoose(digits, label.trim() || known);
     } else if (key === "⌫") setDigits((d) => d.slice(0, -1));
     else setDigits((d) => normalizeNumber(d + key));
   };
 
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
+      const typing = ev.target instanceof HTMLInputElement; // im Kürzel-Feld nur Esc und Eingabe
       if (ev.key === "Escape") onClose();
       else if (ev.key === "Enter") press("OK");
+      else if (typing) return;
       else if (ev.key === "Backspace") press("⌫");
       else if (/^\d$/.test(ev.key)) press(ev.key);
       else return;
@@ -70,6 +75,19 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
             <output className={digits ? "keypad-display" : "keypad-display keypad-empty"} aria-live="polite">
               {digits || "Evident-Nummer"}
             </output>
+            <input
+              className="initials-input"
+              value={label}
+              onChange={(e) => setLabel(normalizeLabel(e.target.value))}
+              maxLength={LABEL_MAX}
+              placeholder="Kürzel (optional), z. B. M.K."
+              aria-label="Kürzel des Patienten, optional"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              enterKeyHint="done"
+            />
             <div className="keypad">
               {KEYS.map((key) => (
                 <button
@@ -84,7 +102,9 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
                 </button>
               ))}
             </div>
-            <p className="muted small">Nur die Patientennummer aus Evident, höchstens {NUMBER_MAX} Ziffern – keine Namen.</p>
+            <p className="muted small">
+              Patientennummer aus Evident, höchstens {NUMBER_MAX} Ziffern; dazu auf Wunsch nur die Initialen – keine Namen.
+            </p>
           </div>
           <div className="picker-list">
             <h3>Offene Patienten</h3>
@@ -100,9 +120,12 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
                     <button
                       type="button"
                       className={p.number === current ? "btn btn-block pick pick-on" : "btn btn-block pick"}
-                      onClick={() => onChoose(p.number)}
+                      onClick={() => onChoose(p.number, p.label ?? null)}
                     >
-                      <span className="pick-number">{p.number}</span>
+                      <span className="pick-number">
+                        {p.number}
+                        {p.label && <span className="initials">{p.label}</span>}
+                      </span>
                       <span className="pick-meta">
                         {p.dictations > 0 ? `${plural(p.dictations, "Diktat", "Diktate")} · ${clock(p.updated_at)}` : "noch kein Diktat"}
                       </span>
@@ -112,7 +135,7 @@ export function PatientPicker({ title, current, onChoose, onClose, allowNone }: 
               </ul>
             )}
             {allowNone && (
-              <button type="button" className="btn btn-quiet btn-block" onClick={() => onChoose(null)}>
+              <button type="button" className="btn btn-quiet btn-block" onClick={() => onChoose(null, null)}>
                 Ohne Patient weiter – später zuordnen
               </button>
             )}

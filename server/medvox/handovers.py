@@ -78,6 +78,7 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
                 "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",
                 (now, row["patient_id"]),
             )
+            db.drop_labels(conn)
     else:
         conn.execute("UPDATE dictations SET revision = revision + 1 WHERE id = ?", (dictation_id,))
     return None

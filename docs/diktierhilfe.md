@@ -115,7 +115,8 @@ Von Zimmer zu Zimmer diktieren und erst im Büro nach Evident übertragen:
 1. **Patient wählen** – ganz oben links steht immer der aktive Patient: die **Evident-Patientennummer**
    groß, oder bernsteinfarben **„Ohne Patient"**. Antippen öffnet ein großes Tastenfeld; Nummer
    tippen, **OK**. Wer heute schon diktiert wurde, steht rechts daneben unter „Offene Patienten" –
-   einfach antippen. Nur die Nummer, **keine Namen**.
+   einfach antippen. Unter der Nummer auf Wunsch das **Kürzel** (Initialen, z. B. „M.K.") – hilft, den
+   Patienten im Büro in Evident wiederzufinden; leer lassen geht immer. **Keine Namen.**
 2. **Diktieren wie immer.** Das Ergebnis wird beim Patienten auf dem Praxis-Mac gespeichert
    („Gespeichert – im Büro unter ‚Patienten'" unter der Nummer). Auch späteres Abwählen oder eine
    übernommene Zuzahlungs-Option wird mitgespeichert.
@@ -169,6 +170,17 @@ vorher noch einmal. Wird für die Korrektur ein zweiter Kurzcode abgeholt, zeigt
 dieselbe Warnung über den Ziffern. Hat das Büro das Diktat schon übertragen, zeigt die Rezeption
 beim Code nur „Dieses Diktat wurde bereits am … übertragen … – nicht erneut in Evident eintragen"
 und keine Ziffern.
+
+**Datenschutz – Kürzel zur Nummer:** das Feld „Kürzel" ist freiwillig und nimmt nur Buchstaben,
+Punkt und Bindestrich auf, höchstens 12 Zeichen (keine Ziffern, also kein Geburtsdatum). Gedacht sind
+Initialen, **keine Namen**. Das ist vertretbar, weil keine neue Datenkategorie entsteht: die
+Evident-Nummer ist schon ein Personenbezug, und Initialen machen ihn für uns nur lesbarer. Das Kürzel
+liegt nur auf dem Praxis-Mac, nie in der Cloud, nie in Protokollen, Fehlermeldungen oder im
+Kopiertext für Evident, und es wird gelöscht wie der Inhalt: beim Übertragen (Büro oder Kurzcode),
+sobald für den Patienten nichts mehr offen ist, spätestens nach 24 Stunden. Das eigentliche Mehr an
+Risiko ist, dass jemand am iPad mitliest (Patient oder Begleitperson sieht die Initialen anderer
+Patienten in „Offene Patienten"); dagegen helfen die kurze Aufbewahrung und dass nur Initialen
+erlaubt sind. Wer das nicht möchte, lässt das Feld einfach leer.
 
 **„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
 das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann

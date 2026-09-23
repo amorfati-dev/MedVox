@@ -1,7 +1,9 @@
 """Diktate je Patient für die spätere Übertragung im Büro (Evident-Patientennummer, keine Namen).
 
 Am Stuhl entstehen Diktate für mehrere Patienten hintereinander; im Büro werden sie später
-nach Evident übertragen. Ein Patient ist nur die Evident-Nummer, ein Diktat trägt Transkript,
+nach Evident übertragen. Ein Patient ist nur die Evident-Nummer, auf Wunsch mit Kürzel (Initialen,
+`label`) zum Wiederfinden in Evident; das Kürzel verschwindet mit dem Inhalt, sobald nichts mehr
+offen ist (`db.drop_labels`), und nie in Logs oder Kopierzeilen. Ein Diktat trägt Transkript,
 Vorschläge und die Auswahl vom iPad (`data`). Diktate ohne Nummer liegen als „ohne Patient“
 bereit und werden später zugeordnet.
 
@@ -50,6 +52,7 @@ class Patient:
     dentist_id: int | None = None  # Behandler des ersten Diktats (hat den Patienten eröffnet)
     dentist_ids: tuple[int, ...] = ()  # dieser und die Behandler der offenen Diktate, ohne Doppelte
     without_dentist: int = 0  # offene Diktate ohne Behandler („Behandler fehlt“)
+    label: str | None = None  # Kürzel (Initialen), nur zum Wiederfinden
 
 
 @dataclass(frozen=True)
@@ -63,6 +66,7 @@ class Dictation:
     data: dict
     handovers: tuple[dict, ...] = ()  # abgeholte Kurzcodes: {"fetched_at", "codes"} (handovers.py)
     dentist_id: int | None = None  # Behandler beim Start der Aufnahme; None = ohne Behandler
+    label: str | None = None  # Kürzel des Patienten
 
 
 _PATIENT_SQL = (
@@ -72,7 +76,7 @@ _PATIENT_SQL = (
     " (SELECT count(*) FROM dictations d WHERE d.patient_id = p.id AND d.dentist_id IS NULL) AS without_dentist"
     " FROM patients p"
 )
-_DICTATION_SQL = "SELECT d.*, p.number FROM dictations d LEFT JOIN patients p ON p.id = d.patient_id"
+_DICTATION_SQL = "SELECT d.*, p.number, p.label FROM dictations d LEFT JOIN patients p ON p.id = d.patient_id"
 
 
 def _patient(row: sqlite3.Row) -> Patient:
@@ -81,7 +85,7 @@ def _patient(row: sqlite3.Row) -> Patient:
     return Patient(
         row["id"], row["number"], row["created_at"], row["updated_at"],
         row["transferred_at"], row["transferred_count"], row["open_count"],
-        row["dentist_id"], tuple(dict.fromkeys(involved)), row["without_dentist"],
+        row["dentist_id"], tuple(dict.fromkeys(involved)), row["without_dentist"], row["label"],
     )
 
 
@@ -90,20 +94,25 @@ def _dictations(conn: sqlite3.Connection, rows: list[sqlite3.Row]) -> list[Dicta
     return [
         Dictation(
             r["id"], r["patient_id"], r["number"], r["revision"], r["created_at"], r["updated_at"],
-            json.loads(r["data_json"]), tuple(fetched[r["id"]]), r["dentist_id"],
+            json.loads(r["data_json"]), tuple(fetched[r["id"]]), r["dentist_id"], r["label"],
         )
         for r in rows
     ]
 
 
-def _patient_id(conn: sqlite3.Connection, number: str, now: float) -> int:
-    """ID des Patienten mit dieser Nummer; legt ihn an, falls es ihn (noch) nicht gibt."""
+def _patient_id(conn: sqlite3.Connection, number: str, now: float, label: str | None = None) -> int:
+    """ID des Patienten mit dieser Nummer; legt ihn an, falls es ihn (noch) nicht gibt.
+
+    Ein Kürzel ersetzt das bisherige; ohne Kürzel bleibt es, wie es ist.
+    """
     row = conn.execute("SELECT id FROM patients WHERE number = ?", (number,)).fetchone()
     if row is not None:
+        if label:
+            conn.execute("UPDATE patients SET label = ? WHERE id = ?", (label, row["id"]))
         return row["id"]
     cur = conn.execute(
-        "INSERT INTO patients (number, created_at, updated_at, expires_at) VALUES (?, ?, ?, ?)",
-        (number, now, now, now + RETENTION_S),
+        "INSERT INTO patients (number, created_at, updated_at, expires_at, label) VALUES (?, ?, ?, ?, ?)",
+        (number, now, now, now + RETENTION_S, label),
     )
     return int(cur.lastrowid)
 
@@ -132,12 +141,12 @@ def _get_dictation(conn: sqlite3.Connection, dictation_id: str) -> Dictation | N
     return None if row is None else _dictations(conn, [row])[0]
 
 
-def create_patient(db_path: Path, number: str, now: float | None = None) -> Patient:
-    """Legt den Patienten an oder liefert den vorhandenen mit dieser Nummer."""
+def create_patient(db_path: Path, number: str, label: str | None = None, now: float | None = None) -> Patient:
+    """Legt den Patienten an oder liefert den vorhandenen mit dieser Nummer (Kürzel wie `_patient_id`)."""
     now = time.time() if now is None else now
     with db.connect(db_path) as conn:
         db.purge_expired(conn, now)
-        patient = _get_patient(conn, _patient_id(conn, number, now))
+        patient = _get_patient(conn, _patient_id(conn, number, now, label))
     assert patient is not None
     return patient
 
@@ -177,6 +186,7 @@ def save_dictation(
     number: str | None,
     dentist_id: int | None = None,
     now: float | None = None,
+    label: str | None = None,
 ) -> Dictation:
     """Legt das Diktat an oder ersetzt seinen Inhalt (iPad speichert nach jeder Änderung).
 
@@ -185,7 +195,8 @@ def save_dictation(
     hat. Die 24 Stunden zählen ab der ersten Speicherung und verlängern sich durch Änderungen
     nicht. `dentist_id` zählt nur beim Anlegen (unbekannte ID: ohne Behandler); spätere
     Speicherungen ändern den Behandler nie, auch wenn das iPad inzwischen gewechselt wurde.
-    Hat die ID einen Grabstein, gibt es `DictationClosed`.
+    Hat die ID einen Grabstein, gibt es `DictationClosed`. `label` (Kürzel) gilt für den Patienten
+    mit dieser Nummer, falls es ihn gibt oder er hier angelegt wird.
     """
     now = time.time() if now is None else now
     payload = json.dumps(data, ensure_ascii=False)
@@ -198,7 +209,9 @@ def save_dictation(
         ).fetchone()
         patient_id = row["patient_id"] if row else None
         if patient_id is None and number:
-            patient_id = _patient_id(conn, number, now)
+            patient_id = _patient_id(conn, number, now, label)
+        elif number and label:
+            conn.execute("UPDATE patients SET label = ? WHERE number = ?", (label, number))
         if row is None:
             expires = now + RETENTION_S
             dentist_id = dentists.known(conn, dentist_id)
