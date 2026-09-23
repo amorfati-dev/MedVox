@@ -91,7 +91,7 @@ class Builder:
     def build(self, tagged: list[Tagged]) -> list[Draft]:
         fillings = [t for t in tagged if t.hit.entry.family]
         removals = [t for t in tagged if t.hit.entry.code in REMOVAL.get(t.hit.entry.system, {}).values()]
-        rest = _incision_depth([t for t in tagged if t not in fillings and t not in removals])
+        rest = _incision_depth([self._incision_teeth(t) for t in tagged if t not in fillings and t not in removals])
         self._fillings(fillings)
         self._removals(removals)
         sessions: dict[tuple[str, str, bool], list[Tagged]] = {}
@@ -127,12 +127,14 @@ class Builder:
                     host.hits = sorted(host.hits + [t for t in d.hits if t not in host.hits], key=lambda t: t.hit.start)
                 del self.drafts[key]
 
+    def _incision_teeth(self, t: Tagged) -> Tagged:
+        """„Tiefliegenden Abszess eröffnet regio 37“: der Zahn nach dem Verb gehört zur Fundstelle."""
+        verb = INCISION_VERB.match(self.ctx.folded, t.hit.end) if t.hit.entry.key in INCISION else None
+        return replace(t, teeth=self.ctx.teeth_for(t.hit.start, verb.end())) if verb else t
+
     def _incision(self, t: Tagged) -> None:
         """Eine Abszesseröffnung je Fundstelle; mehrere Zähne an einer Fundstelle sind ein Abszess."""
-        refs = t.teeth
-        if not refs and (verb := INCISION_VERB.match(self.ctx.folded, t.hit.end)):
-            refs = self.ctx.teeth_for(t.hit.start, verb.end())
-        teeth = _unique_fdi(tuple(tooth.fdi for tooth in refs))
+        teeth = _unique_fdi(tuple(tooth.fdi for tooth in t.teeth))
         if len(teeth) == 1:
             self.add(t.hit.entry, teeth[0], t)
             return

@@ -61,6 +61,15 @@ class CoPayment:
 
 
 @dataclass(frozen=True)
+class Conflict:
+    """Position, die nicht in derselben Sitzung neben dieser abgerechnet wird (außer ``except``)."""
+
+    system: str
+    code: str
+    note: str
+
+
+@dataclass(frozen=True)
 class Entry:
     code: str
     system: str  # BEMA | GOZ | GOÄ
@@ -75,6 +84,8 @@ class Entry:
     co_payment: CoPayment | None = None  # nur GOZ/GOÄ
     evident: str | None = None  # vom Behandler bestätigte Evident-Kurzform ("l1"), sonst None
     limit: tuple[str, int] | None = None  # bestätigtes max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; sonst None
+    analog: str | None = None  # Begründung, wenn beim Kassenpatienten als Analogposition berechnet (``analog``)
+    conflicts: tuple[Conflict, ...] = ()  # nicht in derselben Sitzung (``conflicts``)
 
     @property
     def key(self) -> tuple[str, str]:
@@ -113,9 +124,11 @@ class Catalog:
             co = CoPayment(z["allowed"], tuple(z["basis"]), z["note"]) if z else None
             m = e.get("max_per")
             limit = (m["unit"], m["count"]) if e.get("max_per_status") == "bestaetigt" else None
+            conflicts = tuple(Conflict(c["system"], c["code"], c["note"]) for c in e.get("conflicts", []))
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
                 tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"), limit,
+                (e.get("analog") or {}).get("note"), conflicts,
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}

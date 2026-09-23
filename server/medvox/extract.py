@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from medvox.extract_billing import co_payment_offers, drop_included, flag_not_beside, surcharge
 from medvox.extract_build import Builder, Draft, Tagged
 from medvox.extract_catalog import Catalog, load_catalog
+from medvox.extract_conflicts import flag_conflicts
 from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
@@ -71,6 +72,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
         extra += co_payment_offers(catalog, primaries)
         primaries = co_payment_basis(catalog, ctx, primaries)
     flag_not_beside(catalog, extra, primaries + extra)
+    flag_conflicts(catalog, primaries)
     added = surcharge(catalog, primaries + extra, builder.dictated_surcharges, notes, patient)
     ordered = _ordered(primaries, extra + ([added] if added else []))
     planned = [d for d in drafts if d.planned]
@@ -112,6 +114,8 @@ def _suggestion(catalog: Catalog, ctx: TextContext, d: Draft, patient: str) -> S
         head = "Zuzahlung möglich" if d.alternative_to is not None else "Zuzahlung"
         head += f" zu {co.basis_label}" if co.basis else " (eigenständige Privatleistung)"
         reason = f"{head}: {co.note} – {reason}"
+    elif patient == "kasse" and d.entry.analog:
+        reason = f"{d.entry.analog} – {reason}"
     elif d.alternative_to is not None and not d.reason:
         reason = f"Privat-Alternative zu {d.alternative_to.entry.label} ({reason})"
     if d.limit_note:

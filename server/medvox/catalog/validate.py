@@ -148,6 +148,7 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
                     errors.append(f"{label}: {target} trägt eine andere surfaces_to_code-Familie")
 
     errors += _check_pairs(entries, by_key)
+    errors += _check_conflicts(entries, by_key)
     for e in entries:
         errors += _check_co_payment(e, meta_urls)
 
@@ -177,6 +178,25 @@ def _check_pairs(entries: list[dict], by_key: dict) -> list[str]:
                 errors.append(f"{label}: Paar {name} steht nicht in dieser Datei")
             elif not any((x["system"], x["code"]) == (e["system"], e["code"]) for x in target.get("equivalent", [])):
                 errors.append(f"{label}: Paar {name} ist nicht beidseitig eingetragen")
+    return errors
+
+
+def _check_conflicts(entries: list[dict], by_key: dict) -> list[str]:
+    """analog nur ohne BEMA-Paar/Zuzahlung; conflicts: Ziel vorhanden, Paare tragen den Konflikt mit dem Paar des Ziels."""
+    errors: list[str] = []
+    for e in entries:
+        label = f"{e['system']} {e['code']}"
+        if "analog" in e and (e["system"] == "BEMA" or e.get("equivalent") or e.get("zuzahlung", {}).get("allowed")):
+            errors.append(f"{label}: 'analog' nur bei GOZ/GOÄ ohne BEMA-Paar und ohne erlaubte Zuzahlung")
+        for c in e.get("conflicts", []):
+            target = by_key.get((c["system"], c["code"]))
+            if target is None or target is e:
+                errors.append(f"{label}: Konflikt {c['system']} {c['code']} fehlt in dieser Datei oder ist die eigene Ziffer")
+                continue
+            for link in e.get("equivalent", []):
+                have = {(x["system"], x["code"]) for x in by_key.get((link["system"], link["code"]), {}).get("conflicts", [])}
+                errors += [f"{label}: Paar {link['system']} {link['code']} trägt den Konflikt mit {w[0]} {w[1]} nicht"
+                           for w in [(x["system"], x["code"]) for x in target.get("equivalent", [])] if w not in have]
     return errors
 
 

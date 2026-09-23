@@ -11,6 +11,10 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 - **BEMA-Bezug:** bei „ja“ die BEMA-Position, neben der sie üblich ist (– = eigenständige Privatleistung),
   bei „nein“ die Kassenleistung, die sie abdeckt. Bei Mehrkosten-Füllung und Inlay schlägt der Extraktor
   die BEMA-Basis nach Flächenzahl mit vor (Kassenanteil).
+- **Analogposition:** GOZ/GOÄ-Position, die der Behandler beim Kassenpatienten analog berechnet
+  (Praxisregel, Feld `analog`); der Vorschlag nennt das in der Begründung.
+- **Konflikt:** nicht in derselben Sitzung abrechenbar (Feld `conflicts`, Ausnahme in „außer“); der
+  Extraktor streicht keine der beiden, sondern markiert beide mit dem Hinweis.
 - **neu, bitte prüfen:** Position, die für den Patiententyp aus dem erweiterten Katalog nach v1 geholt wurde
   und noch nicht in der geprüften Fassung stand.
 
@@ -140,7 +144,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 0520 | Zuschlag zu chirurgischen Leistungen (800–1199 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
 | ☐ | nein | GOZ 0530 | Zuschlag zu chirurgischen Leistungen (ab 1200 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
 | ☐ | nein | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) | Ä161 | Kassenleistung BEMA Ä161 – privat nicht zusätzlich berechenbar. | [Q1] |
-| ☐ | nein | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | – | Im BEMA gibt es keine Ziffer für den tiefliegenden Abszess (nur Ä161 Inz1, oberflächlich); ob er beim Kassenpatienten privat vereinbart werden kann, ist nicht belegt – nicht vorgeschlagen. | [Q1] |
+| ☐ | nein | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | – | Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler GOÄ Ä2430 als Analogposition (Feld analog), nicht als Privatleistung. | [Q1] |
 
 ### Zuzahlung – Prophylaxe
 
@@ -161,6 +165,25 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 4055 | Zahnsteinentfernung, mehrwurzeliger Zahn | 107 | Kassenleistung BEMA 107; privat nur, wenn 107 im Kalenderjahr verbraucht ist – dafür nur kommerzielle Quelle, nie neben 107 in derselben Sitzung. | [Q19] [Q11] |
 | ☐ | ja | GOZ 4070 **(neu, bitte prüfen)** | Geschlossene Kürettage, einwurzeliger Zahn | – | Nur außerhalb einer richtliniengemäßen PAR-Behandlung privat; in der Kassen-PAR gilt AITa/UPTe. | [Q11] [Q18] |
 | ☐ | ja | GOZ 4075 **(neu, bitte prüfen)** | Geschlossene Kürettage, mehrwurzeliger Zahn | – | Nur außerhalb einer richtliniengemäßen PAR-Behandlung privat; in der Kassen-PAR gilt AITb/UPTf. | [Q11] [Q18] |
+
+### Analogpositionen beim Kassenpatienten
+
+| ☐ | Ziffer | Kurztext | Begründung im Vorschlag | Quelle |
+|---|---|---|---|---|
+| ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | Analogposition: GOÄ Ä2430 wird beim Kassenpatienten analog berechnet (Praxisregel des Behandlers) | Angabe des Behandlers |
+
+### Nicht in derselben Sitzung (Konflikt)
+
+| ☐ | Ziffer | nicht neben | außer | Hinweis im Vorschlag | Quelle |
+|---|---|---|---|---|---|
+| ☐ | BEMA Ä161 **(neu, bitte prüfen)** | BEMA 47a | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | BEMA Ä161 **(neu, bitte prüfen)** | BEMA 48 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2428 **(neu, bitte prüfen)** | GOZ 3030 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2428 **(neu, bitte prüfen)** | GOZ 3040 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | BEMA 47a | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | BEMA 48 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | GOZ 3030 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+| ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | GOZ 3040 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
 
 ## Erweiterter Katalog (Saat für Phase 2, wird nicht geladen)
 

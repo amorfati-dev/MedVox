@@ -1,8 +1,8 @@
 """Abszesseröffnung (Inzision): die Tiefe wählt die Ziffer, ohne Tiefe wird nachgefragt.
 
 Oberflächlich = BEMA Ä161 (Inz1) bzw. GOÄ Ä2428, Evident „inz1“; tiefliegend = GOÄ Ä2430, Evident
-„inz2“ – im BEMA (Stand 1. Januar 2026) gibt es dafür keine Ziffer. Falsch wäre vor allem, still die
-falsche der beiden Tiefen zu wählen.
+„inz2“ – im BEMA (Stand 1. Januar 2026) gibt es dafür keine Ziffer, der Behandler berechnet Ä2430 beim
+Kassenpatienten als Analogposition. Falsch wäre vor allem, still die falsche der beiden Tiefen zu wählen.
 """
 
 from __future__ import annotations
@@ -13,9 +13,11 @@ from medvox.extract import Extraction, Suggestion, analyze, billable_codes
 from medvox.lexicon import correct
 from medvox.normalize import normalize
 
-DEPTH_OPEN_KASSE = ("Tiefe nicht diktiert – Ä161 (Inz1) nur beim oberflächlichen Abszess; "
-                    "tiefliegend: im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen")
-DEEP_KASSE = "Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen"
+DEPTH_OPEN_KASSE = ("Tiefe nicht diktiert – oberflächlich Ä161 (Inz1) oder tiefliegend GOÄ Ä2430 als Analogposition "
+                    "(inz2) wählen")
+ANALOG = "Analogposition: GOÄ Ä2430 wird beim Kassenpatienten analog berechnet (Praxisregel des Behandlers)"
+APART_FROM_OSTEOTOMY = ("Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates "
+                        "Operationsgebiet – bitte prüfen")
 DEPTH_OPEN_PRIVAT = "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen"
 
 
@@ -40,10 +42,12 @@ def test_deep_incision_is_inz2_for_private_patients():
     assert (s.system, s.code, s.evident, s.points, s.teeth, s.decide) == ("GOÄ", "Ä2430", "inz2", 303, (36,), ())
 
 
-def test_deep_incision_has_no_bema_code():
-    result = run("Tiefliegende Inzision regio vier sieben.")
-    assert result.suggestions == []
-    assert result.notes == [DEEP_KASSE]
+def test_deep_incision_is_an_analog_position_for_kasse_patients():
+    result = run("Zahn drei sechs tiefliegenden Abszess eröffnet.")
+    [s] = performed(result)
+    assert (s.system, s.code, s.evident, s.kind, s.teeth, s.decide) == ("GOÄ", "Ä2430", "inz2", "bema", (36,), ())
+    assert s.reason.startswith(ANALOG)
+    assert result.notes == []
 
 
 @pytest.mark.parametrize("words", [
@@ -86,8 +90,8 @@ def test_deep_word_takes_the_open_word_along():
     assert (s.code, s.count) == ("Ä2430", 1)
     [s] = performed(run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet.", "privat"))
     assert (s.code, s.count, s.teeth, s.decide) == ("Ä2430", 1, (36,), ())
-    kasse = run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet.")
-    assert kasse.suggestions == [] and kasse.notes == [DEEP_KASSE]
+    [s] = performed(run("Regio drei sechs tiefliegende Inzision, Abszess eröffnet."))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä2430", 1, (36,), ())
 
 
 def test_open_word_at_another_tooth_stays_its_own_incision():
@@ -165,6 +169,38 @@ def test_two_deep_abscesses_are_two_positions():
 def test_flap_incision_of_an_osteotomy_is_no_abscess(patient, codes):
     dictation = "Zahn drei acht Osteotomie, marginale Inzision, Entlastungsschnitt, Mukoperiostlappen gebildet."
     assert billable_codes(run(dictation, patient).suggestions) == codes
+
+
+@pytest.mark.parametrize("dictation, patient, expected", [
+    ("Drei sechs extrahiert, tiefliegenden Abszess eröffnet regio drei sieben.", "privat", [("Ä2430", (37,), ())]),
+    ("Tiefliegenden Abszess eröffnet regio drei sechs, Abszess eröffnet regio drei sieben.", "privat",
+     [("Ä2430", (36,), ()), ("Ä2428", (37,), (DEPTH_OPEN_PRIVAT,))]),
+])
+def test_tooth_after_the_verb_wins_over_an_earlier_tooth(dictation, patient, expected):
+    result = run(dictation, patient)
+    assert [(s.code, s.teeth, s.decide) for s in performed(result) if s.code.startswith("Ä24")] == expected
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ("47a", "Ä161")), ("privat", ("3030", "Ä2428"))])
+def test_incision_beside_osteotomy_keeps_both_with_a_conflict_note(patient, codes):
+    result = run("Osteotomie drei acht, Abszess eröffnet an drei acht.", patient)
+    both = [s for s in performed(result) if s.code in codes]
+    assert [s.code for s in both] == list(codes)
+    assert all(APART_FROM_OSTEOTOMY in s.decide for s in both)
+
+
+@pytest.mark.parametrize("patient, codes", [("kasse", ("47a", "Ä161")), ("privat", ("3030", "Ä2428"))])
+def test_conflict_in_other_quadrants_hints_at_a_separate_area(patient, codes):
+    result = run("Osteotomie drei acht, oberflächlichen Abszess eröffnet an eins sechs.", patient)
+    both = [s for s in performed(result) if s.code in codes]
+    flag = f"{APART_FROM_OSTEOTOMY}; Zähne in verschiedenen Quadranten – separates Operationsgebiet möglich"
+    assert [(s.code, flag in s.decide) for s in both] == [(codes[0], True), (codes[1], True)]
+
+
+def test_deep_incision_beside_osteotomy_for_kasse_patients():
+    result = run("Osteotomie drei acht, tiefliegenden Abszess eröffnet.")
+    assert billable_codes(result.suggestions) == ["47a", "Ä2430"]
+    assert all(APART_FROM_OSTEOTOMY in s.decide for s in performed(result))
 
 
 def test_negated_incision_is_not_suggested():

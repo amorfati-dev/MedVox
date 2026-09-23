@@ -39,6 +39,12 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
     "note": "Mehrkostenvereinbarung …",//   übliche Grundlage in einem Satz
     "sources": ["https://..."]         //   Beleg(e), stehen in meta.sources (system "Zuzahlung")
   },
+  // "analog": {"patient": "kasse", "note": "Analogposition: …", "source": "Angabe des Behandlers"},
+                                       //   nur GOZ/GOÄ ohne BEMA-Paar und ohne erlaubte Zuzahlung: beim
+                                       //   Kassenpatienten als Analogposition vorgeschlagen, note in der Begründung
+  // "conflicts": [{"system": "BEMA", "code": "47a", "unit": "sitzung", "except": "separates Operationsgebiet",
+  //                "note": "…", "source": "Angabe des Behandlers"}],
+                                       //   nicht in derselben Sitzung; beide bleiben mit note als Hinweis stehen
   "sources": ["https://..."],          // Quelle(n), gegen die Ziffer/Kurztext/Punkte geprüft wurden
   "review": {"status": "draft"}        // draft | confirmed (+ optional date, note; note erscheint in PRUEFLISTE.md)
 }
@@ -55,9 +61,19 @@ der Extraktor wählt mit dem Patiententyp genau eine Seite. Sie stehen immer bei
 einer Datei (`validate.py` prüft beides). Mehrere Paare sind erlaubt, wenn eine BEMA-Leistung im GOZ
 aufgeteilt ist (BEMA 12 = GOZ 2030 oder 2040, BEMA 107 = GOZ 4050/4055 je Zahn, Ä925a–d = GOÄ Ä5000);
 dann entscheidet das diktierte Wort. Die Abszesseröffnung wählt die Tiefe: oberflächlich BEMA Ä161 (Inz1)
-= GOÄ Ä2428, tiefliegend nur GOÄ Ä2430 (kein BEMA-Paar, im BEMA ohne Ziffer), je Abszess (je diktierter Fundstelle, nie je
+= GOÄ Ä2428, tiefliegend nur GOÄ Ä2430 (kein BEMA-Paar, im BEMA ohne Ziffer; beim Kassenpatienten
+Analogposition, s. u.), je Abszess (je diktierter Fundstelle, nie je
 genanntem Zahn); ein Wort ohne Tiefe („Abszess eröffnet“) gibt einen Prüfhinweis statt einer stillen Wahl (`extract_rules.py`). `zuzahlung` ist ein
 Vorschlag zur Prüfung durch den Behandler, keine Rechtsberatung: `allowed: false` mit Begründung, wo die übliche Praxis umstritten oder nicht belegbar ist.
+
+Praxisregeln des Behandlers stehen maschinenlesbar mit `source` („Angabe des Behandlers“), nicht als
+Regel aus dem amtlichen Text: `analog` (GOÄ Ä2430 beim Kassenpatienten als Analogposition, `extract_patient.kind`)
+und `conflicts` (Inzision Ä161/Ä2428/Ä2430 nicht neben Osteotomie 47a/48 bzw. 3030/3040 derselben Sitzung,
+außer separates Operationsgebiet). Der Extraktor (`extract_conflicts.py`) streicht bei einem Konflikt nie,
+sondern markiert beide Positionen; liegen ihre Zähne in verschiedenen Quadranten, nennt der Hinweis die
+mögliche Ausnahme. `validate.py` prüft: `analog` nur ohne BEMA-Paar und ohne erlaubte Zuzahlung, Konfliktziel
+in derselben Datei, und das Paar einer Position trägt denselben Konflikt mit dem Paar des Ziels. Beide
+erscheinen in `PRUEFLISTE.md`.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche` – oder `unbegrenzt` ohne `count`, wo

@@ -53,21 +53,18 @@ def private_only(entry, folded_keyword: str) -> str | None:
     return rule[1] if rule and rule[0].search(folded_keyword) else None
 
 # Abszesseröffnung: die Tiefe wählt die Ziffer – oberflächlich BEMA Ä161 (Inz1) = GOÄ Ä2428,
-# tiefliegend GOÄ Ä2430 (im BEMA ohne Ziffer). Die Tiefenwörter sind Keywords von Ä2428/Ä2430;
+# tiefliegend GOÄ Ä2430 (beim Kassenpatienten Analogposition, Katalogfeld analog). Die Tiefenwörter
+# sind Keywords von Ä2428/Ä2430;
 # die übrigen Wörter von Ä161 („Abszess eröffnet“, „Abszessinzision“) lassen die Tiefe offen, dann wird
 # nicht still eine Tiefe gewählt, sondern nachgefragt. Gezählt wird je Abszess = je Fundstelle, nie je
 # genanntem Zahn: lieber zu wenig mit Hinweis als zu viel.
 INCISION_OPEN = ("BEMA", "Ä161")
-INCISION_DEEP = ("GOÄ", "Ä2430")
-INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), INCISION_DEEP})
+INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), ("GOÄ", "Ä2430")})
 INCISION_VERB = re.compile(r"\s*(?:eroeffnet|inzidiert|gespalten)\b")  # „oberflächlichen Abszess eröffnet regio 46“
 INCISION_REPEATED = "{n} Inzisionen an {fdi} diktiert – ein Abszess angenommen; falls mehrere Abszesse, von Hand ergänzen"
 INCISION_TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
-INCISION_DEEP_KASSE = ("Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – "
-                       "bitte selbst prüfen")
 _INCISION_DEPTH = {
-    "BEMA": "Tiefe nicht diktiert – Ä161 (Inz1) nur beim oberflächlichen Abszess; "
-            "tiefliegend: im BEMA 2026 keine eigene Ziffer gefunden – bitte selbst prüfen",
+    "BEMA": "Tiefe nicht diktiert – oberflächlich Ä161 (Inz1) oder tiefliegend GOÄ Ä2430 als Analogposition (inz2) wählen",
     "GOÄ": "Tiefe nicht diktiert – oberflächlich GOÄ Ä2428 (inz1) oder tiefliegend GOÄ Ä2430 (inz2) wählen",
 }
 

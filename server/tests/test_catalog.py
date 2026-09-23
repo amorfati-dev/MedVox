@@ -230,3 +230,19 @@ def test_evident_short_form_must_be_lowercase(catalog):
         broken = copy.deepcopy(catalog)
         broken["entries"][0]["evident"] = bad
         assert any("evident" in err for err in _errors_for(broken)), bad
+
+
+def test_detects_misplaced_analog_position(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "GOÄ", "Ä2428")["analog"] = copy.deepcopy(_entry(broken, "GOÄ", "Ä2430")["analog"])
+    assert any("GOÄ Ä2428: 'analog' nur bei GOZ/GOÄ ohne BEMA-Paar" in err for err in _errors_for(broken))
+
+
+def test_detects_broken_or_one_sided_conflict(catalog):
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "BEMA", "Ä161")["conflicts"][0]["code"] = "99x"
+    assert any("BEMA Ä161: Konflikt BEMA 99x fehlt" in err for err in _errors_for(broken))
+    broken = copy.deepcopy(catalog)
+    _entry(broken, "GOÄ", "Ä2428")["conflicts"] = [c for c in _entry(broken, "GOÄ", "Ä2428")["conflicts"]
+                                                    if c["code"] != "3030"]
+    assert any("BEMA Ä161: Paar GOÄ Ä2428 trägt den Konflikt mit GOZ 3030 nicht" in err for err in _errors_for(broken))

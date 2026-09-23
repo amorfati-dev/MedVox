@@ -44,7 +44,7 @@ Einfügen in Evident immer lesen.
 | „Zahn eins eins Wurzelkanalbehandlung drei Kanäle" | 3x 32 |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
-| „Tiefliegenden Abszess drei sechs eröffnet" / „Inz zwei" | privat GOÄ Ä2430; Kasse: keine BEMA-Ziffer |
+| „Tiefliegenden Abszess drei sechs eröffnet" / „Inz zwei" | GOÄ Ä2430 (Kasse als Analogposition) |
 | „Chlorhexidin Spülung" | 105 |
 | „PZR" | 1040 (GOZ) |
 | „BEMA dreizehn a", „GOZ zwei eins null null" | genau diese Ziffer |
@@ -206,6 +206,11 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
   ein Abszess (mit Hinweis); zwei Abszesse in einer Region als zwei Sätze diktieren („zwei Abszesse").
   Zwei Inzisionen am selben Zahn (vestibulär und palatinal) bleiben eine Position mit Hinweis – waren
   es wirklich zwei Abszesse, „zwei Abszesse" ausdrücklich sagen und von Hand ergänzen.
+- **Tiefliegende Inzision beim Kassenpatienten:** GOÄ Ä2430 kommt als Analogposition (Praxisregel des
+  Behandlers) und steht so in der Begründung.
+- **Inzision und Osteotomie in einem Diktat:** nur getrennt abrechenbar (andere Sitzung), außer bei einem
+  separaten Operationsgebiet – beide Positionen bleiben stehen und tragen den Hinweis; entscheiden und
+  eine abwählen, wenn es kein separates Operationsgebiet war.
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.

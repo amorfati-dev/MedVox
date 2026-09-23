@@ -1504,12 +1504,31 @@
         "je Abszess („Eröffnung eines oberflächlichen Abszesses“), mehrere Zähne in einem Satz = ein Abszess; amtlich ohne Höchstzahl",
         "nur oberflächlicher, unmittelbar unter der Haut oder Schleimhaut gelegener Abszess",
         "Wörter ohne Tiefe (Abszess eröffnet, Abszessinzision) lassen oberflächlich/tiefliegend offen – der Extraktor fragt nach",
-        "tiefliegender Abszess: im BEMA keine Ziffer (Inz2 steht nicht im BEMA, Stand 1. Januar 2026)",
-        "Privatpatient: GOÄ Ä2428"
+        "tiefliegender Abszess: im BEMA keine Ziffer (Inz2 steht nicht im BEMA, Stand 1. Januar 2026); Kassenpatient: GOÄ Ä2430 als Analogposition (Angabe des Behandlers)",
+        "Privatpatient: GOÄ Ä2428",
+        "Inzision nicht neben Osteotomie (47a/48) derselben Sitzung, außer separates Operationsgebiet – Angabe des Behandlers"
       ],
       "max_per": {
         "unit": "unbegrenzt"
       },
+      "conflicts": [
+        {
+          "system": "BEMA",
+          "code": "47a",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        },
+        {
+          "system": "BEMA",
+          "code": "48",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        }
+      ],
       "equivalent": [
         {
           "system": "GOÄ",
@@ -4395,11 +4414,30 @@
         "GOÄ Abschnitt L VII, für Zahnärzte über § 6 Abs. 2 GOZ",
         "oberflächlich unter der Haut oder Schleimhaut liegender Abszess (auch Furunkel); tiefliegend: GOÄ Ä2430",
         "kein Zuschlag 0500–0530 (keine GOZ-Leistung) und kein GOÄ-Zuschlag 442–445 (nicht in der Liste zu Abschnitt C VIII)",
-        "Kassenpatient: BEMA Ä161 (Inz1)"
+        "Kassenpatient: BEMA Ä161 (Inz1)",
+        "Inzision nicht neben Osteotomie (GOZ 3030/3040) derselben Sitzung, außer separates Operationsgebiet – Angabe des Behandlers"
       ],
       "max_per": {
         "unit": "unbegrenzt"
       },
+      "conflicts": [
+        {
+          "system": "GOZ",
+          "code": "3030",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        },
+        {
+          "system": "GOZ",
+          "code": "3040",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        }
+      ],
       "equivalent": [
         {
           "system": "BEMA",
@@ -4454,15 +4492,55 @@
         "GOÄ Abschnitt L VII, für Zahnärzte über § 6 Abs. 2 GOZ",
         "tiefliegender Abszess; oberflächlich unter der Haut oder Schleimhaut: GOÄ Ä2428",
         "kein Zuschlag 0500–0530 (keine GOZ-Leistung); stattdessen GOÄ-Zuschlag 442 (250–499 Punkte, Abschnitt C VIII, über § 6 Abs. 2 Nr. 2 GOZ) – nicht im Katalog v1, nicht neben 0500–0530 derselben Sitzung",
-        "Kassenpatient: keine BEMA-Ziffer für den tiefliegenden Abszess (BEMA kennt nur Ä161 Inz1)"
+        "Kassenpatient: als Analogposition berechnet – Angabe des Behandlers (Praxisregel, nicht aus dem BEMA-Text)",
+        "Inzision nicht neben Osteotomie (BEMA 47a/48, GOZ 3030/3040) derselben Sitzung, außer separates Operationsgebiet – Angabe des Behandlers"
       ],
       "max_per": {
         "unit": "unbegrenzt"
       },
+      "analog": {
+        "patient": "kasse",
+        "note": "Analogposition: GOÄ Ä2430 wird beim Kassenpatienten analog berechnet (Praxisregel des Behandlers)",
+        "source": "Angabe des Behandlers"
+      },
+      "conflicts": [
+        {
+          "system": "BEMA",
+          "code": "47a",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        },
+        {
+          "system": "BEMA",
+          "code": "48",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        },
+        {
+          "system": "GOZ",
+          "code": "3030",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        },
+        {
+          "system": "GOZ",
+          "code": "3040",
+          "unit": "sitzung",
+          "except": "separates Operationsgebiet",
+          "note": "Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen",
+          "source": "Angabe des Behandlers"
+        }
+      ],
       "zuzahlung": {
         "allowed": false,
         "basis": [],
-        "note": "Im BEMA gibt es keine Ziffer für den tiefliegenden Abszess (nur Ä161 Inz1, oberflächlich); ob er beim Kassenpatienten privat vereinbart werden kann, ist nicht belegt – nicht vorgeschlagen.",
+        "note": "Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler GOÄ Ä2430 als Analogposition (Feld analog), nicht als Privatleistung.",
         "sources": [
           "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
         ]
