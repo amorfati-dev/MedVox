@@ -4,6 +4,7 @@ import { App } from "./App";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/diktat.css";
+import "./styles/status.css";
 import "./styles/ergebnis.css";
 import "./styles/rezeption.css";
 import { applyTheme, loadTheme } from "./theme";

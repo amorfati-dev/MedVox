@@ -1,6 +1,6 @@
 // Eigene Strich-Symbole (24er Raster, Farbe vom Text) statt eines Icon-Pakets.
 // Symbole sind Beiwerk: jedes steht neben einem Wort und ist für Screenreader verborgen.
-type Name =
+export type IconName =
   | "mic"
   | "stop"
   | "check"
@@ -19,7 +19,7 @@ type Name =
   | "plus"
   | "user";
 
-const PATHS: Record<Name, string> = {
+const PATHS: Record<IconName, string> = {
   mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3M8 21h8",
   stop: "M6 6h12v12H6z",
   check: "M4 12.5l5 5L20 6.5",
@@ -39,7 +39,7 @@ const PATHS: Record<Name, string> = {
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
 };
 
-type Props = { name: Name; className?: string };
+type Props = { name: IconName; className?: string };
 
 export function Icon({ name, className }: Props) {
   return (

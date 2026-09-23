@@ -45,7 +45,9 @@ const MESSAGES: Record<number, string> = {
   413: "Aufnahme zu lang (maximal 60 Sekunden).",
   415: "Audioformat wird vom Server nicht unterstützt.",
   429: "Zu viele Abfragen – bitte kurz warten.",
+  502: "Praxis-Mac antwortet nicht – MedVox-Dienst auf dem Praxis-Mac prüfen.",
   503: "Whisper nicht bereit – Transkriptionsdienst auf dem Praxis-Mac prüfen.",
+  504: "Praxis-Mac antwortet zu langsam – bitte erneut versuchen.",
 };
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
