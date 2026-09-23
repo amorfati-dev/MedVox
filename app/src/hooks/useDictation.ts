@@ -1,6 +1,7 @@
 // Aufnahme-Hook: MediaRecorder-Segmente aufnehmen und an die Upload-Warteschlange
 // übergeben, die die Transkripte der Abschnitte aneinanderhängt.
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { PatientType, SuggestionKind } from "../api";
 import {
   MIC_MESSAGES,
   pickMimeType,
@@ -32,6 +33,8 @@ export type Dictation = {
   dropSegment: () => void; // nur diesen Abschnitt verwerfen, Rest weitersenden
   transcript: string;
   codes: string[];
+  kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
+  resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   error: string | null;
   lastLatency: number | null;
   supported: boolean; // MediaRecorder mit passendem MIME vorhanden
@@ -45,7 +48,8 @@ export type Dictation = {
   reset: () => void; // Transkript und offene Abschnitte verwerfen
 };
 
-export function useDictation(): Dictation {
+// `patientType` gilt ab dem nächsten neuen Diktat; ein laufendes Diktat behält seinen Typ für alle Abschnitte.
+export function useDictation(patientType: PatientType): Dictation {
   const [recording, setRecording] = useState(false);
   const [resumable, setResumable] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -62,6 +66,12 @@ export function useDictation(): Dictation {
   const lost = useRef(false); // Sitzung abgelaufen: keine neue Aufnahme starten
   const alive = useRef(true); // Hook noch eingebunden
   const mime = useRef<string | null>(pickMimeType());
+  const chosenType = useRef(patientType); // Auswahl am Schalter
+  const dictationType = useRef(patientType); // Typ des laufenden Diktats
+
+  useEffect(() => {
+    chosenType.current = patientType;
+  }, [patientType]);
 
   const clearTimers = useCallback(() => {
     if (ticker.current !== null) window.clearInterval(ticker.current);
@@ -98,7 +108,7 @@ export function useDictation(): Dictation {
     if (rec?.state === "recording") rec.stop();
   }, []);
 
-  const uploads = useUploadQueue(onSessionLost);
+  const uploads = useUploadQueue(onSessionLost, dictationType);
   const { enqueue, setError } = uploads;
 
   const startSegment = useCallback(
@@ -171,7 +181,10 @@ export function useDictation(): Dictation {
       starting.current = true;
       try {
         if (append) uploads.resume();
-        else reset();
+        else {
+          reset();
+          dictationType.current = chosenType.current;
+        }
         const mic = await requestMicrophone();
         if (!mic.ok) {
           setError(MIC_MESSAGES[mic.error]);
@@ -222,6 +235,8 @@ export function useDictation(): Dictation {
     dropSegment: uploads.dropSegment,
     transcript: uploads.transcript,
     codes: uploads.codes,
+    kinds: uploads.kinds,
+    resultType: uploads.resultType,
     error: uploads.error,
     lastLatency: uploads.lastLatency,
     supported: mime.current !== null,

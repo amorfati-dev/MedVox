@@ -1,17 +1,20 @@
-// Diktat-Ansicht: großer Aufnahmeknopf, Pegel und Countdown, Transkript in
-// gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
+// Diktat-Ansicht: Schalter Kasse/Privat, großer Aufnahmeknopf, Pegel und Countdown,
+// Transkript in gut lesbarer Schrift, Ziffern-Chips, Kopieren und Übergabe an die Rezeption.
 import { useMemo, useState } from "react";
 import { api, ApiError, joinCodes } from "../api";
 import { CodeChips } from "../components/CodeChips";
 import { CopyButton } from "../components/CopyButton";
+import { PATIENT_LABEL, PatientSwitch } from "../components/PatientSwitch";
 import { TransferPanel } from "../components/TransferPanel";
 import { MAX_SECONDS, useDictation } from "../hooks/useDictation";
+import { usePatientType } from "../hooks/usePatientType";
 import { Login } from "./Login";
 
 type Props = { onLogout: () => void };
 
 export function Diktat({ onLogout }: Props) {
-  const d = useDictation();
+  const [patientType, setPatientType] = usePatientType();
+  const d = useDictation(patientType);
   // Abgewählte Ziffern merken; neu vorgeschlagene gelten damit automatisch als gewählt.
   const [deselected, setDeselected] = useState<ReadonlySet<string>>(() => new Set());
   const activeCodes = useMemo(() => d.codes.filter((c) => !deselected.has(c)), [d.codes, deselected]);
@@ -74,6 +77,10 @@ export function Diktat({ onLogout }: Props) {
       </header>
 
       <section className="card recorder">
+        <PatientSwitch value={patientType} onChange={setPatientType} disabled={recording || sending || resumable} />
+        {(recording || sending || resumable) && (
+          <p className="muted switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
+        )}
         {!d.supported && (
           <p role="alert" className="error">
             Dieser Browser unterstützt keine Audioaufnahme. Bitte Safari auf dem iPad verwenden.
@@ -152,8 +159,19 @@ export function Diktat({ onLogout }: Props) {
       </section>
 
       <section className="card">
-        <h2>Ziffern</h2>
-        <CodeChips all={d.codes} active={activeCodes} onToggle={toggleCode} />
+        <div className="section-head">
+          <h2>Ziffern</h2>
+          {d.resultType && (
+            <span className={`badge badge-${d.resultType}`}>für {PATIENT_LABEL[d.resultType]}</span>
+          )}
+        </div>
+        {d.resultType && d.resultType !== patientType && !recording && !sending && !resumable && (
+          <p className="notice">
+            Diese Ziffern gelten für einen {PATIENT_LABEL[d.resultType]}en. „Aufnehmen“ beginnt ein neues Diktat als{" "}
+            {PATIENT_LABEL[patientType]}.
+          </p>
+        )}
+        <CodeChips all={d.codes} active={activeCodes} kinds={d.kinds} onToggle={toggleCode} />
         <div className="actions">
           <CopyButton label="Ziffern kopieren" text={joinCodes(activeCodes)} />
         </div>

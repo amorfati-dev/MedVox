@@ -2,11 +2,28 @@
 // deutscher Meldung geworfen, damit die Ansichten sie direkt anzeigen können.
 
 export type Health = { status: string; whisper: "ok" | "down" | string };
+// Patiententyp: wählt je Leistung BEMA (Kasse) oder GOZ/GOÄ (Privat).
+export type PatientType = "kasse" | "privat";
+// bema, goz (Privatleistung, auch GOÄ) oder zuzahlung (Privatleistung beim Kassenpatienten)
+export type SuggestionKind = "bema" | "goz" | "zuzahlung";
+export type Suggestion = {
+  code: string;
+  system: string;
+  title: string;
+  kind: SuggestionKind;
+  count: number;
+  teeth: number[];
+  reason: string;
+  decide: string[];
+  alternative: boolean;
+};
 export type TranscribeResult = {
   transcript: string;
+  patient_type: PatientType;
   duration_s: number;
   latency_s: number;
   codes: string[];
+  suggestions: Suggestion[];
 };
 export type TransferCreated = { code: string; expires_at: string };
 export type TransferData = { transcript: string; codes: string[]; created_at: string };
@@ -64,9 +81,10 @@ export const api = {
   login: (password: string) => request<void>("/api/v1/login", json("POST", { password })),
   logout: () => request<void>("/api/v1/logout", { method: "POST" }),
 
-  transcribe(audio: Blob, filename: string): Promise<TranscribeResult> {
+  transcribe(audio: Blob, filename: string, patientType: PatientType): Promise<TranscribeResult> {
     const form = new FormData();
     form.append("file", audio, filename);
+    form.append("patient_type", patientType);
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
 
@@ -79,6 +97,22 @@ export const api = {
 // Ziffern im Kopierformat der Praxis: kommagetrennt, z. B. "01, 8, 13c, 2080".
 export function joinCodes(codes: string[]): string {
   return codes.join(", ");
+}
+
+// Art je Ziffer der erbrachten Hauptvorschläge; Schlüssel wie in `codes` ohne Anzahl ("2x 41a" -> "41a").
+export function kindsOf(suggestions: Suggestion[]): Record<string, SuggestionKind> {
+  const kinds: Record<string, SuggestionKind> = {};
+  for (const s of suggestions) if (!s.alternative) kinds[s.code] = s.kind;
+  return kinds;
+}
+
+export function codeOf(copyCode: string): string {
+  return copyCode.replace(/^\d+x\s+/, "");
+}
+
+// Gespeicherter Patiententyp; alles Unbekannte gilt als Kasse (Standard des Servers).
+export function parsePatientType(raw: string | null): PatientType {
+  return raw === "privat" ? "privat" : "kasse";
 }
 
 // Kurzcodes: 6 Zeichen aus einem eindeutigen Alphabet (ohne 0/O/1/I).

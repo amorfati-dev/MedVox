@@ -1,8 +1,8 @@
 // Upload-Warteschlange: aufgenommene Abschnitte in Aufnahmereihenfolge an
 // /api/v1/transcribe schicken. Kein Fehlerpfad verwirft Audio – bei einem
 // Fehler bleibt der Abschnitt am Kopf der Warteschlange stehen.
-import { useCallback, useRef, useState } from "react";
-import { api, ApiError } from "../api";
+import { useCallback, useRef, useState, type RefObject } from "react";
+import { api, ApiError, kindsOf, type PatientType, type SuggestionKind } from "../api";
 import { filenameFor } from "./recorder";
 
 // Fehler, die eine Wiederholung desselben Abschnitts nie bestehen würde.
@@ -16,6 +16,8 @@ export type UploadQueue = {
   sessionLost: boolean; // Server antwortete 401
   transcript: string;
   codes: string[];
+  kinds: Record<string, SuggestionKind>; // Art je Ziffer (bema, goz, zuzahlung)
+  resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   lastLatency: number | null;
   error: string | null;
   setError: (message: string | null) => void;
@@ -27,13 +29,16 @@ export type UploadQueue = {
   reset: () => void; // Transkript und wartende Abschnitte verwerfen
 };
 
-export function useUploadQueue(onSessionLost: () => void): UploadQueue {
+// `patientType` hält den Patiententyp des laufenden Diktats; jeder Abschnitt wird damit ausgewertet.
+export function useUploadQueue(onSessionLost: () => void, patientType: RefObject<PatientType>): UploadQueue {
   const [waiting, setWaiting] = useState(0);
   const [paused, setPaused] = useState(false);
   const [permanent, setPermanent] = useState(false);
   const [sessionLost, setSessionLost] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [codes, setCodes] = useState<string[]>([]);
+  const [kinds, setKinds] = useState<Record<string, SuggestionKind>>({});
+  const [resultType, setResultType] = useState<PatientType | null>(null);
   const [lastLatency, setLastLatency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,11 +66,13 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
         const blob = queue.current[0];
         const mine = epoch.current;
         try {
-          const result = await api.transcribe(blob, filenameFor(blob.type));
+          const result = await api.transcribe(blob, filenameFor(blob.type), patientType.current);
           if (mine !== epoch.current) continue;
           const text = result.transcript.trim();
           setTranscript((prev) => (prev && text ? `${prev} ${text}` : prev || text));
           setCodes((prev) => Array.from(new Set([...prev, ...result.codes])));
+          setKinds((prev) => ({ ...prev, ...kindsOf(result.suggestions) }));
+          setResultType(result.patient_type);
           setLastLatency(result.latency_s);
           setError(null);
         } catch (e) {
@@ -84,7 +91,7 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
     } finally {
       draining.current = false;
     }
-  }, [halt]);
+  }, [halt, patientType]);
 
   const enqueue = useCallback(
     (blob: Blob) => {
@@ -123,6 +130,8 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
     setPermanent(false);
     setTranscript("");
     setCodes([]);
+    setKinds({});
+    setResultType(null);
     setLastLatency(null);
     setError(null);
   }, []);
@@ -135,6 +144,8 @@ export function useUploadQueue(onSessionLost: () => void): UploadQueue {
     sessionLost,
     transcript,
     codes,
+    kinds,
+    resultType,
     lastLatency,
     error,
     setError,
