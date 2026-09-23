@@ -135,7 +135,7 @@ def _codes(text: str) -> str:
 # --- Flächen ---------------------------------------------------------------------
 
 _SURFACE_WORDS = {"mesial": "m", "okklusal": "o", "occlusal": "o", "distal": "d", "bukkal": "b",
-                  "buccal": "b", "vestibulär": "b", "vestibulaer": "b", "lingual": "l",
+                  "buccal": "b", "bucal": "b", "vestibulär": "b", "vestibulaer": "b", "lingual": "l",
                   "palatinal": "p", "inzisal": "i", "incisal": "i"}
 _SURFACE_WORD = re.compile(rf"\b({_alt(_SURFACE_WORDS)})(?:e|en|er|es|em)?\b", re.I)
 _SURFACE_MOD = re.compile(r"(?<![^\W\d_])mod(?![^\W\d_])", re.I)

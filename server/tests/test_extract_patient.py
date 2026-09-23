@@ -189,6 +189,13 @@ def test_inlay_basis_uses_surfaces_separated_from_the_tooth_by_commas():
     assert all(s.decide == () for s in result.suggestions)
 
 
+@pytest.mark.parametrize("spelling", ["Bucal", "bukal"])
+def test_inlay_basis_counts_whisper_spellings_of_bukkal(spelling):
+    # Live-Befund: Whisper schreibt gesprochenes "bukkal" als "Bucal".
+    result = run(f"Zahn drei sechs, GOZ 2170, mesial, okklusal, distal, {spelling}.", "kasse")
+    assert billable_codes(result.suggestions) == ["13d", "2170"]
+
+
 def test_inlay_basis_without_surface_count_is_flagged_not_guessed():
     result = run("Keramikinlay drei sechs, GOZ 2170", "kasse")
     basis, goz = [s for s in result.suggestions if not s.alternative]
