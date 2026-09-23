@@ -65,6 +65,11 @@
           "minLength": 1,
           "maxLength": 6
         },
+        "evident": {
+          "description": "Kurzform, die Evident statt der Ziffer erwartet (l1, ost1, opg); nur vom Behandler im Praxisbetrieb bestätigte Formen, klein geschrieben.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]{0,7}$"
+        },
         "points": {
           "description": "BEMA-Bewertungszahl bzw. GOZ/GOÄ-Punktzahl; null = nicht verifiziert (nie raten).",
           "type": ["integer", "null"],

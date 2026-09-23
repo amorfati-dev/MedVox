@@ -73,6 +73,7 @@ class Entry:
     family: tuple[str, ...] = ()  # Füllungs-Familie (surfaces_to_code "1".."4"), sonst leer
     equivalents: tuple[Link, ...] = ()
     co_payment: CoPayment | None = None  # nur GOZ/GOÄ
+    evident: str | None = None  # vom Behandler bestätigte Evident-Kurzform ("l1"), sonst None
 
     @property
     def key(self) -> tuple[str, str]:
@@ -111,7 +112,7 @@ class Catalog:
             co = CoPayment(z["allowed"], tuple(z["basis"]), z["note"]) if z else None
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
-                tuple(e["keywords"]), tuple(e["rules"]), family, links, co,
+                tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"),
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}

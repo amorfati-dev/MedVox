@@ -482,6 +482,7 @@
       "system": "BEMA",
       "area": "Röntgen",
       "title": "OPG (Orthopantomogramm)",
+      "evident": "opg",
       "points": 36,
       "keywords": [
         "opg",
@@ -514,6 +515,7 @@
       "system": "BEMA",
       "area": "Röntgen",
       "title": "Teilaufnahme Schädel / Panoramaaufnahme eines Kiefers, eine Aufnahme",
+      "evident": "pan1",
       "points": 21,
       "keywords": [
         "pan1",
@@ -594,6 +596,7 @@
       "system": "BEMA",
       "area": "Anästhesie",
       "title": "Leitungsanästhesie, intraoral",
+      "evident": "l1",
       "abbrev": "L1",
       "points": 12,
       "keywords": [
@@ -1109,6 +1112,7 @@
       "system": "BEMA",
       "area": "Endodontie",
       "title": "Wurzelkanalfüllung, je Kanal",
+      "evident": "wf",
       "abbrev": "WF",
       "points": 17,
       "keywords": [
@@ -1251,6 +1255,7 @@
       "system": "BEMA",
       "area": "Chirurgie",
       "title": "Osteotomie (Zahnentfernung durch Osteotomie)",
+      "evident": "ost1",
       "abbrev": "Ost1",
       "points": 58,
       "keywords": [
@@ -2988,6 +2993,7 @@
       "system": "GOZ",
       "area": "Chirurgie",
       "title": "Osteotomie (Zahn/Implantat)",
+      "evident": "ost1",
       "points": 350,
       "keywords": [
         "osteotomie privat",
@@ -3858,6 +3864,7 @@
       "system": "GOÄ",
       "area": "Röntgen",
       "title": "OPG (Panoramaschichtaufnahme)",
+      "evident": "opg",
       "points": 400,
       "keywords": [
         "opg privat",
@@ -3899,6 +3906,7 @@
       "system": "GOÄ",
       "area": "Röntgen",
       "title": "Panoramaaufnahme(n) eines Kiefers",
+      "evident": "pan1",
       "points": 250,
       "keywords": [
         "pan1 privat",

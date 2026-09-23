@@ -12,6 +12,7 @@ from medvox.extract_catalog import CATALOG_PATH, Catalog, load_catalog
 from medvox.extract_rules import surcharge_for
 from medvox.lexicon import correct
 from medvox.normalize import normalize
+from medvox.routes_transcribe import build_response
 from tests.test_extract_acceptance import DICTATIONS
 
 MORE = [
@@ -240,3 +241,12 @@ def test_statutory_only_service_is_noted_for_private_patient():
 def test_unknown_patient_type_is_rejected():
     with pytest.raises(ValueError, match="Patiententyp"):
         run("Osteotomie drei acht", "gesetzlich")
+
+
+def test_suggestions_carry_the_evident_short_form():
+    kasse = build_response("Zahn drei sechs Wurzelfüllung an drei Kanälen, Leitungsanästhesie.", 1, 1, "kasse")
+    assert [(s.code, s.evident, s.count, s.teeth) for s in kasse.suggestions] == [
+        ("35", "wf", 3, [36]), ("41a", "l1", 1, [36]),
+    ]
+    privat = build_response("Zahn vier acht Osteotomie. OPG.", 1, 1, "privat")
+    assert {s.code: s.evident for s in privat.suggestions} == {"3030": "ost1", "Ä5004": "opg", "0500": None}

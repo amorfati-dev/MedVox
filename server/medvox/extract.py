@@ -35,6 +35,7 @@ class Suggestion:
     planned: bool = False  # nur geplant – nicht abrechnen
     alternative: bool = False  # zusätzlicher Kandidat (Zuzahlung, Gegenstück ohne Paar, Zuschlag dazu)
     kind: str = "bema"  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
+    evident: str | None = None  # Evident-Kurzform aus dem Katalog ("l1"); None = Ziffer verwenden
 
 
 @dataclass
@@ -117,5 +118,5 @@ def _suggestion(catalog: Catalog, ctx: TextContext, d: Draft, patient: str) -> S
     teeth = (d.fdi,) if d.fdi is not None else d.context
     return Suggestion(
         d.entry.code, d.entry.system, d.entry.title, d.entry.points, tuple(teeth), d.count, reason,
-        tuple(d.decide), d.planned, d.alternative_to is not None, kind_,
+        tuple(d.decide), d.planned, d.alternative_to is not None, kind_, d.entry.evident,
     )
