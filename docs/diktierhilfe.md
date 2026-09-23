@@ -201,7 +201,9 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
 - **Inzision: Abszess und Tiefe mitsagen.** „Inzision" oder „Entlastungsschnitt" allein wird nicht
   erkannt (sonst träfe es jede Schnittführung bei der Lappenbildung) – „Abszess eröffnet" oder gleich
   „oberflächlich"/„tiefliegend" sagen. „Abszess eröffnet" ohne Tiefe ergibt Inz1 mit Hinweis „Tiefe
-  nicht diktiert". Jeder Abszess an seinem Zahn ist eine eigene Position – je Abszess den Zahn nennen.
+  nicht diktiert". Je Abszess einen eigenen Satz mit seinem Zahn sagen – jeder ist eine eigene
+  Position. Mehrere Zähne oder ein Bereich in einem Satz („regio drei fünf bis drei sieben") zählen als
+  ein Abszess (mit Hinweis); zwei Abszesse in einer Region als zwei Sätze diktieren („zwei Abszesse").
 - Alter, PAR-Strecke, Frequenzen („einmal im Halbjahr") und die meisten
   Abrechnungsausschlüsse prüft MedVox **nicht**. Zuschlag 0500–0530 nur bei Chirurgie,
   die als GOZ diktiert wurde.

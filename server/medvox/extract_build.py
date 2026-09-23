@@ -15,6 +15,8 @@ from dataclasses import dataclass, field, replace
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
+    INCISION,
+    INCISION_TEETH,
     OSTEO_KINDS,
     REMOVAL,
     REMOVAL_ACT,
@@ -94,6 +96,8 @@ class Builder:
             if entry.system == "GOZ" and entry.code in SURCHARGE_CODES:
                 if t.plan is None:
                     self.dictated_surcharges.append(t)
+            elif entry.key in INCISION:
+                self._incision(t)
             elif (entry.system, entry.code) in ROOT_PAIRS:
                 self._root_pair(t)
             elif (unit := self.catalog.unit(entry)) == "session":
@@ -118,6 +122,16 @@ class Builder:
                 for host in hosts:
                     host.hits = sorted(host.hits + [t for t in d.hits if t not in host.hits], key=lambda t: t.hit.start)
                 del self.drafts[key]
+
+    def _incision(self, t: Tagged) -> None:
+        """Eine Abszesseröffnung je Fundstelle; mehrere Zähne an einer Fundstelle sind ein Abszess."""
+        teeth = _unique_fdi(tuple(tooth.fdi for tooth in t.teeth))
+        if len(teeth) == 1:
+            self.add(t.hit.entry, teeth[0], t)
+            return
+        draft = self.add(t.hit.entry, None, t, 1, INCISION_TEETH if teeth else "Zahn nicht diktiert")
+        draft.context = _unique_fdi(draft.context + teeth)
+        draft.count = len({h.sentence for h in draft.hits})
 
     def _incision_flags(self) -> None:
         """Tiefe offen, wenn kein Wort desselben Abszesses (Ziffer, Zahn) sie nennt."""

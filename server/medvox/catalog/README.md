@@ -55,8 +55,8 @@ der Extraktor wählt mit dem Patiententyp genau eine Seite. Sie stehen immer bei
 einer Datei (`validate.py` prüft beides). Mehrere Paare sind erlaubt, wenn eine BEMA-Leistung im GOZ
 aufgeteilt ist (BEMA 12 = GOZ 2030 oder 2040, BEMA 107 = GOZ 4050/4055 je Zahn, Ä925a–d = GOÄ Ä5000);
 dann entscheidet das diktierte Wort. Die Abszesseröffnung wählt die Tiefe: oberflächlich BEMA Ä161 (Inz1)
-= GOÄ Ä2428, tiefliegend nur GOÄ Ä2430 (kein BEMA-Paar, im BEMA ohne Ziffer), je Abszess (Regel „je Abszess“ zählt je
-Zahn); ein Wort ohne Tiefe („Abszess eröffnet“) gibt einen Prüfhinweis statt einer stillen Wahl (`extract_rules.py`). `zuzahlung` ist ein
+= GOÄ Ä2428, tiefliegend nur GOÄ Ä2430 (kein BEMA-Paar, im BEMA ohne Ziffer), je Abszess (je diktierter Fundstelle, nie je
+genanntem Zahn); ein Wort ohne Tiefe („Abszess eröffnet“) gibt einen Prüfhinweis statt einer stillen Wahl (`extract_rules.py`). `zuzahlung` ist ein
 Vorschlag zur Prüfung durch den Behandler, keine Rechtsberatung: `allowed: false` mit Begründung, wo die übliche Praxis umstritten oder nicht belegbar ist.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`

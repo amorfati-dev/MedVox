@@ -111,6 +111,24 @@ def test_each_abscess_is_its_own_position_with_its_own_depth(patient, code, flag
         (code, (36,), 1, (flag,)), (code, (46,), 1, ())]
 
 
+TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
+
+
+def test_one_abscess_over_several_teeth_is_one_position():
+    [s] = performed(run("Abszess eröffnet regio drei fünf bis drei sieben."))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä161", 1, (35, 36, 37), (TEETH, DEPTH_OPEN_KASSE))
+    [s] = performed(run("Oberflächlicher Abszess regio drei sechs, drei sieben eröffnet.", "privat"))
+    assert (s.code, s.count, s.teeth, s.decide) == ("Ä2428", 1, (36, 37), (TEETH,))
+
+
+def test_separate_abscesses_without_tooth_are_counted():
+    result = run("Oberflächliche Inzision vestibulär. Oberflächliche Inzision palatinal.", "privat")
+    assert billable_codes(result.suggestions) == ["2x Ä2428"]
+    result = run("Abszess eröffnet an drei sechs. Abszess eröffnet.")
+    assert [(s.code, s.count, s.teeth, s.decide[0]) for s in performed(result)] == [
+        ("Ä161", 1, (36,), DEPTH_OPEN_KASSE), ("Ä161", 1, (), "Zahn nicht diktiert")]
+
+
 def test_two_deep_abscesses_are_two_positions():
     result = run("Tiefliegenden Abszess drei sechs eröffnet. Tiefliegenden Abszess vier sechs eröffnet.", "privat")
     assert [(s.code, s.teeth, s.count) for s in performed(result)] == [("Ä2430", (36,), 1), ("Ä2430", (46,), 1)]

@@ -88,7 +88,7 @@ class Entry:
 # Einheit aus dem Regeltext: nur ein Regelanfang zählt ("je Zahn …"); in anderen Sätzen
 # steht "je Zahn" auch verneint ("einmal je Sitzung, nicht je Zahn").
 _PER_CANAL = re.compile(r"^je (?:Wurzel)?[Kk]anal")
-_PER_TOOTH = re.compile(r"^je (?:Zahn|Kavität|behandeltem|einwurzeligem|mehrwurzeligem|Abszess)")
+_PER_TOOTH = re.compile(r"^je (?:Zahn|Kavität|behandeltem|einwurzeligem|mehrwurzeligem)")
 # "Privatpatient: GOZ 2030/2040", "Mehrkosten/Privatpatient: GOZ 2050–2120", "(Privatpatient: GOZ 2400)"
 _PRIVATE = re.compile(r"(^[^:(]*)?Privatpatient[^:]*:\s*(?:vgl\.\s*)?(GOZ|GOÄ)\s+([^;()]+)")
 _PRIVATE_CODE = re.compile(r"Ä?\d{3,4}[a-z]?(?:\s*[–-]\s*Ä?\d{3,4}[a-z]?)?")

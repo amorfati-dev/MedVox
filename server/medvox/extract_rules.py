@@ -54,11 +54,13 @@ def private_only(entry, folded_keyword: str) -> str | None:
 
 # Abszesseröffnung: die Tiefe wählt die Ziffer – oberflächlich BEMA Ä161 (Inz1) = GOÄ Ä2428,
 # tiefliegend GOÄ Ä2430 (im BEMA ohne Ziffer). Die Tiefenwörter sind Keywords von Ä2428/Ä2430;
-# die übrigen Wörter von Ä161 („Inzision“, „Abszess eröffnet“) lassen die Tiefe offen, dann wird
-# nicht still eine Tiefe gewählt, sondern nachgefragt.
+# die übrigen Wörter von Ä161 („Abszess eröffnet“, „Abszessinzision“) lassen die Tiefe offen, dann wird
+# nicht still eine Tiefe gewählt, sondern nachgefragt. Gezählt wird je Abszess = je Fundstelle, nie je
+# genanntem Zahn: lieber zu wenig mit Hinweis als zu viel.
 INCISION_OPEN = ("BEMA", "Ä161")
 INCISION_DEEP = ("GOÄ", "Ä2430")
 INCISION = frozenset({INCISION_OPEN, ("GOÄ", "Ä2428"), INCISION_DEEP})
+INCISION_TEETH = "mehrere Zähne genannt – ein Abszess angenommen; falls es mehrere Abszesse waren, von Hand aufteilen"
 INCISION_DEEP_KASSE = ("Tiefliegende Inzision (GOÄ Ä2430, inz2): im BEMA 2026 keine eigene Ziffer gefunden – "
                        "bitte selbst prüfen")
 _INCISION_DEPTH = {
