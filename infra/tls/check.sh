@@ -39,16 +39,16 @@ code="$(curl -sS --cacert "$ROOT" --resolve "medvox.local:$CADDY_HTTPS_PORT:$LAN
   "https://medvox.local:$CADDY_HTTPS_PORT/" 2>&1 || true)"
 case "$code" in
   200) ok "Caddy antwortet (HTTP 200 über medvox.local → $LAN_IP)" ;;
-  404) warn "PWA noch nicht gebaut (WP-4): Caddy antwortet, liefert aber keine App (HTTP 404)" ;;
+  404) warn "App fehlt (HTTP 404): 'make install' ausführen"; status=1 ;;
   *) warn "unerwartet: $code"; status=1 ;;
 esac
 code="$(curl -sS --cacert "$ROOT" -o /dev/null -w '%{http_code}' "https://$LAN_IP:$CADDY_HTTPS_PORT/api/v1/health" 2>&1 || true)"
 case "$code" in
   200) ok "/api/v1/health → Backend erreichbar (HTTP 200)" ;;
-  502) warn "Backend noch nicht installiert (WP-2): /api wird weitergeleitet, aber $API_UPSTREAM antwortet nicht (HTTP 502)" ;;
+  502) warn "Backend antwortet nicht (HTTP 502): $API_UPSTREAM ist aus – 'make status' zeigt Details"; status=1 ;;
   *) warn "/api/v1/health: HTTP $code"; status=1 ;;
 esac
 
 echo
-if (( status == 0 )); then ok "TLS-Kette und Caddy sind in Ordnung – offene Punkte stehen als Warnung oben"; else warn "HTTPS hat Probleme"; fi
+if (( status == 0 )); then ok "TLS-Kette, Caddy, App und Backend sind in Ordnung"; else warn "HTTPS hat Probleme"; fi
 exit $status

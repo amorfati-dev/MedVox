@@ -63,6 +63,12 @@ else
 fi
 
 # --- 3. Modell --------------------------------------------------------------
+# Ohne Argument und ohne eigenes Modell: vorhandene OpenSuperWhisper-Datei kopieren statt 1,6 GB laden.
+OSW_MODEL="$HOME/Library/Application Support/ru.starmel.OpenSuperWhisper/whisper-models/ggml-large-v3-turbo.bin"
+if [[ -z "$MODEL_SRC" && ! -f "$WHISPER_MODEL" && -f "$OSW_MODEL" ]]; then
+  MODEL_SRC="$OSW_MODEL"
+  ok "Modell von OpenSuperWhisper gefunden – wird kopiert, nicht heruntergeladen"
+fi
 if [[ -n "$MODEL_SRC" ]]; then
   [[ -f "$MODEL_SRC" ]] || die "Modelldatei nicht gefunden: $MODEL_SRC"
   if [[ -f "$WHISPER_MODEL" ]] && cmp -s "$MODEL_SRC" "$WHISPER_MODEL"; then

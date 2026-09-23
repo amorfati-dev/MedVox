@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Wird von infra/server/install.sh erzeugt. Nicht von Hand ändern. -->
+  <key>Label</key>
+  <string>@@LABEL@@</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>@@RUN@@</string>
+    <string>--host</string>
+    <string>@@HOST@@</string>
+    <string>--port</string>
+    <string>@@PORT@@</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>@@WORKDIR@@</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>@@HOME@@</string>
+    <key>PATH</key>
+    <string>/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>MEDVOX_FFMPEG</key>
+    <string>@@FFMPEG@@</string>
+    <key>WHISPER_URL</key>
+    <string>@@WHISPER_URL@@</string>
+    <key>WHISPER_PROMPT_FILE</key>
+    <string>@@PROMPT_FILE@@</string>
+    <key>MEDVOX_DB_PATH</key>
+    <string>@@DB_PATH@@</string>
+    <key>MEDVOX_TMP_DIR</key>
+    <string>@@TMP_DIR@@</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>5</integer>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>StandardOutPath</key>
+  <string>@@LOG@@</string>
+  <key>StandardErrorPath</key>
+  <string>@@LOG@@</string>
+</dict>
+</plist>

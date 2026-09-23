@@ -2,7 +2,8 @@
 # ~/Library/Application Support/MedVox/caddy/Caddyfile gerendert.
 #
 # Eine Origin für alles (kein CORS):
-#   https://<LAN-IP>/        → gebaute PWA aus app/dist
+#   https://<LAN-IP>/        → gebaute PWA aus ~/Library/Application Support/MedVox/app
+#                              (dorthin kopiert von infra/app/install.sh, nie aus dem Repo)
 #   https://<LAN-IP>/api/... → FastAPI auf 127.0.0.1:8000
 # Zertifikat: mkcert (eigene Praxis-CA), SANs medvox.local + LAN-IP.
 

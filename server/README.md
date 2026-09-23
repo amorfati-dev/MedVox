@@ -53,7 +53,7 @@ kommt, sonst direkt vom Peer.
 | `POST /login` | nein | JSON `{"password": "…"}` | 204 + HttpOnly-Cookie `medvox_session` (SameSite=Strict); 401 falsches Passwort, 429 bei > 10 Versuchen/min/IP, 503 kein Hash konfiguriert |
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
-| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB) | `{"transcript", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist lexikon-korrigiert; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative` (siehe „Regel-Extraktor“) |
+| `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB) | `{"transcript", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative` (siehe „Regel-Extraktor“) |
 | `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str]}` | `{"code": "ABC123", "expires_at": iso8601}` |
 | `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at"}` oder 404; 429 bei > 10 Abrufen/min/IP |
 
@@ -75,11 +75,17 @@ ffmpeg dort per `httpx.MockTransport` bzw. Shell-Fake ersetzt.
 
 Jedes Transkript durchläuft drei reine, unit-getestete Schritte:
 **Roh-Transkript → `medvox.lexicon.correct` → `medvox.normalize.normalize` → Extraktor (WP-8).**
+Angezeigt und kopiert wird `medvox.normalize_display.display_text` des korrigierten Texts (siehe unten).
 `correct` behebt systematische Whisper-Verhörer anhand eines kuratierten Dental-Lexikons
 ("Artikein" → "Artikain", "Psycho 3" → "PSI 3", "L935d" → "Ä935d") und gibt jede Korrektur
 mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde; häufige
-deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Der
-korrigierte Text ist das, was der Behandler liest und ins PVS kopiert.
+deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst.
+
+`display_text` (`normalize_display.py`) erzeugt daraus den Text, den der Behandler liest und ins PVS
+kopiert: dieselbe Zahn- und Code-Normalisierung wie `normalize` („drei sechs“ → 36, „BEMA dreizehn a“
+→ BEMA 13a, „Ä neun drei fünf d“ → Ä935d, Zahlwörter → Ziffern), aber Flächen bleiben so, wie sie
+diktiert wurden („Zahn 36 mesial okklusal distal“, nicht „mod“). Die interne Form für den Extraktor
+ist davon unberührt.
 
 `normalize` erzeugt die maschinenlesbare Form für den Regel-Extraktor: gesprochene Ziffernpaare
 und alle Whisper-Schreibweisen werden zu FDI-Nummern ("drei sechs", "3-6", "3,6" → 36;

@@ -15,7 +15,8 @@ Cloud-Prototyp-Version liegt nur noch in der Git-Historie.
 |---|---|---|
 | `server/` | Python 3.12, FastAPI | API auf dem Praxis-Mac: Transkription (whisper.cpp), Normalisierung, Katalog-Regeln, Kurzcode-Transfer |
 | `app/` | Vite + React + TypeScript (ohne UI-Framework) | PWA für iPad/iPhone und Rezeptions-Browser |
-| `infra/` | Shell + launchd | Dienste auf dem Praxis-Mac: whisper-server und LAN-HTTPS (Caddy, eigene CA) – Anleitung in [`infra/README.md`](infra/README.md) |
+| `infra/` | Shell + launchd | Installation auf dem Praxis-Mac: whisper-server, Backend, App und LAN-HTTPS (Caddy, eigene CA) – Anleitung in [`infra/README.md`](infra/README.md) |
+| `docs/` | Markdown | Abnahmeprotokoll und Diktierhilfe für die Praxis |
 
 ## Entwicklung
 
@@ -39,12 +40,20 @@ npm run build
 npm test           # Unit-Tests (node --test)
 ```
 
-Praxis-Mac einrichten (whisper-server, LAN-HTTPS): siehe [`infra/README.md`](infra/README.md).
+## Praxis-Mac (Betrieb)
+
+Ein Befehl richtet alles ein bzw. zieht nach einem Update nach (Details:
+[`infra/README.md`](infra/README.md)):
 
 ```sh
-infra/whisper/install.sh   # Spracherkennung als launchd-Dienst (WP-1)
-infra/tls/setup.sh         # Praxis-CA, Zertifikat, Caddy auf 443 (WP-3)
+make install        # Spracherkennung, Backend, App, HTTPS – endet mit der Adresse für iPad und Rezeption
+make set-password   # Behandler-Passwort setzen oder ändern
+make status         # eine Zeile je Dienst; Exit-Code ≠ 0 bei jedem echten Problem
+make restart-test   # jeden Dienst hart neu starten und die Rückkehr messen
 ```
+
+Abnahme in der Praxis: [`docs/abnahme.md`](docs/abnahme.md). Wie man diktiert:
+[`docs/diktierhilfe.md`](docs/diktierhilfe.md).
 
 ## Struktur
 

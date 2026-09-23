@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from medvox import transcribe
 from medvox.main import create_app
 from medvox.settings import FALLBACK_PROMPT, Settings
-from tests.conftest import PASSWORD, WHISPER_TEXT, FakeWhisper, make_wav
+from tests.conftest import PASSWORD, FakeWhisper, make_wav
 
 URL = "/api/v1/transcribe"
 
@@ -30,7 +30,8 @@ def test_happy_path_wav(logged_in: TestClient, whisper: FakeWhisper) -> None:
     response = _upload(logged_in, make_wav(seconds=2.0))
     assert response.status_code == 200
     body = response.json()
-    assert body["transcript"] == WHISPER_TEXT.strip()
+    # Anzeigefassung: Zahnnummer als FDI, Flächen wie diktiert.
+    assert body["transcript"] == "Zahn 36 mesial okklusal distal."
     assert body["duration_s"] == 2.0
     assert body["latency_s"] >= 0
     assert body["codes"] == []
