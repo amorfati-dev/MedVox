@@ -2,7 +2,7 @@
 // Alle sehen alle Patienten; das Praxis-Passwort bleibt die einzige Schranke. Die Liste liegt auf dem
 // Praxis-Mac (/api/v1/dentists; inaktiv setzen per PATCH `active: false` oder DELETE), die Wahl am iPad im Gerät (useDentist).
 // Reine Funktionen, getestet in test/dentists.test.ts. Mit Endung, damit `node --test` sie lädt.
-import type { DentistRef, PatientList } from "./api.ts";
+import type { DentistRef, PatientList, PatientSummary, StoredDictation } from "./api.ts";
 import { json, request } from "./http.ts";
 
 export type Dentist = {
@@ -19,6 +19,12 @@ export const dentistApi = {
   add: (name: string, practitionerId: string | null) =>
     request<Dentist>("/api/v1/dentists", json("POST", { name, practitioner_id: practitionerId })),
   update: (id: number, change: DentistChange) => request<Dentist>(`/api/v1/dentists/${id}`, json("PATCH", change)),
+  // Büro: Behandler eines Diktats ohne Behandler nachtragen; hat es schon einen, lehnt der Server ab (409).
+  assign: (dictationId: string, dentistId: number) =>
+    request<StoredDictation>(
+      `/api/v1/dictations/${encodeURIComponent(dictationId)}/dentist`,
+      json("PUT", { dentist_id: dentistId }),
+    ),
 };
 
 // Voreinstellung des Servers (MEDVOX_DENTIST_IDLE_S), bis die Liste geladen ist.
@@ -46,12 +52,16 @@ export function restoreDevice(raw: string | null, now: number, idleS: number): D
 }
 
 // Muss das iPad vor dem nächsten Diktat fragen? Ohne aktive Behandler in der Liste nie (dann ohne
-// Behandler diktieren); sonst, wenn die Wahl nicht bestätigt ist oder der Behandler nicht mehr aktiv.
-// `id` null und bestätigt: bewusst „ohne Behandler“ gewählt.
+// Behandler diktieren); sonst, wenn die Wahl nicht bestätigt ist oder kein aktiver Behandler gewählt.
 export function mustAsk(device: DeviceDentist, active: Dentist[]): boolean {
   if (active.length === 0) return false;
-  if (!device.confirmed) return true;
-  return device.id !== null && !active.some((d) => d.id === device.id);
+  return !device.confirmed || !active.some((d) => d.id === device.id);
+}
+
+// „Ohne Behandler diktieren“ nur, solange die geladene Liste keinen aktiven Behandler hat (erster
+// Start) – sonst landete jedes folgende Diktat ohne Zuordnung. null = Liste noch nicht geladen.
+export function offerNone(active: Dentist[] | null): boolean {
+  return active !== null && active.length === 0;
 }
 
 // Büro: Filter nach Behandler – eine Bequemlichkeit, keine Schranke. null = alle (Voreinstellung).
@@ -72,7 +82,15 @@ export function filterChoices(roster: Dentist[], list: PatientList | null): Dent
   return roster.filter((d) => d.active || seen.has(d.id)).map(({ id, name }) => ({ id, name }));
 }
 
-// Anzeige „Dr. Hartmann“, ohne Behandler „ohne Behandler“.
+// Anzeige „Dr. Hartmann“; ohne Behandler „Behandler fehlt“ – im Büro nachträglich zuordnen.
+export const MISSING_DENTIST = "Behandler fehlt";
 export function dentistLabel(name: string | null | undefined): string {
-  return name ?? "ohne Behandler";
+  return name ?? MISSING_DENTIST;
+}
+
+// Büro, Patientenliste: beteiligte Behandler, dazu „Behandler fehlt“, solange ein offenes Diktat keinen hat.
+export function patientDentists(p: PatientSummary): string {
+  const names = (p.dentists ?? []).map((d) => d.name);
+  if ((p.without_dentist ?? 0) > 0) names.push(MISSING_DENTIST);
+  return names.join(", ");
 }

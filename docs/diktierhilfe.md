@@ -101,9 +101,10 @@ Praxis-Passwort bleibt das einzige.
    Name, wie er erscheinen soll („Dr. Hartmann"), optional die Evident-/BEMA-Behandlernummer.
    Wer die Praxis verlässt, wird **inaktiv gesetzt** – er erscheint nicht mehr zur Auswahl, seine
    Diktate behalten den Namen. Gelöscht wird niemand.
-6. „**Ohne Behandler diktieren**" (klein in der Auswahl) geht, falls der eigene Name noch fehlt –
-   das Diktat steht dann im Büro als „ohne Behandler". So erscheinen auch Diktate aus der Zeit vor
-   der Behandlerliste.
+6. **Eigener Name fehlt?** Zuerst in der Behandlerliste anlegen – ohne Behandler diktieren geht nur,
+   solange die Liste noch gar keinen aktiven Behandler hat. Ein Diktat ohne Behandler (auch aus der
+   Zeit vor der Behandlerliste) steht im Büro bernsteinfarben als **„Behandler fehlt"** und bekommt
+   dort mit **Behandler zuordnen** seinen Behandler – einmal zugeordnet, bleibt er.
 
 ## Mehrere Patienten hintereinander, übertragen im Büro
 
@@ -136,7 +137,9 @@ Patientenliste). Links alle Patienten von heute, jüngstes Diktat oben, mit Beha
 Diktate, Uhrzeit und Zustand **offen** / **übertragen**; darüber der Filter **Behandler: Alle** –
 ein Tipp auf einen Namen zeigt nur dessen Patienten (eröffnet oder mitdiktiert), **Alle** wieder
 alles. Der Filter versteckt nichts dauerhaft und ändert nichts am Kopiertext; Diktate „ohne Patient" stehen bernsteinfarben
-ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Rechts je Diktat der Behandler, Text, Evident-Zeilen
+ganz oben und bekommen mit **Patient zuordnen** ihre Nummer. Fehlt einem Diktat der Behandler, steht
+**Behandler fehlt** (links beim Patienten und rechts beim Diktat); **Behandler zuordnen** trägt ihn
+nach. Rechts je Diktat der Behandler, Text, Evident-Zeilen
 und Mehrkosten mit **Text kopieren**, **Ziffern kopieren** und **Nur Ziffern** – dasselbe Format
 wie am iPad. Danach **Als übertragen markieren**: Text und Ziffern sind sofort vom Praxis-Mac
 gelöscht, in der Liste bleibt nur „übertragen" mit Uhrzeit. Kam inzwischen am iPad etwas dazu,

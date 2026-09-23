@@ -1,7 +1,8 @@
 // Büro, linke Spalte: Diktate „ohne Patient“ oben, dann alle Patienten, jüngstes Diktat zuerst –
-// mit Nummer, Behandler, Anzahl der Diktate, Uhrzeit und ob schon übertragen.
+// mit Nummer, Behandler, Anzahl der Diktate, Uhrzeit und ob schon übertragen; „Behandler fehlt“, solange
+// ein offenes Diktat keinen hat.
 import type { PatientList } from "../api";
-import { dentistLabel } from "../dentists";
+import { dentistLabel, patientDentists } from "../dentists";
 import { clock, patientState, preview, STATE_LABEL } from "../patients";
 import { plural } from "../status";
 
@@ -46,6 +47,7 @@ export function PatientListCard({ list, selected, onSelect, filtered }: Props) {
           ))}
           {list.patients.map((p) => {
             const state = patientState(p);
+            const who = patientDentists(p);
             return (
               <li key={p.id}>
                 <button
@@ -56,7 +58,7 @@ export function PatientListCard({ list, selected, onSelect, filtered }: Props) {
                   <span className="plist-number">{p.number}</span>
                   <span className={`state-chip state-${state === "übertragen" ? "done" : state}`}>{STATE_LABEL[state]}</span>
                   <span className="plist-meta">
-                    {(p.dentists ?? []).map((d) => d.name).join(", ") || dentistLabel(null)} ·{" "}
+                    {who && `${who} · `}
                     {p.dictations > 0 && `${plural(p.dictations, "Diktat", "Diktate")} · ${clock(p.updated_at)}`}
                     {p.dictations > 0 && p.transferred > 0 && " · "}
                     {p.transferred > 0 && `${p.transferred} übertragen ${clock(p.transferred_at)}`}

@@ -73,6 +73,11 @@
   border: 1px solid var(--line);
   white-space: nowrap;
 }
+.dentist-missing {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-color: var(--warn);
+}
 .dentist-filter {
   display: flex;
   flex-wrap: wrap;

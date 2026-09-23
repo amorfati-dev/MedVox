@@ -241,7 +241,7 @@ export function Diktat({ onLogout }: Props) {
       )}
       {dentist.asking && (
         <DentistPicker
-          active={dentist.active}
+          active={dentist.roster && dentist.active}
           current={dentist.current?.id ?? null}
           error={dentist.error}
           onChoose={chooseDentist}

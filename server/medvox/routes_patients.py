@@ -13,7 +13,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 
-from medvox import dentists, patients
+from medvox import attribution, dentists, patients
 from medvox.auth import require_session
 from medvox.routes_transcribe import SuggestionOut
 from medvox.routes_transfer import HandoverOut, handover_out
@@ -75,6 +75,7 @@ class PatientOut(BaseModel):
     dentist_id: int | None = None  # Behandler des ersten Diktats (hat den Patienten eröffnet)
     dentist_name: str | None = None
     dentists: list[DentistRef] = []  # dieser und die Behandler der offenen Diktate (Filter im Büro)
+    without_dentist: int = 0  # offene Diktate ohne Behandler („Behandler fehlt“)
 
 
 class PatientDetail(PatientOut):
@@ -99,6 +100,10 @@ class AssignIn(BaseModel):
     dictation_id: str = Field(pattern=r"^[A-Za-z0-9-]{8,64}$")
 
 
+class DentistIn(BaseModel):
+    dentist_id: int = Field(ge=1)
+
+
 def _patient_out(p: patients.Patient, names: dict[int, str]) -> PatientOut:
     return PatientOut(
         id=p.id, number=p.number, created_at=iso(p.created_at), updated_at=iso(p.updated_at),
@@ -106,6 +111,7 @@ def _patient_out(p: patients.Patient, names: dict[int, str]) -> PatientOut:
         transferred_at=iso(p.transferred_at) if p.transferred_at is not None else None,
         dentist_id=p.dentist_id, dentist_name=names.get(p.dentist_id) if p.dentist_id is not None else None,
         dentists=[DentistRef(id=i, name=names[i]) for i in p.dentist_ids if i in names],
+        without_dentist=p.without_dentist,
     )
 
 
@@ -193,3 +199,15 @@ def delete_dictation(dictation_id: DictationId, request: Request) -> Response:
     if not patients.delete_dictation(_db(request), dictation_id):
         raise HTTPException(status_code=404, detail="Diktat nicht gefunden.")
     return Response(status_code=204)
+
+
+@router.put("/dictations/{dictation_id}/dentist", response_model=DictationOut)
+def assign_dentist(dictation_id: DictationId, body: DentistIn, request: Request) -> DictationOut:
+    """Behandler nachtragen, nur wenn das Diktat noch keinen hat; 409, sonst bliebe er nicht fest."""
+    try:
+        updated = attribution.assign_dentist(_db(request), dictation_id, body.dentist_id)
+    except attribution.AlreadyAttributed:
+        raise HTTPException(status_code=409, detail="Dieses Diktat hat schon einen Behandler.") from None
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Diktat oder Behandler nicht gefunden.")
+    return _dictation_out(updated, _names(request))

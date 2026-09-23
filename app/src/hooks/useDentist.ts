@@ -14,13 +14,13 @@ const SAVE_MS = 15_000; // letzte Bedienung höchstens so oft speichern
 export type DentistChoice = {
   roster: Dentist[] | null; // alle Behandler; null, solange nicht geladen
   active: Dentist[];
-  current: Dentist | null; // am Gerät gewählt; null = keiner oder „ohne Behandler“
+  current: Dentist | null; // am Gerät gewählt; null = keiner oder „ohne Behandler“ (leere Liste)
   unsure: boolean; // vor dem nächsten Diktat wird gefragt (nicht bestätigt oder nicht mehr aktiv)
   asking: boolean; // Auswahl ist offen
   error: string | null;
   open: () => void;
   close: () => void;
-  choose: (id: number | null) => void; // null = bewusst ohne Behandler diktieren
+  choose: (id: number | null) => void; // null = ohne Behandler, nur bei leerer Liste (offerNone)
   release: () => void; // Diktat übergeben: vor dem nächsten neu fragen
   gate: (then: (id: number | null) => void) => void; // vor einem neuen Diktat: erst fragen, falls nötig
 };
@@ -150,14 +150,14 @@ export function useDentist(busy: boolean, onUnauthorized: () => void): DentistCh
     (then: (id: number | null) => void) => {
       const list = rosterRef.current;
       const live = (list ?? []).filter((d) => d.active);
-      if (mustAsk(deviceRef.current, live)) {
+      const device = deviceRef.current;
+      // Liste noch nicht geladen: nur eine bestätigte Wahl gilt, sonst fragen (lädt die Liste neu).
+      if (list === null ? !device.confirmed : mustAsk(device, live)) {
         pending.current = then;
         open();
         return;
       }
-      const id = deviceRef.current.id;
-      // Liste noch nicht geladen: die gespeicherte Wahl; sonst nur ein aktiver Behandler.
-      then(list === null || live.some((d) => d.id === id) ? id : null);
+      then(list === null || live.some((d) => d.id === device.id) ? device.id : null);
     },
     [open],
   );

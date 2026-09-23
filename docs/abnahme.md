@@ -188,8 +188,11 @@ Zwei Behandler (hier A und B) und ein iPad; Behandlerliste wie in der Vorbereitu
        nächsten Hinsehen fragt es „Wer diktiert?".
 9. [ ] Behandlerliste: B **Inaktiv setzen** → B erscheint am iPad nicht mehr zur Auswahl; das Diktat
        von B im Büro trägt weiterhin den Namen B.
-10. [ ] Diktate aus der Zeit vor der Behandlerliste (falls noch da) stehen als „ohne Behandler" und
-       lassen sich wie bisher kopieren und übertragen.
+10. [ ] Die Auswahl „Wer diktiert?" bietet kein „Ohne Behandler diktieren", solange aktive Behandler
+       in der Liste stehen. Diktate aus der Zeit vor der Behandlerliste (falls noch da) stehen im Büro
+       bernsteinfarben als „Behandler fehlt" (beim Diktat und links beim Patienten) und lassen sich wie
+       bisher kopieren und übertragen. **Behandler zuordnen** → A wählen → das Diktat steht bei A, der
+       Patient „Eröffnet von A"; „Behandler zuordnen" erscheint danach nicht mehr.
 
 Beobachtet: ______________________________________________________
 

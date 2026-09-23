@@ -2,11 +2,12 @@
 // übertragen. Links die Liste (ohne Patient, dann Patienten, jüngstes zuerst), rechts der gewählte
 // Patient mit seinen Diktaten und denselben Kopieraktionen wie am iPad; „Als übertragen markieren“
 // löscht den Inhalt sofort. Kurzcode und /transfer bleiben für die sofortige Übergabe. Behandler je
-// Patient und Diktat stehen dabei; der Filter nach Behandler steht auf „Alle“ und versteckt nichts
-// dauerhaft – Gemeinschaftspraxis, jeder sieht alle Patienten.
+// Patient und Diktat stehen dabei; einem Diktat ohne („Behandler fehlt“) wird er hier nachgetragen. Der
+// Filter nach Behandler steht auf „Alle“ und versteckt nichts dauerhaft – Gemeinschaftspraxis.
 import { useEffect, useState } from "react";
 import { api, ApiError, type StoredDictation } from "../api";
 import { DentistFilter } from "../components/DentistFilter";
+import { DentistPicker } from "../components/DentistPicker";
 import { DictationCard } from "../components/DictationCard";
 import { HandoverWarning } from "../components/HandoverWarning";
 import { PatientListCard, type Selection } from "../components/PatientListCard";
@@ -22,6 +23,7 @@ export function Patienten({ onLogout }: Props) {
   const [selected, setSelected] = useState<Selection>(null);
   const data = usePatientList(selected?.kind === "patient" ? selected.id : null, onLogout);
   const [assigning, setAssigning] = useState<StoredDictation | null>(null);
+  const [attributing, setAttributing] = useState<StoredDictation | null>(null); // Behandler nachtragen
   const [confirm, setConfirm] = useState<string | null>(null); // Schlüssel der Aktion, die bestätigt werden muss
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -80,6 +82,15 @@ export function Patienten({ onLogout }: Props) {
     });
   };
 
+  const attribute = (d: StoredDictation, dentist: number | null) => {
+    setAttributing(null);
+    if (dentist === null) return;
+    void act(async () => {
+      const saved = await dentistApi.assign(d.id, dentist);
+      setMessage(`Behandler ${saved.dentist_name} zugeordnet.`);
+    });
+  };
+
   // Zweistufig statt Browser-Dialog: erster Tipp fragt nach, zweiter führt aus.
   const twoStep = (key: string, label: string, work: () => Promise<void>) =>
     confirm === key ? (
@@ -98,6 +109,13 @@ export function Patienten({ onLogout }: Props) {
     </button>
   );
 
+  const attributeButton = (d: StoredDictation) =>
+    d.dentist_id == null && (
+      <button type="button" className="btn" disabled={busy} onClick={() => setAttributing(d)}>
+        Behandler zuordnen
+      </button>
+    );
+
   const loose = selected?.kind === "ohne" ? data.list?.unassigned.find((d) => d.id === selected.id) ?? null : null;
   const detail = selected?.kind === "patient" ? data.detail : null;
 
@@ -112,6 +130,7 @@ export function Patienten({ onLogout }: Props) {
         <p className="muted small">Vor dem Übertragen die Evident-Nummer zuordnen.</p>
         <DictationCard d={loose} title="Diktat">
           {assignButton(loose, "Patient zuordnen", true)}
+          {attributeButton(loose)}
           {twoStep(`weg-${loose.id}`, "verwerfen", async () => {
             await api.deleteDictation(loose.id);
             setSelected(null);
@@ -141,6 +160,7 @@ export function Patienten({ onLogout }: Props) {
         )}
         {detail.items.map((d, i) => (
           <DictationCard key={d.id} d={d} title={detail.items.length > 1 ? `Diktat ${i + 1} von ${detail.items.length}` : "Diktat"}>
+            {attributeButton(d)}
             {assignButton(d, "Anderem Patienten zuordnen")}
           </DictationCard>
         ))}
@@ -236,6 +256,17 @@ export function Patienten({ onLogout }: Props) {
           current={assigning.patient}
           onChoose={(number) => assign(assigning, number)}
           onClose={() => setAssigning(null)}
+        />
+      )}
+      {attributing && (
+        <DentistPicker
+          active={roster.filter((d) => d.active)}
+          current={null}
+          error={null}
+          onChoose={(id) => attribute(attributing, id)}
+          onClose={() => setAttributing(null)}
+          title="Behandler zuordnen"
+          hint="Wer hat dieses Diktat aufgenommen? Einmal zugeordnet, bleibt es dabei."
         />
       )}
     </main>

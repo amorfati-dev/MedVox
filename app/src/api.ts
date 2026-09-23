@@ -92,6 +92,7 @@ export type PatientSummary = {
   dentist_id?: number | null; // Behandler des ersten Diktats (hat den Patienten eröffnet)
   dentist_name?: string | null;
   dentists?: DentistRef[]; // dieser und die Behandler der offenen Diktate (Filter im Büro)
+  without_dentist?: number; // offene Diktate ohne Behandler („Behandler fehlt“)
 };
 export type PatientDetail = PatientSummary & { items: StoredDictation[] };
 export type PatientList = { patients: PatientSummary[]; unassigned: StoredDictation[] };

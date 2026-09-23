@@ -193,6 +193,44 @@ def test_pilot_database_without_dentists_keeps_its_data(settings: Settings, whis
         assert [d["name"] for d in tc.get(DENTISTS).json()["dentists"]] == [db.FIRST_DENTIST]
         # Weiter bearbeitbar; ein nachträglich genannter Behandler ändert das alte Diktat nicht.
         assert put(tc, "pilot-0001", dentist=1, transcript="Pilot ergänzt")["dentist_id"] is None
+        assert patient(tc, "4711")["without_dentist"] == 1
+        # Im Büro zugeordnet: ab dann fest, auch als Eröffner des Patienten.
+        assigned = tc.put(f"{DICTATIONS}/pilot-0001/dentist", json={"dentist_id": 1}).json()
+        assert (assigned["transcript"], assigned["dentist_name"]) == ("Pilot ergänzt", db.FIRST_DENTIST)
+        assert patient(tc, "4711")["dentist_name"] == db.FIRST_DENTIST
     db.init_db(settings.db_path)  # erneuter Start: kein zweiter Eintrag
     with db.connect(settings.db_path) as conn:
         assert conn.execute("SELECT count(*) FROM dentists").fetchone()[0] == 1
+
+
+def test_office_assigns_missing_dentist_once_and_fills_the_opener(logged_in: TestClient) -> None:
+    a, b = add(logged_in, "Dr. A")["id"], add(logged_in, "Dr. B")["id"]
+    put(logged_in, "diktat-0001", "4711")
+    put(logged_in, "diktat-0002")  # ohne Patient
+    listing = logged_in.get(PATIENTS).json()
+    assert listing["unassigned"][0]["dentist_id"] is None
+    p = patient(logged_in, "4711")
+    assert (p["dentist_id"], p["without_dentist"]) == (None, 1)
+
+    saved = logged_in.put(f"{DICTATIONS}/diktat-0001/dentist", json={"dentist_id": a})
+    assert saved.status_code == 200, saved.text
+    assert (saved.json()["dentist_id"], saved.json()["dentist_name"]) == (a, "Dr. A")
+    p = patient(logged_in, "4711")
+    assert (p["dentist_name"], p["without_dentist"], [d["name"] for d in p["dentists"]]) == ("Dr. A", 0, ["Dr. A"])
+    assert [d["dentist_name"] for d in items(logged_in, "4711")] == ["Dr. A"]
+
+    again = logged_in.put(f"{DICTATIONS}/diktat-0001/dentist", json={"dentist_id": b})
+    assert again.status_code == 409
+    assert items(logged_in, "4711")[0]["dentist_id"] == a
+    put(logged_in, "diktat-0003", "4712", dentist=b)
+    assert logged_in.put(f"{DICTATIONS}/diktat-0003/dentist", json={"dentist_id": a}).status_code == 409
+    assert items(logged_in, "4712")[0]["dentist_id"] == b
+
+    assert logged_in.put(f"{DICTATIONS}/diktat-0002/dentist", json={"dentist_id": 999}).status_code == 404
+    assert logged_in.put(f"{DICTATIONS}/unbekannt-01/dentist", json={"dentist_id": a}).status_code == 404
+    loose = logged_in.put(f"{DICTATIONS}/diktat-0002/dentist", json={"dentist_id": b}).json()
+    assert (loose["patient_id"], loose["dentist_name"]) == (None, "Dr. B")
+
+
+def test_assigning_dentist_requires_login(client: TestClient) -> None:
+    assert client.put(f"{DICTATIONS}/diktat-0001/dentist", json={"dentist_id": 1}).status_code == 401

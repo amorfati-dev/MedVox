@@ -17,7 +17,8 @@ damit es nie wieder offen erscheint und nicht zweimal nach Evident geht.
 Behandler (`medvox/dentists.py`): jedes Diktat behält den Behandler, den das iPad beim ersten
 Speichern nennt (gewählt beim Start der Aufnahme), und ändert ihn danach nie; der Patient behält
 den Behandler seines ersten Diktats als den, der ihn eröffnet hat. Beides ist nur Zuordnung –
-jeder sieht alle Patienten. Diktate und Patienten aus der Zeit vor der Behandlerliste bleiben ohne.
+jeder sieht alle Patienten. Diktate ohne Behandler (z. B. aus der Zeit vor der Behandlerliste) ordnet
+das Büro nachträglich zu (`medvox/attribution.py`).
 """
 
 from __future__ import annotations
@@ -48,6 +49,7 @@ class Patient:
     open_count: int  # noch nicht übertragene Diktate
     dentist_id: int | None = None  # Behandler des ersten Diktats (hat den Patienten eröffnet)
     dentist_ids: tuple[int, ...] = ()  # dieser und die Behandler der offenen Diktate, ohne Doppelte
+    without_dentist: int = 0  # offene Diktate ohne Behandler („Behandler fehlt“)
 
 
 @dataclass(frozen=True)
@@ -66,7 +68,9 @@ class Dictation:
 _PATIENT_SQL = (
     "SELECT p.*, (SELECT count(*) FROM dictations d WHERE d.patient_id = p.id) AS open_count,"
     " (SELECT group_concat(d.dentist_id) FROM (SELECT dentist_id FROM dictations WHERE patient_id = p.id"
-    " AND dentist_id IS NOT NULL ORDER BY created_at, id) d) AS dentist_list FROM patients p"
+    " AND dentist_id IS NOT NULL ORDER BY created_at, id) d) AS dentist_list,"
+    " (SELECT count(*) FROM dictations d WHERE d.patient_id = p.id AND d.dentist_id IS NULL) AS without_dentist"
+    " FROM patients p"
 )
 _DICTATION_SQL = "SELECT d.*, p.number FROM dictations d LEFT JOIN patients p ON p.id = d.patient_id"
 
@@ -77,7 +81,7 @@ def _patient(row: sqlite3.Row) -> Patient:
     return Patient(
         row["id"], row["number"], row["created_at"], row["updated_at"],
         row["transferred_at"], row["transferred_count"], row["open_count"],
-        row["dentist_id"], tuple(dict.fromkeys(involved)),
+        row["dentist_id"], tuple(dict.fromkeys(involved)), row["without_dentist"],
     )
 
 

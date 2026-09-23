@@ -1,6 +1,6 @@
 // Ein gespeichertes Diktat im Büro: Transkript, Evident-Zeilen je Zahn, Mehrkosten und dieselben
 // Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern) – Format unverändert (patients.ts). Dazu der
-// Behandler, der es diktiert hat (nur Anzeige, nie im Kopiertext).
+// Behandler, der es diktiert hat (nur Anzeige, nie im Kopiertext); fehlt er, bernsteinfarben „Behandler fehlt“.
 import type { ReactNode } from "react";
 import { evidentText, type StoredDictation } from "../api";
 import { dentistLabel } from "../dentists";
@@ -23,7 +23,7 @@ export function DictationCard({ d, title, children }: Props) {
           {title} · {clock(d.created_at)} Uhr
         </h3>
         <span className="section-tags">
-          <span className="dentist-chip">{dentistLabel(d.dentist_name)}</span>
+          <span className={d.dentist_name ? "dentist-chip" : "dentist-chip dentist-missing"}>{dentistLabel(d.dentist_name)}</span>
           {d.patient_type && <span className={`badge badge-${d.patient_type}`}>{PATIENT_LABEL[d.patient_type]}</span>}
         </span>
       </div>

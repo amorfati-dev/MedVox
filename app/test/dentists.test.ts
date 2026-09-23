@@ -10,6 +10,8 @@ import {
   filterChoices,
   idleExpired,
   mustAsk,
+  offerNone,
+  patientDentists,
   restoreDevice,
   type Dentist,
 } from "../src/dentists.ts";
@@ -80,7 +82,6 @@ test("Diktat ohne Behandler (Pilotdaten, ältere iPads) bleibt nutzbar und lesba
   const list: PatientList = { patients: [old], unassigned: [{ ...loose("alt", null), dentist_id: undefined }] };
   assert.equal(filterByDentist(list, null).patients.length, 1);
   assert.deepEqual(filterByDentist(list, A.id), { patients: [], unassigned: [] });
-  assert.equal(dentistLabel(undefined), "ohne Behandler");
   assert.equal(dentistLabel("Dr. A"), "Dr. A");
 });
 
@@ -115,6 +116,23 @@ test("Vor dem nächsten Diktat fragen: unbestätigt, nicht mehr aktiv – nie oh
   assert.equal(mustAsk({ id: 1, confirmed: false, lastActive: 0 }, active), true, "nach Übergabe oder Pause");
   assert.equal(mustAsk({ id: null, confirmed: false, lastActive: 0 }, active), true, "neues Gerät");
   assert.equal(mustAsk({ id: 3, confirmed: true, lastActive: 0 }, active), true, "inzwischen inaktiv");
-  assert.equal(mustAsk({ id: null, confirmed: true, lastActive: 0 }, active), false, "bewusst ohne Behandler");
+  assert.equal(mustAsk({ id: null, confirmed: true, lastActive: 0 }, active), true, "ohne Behandler gilt nicht");
   assert.equal(mustAsk({ id: null, confirmed: false, lastActive: 0 }, []), false, "leere Liste blockiert nie");
+  assert.equal(mustAsk({ id: null, confirmed: true, lastActive: 0 }, []), false);
+});
+
+test("„Ohne Behandler diktieren“ nur bei geladener Liste ohne aktiven Behandler", () => {
+  assert.equal(offerNone([A, B]), false);
+  assert.equal(offerNone([A]), false);
+  assert.equal(offerNone([]), true, "erster Start ohne Behandlerliste");
+  assert.equal(offerNone(null), false, "Liste nicht geladen: erst laden, nicht ohne Zuordnung");
+});
+
+test("Büro: fehlender Behandler steht als „Behandler fehlt“, beim Diktat und beim Patienten", () => {
+  assert.equal(dentistLabel(null), "Behandler fehlt");
+  assert.equal(dentistLabel(undefined), "Behandler fehlt");
+  assert.equal(patientDentists({ ...patient(1, [A, B]), without_dentist: 0 }), "Dr. A, Dr. B");
+  assert.equal(patientDentists({ ...patient(1, [A]), without_dentist: 1 }), "Dr. A, Behandler fehlt");
+  assert.equal(patientDentists({ ...patient(3, []), without_dentist: 2 }), "Behandler fehlt");
+  assert.equal(patientDentists({ ...patient(3, []), without_dentist: undefined }), "", "übertragen oder leer: nichts");
 });

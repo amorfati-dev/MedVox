@@ -102,7 +102,8 @@ ADDED_COLUMNS = {
     "patients": [("dentist_id", "INTEGER")],
 }
 
-# Erster Eintrag der Behandlerliste bei einer neuen Datenbank; in der App umbenennen.
+# Erster Eintrag der Behandlerliste bei leerer Liste: bei einer neuen Datenbank und beim ersten Start
+# einer bestehenden nach dem Update (dann fragt jedes iPad mit diesem Eintrag); in der App umbenennen.
 FIRST_DENTIST = "Behandler 1"
 
 
@@ -116,7 +117,8 @@ def init_db(path: Path) -> None:
             for name, definition in columns:
                 if name not in present:
                     conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
-        # Einmalig: Behandler werden nie gelöscht, eine leere Liste gibt es nur bei einer neuen Datenbank.
+        # Einmalig: Behandler werden nie gelöscht, eine leere Liste gibt es nur bei einer neuen Datenbank
+        # oder beim ersten Start einer bestehenden nach dem Update.
         if conn.execute("SELECT count(*) FROM dentists").fetchone()[0] == 0:
             conn.execute("INSERT INTO dentists (name, created_at) VALUES (?, ?)", (FIRST_DENTIST, time.time()))
 
