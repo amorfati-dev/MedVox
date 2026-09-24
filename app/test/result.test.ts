@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import type { Suggestion, TranscribeResult } from "../src/api.ts";
-import { billable, buildGroups, copyLines, countGroups, optionKey, positionsOf, type Group, type Item } from "../src/result.ts";
+import { billable, buildGroups, copyLines, countGroups, optionKey, positionsOf, type Group, type Item, type Row } from "../src/result.ts";
 
 type Golden = Record<string, Record<string, { evident: string[]; numbers: string[] }>>;
 const fixtures = JSON.parse(readFileSync(new URL("./fixtures/anhang-b.json", import.meta.url), "utf8")) as Record<
@@ -19,12 +19,13 @@ function groupsOf(name: string, active?: string[], adopted: ReadonlySet<string> 
   return buildGroups(r.suggestions, codes, adopted, copyLines(r.suggestions, codes, adopted));
 }
 
-// Kurzform eines Eintrags für Vergleiche: "13c", "13c+[2100?]", "[13a|2150]", "[-|1040]", "?2100".
+// Kurzform eines Eintrags für Vergleiche: "13c", "13c+[2100?]", "[13a|2150]", "[32+[2420?]|2400]", "[-|1040]", "?2100".
 function sketch(item: Item): string {
   const opts = (o: { s: Suggestion; adopted: boolean }[]) =>
     o.length ? `+[${o.map((x) => x.s.code + (x.adopted ? "!" : "?")).join(",")}]` : "";
-  if ("row" in item) return item.row.s.code + opts(item.row.options);
-  if ("frame" in item) return `[${item.frame.basis?.s.code ?? "-"}|${item.frame.copay.s.code}]`;
+  const row = (r: Row) => r.s.code + opts(r.options);
+  if ("row" in item) return row(item.row);
+  if ("frame" in item) return `[${item.frame.basis ? row(item.frame.basis) : "-"}|${row(item.frame.copay)}]`;
   return `?${item.option.s.code}`;
 }
 
@@ -46,10 +47,11 @@ for (const [name, r] of Object.entries(fixtures)) {
     const shown: string[] = [];
     for (const g of groups) {
       for (const item of g.items) {
-        if ("row" in item) shown.push(item.row.key, ...item.row.options.map((o) => o.key));
+        const row = (r: Row) => shown.push(r.key, ...r.options.map((o) => o.key));
+        if ("row" in item) row(item.row);
         else if ("frame" in item) {
-          if (item.frame.basis) shown.push(item.frame.basis.key);
-          shown.push(item.frame.copay.key);
+          if (item.frame.basis) row(item.frame.basis);
+          row(item.frame.copay);
         } else shown.push(item.option.key);
       }
     }
@@ -116,7 +118,8 @@ test("Abnahme-Diktat Kasse: Mehrkosten-Rahmen 13a + 2150 an 46, ohne Zahn zuletz
 test("Kasse d06/d11/d04/d05: Rahmen mit BEMA-Basis aus „zu BEMA …“, eigenständige Zuzahlung ohne Kassenzeile", () => {
   assert.deepEqual(groupsOf("d06-kasse")[0].items.map(sketch), ["[13c|2100]"]);
   assert.deepEqual(groupsOf("d11-kasse").map((g) => g.items.map(sketch)), [["[13a|2060]"], ["[13a|2060]"]]);
-  assert.deepEqual(groupsOf("d04-kasse")[0].items.map(sketch), ["28", "[32|2400]", "34"]);
+  // Endo-Zuzahlungs-Optionen (PR #24): 2420 unter BEMA 32 im Rahmen, 2197 und 2430 unter BEMA 34.
+  assert.deepEqual(groupsOf("d04-kasse")[0].items.map(sketch), ["28", "[32+[2420?]|2400]", "34+[2197?,2430?]"]);
   assert.deepEqual(groupsOf("d05-kasse")[0].items.map(sketch), ["[-|1040]", "IP4", "MHU"]);
 });
 

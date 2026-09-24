@@ -491,6 +491,22 @@
     "evident": null
    },
    {
+    "code": "2420",
+    "system": "GOZ",
+    "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+    "points": 70,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "Zuzahlung möglich zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). – wegen: Wurzelkanalaufbereitung – Kanalzahl wie BEMA 32 (1×)",
+    "decide": [],
+    "planned": false,
+    "alternative": true,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
     "code": "2400",
     "system": "GOZ",
     "title": "Elektrometrische Längenbestimmung",
@@ -520,6 +536,38 @@
     "planned": false,
     "alternative": false,
     "kind": "bema",
+    "evident": null
+   },
+   {
+    "code": "2197",
+    "system": "GOZ",
+    "title": "Adhäsive Befestigung",
+    "points": 130,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: Einlage mit Kalziumhydroxid",
+    "decide": [],
+    "planned": false,
+    "alternative": true,
+    "kind": "zuzahlung",
+    "evident": null
+   },
+   {
+    "code": "2430",
+    "system": "GOZ",
+    "title": "Medikamentöse Einlage",
+    "points": 204,
+    "teeth": [
+     25
+    ],
+    "count": 1,
+    "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: Einlage mit Kalziumhydroxid",
+    "decide": [],
+    "planned": false,
+    "alternative": true,
+    "kind": "zuzahlung",
     "evident": null
    }
   ],
