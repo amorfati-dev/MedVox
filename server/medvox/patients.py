@@ -281,7 +281,7 @@ def mark_transferred(
         rows = conn.execute("SELECT id, revision FROM dictations WHERE patient_id = ?", (patient_id,)).fetchall()
         done = [r["id"] for r in rows if seen.get(r["id"]) == r["revision"]]
         for d in done:
-            db.bury(conn, "id = ?", (d,), now)
+            db.bury(conn, "id = ?", (d,), now, collect=True)
         if done or not rows:
             conn.execute(
                 "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + ? WHERE id = ?",

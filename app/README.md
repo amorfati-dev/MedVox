@@ -6,8 +6,8 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 
 | Pfad | Zweck |
 |---|---|
-| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander |
-| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt) |
+| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), „Rückgängig“ |
+| `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt); am iPad korrigierte Diktate mit „am iPad korrigiert“ und aufklappbarem Original (nur lesen) |
 | `/behandler` | Behandlerliste (mit Anmeldung): Name, optionale Behandlernummer, aktiv/inaktiv – nur Zuordnung, keine Rechte |
 | `/transfer` | Rezeption: Kurzcode eingeben (oder per QR-Link `?code=…`), Behandler des Diktats sehen, Text/Ziffern/beides kopieren – ohne Anmeldung |
 | `/check` | Gerätetest: HTTPS, MediaRecorder-Formate, Mikrofon, Server-Health |
@@ -19,6 +19,8 @@ Aufbau in `src/`: `api.ts` + `http.ts` (API-Client, deutsche Fehlermeldungen, Ev
 `patients.ts` + `hooks/useDictationSave.ts` + `hooks/usePatientList.ts` (Diktate je Patient speichern, Büroliste; Kopiertext
 mit denselben Funktionen wie am iPad),
 `dentists.ts` + `hooks/useDentist.ts` (Behandler: Liste, Wahl je Gerät, neu fragen nach Übergabe und Pause),
+`correction.ts` + `catalog.ts` + `textdiff.ts` + `hooks/useCorrection.ts` + `hooks/useCatalog.ts` (Korrektur am iPad: ersetzen nur an
+einem Zahn, ergänzen aus dem Katalog, neu berechnen über `/api/v1/analyze`, Vergleich mit dem Original),
 `theme.ts` (Auto/Hell/Dunkel je Gerät), `styles/` (`tokens.css` mit allen Farben hell/dunkel), `views/`, `components/`. Der Service Worker (`public/sw.js`) cached nur die App-Hülle, nie `/api/` oder Audio.
 
 Icons: `public/icon.svg` ist die Quelle; `public/apple-touch-icon.png` (180×180, iPadOS nimmt kein SVG als
@@ -35,7 +37,7 @@ npm install
 npm run dev        # /api → http://127.0.0.1:8000 (Server: `make dev`)
 npm run typecheck
 npm test           # node --test (QR-Encoder, Router, Kurzcode-Format, Ziffernart, Patiententyp, Ergebnisliste,
-                   # Kopierformat gegen test/fixtures/evident-golden.json, auch im Büro, Behandler), Node ≥ 22.18
+                   # Kopierformat gegen test/fixtures/evident-golden.json, auch im Büro, Behandler, Korrektur), Node ≥ 22.18
 npm run build      # dist/
 ```
 
@@ -72,5 +74,10 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
 6. Patient: oben links antippen, Nummer eingeben (oder einen offenen Patienten antippen); nach dem Diktat
    steht darunter „Gespeichert“. Ohne Nummer diktiert: „Gespeichert ohne Patient“, Nummer oben nachtragen.
    Am PC `https://medvox.local/patienten` öffnen: der Patient steht mit Anzahl und Uhrzeit oben in der Liste.
-7. „An Rezeption“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
+7. Korrektur: „Bearbeiten“ am Transkript, ein Wort ändern (z. B. „zweiflächig“ → „dreiflächig“),
+   „Übernehmen · Ziffern neu berechnen“: grüner Streifen „Ziffern neu berechnet: 13b → 13c an Zahn 36“ mit
+   „Rückgängig“, am Transkript „korrigiert“. „Ziffer ändern oder ergänzen · Zahn 36“: 13c antippen ersetzt
+   13b nur an Zahn 36 (die Zuzahlungs-Option wandert mit), eine Ziffer aus der Liste ergänzt „von Hand“,
+   noch einmal antippen zählt 2×. Im Büro trägt das Diktat „am iPad korrigiert“ und das Original.
+8. „An Rezeption“: 6-stelligen Code am Rezeptions-PC unter `https://medvox.local/transfer`
    eingeben oder den QR-Code mit dem Handy scannen; dort „Text“, „Ziffern“ oder „beides“ kopieren.

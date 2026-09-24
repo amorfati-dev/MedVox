@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Literal
 
 import httpx
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
@@ -40,10 +41,12 @@ class SuggestionOut(BaseModel):
     count: int
     reason: str
     decide: list[str]
-    planned: bool
+    planned: bool = False  # fehlt bei am iPad ergänzten Positionen (nie geplant)
     alternative: bool
     kind: str  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
     evident: str | None = None  # Evident-Kurzform ("l1"), sonst None – dann gilt die Ziffer
+    # Herkunft: regel (Extraktor), hand (am iPad aus dem Katalog ergänzt), geaendert (am iPad ersetzt, z. B. 13b → 13c)
+    source: Literal["regel", "hand", "geaendert"] = "regel"
 
 
 class TranscribeResponse(BaseModel):

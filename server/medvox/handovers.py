@@ -72,7 +72,7 @@ def hand_over(conn: sqlite3.Connection, dictation_id: str, revision: int | None,
     if row is None:
         conn.execute("INSERT INTO dictation_tombstones (id, closed_at) VALUES (?, ?)", (dictation_id, now))
     elif revision is not None and row["saved_revision"] == revision:
-        db.bury(conn, "id = ?", (dictation_id,), now)
+        db.bury(conn, "id = ?", (dictation_id,), now, collect=True)
         if row["patient_id"] is not None:
             conn.execute(
                 "UPDATE patients SET transferred_at = ?, transferred_count = transferred_count + 1 WHERE id = ?",

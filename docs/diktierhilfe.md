@@ -86,6 +86,30 @@ Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint
 Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste,
 Behandlerliste, Gerätetest und Abmelden.
 
+### Korrigieren am iPad
+
+Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Original, ändert aber nichts.
+
+- **Text berichtigen:** **Bearbeiten** am Transkript (nur bei „Ergebnis da“) öffnet ein großes
+  Textfeld – Tippen geht nur ohne Handschuhe. **Übernehmen · Ziffern neu berechnen** rechnet die
+  Ziffern aus dem ganzen Text neu (ohne Audio, dieselben Regeln wie beim Diktat). Zahlen wie „36“
+  bleiben Zahnnummern. Von Hand ergänzte Ziffern und Abwahlen bleiben erhalten; geänderte Wörter sind
+  grün unterstrichen, am Transkript steht „korrigiert“. Beispiel: „Zahn steinentfernung“ →
+  „Zahnsteinentfernung“ bringt die 107.
+- **Ziffer ändern oder ergänzen** (am Fuß jedes Zahnblocks, geht mit Handschuhen): oben die Füllung
+  an diesem Zahn (13a–13d) – antippen **ersetzt nur an diesem Zahn**, eine Zuzahlung zur selben
+  Füllung wandert mit (13b → 13c: 2080 → 2100). Darunter Suche und Fachbereiche: nur Positionen aus
+  dem Katalog, beim Kassenpatienten BEMA und die Zuzahlungs-Liste, beim Privatpatienten GOZ/GOÄ; eine
+  freie Ziffern-Eingabe gibt es nicht. Dieselbe Ziffer am selben Zahn noch einmal antippen zählt eins
+  mehr („2×“). Ergänzte Zeilen tragen „von Hand“, ersetzte „geändert · vorher 13b“. Eine Zeile „von
+  Hand“ wird immer kopiert, auch wenn dieselbe Ziffer an einem anderen Zahn abgewählt ist; Antippen
+  entfernt sie (mit **Rückgängig**).
+  **Ziffer ohne Zahn oder an anderem Zahn** (unter der Liste): erst „Ohne Zahn“ oder den Quadranten,
+  dann den Zahn antippen.
+- Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
+  Stufe: Text, Ziffern und Auswahl vor der letzten Änderung). Ein neuer Abschnitt wird wie immer
+  angehängt; wurde schon ein Kurzcode abgeholt, zeigt die Rezeption wie gewohnt nur die Änderung.
+
 ## Wer diktiert – mehrere Behandler, geteilte iPads
 
 Alle Behandler sehen alle Patienten (Gemeinschaftspraxis). Der Name am iPad sagt nur, **wer** ein
@@ -192,6 +216,21 @@ sobald für den Patienten nichts mehr offen ist, spätestens nach 24 Stunden. Da
 Risiko ist, dass jemand am iPad mitliest (Patient oder Begleitperson sieht die Initialen anderer
 Patienten in „Offene Patienten"); dagegen helfen die kurze Aufbewahrung und dass nur Initialen
 erlaubt sind. Wer das nicht möchte, lässt das Feld einfach leer.
+
+**Datenschutz – Korrekturen:** das Original eines am iPad korrigierten Diktats liegt nur beim Diktat
+und wird mit ihm gelöscht (übertragen, spätestens nach 24 Stunden). Damit MedVox aus Korrekturen
+lernen kann (Wörterbuch, ab der nächsten Ausbaustufe), bleiben beim Übertragen oder Ablauf – nicht beim
+Verwerfen oder Löschen – nur die **geänderten Stellen** stehen (Entscheidung des Behandlers): je Stelle
+vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (nahe Stellen, deren Umfeld sich
+berührt, zählen als eine; Stellen mit mehr als 12 geänderten Wörtern werden verworfen, ebenso Stellen, die vorher oder nachher
+mehr als die Hälfte der Wörter des Diktats umfassen – ein ganz neu geschriebenes kurzes Diktat hinterlässt
+also keinen Text, nur seine Ziffernänderungen), dazu die Ziffernänderungen ohne Zahn (z. B. „13b → 13c“, „107 ergänzt“),
+Patiententyp (Kasse/Privat), Kalenderwoche und Katalogstand. **Nie** gespeichert werden
+Evident-Nummer, Kürzel, Behandler, Datum oder Uhrzeit, Diktat-ID oder der ganze Text; die Zeilen sind
+mit nichts anderem verknüpft und tragen eine zufällige Nummer, sodass auch ihre Reihenfolge nicht
+verrät, welche Stellen aus demselben Diktat stammen. Sie bleiben, bis sie gelöscht werden, **höchstens 12 Monate**, und liegen
+nur auf dem Praxis-Mac. Restrisiko: ein Textstück kann einen Befund enthalten, der sich ohne Nummer aber
+keinem Patienten zuordnen lässt. Anzeigen und Löschen kommt mit der Wörterbuch-Seite.
 
 **„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
 das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann

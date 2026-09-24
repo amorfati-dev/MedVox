@@ -1,5 +1,6 @@
 // Ergebnis rechts: Kopfzeile (Patiententyp, Zählungen, „Nur Ziffern“), je Zahn ein Block mit der
-// kopierten Evident-Zeile, dann „Geplant – wird nicht abgerechnet“ und „Hinweise“.
+// kopierten Evident-Zeile, dann „Geplant – wird nicht abgerechnet“ und „Hinweise“. Am Fuß jedes Zahnblocks
+// und unter der Liste öffnet sich das Katalog-Blatt (Ziffer ändern oder ergänzen), sofern `onEdit` da ist.
 import type { PatientType, Suggestion } from "../api";
 import type { Counts, Group } from "../result";
 import { plural } from "../status";
@@ -41,11 +42,24 @@ type Props = {
   notes: string[];
   onToggle: (code: string) => void;
   onAdopt: (key: string) => void;
+  onEdit?: (tooth: number | undefined) => void; // Katalog-Blatt: an diesem Zahn, undefined = Zahn erst wählen
+  onRemove?: (s: Suggestion) => void; // Zeile „von Hand“ entfernen
 };
 
-export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt }: Props) {
+export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove }: Props) {
+  const elsewhere = onEdit && (
+    <button type="button" className="list-add" onClick={() => onEdit(undefined)}>
+      <Icon name="plus" />
+      Ziffer ohne Zahn oder an anderem Zahn
+    </button>
+  );
   if (groups.length === 0 && plans.length === 0 && notes.length === 0) {
-    return <p className="muted empty">Noch keine Ziffern-Vorschläge.</p>;
+    return (
+      <>
+        <p className="muted empty">Noch keine Ziffern-Vorschläge.</p>
+        {elsewhere}
+      </>
+    );
   }
   return (
     <>
@@ -69,16 +83,30 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt }:
           <ul className="rows">
             {g.items.map((item) =>
               "row" in item ? (
-                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} />
+                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
               ) : "frame" in item ? (
-                <FrameRows key={item.frame.key} frame={item.frame} tooth={g.tooth} onToggle={onToggle} onAdopt={onAdopt} />
+                <FrameRows
+                  key={item.frame.key}
+                  frame={item.frame}
+                  tooth={g.tooth}
+                  onToggle={onToggle}
+                  onAdopt={onAdopt}
+                  onRemove={onRemove}
+                />
               ) : (
                 <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} />
               ),
             )}
           </ul>
+          {onEdit && g.tooth !== null && (
+            <button type="button" className="tooth-add" onClick={() => onEdit(g.tooth ?? undefined)}>
+              <Icon name="plus" />
+              Ziffer ändern oder ergänzen · Zahn {g.tooth}
+            </button>
+          )}
         </section>
       ))}
+      {elsewhere}
 
       {plans.length > 0 && (
         <section className="planned">

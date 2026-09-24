@@ -1,6 +1,7 @@
 // Ein gespeichertes Diktat im Büro: Transkript, Evident-Zeilen je Zahn, Mehrkosten und dieselben
 // Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern) – Format unverändert (patients.ts). Dazu der
 // Behandler, der es diktiert hat (nur Anzeige, nie im Kopiertext); fehlt er, bernsteinfarben „Behandler fehlt“.
+// Am iPad korrigiert: Etikett „am iPad korrigiert“ und aufklappbar das Original – das Büro ändert nichts.
 import type { ReactNode } from "react";
 import { evidentText, type StoredDictation } from "../api";
 import { dentistLabel } from "../dentists";
@@ -9,6 +10,7 @@ import { CopayTable } from "./CopayTable";
 import { CopyButton } from "./CopyButton";
 import { EvidentLines } from "./EvidentLines";
 import { HandoverWarning } from "./HandoverWarning";
+import { OriginalDiff } from "./OriginalDiff";
 import { PATIENT_LABEL } from "./PatientSwitch";
 
 type Props = { d: StoredDictation; title: string; children?: ReactNode };
@@ -23,12 +25,14 @@ export function DictationCard({ d, title, children }: Props) {
           {title} · {clock(d.created_at)} Uhr
         </h3>
         <span className="section-tags">
+          {d.original && <span className="state-chip state-done">am iPad korrigiert</span>}
           <span className={d.dentist_name ? "dentist-chip" : "dentist-chip dentist-missing"}>{dentistLabel(d.dentist_name)}</span>
           {d.patient_type && <span className={`badge badge-${d.patient_type}`}>{PATIENT_LABEL[d.patient_type]}</span>}
         </span>
       </div>
       <HandoverWarning earlier={d.handovers ?? []} current={copy.blocks} allPrivate={copy.allPrivate} labelled={labelled} />
       <p className="transcript">{d.transcript || <span className="muted">(leer)</span>}</p>
+      {d.original && <OriginalDiff d={d} original={d.original} />}
       <h2>Ziffern für Evident</h2>
       <EvidentLines blocks={copy.blocks} labelled={labelled} />
       <CopayTable positions={copy.positions} />

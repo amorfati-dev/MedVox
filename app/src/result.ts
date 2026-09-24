@@ -9,6 +9,7 @@ import {
   isToothless,
   joinBlocks,
   type EvidentBlocks,
+  type Source,
   type Suggestion,
   type TransferPosition,
 } from "./api.ts";
@@ -30,6 +31,7 @@ export type Row = {
   count: number; // höchste Anzahl, falls ein späterer Abschnitt dieselbe Ziffer am Zahn wiederholt
   selected: boolean; // wird kopiert und an die Rezeption gesendet
   options: Option[];
+  source: Source; // „von Hand“ ergänzt oder am iPad geändert (auch: Anzahl von Hand erhöht)
 };
 
 // Mehrkosten-Rahmen: „Kasse zahlt 13a · Patient zahlt 2150“; ohne Basis eigenständige Zuzahlung (PZR).
@@ -65,6 +67,27 @@ export function billableCodes(active: string[], suggestions: Suggestion[], adopt
   return [...active, ...new Set(extra.map((s) => s.code))];
 }
 
+// Ziffer am Zahn ("36|13a", "-|107"): so fasst die Ergebnisliste Zeilen zusammen.
+function spotOf(s: Suggestion): string {
+  return `${s.teeth.length > 0 ? s.teeth[0] : "-"}|${s.code}`;
+}
+
+// Zeilen „von Hand“ (ohne Regel-Vorschlag derselben Ziffer am Zahn) sind ausdrücklich ergänzt: sie werden
+// immer kopiert, die Abwahl je Ziffer gilt nur für Regel-Vorschläge. Entfernen statt abwählen.
+export function handOnly(suggestions: Suggestion[]): Set<string> {
+  const main = suggestions.filter((s) => !s.alternative);
+  const ruled = new Set(main.filter((s) => s.source !== "hand").map(spotOf));
+  return new Set(main.filter((s) => s.source === "hand" && !ruled.has(spotOf(s))).map(spotOf));
+}
+
+// Kopierte Hauptvorschläge (ohne Optionen): gewählte Ziffern und alle Zeilen „von Hand“. Dieselbe Regel
+// fürs Kopieren und für die Ziffernänderungen im Büro (OriginalDiff).
+export function copiedMain(suggestions: Suggestion[], active: string[]): Suggestion[] {
+  const chosen = new Set(active.map(codeOf));
+  const own = handOnly(suggestions);
+  return suggestions.filter((s) => !s.alternative && (chosen.has(s.code) || own.has(spotOf(s))));
+}
+
 // Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl, Kassen- und Privatblock
 // getrennt („Kassenleistungen kopieren“, „Privatleistungen kopieren“). Eine übernommene Option bringt
 // nur sich selbst an ihrem Zahn mit, nie eine abgewählte Position mit derselben Ziffer.
@@ -75,8 +98,13 @@ export function copyBlocks(
   shortForms = true,
 ): EvidentBlocks {
   const chosen = new Set(active.map(codeOf));
-  const kept = adopted.size === 0 ? suggestions : suggestions.filter((s) => s.alternative || chosen.has(s.code));
-  return evidentBlocks(billable(kept, adopted), billableCodes(active, suggestions, adopted), shortForms);
+  const hand = copiedMain(suggestions, active).filter((s) => !chosen.has(s.code));
+  const kept =
+    adopted.size === 0 && hand.length === 0
+      ? suggestions
+      : suggestions.filter((s) => s.alternative || chosen.has(s.code) || hand.includes(s));
+  const codes = [...billableCodes(active, suggestions, adopted), ...new Set(hand.map((s) => s.code))];
+  return evidentBlocks(billable(kept, adopted), codes, shortForms);
 }
 
 // Beide Blöcke als eine Zeilenliste („Ziffern kopieren“): Kasse, Leerzeile, Privat.
@@ -120,6 +148,7 @@ export function buildGroups(
   lines: string[],
 ): Group[] {
   const chosen = new Set(active.map(codeOf));
+  const own = handOnly(suggestions);
   const groups = new Map<number | null, { rows: Item[]; last: Row | null }>();
   const seen = new Map<string, Row | Option>();
 
@@ -133,6 +162,9 @@ export function buildGroups(
     const key = `${s.alternative ? "o" : "p"}|${tooth ?? "-"}|${s.code}`;
     const known = seen.get(key);
     if (known) {
+      if ("count" in known && s.count > known.count && s.source && s.source !== "regel" && known.source === "regel") {
+        known.source = "geaendert"; // Anzahl am Katalog-Blatt erhöht
+      }
       if ("count" in known) known.count = Math.max(known.count, s.count);
       continue;
     }
@@ -144,7 +176,9 @@ export function buildGroups(
       else group.rows.push({ option });
       continue;
     }
-    const row: Row = { key, s, tag: tagOf(s), count: s.count, selected: chosen.has(s.code), options: [] };
+    const hand = s.source === "hand" && own.has(spotOf(s));
+    const source = s.source === "hand" && !hand ? "geaendert" : (s.source ?? "regel");
+    const row: Row = { key, s, tag: tagOf(s), count: s.count, selected: hand || chosen.has(s.code), options: [], source };
     seen.set(key, row);
     group.rows.push({ row });
     group.last = row;

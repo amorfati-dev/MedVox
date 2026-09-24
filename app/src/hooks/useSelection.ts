@@ -3,6 +3,7 @@
 // für „Ziffern kopieren“ (beim Kassenpatienten auch je Block), „Nur Ziffern“ und die Übergabe an die Rezeption.
 import { useCallback, useMemo, useState } from "react";
 import { codeOf, joinBlocks, type EvidentBlocks, type Suggestion } from "../api";
+import type { Choice } from "../correction";
 import { buildGroups, copyBlocks, copyLines, type Group } from "../result";
 
 export type Selection = {
@@ -13,6 +14,7 @@ export type Selection = {
   toggleCode: (code: string) => void; // Ziffer ohne Anzahl ("41a"); gilt für alle Zähne mit dieser Ziffer
   toggleOption: (key: string) => void; // optionKey
   clear: () => void;
+  restore: (choice: Choice) => void; // Auswahl nach einer Korrektur oder „Rückgängig“ (useCorrection)
   deselected: string[]; // für das Speichern beim Patienten
   adopted: string[];
 };
@@ -29,13 +31,18 @@ export function useSelection(codes: string[], suggestions: Suggestion[]): Select
   const numbers = useMemo(() => copyLines(suggestions, active, adopted, false), [suggestions, active, adopted]);
   const groups = useMemo(() => buildGroups(suggestions, active, adopted, evident), [suggestions, active, adopted, evident]);
 
+  // Alle Einträge dieser Ziffer ("13a" und "2x 13a" aus zwei Abschnitten) gemeinsam, sonst bliebe sie gewählt.
   const toggleCode = useCallback(
     (code: string) => {
-      const key = codes.find((c) => codeOf(c) === code);
-      if (!key) return;
+      const keys = codes.filter((c) => codeOf(c) === code);
+      if (keys.length === 0) return;
       setDeselected((prev) => {
         const next = new Set(prev);
-        if (!next.delete(key)) next.add(key);
+        const off = keys.some((k) => next.has(k));
+        for (const k of keys) {
+          if (off) next.delete(k);
+          else next.add(k);
+        }
         return next;
       });
     },
@@ -55,8 +62,13 @@ export function useSelection(codes: string[], suggestions: Suggestion[]): Select
     setAdopted(new Set());
   }, []);
 
+  const restore = useCallback((choice: Choice) => {
+    setDeselected(new Set(choice.deselected));
+    setAdopted(new Set(choice.adopted));
+  }, []);
+
   const deselectedList = useMemo(() => [...deselected], [deselected]);
   const adoptedList = useMemo(() => [...adopted], [adopted]);
 
-  return { groups, evident, blocks, numbers, toggleCode, toggleOption, clear, deselected: deselectedList, adopted: adoptedList };
+  return { groups, evident, blocks, numbers, toggleCode, toggleOption, clear, restore, deselected: deselectedList, adopted: adoptedList };
 }

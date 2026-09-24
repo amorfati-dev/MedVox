@@ -6,7 +6,7 @@
 // (useDictationSave), ohne Nummer als „ohne Patient“; im Büro unter /patienten übertragen. Eine
 // später gewählte Nummer ordnet es erst nach Nachfrage zu (AssignDialog). Jedes Diktat trägt den
 // Behandler, der beim Start der Aufnahme am iPad gewählt war (useDentist); ein späterer Wechsel am
-// Gerät ändert es nicht.
+// Gerät ändert es nicht. Korrigiert wird nur hier am iPad (useCorrection); das Büro sieht das Original.
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError, type DictationBody } from "../api";
 import { AssignDialog } from "../components/AssignDialog";
@@ -20,6 +20,7 @@ import { PatientSwitch } from "../components/PatientSwitch";
 import { ResultPane } from "../components/ResultPane";
 import { StatusPanel } from "../components/StatusPanel";
 import { ThemeSwitch } from "../components/ThemeSwitch";
+import { useCorrection } from "../hooks/useCorrection";
 import { useDentist } from "../hooks/useDentist";
 import { useDictation } from "../hooks/useDictation";
 import { useDictationSave } from "../hooks/useDictationSave";
@@ -39,6 +40,7 @@ export function Diktat({ onLogout }: Props) {
   const [patientType, setPatientType] = usePatientType();
   const d = useDictation(patientType);
   const sel = useSelection(d.codes, d.suggestions);
+  const c = useCorrection(d, sel, patientType);
   const plans = useMemo(() => uniquePlanned(d.planned), [d.planned]);
   const counts = useMemo(() => countGroups(sel.groups, plans), [sel.groups, plans]);
   const details = useMemo(
@@ -73,9 +75,10 @@ export function Diktat({ onLogout }: Props) {
             notes: d.notes,
             deselected: sel.deselected,
             adopted: sel.adopted,
+            ...(d.corrected ? { original: d.original } : {}),
           }
         : null,
-    [hasResult, patient, patientLabel, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted],
+    [hasResult, patient, patientLabel, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted, d.corrected, d.original],
   );
   const save = useDictationSave(body, d.sessionExpired);
   const closed = save.state === "übertragen";
@@ -194,11 +197,11 @@ export function Diktat({ onLogout }: Props) {
         </header>
         <DentistBar choice={dentist} onOpen={dentist.open} locked={running} />
         <PatientBar number={patient} label={patientLabel} onOpen={() => setPicking(true)} locked={running && (patient !== null || hasResult)} save={save} />
-        <PatientSwitch value={patientType} onChange={setPatientType} disabled={running} />
+        {!c.editing && <PatientSwitch value={patientType} onChange={setPatientType} disabled={running} />}
         {running && (
           <p className="switch-hint">Der Patiententyp gilt für das ganze laufende Diktat.</p>
         )}
-        <div className="control-main">
+        <div className="control-main" hidden={c.editing}>
           <StatusPanel
             state={state}
             seconds={d.seconds}
@@ -236,6 +239,7 @@ export function Diktat({ onLogout }: Props) {
         hasResult={hasResult}
         closed={closed}
         transfer={transfer}
+        c={c}
         onClear={clear}
         onHandover={() => void transfer.send(save.handover(), dictDentist)}
       />

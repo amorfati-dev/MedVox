@@ -115,6 +115,7 @@ class Counterpart:
 
 class Catalog:
     def __init__(self, raw: dict) -> None:
+        self.version: str = raw.get("meta", {}).get("version", "")  # Katalogstand, z. B. in der Korrektur-Sammlung
         self.entries: list[Entry] = []
         for e in raw["entries"]:
             s2c = e.get("surfaces_to_code")

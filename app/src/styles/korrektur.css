@@ -1,0 +1,306 @@
+/* Korrektur am iPad (Bearbeiten, Katalog-Blatt, Streifen „Rückgängig“) und Original im Büro.
+   Nur Tokens aus tokens.css; Tippflächen ≥ 64 px. */
+
+.box-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.box-head h2 {
+  margin: 0;
+}
+.btn-edit {
+  min-height: var(--tap);
+  padding: 8px 18px;
+}
+.tag-corr {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: var(--fs-label);
+  font-weight: 800;
+  background: var(--ok-bg);
+  color: var(--ok);
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: 2px;
+}
+mark.corr {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--ok);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+
+/* Bearbeiten: großes Textfeld; links bleiben nur Behandler und Patient. */
+.editor {
+  display: block;
+  width: 100%;
+  min-height: 250px;
+  font: inherit;
+  font-size: var(--fs-transcript);
+  line-height: 1.5;
+  padding: 12px 16px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 3px solid var(--kasse);
+  border-radius: 12px;
+  resize: none;
+}
+.editor-actions {
+  display: flex;
+  gap: var(--tap-gap);
+  margin-top: 12px;
+}
+.editor-actions .btn {
+  flex: 1 1 0;
+}
+.editor-hint {
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  margin: 8px 0 0;
+}
+.control-main[hidden] {
+  display: none;
+}
+
+/* Einstiege ins Katalog-Blatt: Fuß des Zahnblocks, unter der Liste. */
+.tooth-add {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 16px 0 22px;
+  font: inherit;
+  font-size: var(--fs-reason);
+  font-weight: 700;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: none;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  text-align: left;
+}
+.tooth-add .icon {
+  color: var(--kasse);
+}
+.list-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--tap);
+  margin: 0 0 18px;
+  font: inherit;
+  font-size: var(--fs-reason);
+  font-weight: 700;
+  color: var(--ink-2);
+  background: transparent;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* Nachher: neu berechnet, mit „Rückgängig“. */
+.recalc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 2px solid var(--ok);
+  font-size: var(--fs-reason);
+}
+.recalc b {
+  color: var(--ink);
+  font-family: var(--mono);
+}
+.recalc .btn {
+  min-height: var(--tap);
+}
+.row-tag.tag-hand {
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+/* Katalog-Blatt */
+.cat {
+  width: min(1040px, 100%);
+}
+.cat-family {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.cat-family > span {
+  font-size: var(--fs-reason);
+  font-weight: 700;
+  margin-right: 6px;
+}
+.fam {
+  min-width: 96px;
+  font-family: var(--mono);
+  font-size: var(--fs-ziffer);
+  font-weight: 800;
+}
+.fam-on {
+  border-color: var(--kasse);
+  background: var(--kasse-bg);
+  color: var(--kasse);
+}
+.fam-now {
+  border-style: dashed;
+  color: var(--ink-2);
+  text-decoration: line-through;
+  text-decoration-thickness: 3px;
+}
+.cat-note {
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  margin: 4px 0 12px;
+}
+.cat-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+.cat-search input {
+  margin: 0;
+  font-size: var(--fs-transcript);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+.chip-f {
+  min-height: var(--tap);
+  padding: 8px 18px;
+  font-size: var(--fs-reason);
+}
+.chip-on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+}
+.cat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.cat-list:empty {
+  display: none;
+}
+.cat-list li + li {
+  border-top: 1px solid var(--line);
+}
+.cat-row {
+  display: grid;
+  grid-template-columns: 7ch minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 16px;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  background: var(--surface);
+  border: none;
+  border-left: 6px solid var(--kasse);
+  cursor: pointer;
+}
+.cat-row.zz {
+  border-left-color: var(--privat);
+}
+.cat-row .row-code {
+  font-size: var(--fs-ziffer);
+}
+.cat-row.zz .row-code {
+  color: var(--privat);
+}
+.cat-row.zz .row-tag {
+  color: var(--privat);
+  background: var(--privat-bg);
+}
+.cat-row .row-title {
+  font-size: var(--fs-reason);
+}
+.cat-row small {
+  display: block;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  font-weight: 400;
+}
+/* Zahn wählen: Quadrant (wie im Mund angeordnet), dann Zahn */
+.cat .keypad-box {
+  display: grid;
+  gap: var(--tap-gap);
+  margin-top: 12px;
+}
+.cat .keypad {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.cat .keypad-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.cat .key small {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  font-weight: 600;
+}
+
+/* Büro: Original vor der Korrektur */
+details.orig {
+  margin: 4px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 8px 14px;
+}
+details.orig summary {
+  font-weight: 700;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+  cursor: pointer;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+details.orig p {
+  margin: 6px 0 4px;
+  font-size: 1.05rem;
+}
+details.orig del {
+  color: var(--err);
+  text-decoration-thickness: 2px;
+}
+details.orig ins {
+  color: var(--ok);
+  text-decoration: none;
+  border-bottom: 3px solid var(--ok);
+}
