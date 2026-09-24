@@ -48,8 +48,9 @@ for (const [name, r] of Object.entries(fixtures)) {
       for (const item of g.items) {
         if ("row" in item) shown.push(item.row.key, ...item.row.options.map((o) => o.key));
         else if ("frame" in item) {
-          if (item.frame.basis) shown.push(item.frame.basis.key);
-          shown.push(item.frame.copay.key);
+          for (const row of [item.frame.basis, item.frame.copay]) {
+            if (row) shown.push(row.key, ...row.options.map((o) => o.key));
+          }
         } else shown.push(item.option.key);
       }
     }
@@ -116,7 +117,7 @@ test("Abnahme-Diktat Kasse: Mehrkosten-Rahmen 13a + 2150 an 46, ohne Zahn zuletz
 test("Kasse d06/d11/d04/d05: Rahmen mit BEMA-Basis aus „zu BEMA …“, eigenständige Zuzahlung ohne Kassenzeile", () => {
   assert.deepEqual(groupsOf("d06-kasse")[0].items.map(sketch), ["[13c|2100]"]);
   assert.deepEqual(groupsOf("d11-kasse").map((g) => g.items.map(sketch)), [["[13a|2060]"], ["[13a|2060]"]]);
-  assert.deepEqual(groupsOf("d04-kasse")[0].items.map(sketch), ["28", "[32|2400]", "34"]);
+  assert.deepEqual(groupsOf("d04-kasse")[0].items.map(sketch), ["28", "[32|2400]", "34+[2197?,2430?]"]);
   assert.deepEqual(groupsOf("d05-kasse")[0].items.map(sketch), ["[-|1040]", "IP4", "MHU"]);
 });
 
