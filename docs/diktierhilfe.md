@@ -130,7 +130,9 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   würden sonst mitgezählt). Danach ersetzen die Zähne die Zeile ohne Zahn samt ihrem Prüfhinweis; in der
   Liste steht ein Sammelblock „Zahnsteinentfernung je Zahn · 26 Zähne angetippt“ mit **Zähne ändern**,
   „Ziffern kopieren“ liefert weiter je Zahn eine Zeile (`16,4055`). Neu berechnen aus berichtigtem Text
-  lässt die angetippten Zähne stehen. Milchzähne nur über „Ziffer ohne Zahn oder an anderem Zahn“.
+  lässt die angetippten Zähne stehen. Mit **Zähne ändern** können alle Zähne abgewählt und die Position
+  über **Position entfernen** ganz entfernt werden; die Änderung ist rückgängig zu machen. Milchzähne
+  nur über „Ziffer ohne Zahn oder an anderem Zahn“.
 - Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
   Stufe: Text, Ziffern und Auswahl vor der letzten Änderung). Ein neuer Abschnitt wird wie immer
   angehängt; wurde schon ein Kurzcode abgeholt, zeigt die Rezeption wie gewohnt nur die Änderung.
