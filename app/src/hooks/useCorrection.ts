@@ -140,7 +140,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     range: (s) => countRange(catalogMap.get(s.code)),
     set: (s, count) => {
       const max = countRange(catalogMap.get(s.code))?.max ?? null;
-      const next = setCount(d.suggestions, toothOf(s), s.code, count, max);
+      const next = setCount(d.suggestions, toothOf(s), s.code, count, max, s.alternative);
       commit(content(next), "Anzahl geändert", catalogMap);
     },
   };

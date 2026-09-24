@@ -85,3 +85,13 @@ test("Streifen und Korrektur-Vergleich nennen die geänderte Anzahl", () => {
   assert.equal(changes.length, 1);
   assert.match(describe(changes, "neu"), /32.*3x 32.*46/);
 });
+
+test("Übernommene Zuzahlungs-Option je Kanal: eigene Anzahl, die Hauptzeile bleibt", () => {
+  const adopted = new Set(["2400@46"]);
+  const out = setCount(ENDO, 46, "2400", 3, null, true);
+  assert.deepEqual(copyLines(out, codesOf(out), adopted), ["46,32,wf", "36,13b", "", "46,2400*3"]);
+  const option = out.find((x) => x.code === "2400")!;
+  assert.deepEqual([option.count, option.decide, option.counted], [3, [], true]);
+  assert.equal(out[0], ENDO[0]); // BEMA 32 unverändert
+  assert.deepEqual(copyLines(recompute(out, ENDO, CATALOG), codesOf(ENDO), adopted).at(-1), "46,2400*3");
+});

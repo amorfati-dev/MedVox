@@ -69,17 +69,19 @@ export function countRange(entry: CatalogEntry | undefined): { max: number | nul
 const COUNT_CHECK = /Kanalzahl/;
 
 // Anzahl dieser Ziffer an diesem Zahn setzen (auf 1…Höchstzahl begrenzt); gilt für alle Hauptvorschläge
-// derselben Ziffer am Zahn, damit die Evident-Zeile (höchste Anzahl) genau diese Zahl zeigt.
+// derselben Ziffer am Zahn, damit die Evident-Zeile (höchste Anzahl) genau diese Zahl zeigt – mit
+// `alternative` stattdessen für die übernommene Zuzahlungs-Option (2400 je Kanal neben BEMA 32).
 export function setCount(
   suggestions: Suggestion[],
   tooth: number | null,
   code: string,
   count: number,
   max: number | null = null,
+  alternative = false,
 ): Suggestion[] {
   const n = Math.max(1, max === null ? count : Math.min(count, max));
   return suggestions.map((s) =>
-    s.alternative || toothOf(s) !== tooth || s.code !== code
+    s.alternative !== alternative || toothOf(s) !== tooth || s.code !== code
       ? s
       : {
           ...s,
@@ -169,7 +171,7 @@ export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: 
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);
   }
   for (const s of previous) {
-    if (s.counted && s.source !== "hand") list = setCount(list, toothOf(s), s.code, s.count);
+    if (s.counted && s.source !== "hand") list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
   }
   return [...list, ...previous.filter((s) => s.source === "hand")];
 }

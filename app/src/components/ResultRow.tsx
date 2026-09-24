@@ -87,7 +87,7 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProp
       {row.options.length > 0 && (
         <ul className="options">
           {row.options.map((o) => (
-            <OptionRow key={o.key} option={o} onAdopt={onAdopt} />
+            <OptionRow key={o.key} option={o} onAdopt={onAdopt} counter={counter} />
           ))}
         </ul>
       )}
@@ -95,12 +95,13 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProp
   );
 }
 
-type OptionProps = { option: Option; onAdopt: (key: string) => void };
+type OptionProps = { option: Option; onAdopt: (key: string) => void; counter?: Counter | null };
 
 // Option (`alternative`): Zuzahlungs-Optionen sind abgewählt voreingestellt und per Tipp übernehmbar;
-// andere Optionen (Privat-Gegenstück ohne Paar) bleiben ein Hinweis.
-export function OptionRow({ option, onAdopt }: OptionProps) {
+// andere Optionen (Privat-Gegenstück ohne Paar) bleiben ein Hinweis. Übernommen zählt sie wie eine Zeile.
+export function OptionRow({ option, onAdopt, counter }: OptionProps) {
   const { s, adoptable, adopted } = option;
+  const range = adopted && counter ? counter.range(s) : null;
   const label = adopted ? "Zuzahlung · übernommen" : adoptable ? "Option · Zuzahlung möglich" : "Option · nur Hinweis";
   const body = (
     <>
@@ -119,7 +120,7 @@ export function OptionRow({ option, onAdopt }: OptionProps) {
     </>
   );
   return (
-    <li className={`option${adopted ? " option-on" : ""}${adoptable ? "" : " option-info"}`}>
+    <li className={`option${adopted ? " option-on" : ""}${adoptable ? "" : " option-info"}${range ? " row-stepped" : ""}`}>
       {adoptable ? (
         <button
           type="button"
@@ -134,6 +135,7 @@ export function OptionRow({ option, onAdopt }: OptionProps) {
       ) : (
         <div className="row-main">{body}</div>
       )}
+      {range && counter && <CountStepper s={s} count={s.count} max={range.max} onSet={counter.set} />}
       <Checks decide={s.decide} />
     </li>
   );

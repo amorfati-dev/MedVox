@@ -97,7 +97,7 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
                   counter={counter}
                 />
               ) : (
-                <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} />
+                <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} counter={counter} />
               ),
             )}
           </ul>
