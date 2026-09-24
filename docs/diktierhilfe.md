@@ -257,6 +257,12 @@ Privatleistungen; „Kassenleistungen kopieren" und „Privatleistungen kopieren
 Kassenpatienten; an der Rezeption, wenn beides übergeben wurde) liefern jeden Block einzeln. Beim
 Privatpatienten ist alles privat, dort ändert sich nichts.
 
+**Je Behandlung kopieren.** Hat ein Diktat mehrere Zähne (z. B. Füllung an 25 und begonnene
+Wurzelkanalbehandlung an 46), gibt es am iPad und in der Patientenliste zusätzlich je Zahn eine
+Kopieraktion („Zahn 25 kopieren", zuletzt „Ohne Zahn kopieren"); beim Kassenpatienten getrennt nach
+Kasse und Privat („Zahn 46 Kasse kopieren", „Zahn 46 Privat kopieren" – die Privatzeile wie immer
+zuletzt einfügen). Kopiert wird genau die Zeile dieses Zahns aus dem Gesamttext, Zeichen für Zeichen.
+
 Diktat „Eingehende Untersuchung. Zahnfilm Zahn drei sechs, Leitungsanästhesie, Zahn drei sechs
 mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernung." (Kasse):
 
