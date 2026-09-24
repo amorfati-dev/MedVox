@@ -14,6 +14,8 @@ export type CatalogEntry = {
   kind: SuggestionKind;
   evident?: string | null;
   family: string[]; // Füllungsfamilie nach Flächenzahl 1–4 (13a–13d, 2150/2160/2170/2170), sonst leer
+  counted?: boolean; // Anzahl je Zeile mit − / + änderbar (je Kanal, mehrmals je Sitzung)
+  max_count?: number | null; // bestätigte Höchstzahl, auch ohne Knöpfe möglich; sonst keine
   per_tooth?: boolean; // „je Zahn“ (max_per zahn): Zähne im Zahnschema antippbar
   roots?: string[]; // Paar nach Wurzelzahl [einwurzelig, mehrwurzelig] (4050/4055), sonst leer
 };

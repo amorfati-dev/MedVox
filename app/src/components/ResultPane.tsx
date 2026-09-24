@@ -110,6 +110,7 @@ export function ResultPane({ d, sel, plans, counts, state, patientType, running,
           onAdopt={sel.toggleOption}
           onEdit={editable ? (tooth) => c.openSheet(tooth === undefined ? "wählen" : { tooth }) : undefined}
           onRemove={editable ? c.remove : undefined}
+          counter={editable ? c.counter : undefined}
           tapCodes={c.tapCodes}
           onTap={editable ? c.openTap : undefined}
         />

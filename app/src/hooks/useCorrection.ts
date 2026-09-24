@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, type PatientType, type Suggestion } from "../api";
 import { byCode, codesOf, mainPositions, toothOf, type CatalogEntry } from "../catalog";
-import { addPosition, keepAdopted, recompute, remapDeselected, replaceFamily, type Content } from "../correction";
+import { addPosition, countRange, keepAdopted, recompute, remapDeselected, replaceFamily, setCount, type Content } from "../correction";
 import { applyTap, tapTarget, type TapState } from "../teeth";
 import { codeChanges, type Change } from "../textdiff";
 import type { Dictation } from "./useDictation";
@@ -39,6 +39,7 @@ export type Correction = {
   add: (entry: CatalogEntry, tooth: number | null) => void;
   replace: (tooth: number | null, from: string, to: CatalogEntry) => void;
   remove: (s: Suggestion) => void; // Zeile „von Hand“ wieder entfernen
+  counter: Counter | null; // Knöpfe − / + an mengenweise berechneten Zeilen; null = Katalog noch nicht da
   // Zahnschema: Ziffern der Je-Zahn-Position, deren Zähne gerade angetippt werden (null = Blatt zu)
   tap: string[] | null;
   tapCodes: (code: string) => string[] | null; // Je-Zahn-Position laut Katalog: ihre Ziffern, sonst null
@@ -49,6 +50,9 @@ export type Correction = {
   undo: () => void;
 };
 
+// Anzahl einer Zeile ändern: `range` null = hier keine Knöpfe (nicht mengenweise berechnet).
+export type Counter = { range: (s: Suggestion) => { max: number | null } | null; set: (s: Suggestion, count: number) => void };
+
 export function useCorrection(d: Dictation, sel: Selection, fallback: PatientType): Correction {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -57,7 +61,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
   const [last, setLast] = useState<Undo | null>(null);
   const [tap, setTap] = useState<string[] | null>(null);
   const type = d.resultType ?? fallback;
-  // Mit Ergebnis gleich laden: welche Zeile „Zähne antippen“ bekommt, steht im Katalog.
+  // Mit Ergebnis gleich laden: welche Zeilen Knöpfe − / + bzw. „Zähne antippen“ bekommen, steht im Katalog.
   const cat = useCatalog(type, sheet !== null || d.suggestions.length > 0);
   const catalogMap = useMemo(() => byCode(cat.entries ?? []), [cat.entries]);
   // Angezeigte Vorschläge; ändern sie sich während /analyze läuft (anderer Patient, anderer Behandler,
@@ -156,6 +160,15 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     setTap(null);
   };
 
+  const counter: Counter | null = cat.entries && {
+    range: (s) => countRange(catalogMap.get(s.code)),
+    set: (s, count) => {
+      const max = countRange(catalogMap.get(s.code))?.max ?? null;
+      const next = setCount(d.suggestions, toothOf(s), s.code, count, max, s.alternative);
+      commit(content(next), "Anzahl geändert", catalogMap);
+    },
+  };
+
   const valid = last !== null && last.after === d.suggestions;
   const undo = () => {
     if (!valid) return;
@@ -182,6 +195,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     add,
     replace,
     remove,
+    counter,
     tap,
     tapCodes: (code) => tapTarget(code, catalogMap),
     openTap: (code) => setTap(tapTarget(code, catalogMap)),

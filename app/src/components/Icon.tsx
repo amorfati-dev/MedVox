@@ -17,6 +17,7 @@ export type IconName =
   | "send"
   | "spinner"
   | "plus"
+  | "minus"
   | "user"
   | "badge"
   | "edit";
@@ -38,6 +39,7 @@ const PATHS: Record<IconName, string> = {
   send: "M4 12l16-8-6 16-2.5-6.5L4 12z",
   spinner: "M12 3a9 9 0 1 0 9 9",
   plus: "M12 5v14M5 12h14",
+  minus: "M5 12h14",
   user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0",
   badge: "M4 5h16v14H4zM9 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 16.5a3 3 0 0 1 6 0M14.5 10h3.5M14.5 13.5h3",
   edit: "M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4",

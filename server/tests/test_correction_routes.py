@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from medvox.extract_catalog import load_catalog
+from medvox.extract_catalog import Catalog, load_catalog
 from medvox.extract_rules import SURCHARGE_CODES
 
 ANALYZE = "/api/v1/analyze"
@@ -87,3 +87,35 @@ def test_catalog_for_privat_is_goz_and_goae_only(logged_in: TestClient) -> None:
     inlay = next(e for e in body["entries"] if e["code"] == "2160")
     assert inlay["family"] == ["2150", "2160", "2170", "2170"]
     assert logged_in.get(CATALOG, params={"patient_type": "egal"}).status_code == 422
+
+
+def test_catalog_marks_counted_positions_for_the_stepper(logged_in: TestClient) -> None:
+    listed = {e["code"]: e for e in logged_in.get(CATALOG, params={"patient_type": "kasse"}).json()["entries"]}
+    for code in ("32", "35", "2400"):  # je Kanal
+        assert listed[code]["counted"] and listed[code]["max_count"] is None, code
+    # Höchstzahl nur Vorschlag bzw. je Halbjahr/Jahr (IP4, 4000) oder je Kieferhälfte (2030): kein − / +
+    private = {e["code"]: e for e in logged_in.get(CATALOG, params={"patient_type": "privat"}).json()["entries"]}
+    assert not listed["IP4"]["counted"]
+    for code in ("4000", "2030"):
+        assert not private[code]["counted"], code
+    # je Zahn, einmal je Sitzung, bestätigt einmal je Bereich; „unbegrenzt“ heißt nur: amtlich ohne
+    # Höchstzahl – eine Extraktion (44) an einem Zahn ist nie 2×
+    for code in ("13b", "34", "01", "12", "43", "44", "Ä1", "Ä925a"):
+        assert not listed[code]["counted"], code
+
+
+def _entry(code: str, rule: str, max_per: dict, status: str | None = None) -> dict:
+    raw = {"code": code, "system": "BEMA", "area": "Test", "title": code, "points": None, "keywords": [],
+           "rules": [rule], "max_per": max_per}
+    return raw | ({"max_per_status": status} if status else {})
+
+
+def test_stepper_limit_only_when_confirmed() -> None:
+    cat = Catalog({"entries": [
+        _entry("A", "je Sitzung", {"unit": "sitzung", "count": 2}, "bestaetigt"),
+        _entry("B", "je Sitzung", {"unit": "sitzung", "count": 2}),
+        _entry("C", "je Kanal", {"unit": "kanal", "count": 1}, "bestaetigt"),
+        _entry("D", "je Sitzung", {"unit": "sitzung", "count": 1}, "bestaetigt"),
+        _entry("E", "je Sitzung", {"unit": "kieferhaelfte", "count": 2}, "bestaetigt"),
+    ]})
+    assert [cat.stepper(e) for e in cat.entries] == [(True, 2), (False, None), (True, None), (False, 1), (False, 2)]

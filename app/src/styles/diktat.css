@@ -59,6 +59,15 @@
     flex-shrink: 0;
   }
 }
+/* 11-Zoll-iPad quer (820–834 px hoch): kleinerer Ring. Bei langen Hinweisen führt
+   RecordButton die Seitenspalte so weit nach, dass Wort und Uhr sichtbar bleiben. */
+@media (min-width: 900px) and (max-height: 900px) {
+  .control-main .record:not(.record-neu) {
+    --record-size: 108px;
+    gap: 4px;
+    padding-top: 0;
+  }
+}
 
 /* iPad hoch / iPad mini: Statusfeld und Knopf in einer Zeile oben. */
 @media (max-width: 899px) {

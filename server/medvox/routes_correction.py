@@ -57,6 +57,9 @@ class CatalogItem(BaseModel):
     evident: str | None = None  # vom Behandler bestätigte Evident-Kurzform, sonst None
     # Füllungsfamilie nach Flächenzahl 1–4 (13a–13d, 2060–2120, 2150/2160/2170/2170), sonst leer
     family: list[str] = []
+    # Anzahl je Zeile am iPad mit − / + änderbar (je Kanal, mehrmals je Sitzung) und bestätigte Höchstzahl
+    counted: bool = False
+    max_count: int | None = None
     # im Katalog „je Zahn“ (`max_per.unit` zahn): am iPad per Zahnschema antippbar (app/src/teeth.ts)
     per_tooth: bool = False
     # Paar nach Wurzelzahl [einwurzelig, mehrwurzelig] (4050/4055, AITa/AITb), sonst leer
@@ -108,9 +111,10 @@ def catalog(patient_type: PatientType = "kasse") -> CatalogOut:
         k = kind(cat, e, patient_type)
         if k == _FOREIGN[patient_type]:
             continue
+        counted, most = cat.stepper(e)
         entries.append(CatalogItem(
             code=e.code, system=e.system, title=e.title, area=e.area, points=e.points, kind=k,
-            evident=e.evident, family=list(e.family), per_tooth=e.key in _per_tooth(),
-            roots=list(ROOT_PAIRS.get(e.key, ())),
+            evident=e.evident, family=list(e.family), counted=counted, max_count=most,
+            per_tooth=e.key in _per_tooth(), roots=list(ROOT_PAIRS.get(e.key, ())),
         ))
     return CatalogOut(version=cat.version, patient_type=patient_type, entries=entries)

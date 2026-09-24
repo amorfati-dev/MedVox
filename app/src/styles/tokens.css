@@ -12,8 +12,8 @@
   --ink-2: #4f5a64;
   --on-solid: #ffffff; /* Text auf vollen Farbflächen */
 
-  --rec: #c62828; /* nur „nimmt auf“ */
-  --on-rec: #ffffff; /* Text, Punkt und Balken auf der roten Aufnahmefläche, in beiden Modi weiß */
+  --rec: #c62828; /* rotes Statusfeld während der Aufnahme und roter Aufnahmeknopf */
+  --on-rec: #ffffff; /* Inhalt auf dem roten Statusfeld und Symbol im roten Knopf, in beiden Modi weiß */
   --on-rec-track: rgba(255, 255, 255, 0.28);
   --on-rec-hatch: rgba(255, 255, 255, 0.55);
   --rec-shadow: 0 6px 18px rgba(198, 40, 40, 0.3);

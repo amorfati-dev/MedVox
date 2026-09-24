@@ -69,12 +69,12 @@ mit Hinweis.
 
 | Statusfeld | Bedeutung | Knopf |
 |---|---|---|
-| **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kreis **Aufnehmen** – beginnt ein neues Diktat |
-| **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Quadrat **Stopp**; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
-| **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | gesperrt – warten |
-| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** (weiteres Diktat für denselben Patienten, das bisherige bleibt gespeichert), **Nächster Patient** (Bildschirm leeren, nächste Nummer eingeben) |
-| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** (löscht das Diktat auch beim Patienten) |
-| **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen** |
+| **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kern im Ring, darunter **Aufnehmen** – beginnt ein neues Diktat |
+| **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Stopp-Quadrat im Ring, der sich bis 60 s füllt; darunter **Stopp** und Laufzeit / Grenze (z. B. **0:23 / 1:00**), in den letzten 10 s rot hervorgehoben; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
+| **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | **Bitte warten** unter dem grauen Kern; der Ring dreht sich, der Knopf ist gesperrt |
+| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** unter dem Aufnahmeknopf (weiteres Diktat für denselben Patienten, das bisherige bleibt gespeichert), **Nächster Patient** (Bildschirm leeren, nächste Nummer eingeben) |
+| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | bernsteinfarbener Ring und Kern, darunter **Erneut senden**; **Weiter aufnehmen** (hängt an), leise **Verwerfen** (löscht das Diktat auch beim Patienten) |
+| **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen**; ein gesperrter Aufnahmeknopf hat einen grauen Kern im gestrichelten Ring |
 
 Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile(n), die
 „Ziffern kopieren" liefert. Jede Zeile: Kästchen · Ziffer · Leistung · „wegen: …". Antippen
@@ -119,6 +119,18 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   entfernt sie (mit **Rückgängig**).
   **Ziffer ohne Zahn oder an anderem Zahn** (unter der Liste): erst „Ohne Zahn“ oder den Quadranten,
   dann den Zahn antippen.
+- **Anzahl − / +** (rechts in der Zeile, geht mit Handschuhen): nur an Positionen, die mengenweise
+  berechnet werden – je Kanal (28, 32, 35, 2400 …) oder laut vom Behandler bestätigter
+  Katalog-Höchstzahl mehrmals je Sitzung; nicht an Je-Zahn-Positionen wie Füllungen oder Extraktionen
+  (weiterer Zahn: über „Ziffer ändern oder ergänzen“). Bei Leistungen je Sitzung braucht es eine
+  bestätigte Höchstzahl über 1; eine noch unbestätigte Grenze gibt keine Knöpfe. Grenzen je
+  Halbjahr/Jahr oder je Kieferhälfte (IP4, 4000, 4005, 2030, 3300) geben auch nach Bestätigung
+  keine Knöpfe. Gilt nur an diesem Zahn und ändert die Evident-Zeile (`32*3`, `wf*3`); der Hinweis
+  „Kanalzahl nicht diktiert“ ist damit erledigt, die Zeile trägt „Anzahl von Hand“. Nie unter 1 – weg
+  nur über die Abwahl –, nie über eine vom Behandler bestätigte Höchstzahl. Eine übernommene
+  Zuzahlungs-Option je Kanal (2400 neben 32) hat ihre eigenen Knöpfe. Abgewählte Zeilen und das Büro
+  zeigen die Anzahl nur an. Neu berechnen behält die Anzahl von Hand; diktiert der berichtigte Text dort
+  eine andere Anzahl („WK*4“), gilt die diktierte, und der Streifen nennt sie.
 - **Zähne antippen** (an Positionen „je Zahn“: Zahnstein 4050/4055, geschlossene Kürettage 4070/4075,
   AIT a/b, Fissurenversiegelung, PZR 1040, medikamentöse Einlage, Überkappung): öffnet das Zahnschema,
   **ein Kiefer auf einmal** (Umschalter Oberkiefer/Unterkiefer), je Kieferhälfte eine Reihe mit 8 Zähnen

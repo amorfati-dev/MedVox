@@ -27,6 +27,8 @@ PER = {
     "zahn": "je Zahn",
     "kanal": "je Kanal",
     "flaeche": "je Fläche",
+    "halbjahr": "je Kalenderhalbjahr",
+    "jahr": "je Jahr",
 }
 _SIDES = {1: "OK rechts", 2: "OK links", 3: "UK links", 4: "UK rechts"}
 NO_REGION = "Kieferhälfte/Frontzahnbereich nicht diktiert – je weiterem Bereich einmal mehr berechnen"
@@ -53,7 +55,8 @@ def apply_limits(drafts: list[Draft]) -> list[Draft]:
         if unit == "kieferhaelfte":
             result += _per_region(d, most)
             continue
-        if unit == "sitzung" or (unit == "zahn" and d.fdi is not None):
+        # Grenze je Halbjahr/Jahr: mehr geht auch in einer Sitzung nicht (frühere Sitzungen kennt MedVox nicht)
+        if unit in ("sitzung", "halbjahr", "jahr") or (unit == "zahn" and d.fdi is not None):
             _cap(d, most, PER[unit])
         result.append(d)
     return result

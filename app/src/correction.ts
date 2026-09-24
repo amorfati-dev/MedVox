@@ -9,8 +9,12 @@
 // - Ergänzen legt einen Vorschlag „von Hand“ an. Ist die Ziffer am Zahn schon da, zählt er genau eins
 //   mehr als angezeigt („2×“). Gleiche Ziffern am selben Zahn zählen wie in der Evident-Zeile einmal mit
 //   der höchsten Anzahl – ein späterer Regel-Vorschlag derselben Ziffer zählt also nie doppelt.
+// - Anzahl mit − / + (nur mengenweise berechnete Positionen laut Katalog, `counted`): gilt genau für diese
+//   Ziffer an diesem Zahn, nie unter 1 (weg nur über die Abwahl), nie über die bestätigte Höchstzahl; ein
+//   Kanalzahl-Prüfhinweis ist damit entschieden.
 // - Neu berechnen ersetzt die Regel-Vorschläge; Ersetzungen gelten wieder, wo die ersetzte Ziffer am Zahn
-//   wieder vorkommt, Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
+//   wieder vorkommt, ebenso von Hand gesetzte Anzahlen, solange der Text dort dieselbe Anzahl diktiert wie
+//   vorher (eine neu diktierte Anzahl gilt, der Streifen nennt sie); Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
 //   Im Zahnschema angetippte Zähne (teeth.ts) bleiben die ganze Position: deren Regel-Vorschläge (auch die
 //   Zeile ohne Zahn) kommen nicht zurück, sonst zählte sie doppelt.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
@@ -63,6 +67,46 @@ export function addPosition(suggestions: Suggestion[], entry: CatalogEntry, toot
   const added = handSuggestion(entry, tooth, count);
   if (at < 0) return [...suggestions, added];
   return suggestions.filter((s, i) => i === at || !mine(s)).map((s, i) => (i === at ? { ...s, count } : s));
+}
+
+// Spanne der Knöpfe − / + für eine Ziffer; null = Anzahl hier nicht änderbar.
+export function countRange(entry: CatalogEntry | undefined): { max: number | null } | null {
+  if (!entry?.counted) return null;
+  const max = entry.max_count ?? null;
+  return max === null || max > 1 ? { max } : null;
+}
+
+// Prüfhinweise, die eine von Hand gesetzte Anzahl entscheidet („Kanalzahl nicht diktiert – …“).
+const COUNT_CHECK = /Kanalzahl/;
+
+// Diktierte Anzahl eines Vorschlags; 0 = nicht diktiert (Kanalzahl-Prüfhinweis).
+function dictated(s: Suggestion): number {
+  return s.decide.some((d) => COUNT_CHECK.test(d)) ? 0 : s.count;
+}
+
+// Anzahl dieser Ziffer an diesem Zahn setzen (auf 1…Höchstzahl begrenzt); gilt für alle Hauptvorschläge
+// derselben Ziffer am Zahn, damit die Evident-Zeile (höchste Anzahl) genau diese Zahl zeigt – mit
+// `alternative` stattdessen für die übernommene Zuzahlungs-Option (2400 je Kanal neben BEMA 32).
+export function setCount(
+  suggestions: Suggestion[],
+  tooth: number | null,
+  code: string,
+  count: number,
+  max: number | null = null,
+  alternative = false,
+): Suggestion[] {
+  const n = Math.max(1, max === null ? count : Math.min(count, max));
+  return suggestions.map((s) =>
+    s.alternative !== alternative || toothOf(s) !== tooth || s.code !== code
+      ? s
+      : {
+          ...s,
+          count: n,
+          decide: s.decide.filter((d) => !COUNT_CHECK.test(d)),
+          source: s.source === "hand" ? "hand" : "geaendert",
+          counted: s.counted ?? dictated(s),
+        },
+  );
 }
 
 // "BEMA 13b" im Begründungstext durch "BEMA 13c" ersetzen (Rahmen Kassenanteil/Zuzahlung bleibt verbunden).
@@ -151,6 +195,11 @@ export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: 
   for (const s of previous) {
     const entry = catalog.get(s.code);
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);
+  }
+  for (const s of previous) {
+    if (s.counted === undefined || s.source === "hand") continue;
+    const same = list.find((f) => f.alternative === s.alternative && toothOf(f) === toothOf(s) && f.code === s.code);
+    if (same && dictated(same) === s.counted) list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
   }
   return [...list, ...previous.filter((s) => s.source === "hand")];
 }
