@@ -255,7 +255,7 @@ ihn zurück; „seit …“ und die Herkunft (von Hand / aus Korrekturen überno
   „richtig“, das das falsch Gehörte selbst enthält.
 - **Fachbegriffe** (z. B. „Keramikinlay“) kommen nur in den Prompt, der Whisper vorab zeigt, welche Wörter
   vorkommen; sie werden nicht unscharf korrigiert. Der Balken zeigt, wie voll der Prompt ist: whisper.cpp
-  nimmt höchstens 223 Token, der feste Grundtext belegt 150, ein Begriff etwa 4–8. Ist er voll, lehnt
+  nimmt höchstens 223 Token, der feste Grundtext belegt 154, ein Begriff etwa 4–8. Ist er voll, lehnt
   MedVox weitere Begriffe ab – erst einen anderen abschalten.
 - **Aus Korrekturen:** gleiche Änderungen aus der Korrektur-Sammlung, gezählt („3× Zahn steinentfernung →
   Zahnsteinentfernung“). **Als Ersetzung übernehmen** füllt das Formular und zeigt gleich die Probe –

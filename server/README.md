@@ -168,7 +168,8 @@ Angezeigt und kopiert wird `medvox.normalize_display.display_text` des korrigier
 ("Artikein" → "Artikain", "Psycho 3" → "PSI 3", "L935d" → "Ä935d") und gibt jede Korrektur
 mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde; häufige
 deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Einige Verhörer
-gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“ → „VitE 3x“ nur vor einer Anzahl, „Röntgen
+gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“/„2x WD“ → VitE nur neben einer Anzahl (davor oder
+dahinter), „MET“ → „med“ nur im Abschnitt eines Zahns mit Wurzelkanalbehandlung (`lexicon_endo.py`), „Röntgen
 zwei“/„Rö zwei“ → „Rö2“ nur, wenn keine weitere Ziffer folgt („Röntgen zwei sechs“ bleibt Zahn 26);
 „2 flächig“ → „zweiflächig“. Zwei-Wort-Ersetzungen greifen nur bei Leerraum zwischen den Wörtern (vor
 „flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert). Dazu kommen je
