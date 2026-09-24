@@ -39,6 +39,10 @@ EXAMPLES = {
     "getippt": ("Zahn 25, Füllung 2 flächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit "
                 "Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2"),
 }
+# Pilot-Diktat nach dem VitE-Fix: Whisper hörte VitE als „WD“, die Anzahl steht davor („2x WD“, „2x WK“),
+# und „med“ als „MET“.
+PILOT = ("Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x WD, 2x WK, MET, Zahn 46 "
+         "Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.")
 # Erbrachte Hauptvorschläge an 46 (Ziffer -> Anzahl): 2420 („phys“) und 2400 sind diktiert und zählen je
 # Kanal wie WK.
 ENDO_46 = {"32": 3, "40": 1, "Ä925a": 1, "28": 3, "34": 1, "2420": 3, "2400": 3}
@@ -72,6 +76,22 @@ def test_captains_example(name):
         assert main_at(result, 25) == FILLING_25
         assert options_at(result, 25) == {"2080": 1}  # Füllung unverändert: nur die Mehrkosten 2080
         assert not any(s.decide for s in result.suggestions if 25 in s.teeth)
+
+
+def test_pilot_vite_heard_as_wd_with_count_before():
+    result = run(PILOT)
+    assert main_at(result, 25) == {"40": 1, "32": 2, "28": 2, "34": 1}
+    # Endo-Zuzahlungen: 2400/2420 je Kanal wie WK, 2197/2430 neben der Einlage (34)
+    assert options_at(result, 25) == {"2400": 2, "2420": 2, "2197": 1, "2430": 1}
+    assert main_at(result, 46) == {"13c": 1, "41a": 1, "Ä935a": 1, "12": 1}
+    assert options_at(result, 46) == {"2100": 1}
+    assert not any(s.decide for s in result.suggestions)
+
+
+def test_count_before_equals_count_after():
+    def counted(said):
+        return [(s.code, s.teeth, s.count, s.alternative, s.decide) for s in run(f"Zahn 25 {said}.").suggestions]
+    assert counted("2x WK, 2x VitE") == counted("WK*2, VitE*2") == counted("2x WK, 2x WD")
 
 
 def test_fixture_is_the_current_server_response():
@@ -177,7 +197,7 @@ def test_planned_endo_offers_nothing():
 
 def _responses() -> dict:
     return {f"{name}-{patient}": build_response(text, 10.0, 0.8, patient).model_dump()
-            for name, text in EXAMPLES.items() for patient in ("kasse", "privat")}
+            for name, text in {**EXAMPLES, "pilot-wd": PILOT}.items() for patient in ("kasse", "privat")}
 
 
 if __name__ == "__main__":

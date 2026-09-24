@@ -63,4 +63,4 @@ def test_measured_with_the_installed_model() -> None:
     assert count_tokens(", Wurzelstiftaufbau", vocab) == 8
     assert count_tokens(", Adhäsiv", vocab) == 6
     if BASE_FILE.read_text(encoding="utf-8").strip().startswith("Zahnarzt-Diktat. Zahn drei sechs"):
-        assert budget(BASE_FILE.read_text(encoding="utf-8").strip(), [], DEFAULT_MODEL_FILE).base == 150
+        assert budget(BASE_FILE.read_text(encoding="utf-8").strip(), [], DEFAULT_MODEL_FILE).base == 154

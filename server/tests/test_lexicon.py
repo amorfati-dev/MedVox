@@ -200,7 +200,17 @@ def test_pte_is_vite_only_before_a_count(raw, expected):
     assert correct(raw)[0] == expected
 
 
-@pytest.mark.parametrize("raw", ["PTE", "PTE besprochen", "Zahn 46 PTE, WK mal drei", "PTE 36"])
+@pytest.mark.parametrize("short", ["PTE", "WD"])
+@pytest.mark.parametrize("raw, expected", [
+    ("2x {}, 2x WK", "2x VitE, 2x WK"), ("{} 2x", "VitE 2x"), ("{} mal zwei", "VitE mal zwei"),
+    ("zweimal {}", "zweimal VitE"), ("2 mal {}", "2 mal VitE"), ("{}*2", "VitE*2"),
+])
+def test_vite_mishearing_with_count_on_either_side(short, raw, expected):
+    assert correct(raw.format(short))[0] == expected
+
+
+@pytest.mark.parametrize("raw", ["PTE", "PTE besprochen", "Zahn 46 PTE, WK mal drei", "PTE 36",
+                                 "WD", "WD besprochen", "Zahn 46 WD, WK mal drei", "WD 36", "2 WD", "Zahn 25 WD"])
 def test_pte_elsewhere_is_left_alone(raw):
     assert correct(raw) == (raw, [])
 
@@ -231,3 +241,39 @@ def test_surface_count_as_digit_becomes_the_word(raw, expected):
 def test_captains_spellings_of_endo_words():
     assert correct_token("Vitalextirpation") == "Vitalexstirpation"
     assert correct_token("längenbestimungen") == "Längenbestimmungen"
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Zahn 25 Wurzelkanalbehandlung beginnen, 2x WD, 2x WK, MET, Zahn 46 Füllung",
+     "Zahn 25 Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Füllung"),
+    ("Zahn drei sechs MET, WK mal drei", "Zahn drei sechs med, WK mal drei"),
+    ("Trepanation, MET, Verschluss", "Trepanation, med, Verschluss"),
+])
+def test_met_is_med_next_to_a_root_canal_treatment(raw, expected):
+    assert correct(raw)[0] == expected
+
+
+@pytest.mark.parametrize("raw", [
+    "MET", "Zahn 36 Füllung, MET", "Zahn 25 WK mal drei, Zahn 46 MOD, MET",
+    "Zahn 46 MET, Zahn 25 Wurzelkanalbehandlung", "36 WK 2x, 46 MET", "Zahn 25 2 WD, MET",
+])
+def test_met_elsewhere_is_left_alone(raw):
+    assert correct(raw) == (raw, [])
+
+
+@pytest.mark.parametrize("raw, extra, expected", [
+    ("Zahn 25 WK, MET Einlage", {("met", "einlage"): "med"}, "Zahn 25 WK, med"),
+    ("Zahn 25 WK, MET", {("met",): "Metronidazol"}, "Zahn 25 WK, Metronidazol"),
+])
+def test_met_inside_a_practice_entry_is_replaced_once(raw, extra, expected):
+    text, corrections = correct(raw, extra)
+    assert text == expected
+    assert len(corrections) == 1
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Bisflügel", "Bissflügel"), ("Bisflügelaufnahme rechts", "Bissflügelaufnahme rechts"),
+    ("Bisflügelaufnahmen", "Bissflügelaufnahmen"),
+])
+def test_bitewing_with_one_s(raw, expected):
+    assert correct(raw)[0] == expected

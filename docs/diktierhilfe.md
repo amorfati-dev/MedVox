@@ -44,6 +44,7 @@ Einfügen in Evident immer lesen.
 | „Zahn eins eins Wurzelkanalbehandlung drei Kanäle" | 3x 32 |
 | „Zahn vier sechs WK mal drei, VitE mal drei" (getippt „WK*3, VitE*3") | 32*3, 28*3 |
 | „Röntgen zwei" / „Rö zwei" (getippt „Rö2") | Ä925a |
+| „Bissflügel rechts und links" / „Bissflügel beidseits" | Ä925a (privat 2× GOÄ Ä5000, je Projektion) |
 | „Füllung zweiflächig" (getippt auch „2 flächig") | 13b |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
@@ -250,11 +251,11 @@ ihn zurück; „seit …“ und die Herkunft (von Hand / aus Korrekturen überno
   Erst **Probe**: ein Beispielsatz läuft einmal ohne und einmal mit dem Entwurf durch die Auswertung
   („Ziffern vorher IP4 · nachher 107, IP4“), dann **Hinzufügen**. Abgelehnt wird mit Begründung: Zahlen
   oder Zahlwörter (Zahnnummern und Codes bleiben unangetastet), ein Allerweltswort allein („Zahn“), was
-  eine der zehn eingebauten Ersetzungen oder einen eingebauten Fachbegriff überschreiben würde, und ein
+  eine der dreizehn eingebauten Ersetzungen oder einen eingebauten Fachbegriff überschreiben würde, und ein
   „richtig“, das das falsch Gehörte selbst enthält.
 - **Fachbegriffe** (z. B. „Keramikinlay“) kommen nur in den Prompt, der Whisper vorab zeigt, welche Wörter
   vorkommen; sie werden nicht unscharf korrigiert. Der Balken zeigt, wie voll der Prompt ist: whisper.cpp
-  nimmt höchstens 223 Token, der feste Grundtext belegt 150, ein Begriff etwa 4–8. Ist er voll, lehnt
+  nimmt höchstens 223 Token, der feste Grundtext belegt 154, ein Begriff etwa 4–8. Ist er voll, lehnt
   MedVox weitere Begriffe ab – erst einen anderen abschalten.
 - **Aus Korrekturen:** gleiche Änderungen aus der Korrektur-Sammlung, gezählt („3× Zahn steinentfernung →
   Zahnsteinentfernung“). **Als Ersetzung übernehmen** füllt das Formular und zeigt gleich die Probe –

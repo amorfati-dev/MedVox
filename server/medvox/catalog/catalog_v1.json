@@ -368,6 +368,8 @@
         "röntgenbild",
         "einzelzahnfilm",
         "bissflügel",
+        "bissflügelaufnahme",
+        "bissflügelaufnahmen",
         "bitewing",
         "rö2",
         "röntgenaufnahme",
@@ -411,8 +413,7 @@
         "fünf zahnfilme",
         "drei aufnahmen",
         "vier aufnahmen",
-        "fünf aufnahmen",
-        "bissflügel beidseits"
+        "fünf aufnahmen"
       ],
       "rules": [
         "3–5 Aufnahmen"
