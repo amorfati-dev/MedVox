@@ -190,7 +190,7 @@ Fachtabellen zum Nachlesen).
   Position („WK mal drei“, „WK*3“, „VitE 3x“, „3x WK“) oder „3 Kanäle“ im Satz; eine Anzahl gilt nur für
   die Position, an der sie steht („WK 3x, VitE“ → VitE einmal mit Hinweis). Ohne Kanalzahl bleibt es bei
   1 mit „Kanalzahl nicht diktiert“ – nie hochgezählt. „x3“ ist keine Anzahl, sondern X3 (BEMA 45). Eine
-  Zuzahlung je Kanal (2400) übernimmt die diktierte Kanalzahl ihrer Basis am selben Zahn („WK*3,
+  Zuzahlung je Kanal (2400, 2420) übernimmt die diktierte Kanalzahl ihrer Basis am selben Zahn („WK*3,
   Längenbestimmung“ → 3x 2400). Ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes
   Wort („L1, L1“) oder „2x“.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
@@ -215,8 +215,8 @@ Fachtabellen zum Nachlesen).
     schon erbracht. Ist die Flächenzahl unbekannt und deckt die GOZ-Ziffer mehrere BEMA-Stufen ab (2170 =
     drei- oder vierflächig), trägt die Basis „Flächenzahl nicht erkannt – 13a–d prüfen“. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
     13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Ebenso bei jeder erbrachten
-    Endo-Position (`extract_endo.py`): die erlaubten Zuzahlungen, die sie als Basis nennen (2400 neben
-    32, 2197 neben 34/35), und ihr eigenständiges Privat-Paar (2430 zu 34, erst ab der 4. Einlage) –
+    Endo-Position (`extract_endo.py`): die erlaubten Zuzahlungen, die sie als Basis nennen (2400
+    Längenbestimmung und 2420 „phys“ neben 32, 2197 neben 34/35), und ihr eigenständiges Privat-Paar (2430 zu 34, erst ab der 4. Einlage) –
     nur als Option, nie vorausgewählt; eine schon diktierte Position wird nicht noch einmal angeboten.
     Andere diktierte Privatziffern werden
     auf ihr BEMA-Paar umgestellt („Osteotomie privat“ → 47a) oder mit Hinweis in `notes` weggelassen

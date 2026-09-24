@@ -44,8 +44,9 @@ def test_catalog_v1_is_a_mini_catalog(catalog):
     # sechs Positionen ausdruecklich fuer v1 nachgefordert hat (Ae935a/Ae5002, GOZ 0500-0530; 84 geprueft)
     # und die Patiententyp-Umschaltung zwoelf Positionen nach v1 geholt hat: die GOZ-Paare von v1-BEMA-
     # Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020, 4070, 4075) und die Inlays 2150-2170.
-    # Nachgefordert: Abszesseroeffnung BEMA Ae161 (Inz1), GOAe Ae2428/Ae2430 (inz1/inz2).
-    assert 60 <= len(catalog["entries"]) <= 99
+    # Nachgefordert: Abszesseroeffnung BEMA Ae161 (Inz1), GOAe Ae2428/Ae2430 (inz1/inz2) und GOZ 2420
+    # („phys“, Endo-Zuzahlung je Kanal; Angabe des Behandlers 2026-09-24, aus dem erweiterten Katalog geholt).
+    assert 60 <= len(catalog["entries"]) <= 100
 
 
 def test_positions_new_in_v1_are_marked_for_review(catalog):

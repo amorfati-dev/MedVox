@@ -10,6 +10,7 @@
       "Ä925a",
       "3x 28",
       "34",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -126,6 +127,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). – wegen: phys – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -156,6 +173,7 @@
       "Ä5000",
       "3x 2360",
       "2430",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -244,6 +262,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: phys – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -276,6 +310,7 @@
       "Ä925a",
       "3x 28",
       "34",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -440,6 +475,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). – wegen: phys – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -472,6 +523,7 @@
       "Ä5000",
       "3x 2360",
       "2430",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -594,6 +646,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: phys – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -624,6 +692,7 @@
       "Ä925a",
       "3x 28",
       "34",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -740,6 +809,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). – wegen: phys – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -770,6 +855,7 @@
       "Ä5000",
       "3x 2360",
       "2430",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -851,6 +937,22 @@
         ],
         "count": 1,
         "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: phys – Kanalzahl wie GOZ 2410 (3×)",
         "decide": [],
         "planned": false,
         "alternative": false,
@@ -890,6 +992,7 @@
       "Ä925a",
       "3x 28",
       "34",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -1054,6 +1157,22 @@
         "evident": null
       },
       {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). – wegen: phys – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
         "code": "2400",
         "system": "GOZ",
         "title": "Elektrometrische Längenbestimmung",
@@ -1086,6 +1205,7 @@
       "Ä5000",
       "3x 2360",
       "2430",
+      "3x 2420",
       "3x 2400"
     ],
     "suggestions": [
@@ -1201,6 +1321,22 @@
         ],
         "count": 1,
         "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2420",
+        "system": "GOZ",
+        "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: phys – Kanalzahl wie GOZ 2410 (3×)",
         "decide": [],
         "planned": false,
         "alternative": false,

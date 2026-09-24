@@ -1,7 +1,8 @@
 // Beispiel-Diktat des Behandlers zur Wurzelkanalbehandlung (Testpatient „ohne Patient“), als echte Server-
 // Antworten in `fixtures/endo-beispiel.json` (erzeugt und gegen den Server geprüft in
 // server/tests/test_extract_endo.py). Diktierte Kanalzahl kopiert als "*3" („WK*3“ → 32*3, „VitE*3“ → 28*3);
-// die Endo-Zuzahlungen stehen beim Kassenpatienten als Option da und kommen nur nach Antippen dazu.
+// „phys“ (2420) und Längenbestimmung (2400) zählen je Kanal wie WK; weitere Endo-Zuzahlungen stehen beim
+// Kassenpatienten als Option da und kommen nur nach Antippen dazu.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
@@ -13,8 +14,8 @@ const fixtures = JSON.parse(readFileSync(new URL("./fixtures/endo-beispiel.json"
   TranscribeResult
 >;
 const none = new Set<string>();
-const ENDO_KASSE = ["46,32*3,40,Ä925a,28*3,34", "", "46,2400*3"];
-const ENDO_PRIVAT = ["46,2410*3,0090,Ä5000,2360*3,2430,2400*3"];
+const ENDO_KASSE = ["46,32*3,40,Ä925a,28*3,34", "", "46,2420*3,2400*3"];
+const ENDO_PRIVAT = ["46,2410*3,0090,Ä5000,2360*3,2430,2420*3,2400*3"];
 
 for (const name of ["original", "gesprochen", "verhoert", "getippt"]) {
   test(`Evident-Zeilen des Endo-Beispiels, Kassenpatient: ${name}`, () => {
@@ -40,6 +41,6 @@ test("Endo-Option kommt nur nach Antippen in den Privatblock", () => {
   assert.deepEqual(copyLines(r.suggestions, r.codes, new Set([optionKey(option)])), [
     "46,32*3,40,Ä925a,28*3,34",
     "",
-    "46,2197,2400*3",
+    "46,2197,2420*3,2400*3",
   ]);
 });

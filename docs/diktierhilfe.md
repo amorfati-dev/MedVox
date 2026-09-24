@@ -57,10 +57,12 @@ eines Diktats gesperrt). Beim Kassenpatienten erscheint eine mögliche Zuzahlung
 zur Füllung 13c) als **Option** gestrichelt unter ihrer Leistung – **abgewählt**. Erst ein Tipp
 auf die Option übernimmt sie; dann wird sie wie jede gewählte Position kopiert und an die
 Rezeption gesendet. Ohne Tipp kommt sie nirgends hin. Genauso bei der Endo: zur
-Wurzelkanalaufbereitung (32) kommt die elektrometrische Längenbestimmung GOZ 2400 als Option, zur
+Wurzelkanalaufbereitung (32) kommen die elektrometrische Längenbestimmung GOZ 2400 und „phys"
+(elektrophysikalisch-chemische Methoden) GOZ 2420 als Option, zur
 medikamentösen Einlage (34) GOZ 2430 (erst ab der 4. Einlage) und die adhäsive Befestigung GOZ 2197.
-Diktiert („Längenbestimmung") steht 2400 gleich als Zuzahlung da. Je Kanal gilt die diktierte
-Kanalzahl („WK mal drei" → auch 2400 dreimal); ohne Kanalzahl bleibt es bei 1 mit Hinweis.
+Diktiert („Längenbestimmung", „phys") stehen 2400 bzw. 2420 gleich als Zuzahlung da. Je Kanal gilt
+die diktierte Kanalzahl („WK mal drei" → auch 2400 und 2420 dreimal); ohne Kanalzahl bleibt es bei 1
+mit Hinweis.
 
 ## Die Anzeige am iPad
 

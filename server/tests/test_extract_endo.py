@@ -3,7 +3,9 @@
 Beispiel-Diktat des Behandlers (Testpatient „ohne Patient“): „zahn 46 wurzelkanalbehandlung begonnen mit
 infiltrationsanästhesie,rö2, wk*3, vite*3 med phys und längenbestimungen als privat die letzten 2“. Befunde:
 „mal drei“/„*3“ ging verloren (32 und 28 je einmal), „VitE“ kam als „PTE 3x“ an, „Röntgen zwei“ ergab kein
-Ä925a, „2 flächig“ ergab 13a, und beim Kassenpatienten fehlten die Zuzahlungs-Optionen der Endo.
+Ä925a, „2 flächig“ ergab 13a, „phys“ (GOZ 2420) fehlte still, und beim Kassenpatienten fehlten die
+Zuzahlungs-Optionen der Endo. Laut Behandler (2026-09-24) zahlen Kassenpatienten bei der Endo 2400
+(Längenbestimmung) und 2420 („phys“) zu, beide je Kanal; sie werden bei jeder WK angeboten.
 „als privat die letzten 2“ wertet der Extraktor bewusst nicht aus (offene Frage an den Behandler).
 
 ``EXAMPLES`` steht als echte Server-Antwort (``build_response``) in ``app/test/fixtures/endo-beispiel.json``;
@@ -37,8 +39,9 @@ EXAMPLES = {
     "getippt": ("Zahn 25, Füllung 2 flächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit "
                 "Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2"),
 }
-# Erbrachte Hauptvorschläge an 46 (Ziffer -> Anzahl): 2400 ist diktiert und zählt je Kanal wie WK.
-ENDO_46 = {"32": 3, "40": 1, "Ä925a": 1, "28": 3, "34": 1, "2400": 3}
+# Erbrachte Hauptvorschläge an 46 (Ziffer -> Anzahl): 2420 („phys“) und 2400 sind diktiert und zählen je
+# Kanal wie WK.
+ENDO_46 = {"32": 3, "40": 1, "Ä925a": 1, "28": 3, "34": 1, "2420": 3, "2400": 3}
 FILLING_25 = {"13b": 1, "12": 1}
 
 
@@ -61,8 +64,9 @@ def test_captains_example(name):
     result = run(EXAMPLES[name])
     assert main_at(result, 46) == ENDO_46
     assert not any(CANALS_OPEN in s.decide for s in result.suggestions if not s.alternative)
-    assert {s.code: s.kind for s in result.suggestions if s.code == "2400"} == {"2400": "zuzahlung"}
-    # Zuzahlungs-Optionen der Endo (Kassenpatient), nie vorausgewählt; 2400 ist schon diktiert.
+    assert {s.code: s.kind for s in result.suggestions if s.code in {"2400", "2420"}} == {
+        "2400": "zuzahlung", "2420": "zuzahlung"}
+    # Zuzahlungs-Optionen der Endo (Kassenpatient), nie vorausgewählt; 2400 und 2420 sind schon diktiert.
     assert options_at(result, 46) == {"2197": 1, "2430": 1}
     if 25 in [t for s in result.suggestions for t in s.teeth]:
         assert main_at(result, 25) == FILLING_25
@@ -129,16 +133,25 @@ def test_surface_count_as_digit(said, code):
 
 def test_endo_options_follow_the_dictated_canal_count():
     result = run("Zahn drei sechs WK mal drei.")
-    option = next(s for s in result.suggestions if s.code == "2400")
-    assert (option.alternative, option.kind, option.count, option.decide) == (True, "zuzahlung", 3, ())
-    assert billable_codes(result.suggestions) == ["3x 32"]  # Option nur nach Antippen
-    unknown = next(s for s in run("Zahn drei sechs WK.").suggestions if s.code == "2400")
-    assert (unknown.count, unknown.decide) == (1, (CANALS_OPEN,))
+    options = [(s.code, s.alternative, s.kind, s.count, s.decide) for s in result.suggestions if s.code != "32"]
+    assert options == [("2400", True, "zuzahlung", 3, ()), ("2420", True, "zuzahlung", 3, ())]
+    assert billable_codes(result.suggestions) == ["3x 32"]  # Optionen nur nach Antippen
+    unknown = [(s.code, s.count, s.decide) for s in run("Zahn drei sechs WK.").suggestions if s.alternative]
+    assert unknown == [("2400", 1, (CANALS_OPEN,)), ("2420", 1, (CANALS_OPEN,))]
+
+
+@pytest.mark.parametrize("said", ["phys", "Phys", "physikalisch", "physikalische Längenbestimmung",
+                                  "elektrophysikalisch"])
+def test_phys_is_goz_2420(said):
+    result = run(f"Zahn drei sechs WK mal drei, {said}.")
+    assert main_at(result, 36) == {"32": 3, "2420": 3}
+    assert options_at(result, 36) == {"2400": 3}
+    assert run(f"Zahn drei sechs WK mal drei, {said}.", "privat").suggestions[1].code == "2420"
 
 
 def test_private_patient_gets_no_co_payment_options():
-    result = run("Zahn drei sechs WK mal drei, Längenbestimmung.", "privat")
-    assert main_at(result, 36) == {"2410": 3, "2400": 3}
+    result = run("Zahn drei sechs WK mal drei, Längenbestimmung, phys.", "privat")
+    assert main_at(result, 36) == {"2410": 3, "2400": 3, "2420": 3}
     assert not any(s.alternative for s in result.suggestions)
 
 

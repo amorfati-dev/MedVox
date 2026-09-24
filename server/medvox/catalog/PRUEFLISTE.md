@@ -125,6 +125,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 2390 | Trepanation, als selbstständige Leistung | 31 | Kassenleistung BEMA 31 – privat nicht zusätzlich berechenbar. | [Q1] [Q3] |
 | ☐ | ja | GOZ 2400 | Elektrometrische Längenbestimmung | 32 | Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. | [Q12] [Q6] [Q1] |
 | ☐ | nein | GOZ 2410 | Wurzelkanalaufbereitung, je Kanal | 32 | Kassenleistung BEMA 32; nur wenn die ganze Endo richtlinienbedingt oder auf Wunsch privat ist, gilt GOZ 2410. | [Q1] [Q6] [Q15] |
+| ☐ | ja | GOZ 2420 **(Angabe des Behandlers 2026-09-24)** | Elektrophysikalisch-chemische Methoden, je Kanal | 32 | Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). | [Q12] [Q6] |
 | ☐ | ja | GOZ 2430 | Medikamentöse Einlage | – | Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. | [Q12] [Q1] |
 | ☐ | nein | GOZ 2440 | Wurzelkanalfüllung | 35 | Kassenleistung BEMA 35; nur die adhäsive Befestigung (2197) ist privat vereinbar. | [Q1] [Q12] |
 
@@ -239,7 +240,6 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | Zuzahlung | Ziffer | Kurztext | BEMA-Bezug | übliche Grundlage | Quelle |
 |---|---|---|---|---|---|---|
 | ☐ | ja | GOZ 2380 | Milchzahn-Pulpaamputation (avital) | – | Avitale Milchzahn-Amputation hat keine vergleichbare Sachleistung; privat vereinbar. | [Q6] |
-| ☐ | ja | GOZ 2420 | Elektrophysikalisch-chemische Methoden, je Kanal | 32 | Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal). | [Q12] [Q6] |
 
 ### Zuzahlung – Chirurgie
 

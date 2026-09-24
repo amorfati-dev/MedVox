@@ -131,8 +131,9 @@ BEMA-Basis nach Flächenzahl mit (2080 → 13b, 2170 dreiflächig → 13c), denn
 
 Für den Patiententyp wurden die GOZ-Paare von v1-BEMA-Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020,
 4070/4075) und die Inlays 2150–2170 nach v1 geholt; sie tragen `review.note` „neu, bitte prüfen“, das
-`PRUEFLISTE.md` hinter der Ziffer zeigt. Eigenständige Privatleistungen ohne Paar (GOZ 2420, DVT GOÄ 5370/5377)
-bleiben im erweiterten Katalog, bis der Behandler sie für v1 freigibt.
+`PRUEFLISTE.md` hinter der Ziffer zeigt. Eigenständige Privatleistungen ohne Paar (DVT GOÄ 5370/5377)
+bleiben im erweiterten Katalog, bis der Behandler sie für v1 freigibt; GOZ 2420 („phys“, Endo-Zuzahlung je
+Kanal neben BEMA 32) hat er am 2026-09-24 freigegeben (`review.note`).
 
 Bewusst nicht aufgenommen, weil ohne eigene Gebührennummer (nur Analogberechnung nach § 6 Abs. 1 GOZ) oder
 beim Kassenpatienten nicht vereinbarungsfähig:

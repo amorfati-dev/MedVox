@@ -1659,41 +1659,6 @@
       }
     },
     {
-      "code": "2420",
-      "system": "GOZ",
-      "area": "Endodontie",
-      "title": "Elektrophysikalisch-chemische Methoden, je Kanal",
-      "points": 70,
-      "keywords": [
-        "ultraschallaktivierung",
-        "elektrophysikalisch",
-        "schallaktivierte spülung",
-        "2420",
-        "laser endo"
-      ],
-      "rules": [
-        "je Kanal, zusätzlich zu 2410"
-      ],
-      "zuzahlung": {
-        "allowed": true,
-        "basis": [
-          "32"
-        ],
-        "note": "Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vereinbar (je Kanal).",
-        "sources": [
-          "https://www.kzvb.de/fileadmin/user_upload/Abrechnung/Tipps/Privatleistungen_Wurzelkanalbehandlungen_Bema.pdf",
-          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/endodontische-leistungen/wurzelkanalfuellung"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
       "code": "3045",
       "system": "GOZ",
       "area": "Chirurgie",
