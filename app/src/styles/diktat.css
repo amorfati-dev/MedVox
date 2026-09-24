@@ -60,11 +60,13 @@
   }
 }
 /* 11-Zoll-iPad quer (820–834 px hoch): kleinerer Ring, damit „Stopp“ und die Uhr darunter
-   während der Aufnahme ohne Scrollen sichtbar bleiben. */
+   während der Aufnahme ohne Scrollen sichtbar bleiben – auch in den letzten 10 s, wenn der
+   Hinweis im Statusfeld zweizeilig wird. */
 @media (min-width: 900px) and (max-height: 900px) {
   .control-main .record:not(.record-neu) {
-    --record-size: 120px;
-    gap: 6px;
+    --record-size: 108px;
+    gap: 4px;
+    padding-top: 0;
   }
 }
 
