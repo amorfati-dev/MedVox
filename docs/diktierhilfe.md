@@ -42,6 +42,9 @@ Einfügen in Evident immer lesen.
 | „Karies profunda" (Überkappung) | 25 – prüfen, ist ein Befundwort |
 | „Zahnsteinentfernung" | 107 |
 | „Zahn eins eins Wurzelkanalbehandlung drei Kanäle" | 3x 32 |
+| „Zahn vier sechs WK mal drei, VitE mal drei" (getippt „WK*3, VitE*3") | 32*3, 28*3 |
+| „Röntgen zwei" / „Rö zwei" (getippt „Rö2") | Ä925a |
+| „Füllung zweiflächig" (getippt auch „2 flächig") | 13b |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
 | „Tiefliegenden Abszess drei sechs eröffnet" / „Inz zwei" | GOÄ Ä2430 (Kasse als Analogposition) |
@@ -53,7 +56,11 @@ Vor dem Diktat **Kassenpatient** oder **Privatpatient** wählen (Schalter oben l
 eines Diktats gesperrt). Beim Kassenpatienten erscheint eine mögliche Zuzahlung (z. B. GOZ 2100
 zur Füllung 13c) als **Option** gestrichelt unter ihrer Leistung – **abgewählt**. Erst ein Tipp
 auf die Option übernimmt sie; dann wird sie wie jede gewählte Position kopiert und an die
-Rezeption gesendet. Ohne Tipp kommt sie nirgends hin.
+Rezeption gesendet. Ohne Tipp kommt sie nirgends hin. Genauso bei der Endo: zur
+Wurzelkanalaufbereitung (32) kommt die elektrometrische Längenbestimmung GOZ 2400 als Option, zur
+medikamentösen Einlage (34) GOZ 2430 (erst ab der 4. Einlage) und die adhäsive Befestigung GOZ 2197.
+Diktiert („Längenbestimmung") steht 2400 gleich als Zuzahlung da. Je Kanal gilt die diktierte
+Kanalzahl („WK mal drei" → auch 2400 dreimal); ohne Kanalzahl bleibt es bei 1 mit Hinweis.
 
 ## Die Anzeige am iPad
 
@@ -247,7 +254,11 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
   vermeiden oder den Vorschlag abwählen.
 - **Zuordnung:** „36 o Karies, 37 mo Karies, Füllungen" ordnet die Füllung nur 37 zu – je Zahn
   einen Satz.
-- Fehlen Flächen-, Kanal- oder Zahnangabe, kommt der kleinste Vorschlag mit Hinweis.
+- Fehlen Flächen-, Kanal- oder Zahnangabe, kommt der kleinste Vorschlag mit Hinweis. Die Anzahl
+  gehört zur Position direkt davor: „WK mal drei, VitE" zählt nur die WK dreimal. „x drei" nicht
+  sagen – „X3" ist die Entfernung (45); „mal drei" oder „dreimal" ist sicher.
+- **„als privat die letzten zwei"** wertet MedVox nicht aus – ob eine Position privat ist, folgt aus
+  Katalog und Patiententyp; Optionen von Hand antippen.
 - **Inzision: Abszess und Tiefe mitsagen.** „Inzision" oder „Entlastungsschnitt" allein wird nicht
   erkannt (sonst träfe es jede Schnittführung bei der Lappenbildung) – „Abszess eröffnet" oder gleich
   „oberflächlich"/„tiefliegend" sagen. „Abszess eröffnet" ohne Tiefe ergibt Inz1 mit Hinweis „Tiefe

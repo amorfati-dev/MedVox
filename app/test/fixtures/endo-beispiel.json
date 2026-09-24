@@ -1,0 +1,1230 @@
+{
+  "original-kasse": {
+    "transcript": "zahn 46 wurzelkanalbehandlung begonnen mit infiltrationsanästhesie,rö2, wk*3, vite*3 med phys und Längenbestimmungen als privat die letzten 2",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "3x 32",
+      "40",
+      "Ä925a",
+      "3x 28",
+      "34",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "32",
+        "system": "BEMA",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 29,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: wurzelkanalbehandlung, wk",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: infiltrationsanästhesie",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "Ä925a",
+        "system": "BEMA",
+        "title": "Zahnfilm, bis 2 Aufnahmen",
+        "points": 12,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: rö2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "28",
+        "system": "BEMA",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 18,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: vite",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "34",
+        "system": "BEMA",
+        "title": "Medikamentöse Einlage",
+        "points": 15,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2197",
+        "system": "GOZ",
+        "title": "Adhäsive Befestigung",
+        "points": 130,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. – wegen: Längenbestimmungen – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "original-privat": {
+    "transcript": "zahn 46 wurzelkanalbehandlung begonnen mit infiltrationsanästhesie,rö2, wk*3, vite*3 med phys und Längenbestimmungen als privat die letzten 2",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "3x 2410",
+      "0090",
+      "Ä5000",
+      "3x 2360",
+      "2430",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "2410",
+        "system": "GOZ",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 392,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: wurzelkanalbehandlung, wk (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "Ä5000",
+        "system": "GOÄ",
+        "title": "Zahnfilm, je Projektion",
+        "points": 50,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: rö2 (BEMA Ä925a ↔ GOÄ Ä5000, für Privatpatienten GOÄ)",
+        "decide": [
+          "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2360",
+        "system": "GOZ",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 110,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: vite (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Längenbestimmungen – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "gesprochen-kasse": {
+    "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE mal 3, med phys und Längenbestimmungen als privat die letzten 2.",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "13b",
+      "12",
+      "3x 32",
+      "40",
+      "Ä925a",
+      "3x 28",
+      "34",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "13b",
+        "system": "BEMA",
+        "title": "Füllung, zweiflächig",
+        "points": 41,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: Füllung, zweiflächig",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2080",
+        "system": "GOZ",
+        "title": "Kompositfüllung adhäsiv, zweiflächig",
+        "points": 556,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 13b: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13b, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: Füllung, zweiflächig",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "12",
+        "system": "BEMA",
+        "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
+        "points": 10,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: BMF",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "bmf"
+      },
+      {
+        "code": "32",
+        "system": "BEMA",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 29,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "Ä925a",
+        "system": "BEMA",
+        "title": "Zahnfilm, bis 2 Aufnahmen",
+        "points": 12,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "28",
+        "system": "BEMA",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 18,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "34",
+        "system": "BEMA",
+        "title": "Medikamentöse Einlage",
+        "points": 15,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2197",
+        "system": "GOZ",
+        "title": "Adhäsive Befestigung",
+        "points": 130,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. – wegen: Längenbestimmungen – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "gesprochen-privat": {
+    "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE mal 3, med phys und Längenbestimmungen als privat die letzten 2.",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "2080",
+      "2030",
+      "3x 2410",
+      "0090",
+      "Ä5000",
+      "3x 2360",
+      "2430",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "2080",
+        "system": "GOZ",
+        "title": "Kompositfüllung adhäsiv, zweiflächig",
+        "points": 556,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: Füllung, zweiflächig (BEMA 13b ↔ GOZ 2080, für Privatpatienten GOZ)",
+        "decide": [
+          "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2030",
+        "system": "GOZ",
+        "title": "Besondere Maßnahmen beim Präparieren/Füllen",
+        "points": 65,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: BMF (BEMA 12 ↔ GOZ 2030, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2410",
+        "system": "GOZ",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 392,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "Ä5000",
+        "system": "GOÄ",
+        "title": "Zahnfilm, je Projektion",
+        "points": 50,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2 (BEMA Ä925a ↔ GOÄ Ä5000, für Privatpatienten GOÄ)",
+        "decide": [
+          "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2360",
+        "system": "GOZ",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 110,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Längenbestimmungen – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "verhoert-kasse": {
+    "transcript": "Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE 3x, med phys und Längenbestimmungen.",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "3x 32",
+      "40",
+      "Ä925a",
+      "3x 28",
+      "34",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "32",
+        "system": "BEMA",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 29,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "Ä925a",
+        "system": "BEMA",
+        "title": "Zahnfilm, bis 2 Aufnahmen",
+        "points": 12,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "28",
+        "system": "BEMA",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 18,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "34",
+        "system": "BEMA",
+        "title": "Medikamentöse Einlage",
+        "points": 15,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2197",
+        "system": "GOZ",
+        "title": "Adhäsive Befestigung",
+        "points": 130,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. – wegen: Längenbestimmungen – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "verhoert-privat": {
+    "transcript": "Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE 3x, med phys und Längenbestimmungen.",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "3x 2410",
+      "0090",
+      "Ä5000",
+      "3x 2360",
+      "2430",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "2410",
+        "system": "GOZ",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 392,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "Ä5000",
+        "system": "GOÄ",
+        "title": "Zahnfilm, je Projektion",
+        "points": 50,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2 (BEMA Ä925a ↔ GOÄ Ä5000, für Privatpatienten GOÄ)",
+        "decide": [
+          "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2360",
+        "system": "GOZ",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 110,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Längenbestimmungen – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "getippt-kasse": {
+    "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "13b",
+      "12",
+      "3x 32",
+      "40",
+      "Ä925a",
+      "3x 28",
+      "34",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "13b",
+        "system": "BEMA",
+        "title": "Füllung, zweiflächig",
+        "points": 41,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: Füllung, zweiflächig",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2080",
+        "system": "GOZ",
+        "title": "Kompositfüllung adhäsiv, zweiflächig",
+        "points": 556,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 13b: Mehrkostenvereinbarung nach § 28 Abs. 2 SGB V: Kasse zahlt BEMA 13b, Patient die Differenz – nur Mehrfarbentechnik oder adhäsive Seitenzahnfüllung außerhalb der Bulkfill-Regel. – wegen: Füllung, zweiflächig",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "12",
+        "system": "BEMA",
+        "title": "Besondere Maßnahmen (Kofferdam, Separieren)",
+        "points": 10,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: BMF",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "bmf"
+      },
+      {
+        "code": "32",
+        "system": "BEMA",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 29,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "Ä925a",
+        "system": "BEMA",
+        "title": "Zahnfilm, bis 2 Aufnahmen",
+        "points": 12,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "28",
+        "system": "BEMA",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 18,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "34",
+        "system": "BEMA",
+        "title": "Medikamentöse Einlage",
+        "points": 15,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null
+      },
+      {
+        "code": "2197",
+        "system": "GOZ",
+        "title": "Adhäsive Befestigung",
+        "points": 130,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "Zuzahlung zu BEMA 32: Keine Kassenleistung; neben BEMA 32 privat nach § 8 Abs. 7 BMV-Z vor Behandlungsbeginn vereinbar. – wegen: Längenbestimmungen – Kanalzahl wie BEMA 32 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "zuzahlung",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  },
+  "getippt-privat": {
+    "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "2080",
+      "2030",
+      "3x 2410",
+      "0090",
+      "Ä5000",
+      "3x 2360",
+      "2430",
+      "3x 2400"
+    ],
+    "suggestions": [
+      {
+        "code": "2080",
+        "system": "GOZ",
+        "title": "Kompositfüllung adhäsiv, zweiflächig",
+        "points": 556,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: Füllung, zweiflächig (BEMA 13b ↔ GOZ 2080, für Privatpatienten GOZ)",
+        "decide": [
+          "GOZ 2060–2120 setzt Adhäsivtechnik voraus; selbstadhäsiv/Bulkfill ohne Konditionieren wäre GOZ 2050–2110 – prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2030",
+        "system": "GOZ",
+        "title": "Besondere Maßnahmen beim Präparieren/Füllen",
+        "points": 65,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: BMF (BEMA 12 ↔ GOZ 2030, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2410",
+        "system": "GOZ",
+        "title": "Wurzelkanalaufbereitung, je Kanal",
+        "points": 392,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Wurzelkanalbehandlung, WK (BEMA 32 ↔ GOZ 2410, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "Ä5000",
+        "system": "GOÄ",
+        "title": "Zahnfilm, je Projektion",
+        "points": 50,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: Rö2 (BEMA Ä925a ↔ GOÄ Ä5000, für Privatpatienten GOÄ)",
+        "decide": [
+          "GOÄ Ä5000 zählt je Projektion (BEMA Ä925a: 1–2 Aufnahmen) – Anzahl prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2360",
+        "system": "GOZ",
+        "title": "Vitalexstirpation, je Kanal",
+        "points": 110,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: VitE (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          46
+        ],
+        "count": 1,
+        "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      },
+      {
+        "code": "2400",
+        "system": "GOZ",
+        "title": "Elektrometrische Längenbestimmung",
+        "points": 70,
+        "teeth": [
+          46
+        ],
+        "count": 3,
+        "reason": "wegen: Längenbestimmungen – Kanalzahl wie GOZ 2410 (3×)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null
+      }
+    ],
+    "planned": [],
+    "notes": []
+  }
+}

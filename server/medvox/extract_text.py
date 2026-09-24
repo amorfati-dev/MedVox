@@ -38,6 +38,10 @@ _CANALS = re.compile(r"(?<![\w.])(\d+)\s*(?:wurzel)?kan(?:al|aele|aelen)(?![a-z]
 _TEETH_COUNT = re.compile(r"(?<![\w.])(\d+)\s*zaehnen?(?![a-z])")
 _TIMES_AFTER = re.compile(r"\s*(\d+)\s*(?:x|mal)(?![a-z])")
 _TIMES_BEFORE = re.compile(r"(?<![\w.])(\d+)\s*(?:x|mal)\s*$")
+# Anzahl einer Je-Kanal-Position: direkt dahinter ("WK*3", "VitE mal 3", "WK 3x") oder am Teilsatzanfang bzw.
+# hinter der Zahnnummer ("3x WK", "36 3x WK"). Nie "x3" – das ist die Kurzform X3 (BEMA 45).
+_COUNT_AFTER = re.compile(r"\s*(?:(?:\*|mal)\s*(\d+)(?!\d)|(\d+)\s*(?:x|mal)(?![a-z]))")
+_COUNT_LEAD = re.compile(r"\s*(?:und\s+)?(\d+)\s*(?:x|mal)\s*")
 
 
 @dataclass(frozen=True)
@@ -153,6 +157,12 @@ class TextContext:
 
     def teeth_count(self, start: int) -> int | None:
         return self._nearest(_TEETH_COUNT, start)
+
+    def count_at(self, start: int, end: int) -> int | None:
+        """Diktierte Anzahl, die zu genau dieser Fundstelle gehört – nie die einer Nachbarposition."""
+        lead = max([self.clause(start)[0]] + [g.end for g in self.groups if g.end <= start])
+        m = _COUNT_AFTER.match(self.folded, end) or _COUNT_LEAD.fullmatch(self.folded, lead, start)
+        return int(next(g for g in m.groups() if g)) if m else None
 
     def times(self, start: int, end: int) -> int | None:
         """Ausdrückliche Anzahl direkt an der Fundstelle ("BEMA 13a 2x", "2x L1")."""

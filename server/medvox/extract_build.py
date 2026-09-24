@@ -15,6 +15,7 @@ from dataclasses import dataclass, field, replace
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
+    CANALS_OPEN,
     INCISION,
     INCISION_REPEATED,
     INCISION_TEETH,
@@ -24,8 +25,8 @@ from medvox.extract_rules import (
     REMOVAL_ACT,
     ROOT_PAIRS,
     SURCHARGE_CODES,
+    incision_depth,
     incision_depth_open,
-    incision_depth_stated,
     multi_rooted,
     removal_modifier,
     surface_count_word,
@@ -55,7 +56,8 @@ class Draft:
     alternative_to: Draft | None = None
     reason: str = ""
     surfaces: int | None = None  # diktierte Flächenzahl 1..4 bei Füllungen, None wenn nicht erkannt
-    limit_note: str = ""  # Höchstzahl laut Katalog angewandt (extract_limits), steht in der Begründung
+    limit_note: str = ""  # Höchstzahl (extract_limits) bzw. übernommene Kanalzahl (extract_endo), in der Begründung
+    counted: bool = False  # Kanalzahl ausdrücklich diktiert ("WK*3", "3 Kanäle"), nicht angenommen
 
     @property
     def key(self) -> tuple[str, str, int | None, bool]:
@@ -91,7 +93,7 @@ class Builder:
     def build(self, tagged: list[Tagged]) -> list[Draft]:
         fillings = [t for t in tagged if t.hit.entry.family]
         removals = [t for t in tagged if t.hit.entry.code in REMOVAL.get(t.hit.entry.system, {}).values()]
-        rest = _incision_depth([self._incision_teeth(t) for t in tagged if t not in fillings and t not in removals])
+        rest = incision_depth([self._incision_teeth(t) for t in tagged if t not in fillings and t not in removals])
         self._fillings(fillings)
         self._removals(removals)
         sessions: dict[tuple[str, str, bool], list[Tagged]] = {}
@@ -112,6 +114,9 @@ class Builder:
             self._session(group)
         self._absorb_toothless()
         self._incision_flags()
+        for d in self.drafts.values():  # eine Fundstelle mit Kanalzahl ("WK mal 3") gilt für die ganze Position
+            if d.counted and CANALS_OPEN in d.decide:
+                d.decide.remove(CANALS_OPEN)
         return sorted(self.drafts.values(), key=lambda d: d.start)
 
     def _absorb_toothless(self) -> None:
@@ -263,11 +268,16 @@ class Builder:
             self.add(entry, tooth.fdi, t)
 
     def _per_tooth(self, t: Tagged, entry: Entry, unit: str) -> None:
-        canals = self.ctx.canals(t.hit.start) if unit == "canal" else None
-        flag = "Kanalzahl nicht diktiert – je Kanal berechnen" if unit == "canal" and canals is None else None
+        """Je Kanal: die an der Fundstelle diktierte Anzahl ("WK*3", "VitE mal 3"), sonst "3 Kanäle" im Satz."""
+        said = self.ctx.count_at(t.hit.start, t.hit.end) if unit == "canal" else None
+        canals = said or (self.ctx.canals(t.hit.start) if unit == "canal" else None)
+        flag = CANALS_OPEN if unit == "canal" and canals is None else None
         if t.teeth:
-            for tooth in _unique(t.teeth):
-                self.add(entry, tooth.fdi, t, canals or 1, flag)
+            teeth = _unique(t.teeth)
+            if said and len(teeth) > 1:
+                flag = f"{said}× diktiert, mehrere Zähne genannt – Kanalzahl je Zahn prüfen"
+            for tooth in teeth:
+                self.add(entry, tooth.fdi, t, canals or 1, flag).counted |= canals is not None
             return
         count = self.ctx.teeth_count(t.hit.start) if unit == "tooth" else canals
         count = count or self.ctx.times(t.hit.start, t.hit.end)
@@ -279,17 +289,6 @@ class Builder:
         for t in group:
             draft = self.add(t.hit.entry, None, t, max(repeats, times))
             draft.context = _unique_fdi(draft.context + tuple(tooth.fdi for tooth in t.teeth))
-
-
-def _incision_depth(tagged: list[Tagged]) -> list[Tagged]:
-    """„Subperiostaler Abszess inzidiert“: ein Wort ohne Tiefe gehört zur Abszesseröffnung mit Tiefe im selben Satz."""
-    stated = [t for t in tagged if incision_depth_stated(t.hit)]
-    result = []
-    for t in tagged:
-        host = next((s for s in stated if s.sentence == t.sentence and (
-            not t.teeth or not s.teeth or set(t.teeth) & set(s.teeth))), None) if incision_depth_open(t.hit) else None
-        result.append(replace(t, hit=replace(t.hit, entry=host.hit.entry, via=None)) if host else t)
-    return result
 
 
 def _unique(items) -> list:
