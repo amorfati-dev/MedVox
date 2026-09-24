@@ -43,6 +43,11 @@
     border-right: 1px solid var(--line);
     background: var(--surface);
   }
+  /* Nicht stauchen, sondern scrollen: sonst schrumpfen Behandler- und Patientenleiste bei wenig
+     Höhe unter ihren Inhalt und ein langer Name ragt abgeschnitten hinaus. */
+  .control > * {
+    flex-shrink: 0;
+  }
   .result {
     overflow-y: auto;
     display: flex;
