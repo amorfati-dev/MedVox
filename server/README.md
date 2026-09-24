@@ -141,7 +141,8 @@ mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde
 deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Einige Verhörer
 gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“ → „VitE 3x“ nur vor einer Anzahl, „Röntgen
 zwei“/„Rö zwei“ → „Rö2“ nur, wenn keine weitere Ziffer folgt („Röntgen zwei sechs“ bleibt Zahn 26);
-„2 flächig“ → „zweiflächig“.
+„2 flächig“ → „zweiflächig“. Zwei-Wort-Ersetzungen greifen nur bei Leerraum zwischen den Wörtern (vor
+„flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert).
 
 `display_text` (`normalize_display.py`) erzeugt daraus den Text, den der Behandler liest und ins PVS
 kopiert: dieselbe Zahn- und Code-Normalisierung wie `normalize` („drei sechs“ → 36, „BEMA dreizehn a“
@@ -191,8 +192,8 @@ Fachtabellen zum Nachlesen).
   die Position, an der sie steht („WK 3x, VitE“ → VitE einmal mit Hinweis). Ohne Kanalzahl bleibt es bei
   1 mit „Kanalzahl nicht diktiert“ – nie hochgezählt. „x3“ ist keine Anzahl, sondern X3 (BEMA 45). Eine
   Zuzahlung je Kanal (2400, 2420) übernimmt die diktierte Kanalzahl ihrer Basis am selben Zahn („WK*3,
-  Längenbestimmung“ → 3x 2400). Ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes
-  Wort („L1, L1“) oder „2x“.
+  Längenbestimmung“ → 3x 2400), samt deren Hinweis zur Kanalzahl (mehrere Zähne genannt). Ohne
+  Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.
