@@ -24,7 +24,7 @@ def bitewing_projections(ctx: TextContext, drafts: list[Draft]) -> None:
             continue
         if not all(_BITEWING in t.hit.keyword for t in d.hits):
             continue
-        if any("beidseits" in t.hit.keyword or _both_sides_after(ctx, t.hit.end) for t in d.hits):
+        if any(_both_sides_after(ctx, t.hit.end) for t in d.hits):
             d.count = 2
             d.decide = [f for f in d.decide if not f.startswith(_PROJECTION_NOTE)]
             d.limit_note = "rechts und links: 2 Projektionen"

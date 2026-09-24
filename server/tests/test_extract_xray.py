@@ -45,6 +45,7 @@ def test_plain_bitewing_is_one_projection_with_check_note(said):
                                   "Bissflügel beidseitig"])
 def test_both_sides_are_two_projections(said):
     assert positions(run(f"{said}.", "privat")) == [("Ä5000", 2, False, ())]
+    assert positions(run(f"{said}.", "kasse")) == [("Ä925a", 1, False, ())]
 
 
 @pytest.mark.parametrize("said", ["Bissflügel rechts, Zahn 36 links", "Rechts und links Bissflügel",
