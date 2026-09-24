@@ -93,6 +93,6 @@ def _measure_beside(ctx: TextContext, bleeding: Tagged) -> bool:
     own = {tooth.fdi for tooth in bleeding.teeth}
     for m in _MEASURE.finditer(ctx.folded, *bleeding.sentence):
         teeth = {tooth.fdi for tooth in ctx.teeth_for(m.start(), m.end())}
-        if not ctx.negated(m.start(), m.end()) and (not teeth or teeth & own):
+        if not ctx.negated(m.start(), m.end()) and (not teeth or not own or teeth & own):
             return True
     return False

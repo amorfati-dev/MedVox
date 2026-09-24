@@ -123,6 +123,14 @@ def test_nbl2_only_when_said_or_bleeding_with_a_measure(words):
     assert [s.code for s in main(run(f"48 Ost2, {words}.", "privat")) if s.code == "3060"] == ["3060"]
 
 
+@pytest.mark.parametrize("dictation", ["48 Ost2. Starke Blutung, Umschlingungsnaht an 48.",
+                                       "Starke Blutung und Umschlingungsnaht 48, Ost2 48."])
+def test_toothless_bleeding_with_measure_at_the_tooth_is_billed(dictation):
+    result = run(dictation)
+    assert [(s.code, s.teeth) for s in main(result) if s.code == "37"] == [("37", (48,))]
+
+
+
 @pytest.mark.parametrize("dictation", ["Extraktion 46. Parasorb eingelegt.", "Extraktion 46. Bipolar koaguliert.",
                                        "48 Ost2, Umschlingungsnaht.", "48 Ost2, starke Blutung.",
                                        "Parasorb eingelegt.", "48 Ost2, starke Blutung, Tamponade, keine Naht.",
