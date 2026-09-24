@@ -230,7 +230,8 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
 - **Anästhesie je Zahn** (40, 41a, GOZ 0090, 0100): die Anzahl gehört zum Zahn, mit dem sie diktiert wird
   („Infiltrationsanästhesie 18 2x“, „38 Ost2, Leitungsanästhesie 2x“ → I*2 an 18, L1*2 an 38); eine
   Fundstelle mit mehreren Zähnen bleibt eine BEMA-40 („Infiltration 36, 37“), getrennt diktierte
-  Nachbarzähne tragen einen Hinweis. „lange Dauer“ zählt nie hoch, es steht in der Begründung. Ein zweites
+  Nachbarzähne tragen einen Hinweis. Die wiederholte Kurzform am Zahn („38 L1, L1“, „L1, L1, Ost2 38“)
+  zählt zwei, ob die Zahnnummer davor oder dahinter steht. „lange Dauer“ zählt nie hoch, es steht in der Begründung. Ein zweites
   Mal je Zahn beim Kassenpatienten nur neben Ost1/Ost2 am selben Zahn (Katalogfeld `repeat`, KZVB laut
   Behandler), sonst 1 mit Hinweis. Whisper schreibt „i“ als „IP“: an einer Zahnnummer oder mit „X2“ ist das
   I; „X2“ direkt hinter I/IP ist die Anzahl, allein bleibt es die Extraktion 44.
