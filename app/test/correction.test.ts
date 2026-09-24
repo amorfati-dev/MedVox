@@ -142,6 +142,8 @@ test("Wortvergleich fürs Original: nur die geänderten Stellen mit Umfeld", () 
     { kind: "same", text: "Zahn 16 planen." },
   ]);
   assert.deepEqual(wordDiff("gleich bleibt", "gleich bleibt"), [{ kind: "same", text: "gleich bleibt" }]);
+  const long = (w: string) => Array.from({ length: 2100 }, (_, i) => `${w}${i}`).join(" ");
+  assert.deepEqual(wordDiff(`A ${long("x")} Z`, `A ${long("y")} Z`).map((p) => p.kind), ["same", "del", "ins", "same"]);
 });
 
 test("Katalog-Suche: Ziffer, Kurzform oder Wort, dazu der Fachbereich", () => {

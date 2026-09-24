@@ -6,6 +6,8 @@ import { perTooth, sameFamily, type CatalogEntry, type Position } from "./catalo
 
 export type Part = { kind: "same" | "del" | "ins"; text: string };
 
+const MAX_CELLS = 4_000_000; // Obergrenze der Vergleichstabelle (≈ 2000 × 2000 Wörter)
+
 // Wortweiser Vergleich (längste gemeinsame Teilfolge); gleiche Anfangs- und Endstücke vorab abgetrennt.
 export function wordDiff(before: string, after: string): Part[] {
   const a = before.split(/\s+/).filter(Boolean);
@@ -16,6 +18,13 @@ export function wordDiff(before: string, after: string): Part[] {
   while (tail < a.length - head && tail < b.length - head && a[a.length - 1 - tail] === b[b.length - 1 - tail]) tail += 1;
   const x = a.slice(head, a.length - tail);
   const y = b.slice(head, b.length - tail);
+  if (x.length * y.length > MAX_CELLS) {
+    // fast alles neu geschrieben: als ein Block gelöscht/eingefügt statt quadratisch zu rechnen
+    const words = [...a.slice(0, head).map((word) => ({ kind: "same" as const, word })),
+      ...x.map((word) => ({ kind: "del" as const, word })), ...y.map((word) => ({ kind: "ins" as const, word })),
+      ...a.slice(a.length - tail).map((word) => ({ kind: "same" as const, word }))];
+    return merge(words);
+  }
   const width = y.length + 1;
   const lcs = new Uint32Array((x.length + 1) * width);
   for (let i = x.length - 1; i >= 0; i -= 1) {
