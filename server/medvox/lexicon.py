@@ -2,7 +2,8 @@
 
 ``correct(text, extra)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
 "PSI", "bis Registrat" -> "Bissregistrat"), Verhörer aus ``CONTEXT_ALIASES`` nur in ihrem
-Zusammenhang ("PTE 3x" -> "VitE 3x", "2x WD" -> "2x VitE", "Röntgen zwei" -> "Rö2") sowie Tokens
+Zusammenhang ("PTE 3x" -> "VitE 3x", "2x WD" -> "2x VitE", "Röntgen zwei" -> "Rö2", "MET" -> "med"
+nur am Zahn mit Wurzelkanalbehandlung) sowie Tokens
 mit Levenshtein-Distanz 1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
 Token stehen: Distanz 2 wird nicht mehr geraten, weil das den klinischen Sinn
 verändert hat ("schwere" -> "Schmerz").
@@ -117,6 +118,17 @@ for _n, _word in (("2", "zwei"), ("5", "fünf")):  # Katalog-Kurzformen Rö2 (Ä
     for _xray in ("röntgen", "rö"):
         for _count in (_n, _word):
             CONTEXT_ALIASES[(_xray, _count)] = ("Rö" + _n, _NO_NUMBER_AFTER, None)
+
+# Verhörer, die nur im Abschnitt eines Zahns mit Wurzelkanalbehandlung gelten: "MET" ist dort "med"
+# (medikamentöse Einlage, BEMA 34), sonst bleibt es stehen. Ein Abschnitt reicht von einer Zahnangabe
+# ("Zahn", "regio", "25", "zwei fünf") bis zur nächsten; ohne Zahnangabe davor ab Textanfang.
+ENDO_ONLY: dict[str, str] = {"met": "med"}
+_ENDO_WORDS = ("VitE", "WK", "Vitalexstirpation", "Trepanation")
+_ENDO = re.compile(r"(?<!\w)(?:wurzelkanal\w*|wk|vite|vitalexstirpation|trepanation)(?!\w)", re.I)
+_DIGIT_WORDS = "eins|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht"
+_TOOTH_MARK = re.compile(
+    rf"(?<!\w)(?:zahn|zähne|regio|[1-8]\s*[1-8]|(?:{_DIGIT_WORDS})\s+(?:{_DIGIT_WORDS}))(?!\w)", re.I
+)
 
 # Häufige deutsche Wörter, die nie zu einem Begriff "korrigiert" werden dürfen.
 NEVER_CORRECT: frozenset[str] = frozenset("""
@@ -251,6 +263,20 @@ def _window(
     return None
 
 
+def _endo_only(text: str, tokens: list[tuple[int, int, str]], found: list[Correction]) -> list[Correction]:
+    """Verhörer aus ``ENDO_ONLY`` nur, wenn im Abschnitt desselben Zahns eine Wurzelkanalbehandlung steht."""
+    result = []
+    for start, end, token in tokens:
+        if (replacement := ENDO_ONLY.get(token.lower())) is None:
+            continue
+        before = [m.end() for m in _TOOTH_MARK.finditer(text, 0, start)]
+        after = _TOOTH_MARK.search(text, end)
+        lo, hi = before[-1] if before else 0, after.start() if after else len(text)
+        if _ENDO.search(text, lo, hi) or any(lo <= c.start < hi and c.corrected in _ENDO_WORDS for c in found):
+            result.append(Correction(token, replacement, start, end))
+    return result
+
+
 def correct(text: str, extra: dict[tuple[str, ...], str] | None = None) -> tuple[str, list[Correction]]:
     """Korrigierter Text und alle angewandten Korrekturen (Offsets beziehen sich auf ``text``).
 
@@ -268,9 +294,13 @@ def correct(text: str, extra: dict[tuple[str, ...], str] | None = None) -> tuple
             i += size
             continue
         start, end, token = tokens[i]
-        if (replacement := correct_token(token)) is not None:
+        if token.lower() in ENDO_ONLY:
+            pass  # erst unten, wenn alle Korrekturen (auch "2x WD" -> VitE) feststehen
+        elif (replacement := correct_token(token)) is not None:
             corrections.append(Correction(token, replacement, start, end))
         i += 1
+    corrections += _endo_only(text, tokens, corrections)
+    corrections.sort(key=lambda c: c.start)
     pieces, last = [], 0
     for c in corrections:
         pieces += [text[last : c.start], c.corrected]

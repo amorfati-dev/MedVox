@@ -1438,7 +1438,7 @@
     "notes": []
   },
   "pilot-wd-kasse": {
-    "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, MET, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
+    "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
     "patient_type": "kasse",
     "duration_s": 10.0,
     "latency_s": 0.8,
@@ -1446,6 +1446,7 @@
       "40",
       "2x 32",
       "2x 28",
+      "34",
       "13c",
       "41a",
       "Ä935a",
@@ -1534,6 +1535,57 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
+        "evident": null,
+        "source": "regel"
+      },
+      {
+        "code": "34",
+        "system": "BEMA",
+        "title": "Medikamentöse Einlage",
+        "points": 15,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null,
+        "source": "regel"
+      },
+      {
+        "code": "2197",
+        "system": "GOZ",
+        "title": "Adhäsive Befestigung",
+        "points": 130,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich zu BEMA 34/35/18a: Privat vereinbar für adhäsive Befestigung des provisorischen Verschlusses, der Wurzelfüllung oder eines Glasfaserstifts (gleichartig). – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
+        "evident": null,
+        "source": "regel"
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "Zuzahlung möglich (eigenständige Privatleistung): Nur ab der 4. medikamentösen Einlage privat vereinbar, weil BEMA 34 auf drei Sitzungen begrenzt ist; sonst BEMA 34. – wegen: med",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "zuzahlung",
         "evident": null,
         "source": "regel"
       },
@@ -1627,7 +1679,7 @@
     "notes": []
   },
   "pilot-wd-privat": {
-    "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, MET, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
+    "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
     "patient_type": "privat",
     "duration_s": 10.0,
     "latency_s": 0.8,
@@ -1635,6 +1687,7 @@
       "0090",
       "2x 2410",
       "2x 2360",
+      "2430",
       "2100",
       "0100",
       "Ä5002",
@@ -1687,6 +1740,23 @@
         ],
         "count": 2,
         "reason": "wegen: VitE (BEMA 28 ↔ GOZ 2360, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "source": "regel"
+      },
+      {
+        "code": "2430",
+        "system": "GOZ",
+        "title": "Medikamentöse Einlage",
+        "points": 204,
+        "teeth": [
+          25
+        ],
+        "count": 1,
+        "reason": "wegen: med (BEMA 34 ↔ GOZ 2430, für Privatpatienten GOZ)",
         "decide": [],
         "planned": false,
         "alternative": false,

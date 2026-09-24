@@ -241,3 +241,21 @@ def test_surface_count_as_digit_becomes_the_word(raw, expected):
 def test_captains_spellings_of_endo_words():
     assert correct_token("Vitalextirpation") == "Vitalexstirpation"
     assert correct_token("längenbestimungen") == "Längenbestimmungen"
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Zahn 25 Wurzelkanalbehandlung beginnen, 2x WD, 2x WK, MET, Zahn 46 Füllung",
+     "Zahn 25 Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Füllung"),
+    ("Zahn drei sechs MET, WK mal drei", "Zahn drei sechs med, WK mal drei"),
+    ("Trepanation, MET, Verschluss", "Trepanation, med, Verschluss"),
+])
+def test_met_is_med_next_to_a_root_canal_treatment(raw, expected):
+    assert correct(raw)[0] == expected
+
+
+@pytest.mark.parametrize("raw", [
+    "MET", "Zahn 36 Füllung, MET", "Zahn 25 WK mal drei, Zahn 46 MOD, MET",
+    "Zahn 46 MET, Zahn 25 Wurzelkanalbehandlung", "36 WK 2x, 46 MET", "Zahn 25 2 WD, MET",
+])
+def test_met_elsewhere_is_left_alone(raw):
+    assert correct(raw) == (raw, [])

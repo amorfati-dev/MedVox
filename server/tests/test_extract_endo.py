@@ -39,7 +39,8 @@ EXAMPLES = {
     "getippt": ("Zahn 25, Füllung 2 flächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit "
                 "Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2"),
 }
-# Pilot-Diktat nach dem VitE-Fix: Whisper hörte VitE als „WD“, die Anzahl steht davor („2x WD“, „2x WK“).
+# Pilot-Diktat nach dem VitE-Fix: Whisper hörte VitE als „WD“, die Anzahl steht davor („2x WD“, „2x WK“),
+# und „med“ als „MET“.
 PILOT = ("Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x WD, 2x WK, MET, Zahn 46 "
          "Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.")
 # Erbrachte Hauptvorschläge an 46 (Ziffer -> Anzahl): 2420 („phys“) und 2400 sind diktiert und zählen je
@@ -79,8 +80,9 @@ def test_captains_example(name):
 
 def test_pilot_vite_heard_as_wd_with_count_before():
     result = run(PILOT)
-    assert main_at(result, 25) == {"40": 1, "32": 2, "28": 2}
-    assert options_at(result, 25) == {"2400": 2, "2420": 2}  # Endo-Zuzahlungen je Kanal wie WK
+    assert main_at(result, 25) == {"40": 1, "32": 2, "28": 2, "34": 1}
+    # Endo-Zuzahlungen: 2400/2420 je Kanal wie WK, 2197/2430 neben der Einlage (34)
+    assert options_at(result, 25) == {"2400": 2, "2420": 2, "2197": 1, "2430": 1}
     assert main_at(result, 46) == {"13c": 1, "41a": 1, "Ä935a": 1, "12": 1}
     assert options_at(result, 46) == {"2100": 1}
     assert not any(s.decide for s in result.suggestions)
