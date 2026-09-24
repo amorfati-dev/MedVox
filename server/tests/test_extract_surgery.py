@@ -127,7 +127,10 @@ def test_nbl2_only_when_said_or_bleeding_with_a_measure(words):
                                        "48 Ost2, Umschlingungsnaht.", "48 Ost2, starke Blutung.",
                                        "Parasorb eingelegt.", "48 Ost2, starke Blutung, Tamponade, keine Naht.",
                                        "48 Ost2, starke Blutung, kein Parasorb.",
-                                       "38 Ost2, Naht. 48 Ost2, starke Blutung."])
+                                       "38 Ost2, Naht. 48 Ost2, starke Blutung.",
+                                       "38 Ost2, Naht, 48 Ost2, starke Blutung.",
+                                       "38 Ost2, Umschlingungsnaht, 48 Ost2, starke Blutung.",
+                                       "48 Ost2, starke Blutung, Naht nicht nötig."])
 def test_lone_measure_or_bleeding_is_only_an_option(dictation):
     for patient, code in (("kasse", "37"), ("privat", "3060")):
         result = run(dictation, patient)

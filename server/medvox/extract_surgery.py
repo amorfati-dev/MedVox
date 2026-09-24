@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 
 from medvox.extract_catalog import Catalog
-from medvox.extract_draft import Draft
+from medvox.extract_draft import Draft, Tagged
 from medvox.extract_rules import REMOVAL
 from medvox.extract_text import TextContext
 
@@ -74,7 +74,7 @@ def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -
         if d.entry.key not in NBL2 or any(t.hit.code_word for t in d.hits):
             kept.append(d)
             continue
-        if any(t.hit.keyword in BLEEDING and _measure_beside(ctx, t.sentence) for t in d.hits):
+        if any(t.hit.keyword in BLEEDING and _measure_beside(ctx, t) for t in d.hits):
             kept.append(d)
             continue
         if not surgery and all(t.hit.keyword in BLEEDING for t in d.hits):
@@ -88,6 +88,11 @@ def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -
     return kept, offers
 
 
-def _measure_beside(ctx: TextContext, sentence: tuple[int, int]) -> bool:
-    """Nicht verneinte Maßnahme im Satz der starken Blutung („keine Naht“, Naht am anderen Zahn zählen nicht)."""
-    return any(not ctx.negated(m.start(), m.end()) for m in _MEASURE.finditer(ctx.folded, *sentence))
+def _measure_beside(ctx: TextContext, bleeding: Tagged) -> bool:
+    """Nicht verneinte Maßnahme im Satz der starken Blutung am selben Zahn („keine Naht“, andere Zähne nicht)."""
+    own = {tooth.fdi for tooth in bleeding.teeth}
+    for m in _MEASURE.finditer(ctx.folded, *bleeding.sentence):
+        teeth = {tooth.fdi for tooth in ctx.teeth_for(m.start(), m.end())}
+        if not ctx.negated(m.start(), m.end()) and (not teeth or teeth & own):
+            return True
+    return False
