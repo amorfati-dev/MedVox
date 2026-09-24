@@ -14,7 +14,9 @@ es ab, bleiben davon nur die geänderten Stellen – beim Verwerfen oder Lösche
 Dazu nur Patiententyp, Kalenderwoche und Katalogstand. Nie Evident-Nummer, Kürzel, Behandler, Datum
 oder Uhrzeit, Diktat-ID oder der ganze Text; die Tabelle hat keine Verknüpfung zu anderen, die Zeilen-ID
 ist zufällig (keine Reihenfolge, die Zeilen eines Diktats verbindet). Jede Zeile
-bleibt, bis sie gelöscht wird, höchstens 12 Monate (`purge`, bei jedem Aufräumen in `db.purge_expired`).
+bleibt, bis sie gelöscht wird („Alle löschen“ auf der Wörterbuch-Seite, `delete_all`), höchstens 12 Monate
+(`purge`, bei jedem Aufräumen in `db.purge_expired`). Die Wörterbuch-Seite zählt gleiche Stellen als
+Vorschläge (`medvox/lexicon_suggest.py`).
 Geschrieben wird in derselben Transaktion, in der `db.bury` das Diktat löscht.
 """
 
@@ -154,3 +156,8 @@ def record(conn: sqlite3.Connection, where: str, params: tuple, now: float) -> i
 def purge(conn: sqlite3.Connection, now: float) -> None:
     """Zeilen älter als 12 Monate löschen (ganze Kalenderwochen, nie länger als `KEEP_S`)."""
     conn.execute("DELETE FROM corrections WHERE week <= ?", (week(now - KEEP_S),))
+
+
+def delete_all(conn: sqlite3.Connection) -> int:
+    """„Alle löschen“ auf der Wörterbuch-Seite: die ganze Sammlung, sofort."""
+    return conn.execute("DELETE FROM corrections").rowcount

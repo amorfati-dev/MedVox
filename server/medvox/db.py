@@ -97,6 +97,17 @@ CREATE TABLE IF NOT EXISTS corrections (
     after           TEXT NOT NULL,
     catalog_version TEXT NOT NULL
 );
+-- Wörterbuch der Praxis (`medvox/lexicon_entries.py`): Ersetzungen und Fachbegriffe für den Prompt, keine
+-- Patientendaten. Nie gelöscht, nur abgeschaltet, damit sichtbar bleibt, was einmal galt.
+CREATE TABLE IF NOT EXISTS lexicon_entries (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    kind        TEXT NOT NULL,              -- ersetzung | begriff
+    wrong       TEXT NOT NULL DEFAULT '',   -- falsch gehört (nur bei Ersetzungen)
+    right       TEXT NOT NULL,              -- richtig bzw. der Fachbegriff
+    active      INTEGER NOT NULL DEFAULT 1,
+    source      TEXT NOT NULL,              -- hand | korrektur
+    created_at  REAL NOT NULL
+);
 """
 
 TOMBSTONE_S = 7 * 24 * 3600  # länger als die 24 Stunden eines Diktats

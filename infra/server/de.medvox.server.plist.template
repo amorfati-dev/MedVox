@@ -28,6 +28,8 @@
     <string>@@WHISPER_URL@@</string>
     <key>WHISPER_PROMPT_FILE</key>
     <string>@@PROMPT_FILE@@</string>
+    <key>WHISPER_MODEL</key>
+    <string>@@MODEL@@</string>
     <key>MEDVOX_DB_PATH</key>
     <string>@@DB_PATH@@</string>
     <key>MEDVOX_TMP_DIR</key>

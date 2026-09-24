@@ -26,6 +26,8 @@ FALLBACK_PROMPT = (
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROMPT_FILE = REPO_ROOT / "infra" / "whisper" / "prompt.txt"
 DEFAULT_DB_PATH = Path.home() / "Library" / "Application Support" / "MedVox" / "medvox.db"
+# Nur fürs Zählen der Prompt-Token (Vokabular, `medvox/whisper_prompt.py`); transkribiert wird im whisper-server.
+DEFAULT_MODEL_FILE = Path.home() / "Library" / "Application Support" / "MedVox" / "models" / "ggml-large-v3-turbo.bin"
 
 
 def _env_int(name: str, default: int) -> int:
@@ -44,6 +46,7 @@ class Settings:
 
     whisper_url: str = "http://127.0.0.1:8178"
     whisper_prompt_file: Path = DEFAULT_PROMPT_FILE
+    whisper_model: Path = DEFAULT_MODEL_FILE
     whisper_timeout_s: float = 60.0
     password_hash: str = ""
     db_path: Path = DEFAULT_DB_PATH
@@ -68,6 +71,7 @@ class Settings:
             whisper_prompt_file=Path(
                 os.environ.get("WHISPER_PROMPT_FILE", str(DEFAULT_PROMPT_FILE))
             ),
+            whisper_model=Path(os.environ.get("WHISPER_MODEL", str(DEFAULT_MODEL_FILE))),
             password_hash=os.environ.get("MEDVOX_PASSWORD_HASH", ""),
             db_path=Path(os.environ.get("MEDVOX_DB_PATH", str(DEFAULT_DB_PATH))),
             transfer_ttl_s=_env_int("MEDVOX_TRANSFER_TTL_S", cls.transfer_ttl_s),
