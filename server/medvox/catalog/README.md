@@ -83,7 +83,8 @@ KZBV-Gesamtfassung bzw. GOZ-Text; Grenzen über längere Zeiträume („einmal j
 `max_per_status`: `vorschlag` = aus dem amtlichen Text gelesen, wartet auf die Bestätigung des Behandlers;
 `bestaetigt` = vom Behandler bestätigt. Der Extraktor begrenzt die Anzahl nur bei `bestaetigt`
 (`extract_limits.py`), bisher nur BEMA 12; ein Vorschlag ändert an den Vorschlägen nichts, bis der
-Behandler ihn bestätigt (ein Wechsel auf `bestaetigt` je Eintrag). Bereiche aus der FDI-Nummer: Frontzahnbereich = 13–23 bzw. 33–43,
+Behandler ihn bestätigt (ein Wechsel auf `bestaetigt` je Eintrag). Anzahl − / + am iPad
+(`Catalog.stepper`): je `kanal` oder `sitzung` mit `count` über 1, gedeckelt nur bei `bestaetigt`. Bereiche aus der FDI-Nummer: Frontzahnbereich = 13–23 bzw. 33–43,
 Kieferhälfte = Seitenzähne 4–8 eines Quadranten (KZVB-Abrechnungsmappe zu BEMA 12). Im erweiterten
 Katalog fehlt das Feld noch (gilt als ungeprüft/unbegrenzt).
 
