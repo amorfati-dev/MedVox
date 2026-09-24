@@ -7,7 +7,9 @@ import { plural } from "../status";
 import { CopyButton } from "./CopyButton";
 import { Icon } from "./Icon";
 import { PATIENT_LABEL } from "./PatientSwitch";
+import { collectTapped } from "../teeth";
 import { FrameRows, OptionRow, ResultRow } from "./ResultRow";
+import { TappedBlock } from "./TappedBlock";
 
 type HeadProps = {
   counts: Counts;
@@ -44,16 +46,30 @@ type Props = {
   onAdopt: (key: string) => void;
   onEdit?: (tooth: number | undefined) => void; // Katalog-Blatt: an diesem Zahn, undefined = Zahn erst wählen
   onRemove?: (s: Suggestion) => void; // Zeile „von Hand“ entfernen
+  tapCodes?: (code: string) => string[] | null; // Je-Zahn-Position: Ziffern fürs Antippen
+  onTap?: (code: string) => void; // Blatt „Zähne antippen“ öffnen
 };
 
-export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove }: Props) {
+export function ResultList({ groups: all, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove, tapCodes, onTap }: Props) {
+  const { groups, collected } = collectTapped(all);
+  // „Zähne antippen“ einmal je Position: an ihrer ersten Zeile (meist der ohne Zahn); schon angetippte
+  // Positionen ändert der Sammelblock („Zähne ändern“).
+  const pairOf = (code: string) => tapCodes?.(code)?.join("/") ?? null;
+  const seen = new Set(collected.flatMap((b) => b.rows.map((r) => pairOf(r.row.s.code))));
+  const tapAt = new Set<string>();
+  for (const item of groups.flatMap((g) => g.items)) {
+    const pair = "row" in item ? pairOf(item.row.s.code) : null;
+    if (pair === null || !("row" in item) || seen.has(pair)) continue;
+    seen.add(pair);
+    tapAt.add(item.row.key);
+  }
   const elsewhere = onEdit && (
     <button type="button" className="list-add" onClick={() => onEdit(undefined)}>
       <Icon name="plus" />
       Ziffer ohne Zahn oder an anderem Zahn
     </button>
   );
-  if (groups.length === 0 && plans.length === 0 && notes.length === 0) {
+  if (all.length === 0 && plans.length === 0 && notes.length === 0) {
     return (
       <>
         <p className="muted empty">Noch keine Ziffern-Vorschläge.</p>
@@ -63,7 +79,7 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
   }
   return (
     <>
-      {groups.length > 0 && <h2 className="list-title">Abrechnen</h2>}
+      {all.length > 0 && <h2 className="list-title">Abrechnen</h2>}
       {groups.map((g) => (
         <section key={g.tooth ?? "ohne"} className={g.tooth === null ? "tooth tooth-none" : "tooth"}>
           <header className="tooth-head">
@@ -83,7 +99,15 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
           <ul className="rows">
             {g.items.map((item) =>
               "row" in item ? (
-                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
+                <ResultRow
+                  key={item.row.key}
+                  row={item.row}
+                  onToggle={onToggle}
+                  onAdopt={onAdopt}
+                  onRemove={onRemove}
+                  tapCodes={tapCodes}
+                  onTap={tapAt.has(item.row.key) ? onTap : undefined}
+                />
               ) : "frame" in item ? (
                 <FrameRows
                   key={item.frame.key}
@@ -105,6 +129,9 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
             </button>
           )}
         </section>
+      ))}
+      {collected.map((block) => (
+        <TappedBlock key={block.key} block={block} tapCodes={tapCodes} onTap={onTap} />
       ))}
       {elsewhere}
 

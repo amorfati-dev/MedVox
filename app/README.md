@@ -6,7 +6,7 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 
 | Pfad | Zweck |
 |---|---|
-| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), „Rückgängig“ |
+| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), „Zähne antippen“ an Je-Zahn-Positionen (Zahnschema-Blatt), „Rückgängig“; Zahnschema-Karte mit Befundliste und „Befund kopieren“ |
 | `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), neue Diktate erscheinen sofort (Live-Strom, `live.ts`; ohne Strom Abgleich alle 30 s, Anzeige „Live“/„Abgleich alle 30 s“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt); am iPad korrigierte Diktate mit „am iPad korrigiert“ und aufklappbarem Original (nur lesen) |
 | `/behandler` | Behandlerliste (mit Anmeldung): Name, optionale Behandlernummer, aktiv/inaktiv – nur Zuordnung, keine Rechte |
 | `/woerterbuch` | Wörterbuch (mit Anmeldung, vor allem Büro-PC): Ersetzungen „falsch gehört → richtig“ mit Probe vor dem Speichern, Fachbegriffe für den Whisper-Prompt mit Füllstand, Vorschläge aus Korrekturen (übernehmen per Tipp), „Alle löschen“ für die Korrektur-Sammlung; gilt sofort für alle Diktate, abschalten statt löschen |
@@ -22,6 +22,8 @@ mit denselben Funktionen wie am iPad),
 `dentists.ts` + `hooks/useDentist.ts` (Behandler: Liste, Wahl je Gerät, neu fragen nach Übergabe und Pause),
 `correction.ts` + `catalog.ts` + `textdiff.ts` + `hooks/useCorrection.ts` + `hooks/useCatalog.ts` (Korrektur am iPad: ersetzen nur an
 einem Zahn, ergänzen aus dem Katalog, neu berechnen über `/api/v1/analyze`, Vergleich mit dem Original),
+`teeth.ts` + `findings.ts` (Zahnschema: ein Kiefer auf einmal, Wurzelzahl aus der FDI-Nummer, 14/24 fragen,
+Zähne antippen für Je-Zahn-Positionen, Sammelblock; Befundliste und „Befund kopieren“, Zeile je Zahn),
 `lexicon.ts` + `hooks/useLexicon.ts` (Wörterbuch-Seite: Einträge, Probe über `/api/v1/analyze` mit `draft`, Füllstand),
 `theme.ts` (Auto/Hell/Dunkel je Gerät), `styles/` (`tokens.css` mit allen Farben hell/dunkel), `views/`, `components/`. Der Service Worker (`public/sw.js`) cached nur die App-Hülle, nie `/api/` oder Audio.
 

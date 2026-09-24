@@ -3,7 +3,8 @@
 // damit Text und Ziffern im Büro Zeichen für Zeichen dem entsprechen, was das iPad kopieren würde.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
 import { onlyPrivate, splitBlocks, type EvidentBlocks, type PatientSummary, type StoredDictation, type TransferPosition } from "./api.ts";
-import { buildGroups, positionsOf, selectedLines } from "./result.ts";
+import { findingRows, type FindingRow } from "./findings.ts";
+import { buildGroups, positionsOf, selectedLines, uniquePlanned } from "./result.ts";
 
 // Evident-Patientennummer: nur Ziffern, höchstens 12 (wie der Server prüft).
 export const NUMBER_MAX = 12;
@@ -40,6 +41,7 @@ export type DictationCopy = {
   positions: TransferPosition[]; // Zahn, Ziffer, Art – für die Mehrkosten-Tabelle
   allPrivate: boolean; // nur Privatpositionen: ein Block, der Privatblock
   blocks: EvidentBlocks; // Kassenpatient: Kassenblock, Leerzeile, Privatblock – wie an der Rezeption
+  findings: FindingRow[]; // Zahnschema und „Befund kopieren“ (findings.ts), wie am iPad
 };
 
 export function dictationCopy(d: StoredDictation): DictationCopy {
@@ -50,7 +52,8 @@ export function dictationCopy(d: StoredDictation): DictationCopy {
   const active = d.codes.filter((c) => !deselected.has(c));
   const positions = positionsOf(buildGroups(d.suggestions, active, adopted, evident));
   const allPrivate = onlyPrivate(positions);
-  return { evident, numbers, positions, allPrivate, blocks: splitBlocks(evident, allPrivate) };
+  const findings = findingRows(d.suggestions, uniquePlanned(d.planned), active, adopted, d.teeth ?? []);
+  return { evident, numbers, positions, allPrivate, blocks: splitBlocks(evident, allPrivate), findings };
 }
 
 // offen: noch nicht übertragene Diktate; übertragen: alles übertragen (Inhalt gelöscht);

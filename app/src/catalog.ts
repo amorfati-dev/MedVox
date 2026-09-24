@@ -14,6 +14,8 @@ export type CatalogEntry = {
   kind: SuggestionKind;
   evident?: string | null;
   family: string[]; // Füllungsfamilie nach Flächenzahl 1–4 (13a–13d, 2150/2160/2170/2170), sonst leer
+  per_tooth?: boolean; // „je Zahn“ (max_per zahn): Zähne im Zahnschema antippbar
+  roots?: string[]; // Paar nach Wurzelzahl [einwurzelig, mehrwurzelig] (4050/4055), sonst leer
 };
 export type CatalogList = { version: string; patient_type: PatientType; entries: CatalogEntry[] };
 
@@ -66,6 +68,11 @@ export function byCode(entries: CatalogEntry[]): Map<string, CatalogEntry> {
   const map = new Map<string, CatalogEntry>();
   for (const e of entries) if (!map.has(e.code)) map.set(e.code, e);
   return map;
+}
+
+// Ziffern einer Je-Zahn-Position beim Antippen: das Paar nach Wurzelzahl oder die Ziffer allein.
+export function tapCodes(entry: CatalogEntry): string[] {
+  return entry.roots && entry.roots.length === 2 ? entry.roots : [entry.code];
 }
 
 // Gehören zwei Ziffern zur selben Füllungsfamilie (13b/13c, 2080/2100)?

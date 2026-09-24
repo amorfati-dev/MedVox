@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from medvox import attribution, dentists, patients
 from medvox.auth import require_session
-from medvox.routes_transcribe import SuggestionOut
+from medvox.routes_transcribe import SuggestionOut, ToothOut
 from medvox.routes_transfer import HandoverOut, handover_out
 from medvox.transfer import iso
 
@@ -81,6 +81,7 @@ class DictationIn(BaseModel):
     suggestions: list[SuggestionOut] = Field(default_factory=list, max_length=500)
     planned: list[SuggestionOut] = Field(default_factory=list, max_length=200)
     notes: list[Text] = Field(default_factory=list, max_length=200)
+    teeth: list[ToothOut] = Field(default_factory=list, max_length=100)  # Zahnschema (Flächen, Befunde)
     deselected: list[Code] = Field(default_factory=list, max_length=200)  # abgewählte Ziffern ("2x 41a")
     adopted: list[Code] = Field(default_factory=list, max_length=200)  # übernommene Optionen (optionKey)
     # nur bei einem am iPad korrigierten Diktat: das Original (24 h wie das Diktat; Sammlung: corrections.py)

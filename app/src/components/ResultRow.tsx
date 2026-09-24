@@ -23,12 +23,31 @@ function Checks({ decide }: { decide: string[] }) {
   ));
 }
 
+// „Zähne antippen“ an einer Je-Zahn-Position (Zahnschema, ToothTapSheet); Türkis Kasse, Indigo privat.
+export function TapButton({ codes, kind, label, onTap }: { codes: string[]; kind: string; label?: string; onTap: () => void }) {
+  const what = codes.length === 2 ? `${codes[0]} / ${codes[1]} nach Wurzelzahl` : `${codes[0]} je Zahn`;
+  return (
+    <button type="button" className={kind === "bema" ? "tap-teeth kasse" : "tap-teeth"} onClick={onTap}>
+      <Icon name="edit" />
+      {label ?? `Zähne antippen · ${what}`}
+    </button>
+  );
+}
+
 function Teeth({ s }: { s: Suggestion }) {
   return s.teeth.length > 1 ? <span className="row-meta">Zähne {s.teeth.join(", ")}</span> : null;
 }
 
 // `onRemove`: Zeile „von Hand“ entfernen (wird immer kopiert, also nicht abwählbar); fehlt = nicht änderbar.
-type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void; onRemove?: (s: Suggestion) => void };
+// `tapCodes`/`onTap`: Je-Zahn-Position – Knopf „Zähne antippen“ unter der Zeile (nur am iPad).
+type RowProps = {
+  row: Row;
+  onToggle: (code: string) => void;
+  onAdopt: (key: string) => void;
+  onRemove?: (s: Suggestion) => void;
+  tapCodes?: (code: string) => string[] | null;
+  onTap?: (code: string) => void;
+};
 
 // Vermerk einer Korrektur am iPad; null = so vom Extraktor.
 function edited(row: Row): string | null {
@@ -38,8 +57,9 @@ function edited(row: Row): string | null {
   return row.s.replaced ? `geändert · vorher ${row.s.replaced}` : "geändert";
 }
 
-export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
+export function ResultRow({ row, onToggle, onAdopt, onRemove, tapCodes, onTap }: RowProps) {
   const { s, tag, count, selected } = row;
+  const tap = onTap && tapCodes?.(s.code);
   const mark = edited(row);
   const hand = row.source === "hand";
   return (
@@ -70,6 +90,7 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
         </span>
       </button>
       <Checks decide={s.decide} />
+      {tap && onTap && <TapButton codes={tap} kind={s.kind} onTap={() => onTap(s.code)} />}
       {row.options.length > 0 && (
         <ul className="options">
           {row.options.map((o) => (

@@ -6,6 +6,7 @@ import { useCallback, useRef, useState, type RefObject } from "react";
 import { api, ApiError, kindsOf, type PatientType, type Suggestion, type SuggestionKind } from "../api";
 import { EMPTY_ORIGINAL, mainPositions, type Original } from "../catalog";
 import type { Content } from "../correction";
+import { mergeTeeth, type ToothInfo } from "../teeth";
 import { filenameFor } from "./recorder";
 
 // Fehler, die eine Wiederholung desselben Abschnitts nie bestehen würde.
@@ -23,6 +24,7 @@ export type UploadQueue = {
   suggestions: Suggestion[]; // Vorschläge aller Abschnitte in Diktatreihenfolge (Zahnzuordnung)
   planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
   notes: string[]; // Hinweise aller Abschnitte, ohne Wiederholungen
+  teeth: ToothInfo[]; // Zahnschema aller Abschnitte (mergeTeeth)
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   original: Original; // alle Abschnitte, wie sie kamen
   corrected: boolean; // am iPad korrigiert (Text oder Ziffern)
@@ -50,6 +52,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [planned, setPlanned] = useState<Suggestion[]>([]);
   const [notes, setNotes] = useState<string[]>([]);
+  const [teeth, setTeeth] = useState<ToothInfo[]>([]);
   const [resultType, setResultType] = useState<PatientType | null>(null);
   const [original, setOriginal] = useState<Original>(EMPTY_ORIGINAL);
   const [corrected, setCorrected] = useState(false);
@@ -89,6 +92,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
           setSuggestions((prev) => [...prev, ...result.suggestions]);
           setPlanned((prev) => [...prev, ...(result.planned ?? [])]);
           setNotes((prev) => Array.from(new Set([...prev, ...(result.notes ?? [])])));
+          setTeeth((prev) => mergeTeeth(prev, result.teeth ?? []));
           setOriginal((prev) => ({
             transcript: prev.transcript && text ? `${prev.transcript} ${text}` : prev.transcript || text,
             codes: Array.from(new Set([...prev.codes, ...result.codes])),
@@ -150,6 +154,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     setSuggestions(content.suggestions);
     setPlanned(content.planned);
     setNotes(content.notes);
+    setTeeth(content.teeth);
     setCorrected(isCorrected);
   }, []);
 
@@ -166,6 +171,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     setSuggestions([]);
     setPlanned([]);
     setNotes([]);
+    setTeeth([]);
     setResultType(null);
     setOriginal(EMPTY_ORIGINAL);
     setCorrected(false);
@@ -185,6 +191,7 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     suggestions,
     planned,
     notes,
+    teeth,
     resultType,
     original,
     corrected,

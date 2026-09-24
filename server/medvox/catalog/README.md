@@ -7,7 +7,8 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
 |---|---|
 | `catalog_v1.json` | die 60–99 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
 | `catalog_extended.json` | weitere geprüfte Positionen (Prothetik, PAR-Chirurgie, UPT, Kinder-Früherkennung …), gleiches Schema; wird nicht geladen, Saat für den Vollimport in Phase 2 |
-| `schema.json` | JSON-Schema für beide Dateien |
+| `befunde.json` | Befundwörter fürs Zahnschema („Karies profunda“, „Pulpitis“ …, `extract_findings.py`); nur Anzeige und „Befund kopieren“, nie eine Ziffer. Jeder Eintrag `review` „vorschlag“, bis der Behandler ihn bestätigt („bestaetigt“); Wörter je Eintrag klein, kein Wort doppelt (`tests/test_extract_findings.py`) |
+| `schema.json` | JSON-Schema für `catalog_v1.json` und `catalog_extended.json` |
 | `validate.py` | prüft Schema + Fachregeln, druckt die Review-Tabelle (`cd server && make catalog-check` prüft beide Kataloge) |
 | `review.py` | Prüftabellen Paare und Zuzahlungs-Liste (`python -m medvox.catalog.validate --markdown` für die PR-Beschreibung) |
 | `../../tests/test_catalog.py` | pytest: beide Kataloge gültig, zusammen widerspruchsfrei, Validator findet echte Fehler |

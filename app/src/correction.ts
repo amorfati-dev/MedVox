@@ -11,13 +11,23 @@
 //   der höchsten Anzahl – ein späterer Regel-Vorschlag derselben Ziffer zählt also nie doppelt.
 // - Neu berechnen ersetzt die Regel-Vorschläge; Ersetzungen gelten wieder, wo die ersetzte Ziffer am Zahn
 //   wieder vorkommt, Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
+//   Im Zahnschema angetippte Zähne (teeth.ts) bleiben die ganze Position: deren Regel-Vorschläge (auch die
+//   Zeile ohne Zahn) kommen nicht zurück, sonst zählte sie doppelt.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
 import { codeOf, type Suggestion } from "./api.ts";
-import { toothOf, type CatalogEntry } from "./catalog.ts";
+import { tapCodes, toothOf, type CatalogEntry } from "./catalog.ts";
 import { optionKey } from "./result.ts";
+import type { ToothInfo } from "./teeth.ts";
 
 // Inhalt eines Diktats, den eine Korrektur ersetzt (wie aus /transcribe bzw. /analyze).
-export type Content = { transcript: string; codes: string[]; suggestions: Suggestion[]; planned: Suggestion[]; notes: string[] };
+export type Content = {
+  transcript: string;
+  codes: string[];
+  suggestions: Suggestion[];
+  planned: Suggestion[];
+  notes: string[];
+  teeth: ToothInfo[]; // Zahnschema: Flächen und Befunde je Zahn
+};
 // Auswahl: abgewählte Ziffern im Kopierformat, übernommene Optionen (optionKey).
 export type Choice = { deselected: string[]; adopted: string[] };
 
@@ -127,7 +137,9 @@ export function replaceFamily(
 
 // Neu berechnet: frische Regel-Vorschläge, darauf die Ersetzungen von vorher, dazu alles „von Hand“.
 export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: Map<string, CatalogEntry>): Suggestion[] {
-  let list = fresh;
+  const pairs = previous.filter((s) => s.tapped).map((s) => catalog.get(s.code));
+  const tapped = new Set(pairs.flatMap((entry) => (entry ? tapCodes(entry) : [])));
+  let list = fresh.filter((s) => s.alternative || !tapped.has(s.code));
   for (const s of previous) {
     const entry = catalog.get(s.code);
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);

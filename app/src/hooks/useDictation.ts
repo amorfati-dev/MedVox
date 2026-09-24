@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PatientType, Suggestion, SuggestionKind } from "../api";
 import type { Original } from "../catalog";
 import type { Content } from "../correction";
+import type { ToothInfo } from "../teeth";
 import {
   MIC_MESSAGES,
   pickMimeType,
@@ -39,6 +40,7 @@ export type Dictation = {
   suggestions: Suggestion[]; // Vorschläge aller Abschnitte (Zahnzuordnung für Evident)
   planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
   notes: string[]; // Hinweise aller Abschnitte
+  teeth: ToothInfo[]; // Zahnschema: Flächen und Befunde je Zahn aller Abschnitte
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
   original: Original; // Stand vor einer Korrektur am iPad
   corrected: boolean;
@@ -247,6 +249,7 @@ export function useDictation(patientType: PatientType): Dictation {
     suggestions: uploads.suggestions,
     planned: uploads.planned,
     notes: uploads.notes,
+    teeth: uploads.teeth,
     resultType: uploads.resultType,
     original: uploads.original,
     corrected: uploads.corrected,

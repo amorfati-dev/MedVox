@@ -87,6 +87,18 @@ Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint
 Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste,
 Behandlerliste, Wörterbuch, Gerätetest und Abmelden.
 
+### Zahnschema und „Befund kopieren“
+
+Zwischen Transkript und „Abrechnen“ steht das **Zahnschema** (nur Anzeige): ein Kiefer auf einmal,
+es öffnet der Kiefer des ersten Zahns. Farben wie in der Liste: Türkis Kasse, Indigo Privat/Zuzahlung,
+gestrichelt geplant, bernsteinfarbener Strich = offener Prüfhinweis, schwarzer Rand = nur Befund. Im
+Zahn stehen die Flächen („mod“) oder die Ziffer. Darunter die Befundliste („36 · mod · Karies profunda →
+Kompositfüllung … 2100“); die Befundwörter (Karies profunda, Pulpitis, Fraktur …) stehen in
+`server/medvox/catalog/befunde.json` und werden nie zu einer Ziffer. **Befund kopieren** liefert eine
+Zeile je Zahn für die Karteikarte, z. B. `36 mod: Karies profunda – Kompositfüllung adhäsiv, dreiflächig
+(2100)` und `ohne Zahn: Gingivitis`. Ob Evident das so in der Karteikarte annimmt, ist noch an einer
+echten Karteikarte zu prüfen. Das Büro zeigt beide Kiefer klein, die Befundliste und denselben Knopf.
+
 ### Korrigieren am iPad
 
 Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Original, ändert aber nichts.
@@ -107,6 +119,18 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   entfernt sie (mit **Rückgängig**).
   **Ziffer ohne Zahn oder an anderem Zahn** (unter der Liste): erst „Ohne Zahn“ oder den Quadranten,
   dann den Zahn antippen.
+- **Zähne antippen** (an Positionen „je Zahn“: Zahnstein 4050/4055, geschlossene Kürettage 4070/4075,
+  AIT a/b, Fissurenversiegelung, PZR 1040, medikamentöse Einlage, Überkappung): öffnet das Zahnschema,
+  **ein Kiefer auf einmal** (Umschalter Oberkiefer/Unterkiefer), je Kieferhälfte eine Reihe mit 8 Zähnen
+  von der Mitte aus – dieselbe Spalte ist derselbe Zahntyp. Antippen wählt den Zahn, noch einmal
+  antippen nimmt ihn heraus. Die Ziffer folgt der Wurzelzahl: Spalten 1–5 einwurzelig (4050), 6–8
+  mehrwurzelig (4055). Bei **14 und 24** rät MedVox nicht: der Zahn wird bernsteinfarben, darunter
+  „ein- oder zweiwurzelig?“, und **Übernehmen** geht erst nach der Antwort. Abgerechnet werden nur
+  angetippte Zähne, je Zahn einmal; einen Knopf „ganzer Kiefer“ gibt es bewusst nicht (fehlende Zähne
+  würden sonst mitgezählt). Danach ersetzen die Zähne die Zeile ohne Zahn samt ihrem Prüfhinweis; in der
+  Liste steht ein Sammelblock „Zahnsteinentfernung je Zahn · 26 Zähne angetippt“ mit **Zähne ändern**,
+  „Ziffern kopieren“ liefert weiter je Zahn eine Zeile (`16,4055`). Neu berechnen aus berichtigtem Text
+  lässt die angetippten Zähne stehen. Milchzähne nur über „Ziffer ohne Zahn oder an anderem Zahn“.
 - Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
   Stufe: Text, Ziffern und Auswahl vor der letzten Änderung). Ein neuer Abschnitt wird wie immer
   angehängt; wurde schon ein Kurzcode abgeholt, zeigt die Rezeption wie gewohnt nur die Änderung.
