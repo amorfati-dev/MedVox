@@ -14,7 +14,7 @@ export function TreatmentCopy({ blocks, labelled }: Props) {
   return (
     <>
       <h3 className="codes-label">Je Behandlung kopieren</h3>
-      <div className="actions treatment-actions">
+      <div className="actions">
         {list.flatMap((t) => {
           const key = t.tooth ?? "-";
           if (!labelled && (t.kasse.length === 0 || t.privat.length === 0)) {
