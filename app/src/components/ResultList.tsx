@@ -43,9 +43,10 @@ type Props = {
   onToggle: (code: string) => void;
   onAdopt: (key: string) => void;
   onEdit?: (tooth: number | undefined) => void; // Katalog-Blatt: an diesem Zahn, undefined = Zahn erst wählen
+  onRemove?: (s: Suggestion) => void; // Zeile „von Hand“ entfernen
 };
 
-export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit }: Props) {
+export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove }: Props) {
   const elsewhere = onEdit && (
     <button type="button" className="list-add" onClick={() => onEdit(undefined)}>
       <Icon name="plus" />
@@ -82,9 +83,16 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
           <ul className="rows">
             {g.items.map((item) =>
               "row" in item ? (
-                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} />
+                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
               ) : "frame" in item ? (
-                <FrameRows key={item.frame.key} frame={item.frame} tooth={g.tooth} onToggle={onToggle} onAdopt={onAdopt} />
+                <FrameRows
+                  key={item.frame.key}
+                  frame={item.frame}
+                  tooth={g.tooth}
+                  onToggle={onToggle}
+                  onAdopt={onAdopt}
+                  onRemove={onRemove}
+                />
               ) : (
                 <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} />
               ),

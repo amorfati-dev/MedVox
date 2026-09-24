@@ -113,10 +113,24 @@ test("Neu berechnen: Ersetzung gilt wieder, wo die ersetzte Ziffer wiederkommt, 
 
 test("Abwahlen bleiben je Ziffer, auch bei anderer Anzahl; verschwundene Ziffern fallen heraus", () => {
   assert.deepEqual(remapDeselected(["13b", "25"], ["2x 13b", "12"]), ["2x 13b"]);
+  assert.deepEqual(keepAdopted(["2080@36", "9999@1"], TWO_TEETH), ["2080@36"]);
+});
+
+test("Zeile „von Hand“ wird immer kopiert; die Abwahl derselben Ziffer an anderen Zähnen bleibt", () => {
   const list = addPosition(TWO_TEETH, CATALOG.get("12")!, 46);
   const deselected = remapDeselected(["12"], codesOf(list));
-  assert.deepEqual(lines(list, none, deselected), ["36,13b", "46,13b"]); // ergänzte 12 bleibt sichtbar abgewählt
-  assert.deepEqual(keepAdopted(["2080@36", "9999@1"], TWO_TEETH), ["2080@36"]);
+  assert.deepEqual(lines(list, none, deselected), ["36,13b", "46,13b,bmf"]);
+  const active = codesOf(list).filter((c) => !deselected.includes(c));
+  const rows = buildGroups(list, active, none, lines(list, none, deselected)).flatMap((g) =>
+    g.items.flatMap((i) => ("row" in i ? [i.row] : [])),
+  );
+  const at = (tooth: number) => rows.find((r) => r.s.code === "12" && r.s.teeth[0] === tooth);
+  assert.equal(at(36)?.selected, false);
+  assert.equal(at(46)?.selected, true);
+  assert.equal(at(46)?.source, "hand");
+  // Am Zahn mit Regel-Vorschlag derselben Ziffer zählt die Hand-Position mit und folgt der Abwahl.
+  const more = addPosition(TWO_TEETH, CATALOG.get("12")!, 36);
+  assert.deepEqual(lines(more, none, remapDeselected(["12"], codesOf(more))), ["36,13b", "46,13b"]);
 });
 
 test("Streifen und Büro nennen die Ziffernänderungen je Zahn", () => {

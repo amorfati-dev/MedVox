@@ -92,7 +92,9 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   Füllung wandert mit (13b → 13c: 2080 → 2100). Darunter Suche und Fachbereiche: nur Positionen aus
   dem Katalog, beim Kassenpatienten BEMA und die Zuzahlungs-Liste, beim Privatpatienten GOZ/GOÄ; eine
   freie Ziffern-Eingabe gibt es nicht. Dieselbe Ziffer am selben Zahn noch einmal antippen zählt eins
-  mehr („2×“). Ergänzte Zeilen tragen „von Hand“, ersetzte „geändert · vorher 13b“.
+  mehr („2×“). Ergänzte Zeilen tragen „von Hand“, ersetzte „geändert · vorher 13b“. Eine Zeile „von
+  Hand“ wird immer kopiert, auch wenn dieselbe Ziffer an einem anderen Zahn abgewählt ist; Antippen
+  entfernt sie (mit **Rückgängig**).
   **Ziffer ohne Zahn oder an anderem Zahn** (unter der Liste): erst „Ohne Zahn“ oder den Quadranten,
   dann den Zahn antippen.
 - Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
@@ -210,11 +212,12 @@ erlaubt sind. Wer das nicht möchte, lässt das Feld einfach leer.
 und wird mit ihm gelöscht (übertragen, spätestens nach 24 Stunden). Damit MedVox aus Korrekturen
 lernen kann (Wörterbuch, ab der nächsten Ausbaustufe), bleiben beim Übertragen oder Ablauf – nicht beim
 Verwerfen oder Löschen – nur die **geänderten Stellen** stehen (Entscheidung des Behandlers): je Stelle
-vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (Stellen mit mehr als 12 geänderten
-Wörtern werden verworfen), dazu die Ziffernänderungen ohne Zahn (z. B. „13b → 13c“, „107 ergänzt“),
+vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (nahe Stellen, deren Umfeld sich
+berührt, zählen als eine; Stellen mit mehr als 12 geänderten Wörtern werden verworfen), dazu die Ziffernänderungen ohne Zahn (z. B. „13b → 13c“, „107 ergänzt“),
 Patiententyp (Kasse/Privat), Kalenderwoche und Katalogstand. **Nie** gespeichert werden
 Evident-Nummer, Kürzel, Behandler, Datum oder Uhrzeit, Diktat-ID oder der ganze Text; die Zeilen sind
-mit nichts anderem verknüpft. Sie bleiben, bis sie gelöscht werden, **höchstens 12 Monate**, und liegen
+mit nichts anderem verknüpft und tragen eine zufällige Nummer, sodass auch ihre Reihenfolge nicht
+verrät, welche Stellen aus demselben Diktat stammen. Sie bleiben, bis sie gelöscht werden, **höchstens 12 Monate**, und liegen
 nur auf dem Praxis-Mac. Restrisiko: ein Textstück kann einen Befund enthalten, der sich ohne Nummer aber
 keinem Patienten zuordnen lässt. Anzeigen und Löschen kommt mit der Wörterbuch-Seite.
 

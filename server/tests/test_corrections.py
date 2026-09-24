@@ -91,6 +91,27 @@ def test_long_rewrites_are_dropped_and_context_is_short() -> None:
     assert spots == [("c d falsch e f", "c d richtig e f")]
 
 
+def test_nearby_spots_merge_so_rows_cannot_rebuild_the_text() -> None:
+    words = "a b c d e f g h i j k l m n o p q r s t".split()
+    fixed = [w.upper() if w in {"b", "e", "h"} else w for w in words]
+    spots = corrections.text_spots(" ".join(words), " ".join(fixed))
+    assert spots == [("a b c d e f g h i j", "a B c d E f g H i j")]
+    common = "Zahn 36 " + " ".join(f"alt{i} Zahn" for i in range(8))
+    rewritten = "Zahn 36 " + " ".join(f"neu{i} Zahn" for i in range(8))
+    assert corrections.text_spots(common, rewritten) == []
+
+
+def test_row_ids_do_not_reveal_insertion_order(db_path: Path) -> None:
+    now = time.time()
+    for n in range(3):
+        saved = patients.save_dictation(db_path, f"diktat-000{n}", CORRECTED, f"47{n}", now=now)
+        patients.mark_transferred(db_path, saved.patient_id, {saved.id: saved.revision}, now=now)
+    with sqlite3.connect(db_path) as conn:
+        ids = sorted(r[0] for r in conn.execute("SELECT id FROM corrections"))
+    assert len(ids) == 12
+    assert all(b - a > 1 for a, b in zip(ids, ids[1:]))
+
+
 def test_code_changes_count_and_deselection() -> None:
     data = {
         "codes": ["2x 25", "13b", "40"],
@@ -100,6 +121,15 @@ def test_code_changes_count_and_deselection() -> None:
     }
     original = [{"tooth": 36, "code": "25"}, {"tooth": 36, "code": "13b"}, {"tooth": 36, "code": "40"}]
     assert corrections.code_changes(original, data) == [("40", ""), ("25", "2x 25")]
+
+
+def test_hand_position_counts_even_if_the_code_is_deselected_elsewhere() -> None:
+    data = {
+        "codes": ["13a", "13a"],
+        "deselected": ["13a"],
+        "suggestions": [sug("13a", [36]), sug("13a", [46], source="hand")],
+    }
+    assert corrections.code_changes([{"tooth": 36, "code": "13a"}], data) == [("13a", ""), ("", "13a")]
 
 
 def test_expiry_collects_but_discard_does_not(settings: Settings, logged_in: TestClient) -> None:

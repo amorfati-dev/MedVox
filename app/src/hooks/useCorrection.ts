@@ -2,9 +2,9 @@
 // (POST /api/v1/analyze, ohne Audio), Ziffer im Katalog-Blatt ersetzen oder ergänzen, eine Stufe
 // „Rückgängig“. Die Rechnung liegt in correction.ts; hier nur Zustand und Server-Aufrufe. Der Inhalt
 // liegt weiter in der Warteschlange (useUploadQueue.replace), die Auswahl in useSelection.restore.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, type PatientType, type Suggestion } from "../api";
-import { byCode, codesOf, mainPositions, type CatalogEntry } from "../catalog";
+import { byCode, codesOf, mainPositions, toothOf, type CatalogEntry } from "../catalog";
 import { addPosition, keepAdopted, recompute, remapDeselected, replaceFamily, type Content } from "../correction";
 import { codeChanges, type Change } from "../textdiff";
 import type { Dictation } from "./useDictation";
@@ -37,6 +37,7 @@ export type Correction = {
   catalogError: string | null;
   add: (entry: CatalogEntry, tooth: number | null) => void;
   replace: (tooth: number | null, from: string, to: CatalogEntry) => void;
+  remove: (s: Suggestion) => void; // Zeile „von Hand“ wieder entfernen
   notice: { title: string; changes: Change[] } | null; // Streifen mit „Rückgängig“
   undo: () => void;
 };
@@ -50,6 +51,10 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
   const type = d.resultType ?? fallback;
   const cat = useCatalog(type, sheet !== null);
   const catalogMap = useMemo(() => byCode(cat.entries ?? []), [cat.entries]);
+  // Angezeigte Vorschläge; ändern sie sich während /analyze läuft (anderer Patient, anderer Behandler,
+  // neuer Abschnitt), gehört das Ergebnis nicht mehr zu diesem Stand und wird verworfen.
+  const shown = useRef(d.suggestions);
+  shown.current = d.suggestions;
 
   // Bildschirm geleert (anderer Patient, anderer Behandler, neues Diktat): nichts mehr offen lassen,
   // sonst landete der alte Text im nächsten Diktat.
@@ -86,8 +91,10 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
       }
       setBusy(true);
       setError(null);
+      const start = d.suggestions;
       try {
         const [result, entries] = await Promise.all([api.analyze(text, type), loadCatalog(type)]);
+        if (shown.current !== start) return;
         const map = byCode(entries);
         const suggestions = recompute(d.suggestions, result.suggestions, map);
         const next = { transcript: result.transcript, codes: codesOf(suggestions), suggestions, planned: result.planned ?? [], notes: result.notes ?? [] };
@@ -110,6 +117,11 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     planned: d.planned,
     notes: d.notes,
   });
+
+  const remove = (s: Suggestion) => {
+    const same = (x: Suggestion) => x.source === "hand" && !x.alternative && x.code === s.code && toothOf(x) === toothOf(s);
+    commit(content(d.suggestions.filter((x) => !same(x))), "Ziffer entfernt", catalogMap);
+  };
 
   const add = (entry: CatalogEntry, tooth: number | null) =>
     commit(content(addPosition(d.suggestions, entry, tooth)), "Ziffer ergänzt", catalogMap);
@@ -144,6 +156,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     catalogError: cat.error,
     add,
     replace,
+    remove,
     notice: valid ? { title: last.title, changes: last.changes } : null,
     undo,
   };

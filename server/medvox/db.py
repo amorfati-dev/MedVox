@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS handovers (
 -- Korrektur-Sammlung (`medvox/corrections.py`): nur geänderte Textstellen (höchstens 4 Wörter Umfeld) und
 -- Ziffernänderungen; ohne Verknüpfung zu Patient, Diktat oder Behandler, ohne Datum. Höchstens 12 Monate.
 CREATE TABLE IF NOT EXISTS corrections (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id              INTEGER PRIMARY KEY,  -- zufällig (corrections.record), keine Reihenfolge
     week            TEXT NOT NULL,  -- Kalenderwoche „2026-W39“
     patient_type    TEXT,           -- kasse | privat
     kind            TEXT NOT NULL,  -- text | ziffer

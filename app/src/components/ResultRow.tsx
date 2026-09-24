@@ -27,7 +27,8 @@ function Teeth({ s }: { s: Suggestion }) {
   return s.teeth.length > 1 ? <span className="row-meta">Zähne {s.teeth.join(", ")}</span> : null;
 }
 
-type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void };
+// `onRemove`: Zeile „von Hand“ entfernen (wird immer kopiert, also nicht abwählbar); fehlt = nicht änderbar.
+type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void; onRemove?: (s: Suggestion) => void };
 
 // Vermerk einer Korrektur am iPad; null = so vom Extraktor.
 function edited(row: Row): string | null {
@@ -37,9 +38,10 @@ function edited(row: Row): string | null {
   return row.s.replaced ? `geändert · vorher ${row.s.replaced}` : "geändert";
 }
 
-export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
+export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
   const { s, tag, count, selected } = row;
   const mark = edited(row);
+  const hand = row.source === "hand";
   return (
     <li className={`row row-${tag}${selected ? "" : " row-off"}`}>
       <button
@@ -47,8 +49,8 @@ export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
         className="row-main"
         role="checkbox"
         aria-checked={selected}
-        aria-label={`${s.system} ${s.code}${count > 1 ? `, ${count}-mal` : ""}, ${s.title}${mark ? `, ${mark}` : ""}${selected ? "" : ", abgewählt"}`}
-        onClick={() => onToggle(s.code)}
+        aria-label={`${s.system} ${s.code}${count > 1 ? `, ${count}-mal` : ""}, ${s.title}${mark ? `, ${mark}` : ""}${selected ? "" : ", abgewählt"}${hand && onRemove ? ", antippen entfernt die Zeile" : ""}`}
+        onClick={() => (hand ? onRemove?.(s) : onToggle(s.code))}
       >
         <span className="box" aria-hidden="true">
           {selected && <Icon name="check" />}
@@ -126,7 +128,7 @@ export function OptionRow({ option, onAdopt }: OptionProps) {
 type FrameProps = { frame: Frame; tooth: number | null } & Omit<RowProps, "row">;
 
 // Mehrkosten: Kassenanteil und Zuzahlung am selben Zahn in einem Rahmen.
-export function FrameRows({ frame, tooth, onToggle, onAdopt }: FrameProps) {
+export function FrameRows({ frame, tooth, onToggle, onAdopt, onRemove }: FrameProps) {
   const { basis, copay } = frame;
   const where = tooth === null ? "" : ` Zahn ${tooth}`;
   return (
@@ -144,8 +146,8 @@ export function FrameRows({ frame, tooth, onToggle, onAdopt }: FrameProps) {
         )}
       </p>
       <ul className="rows">
-        {basis && <ResultRow row={basis} onToggle={onToggle} onAdopt={onAdopt} />}
-        <ResultRow row={copay} onToggle={onToggle} onAdopt={onAdopt} />
+        {basis && <ResultRow row={basis} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />}
+        <ResultRow row={copay} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
       </ul>
     </li>
   );

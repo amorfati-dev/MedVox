@@ -102,6 +102,7 @@ export function ResultPane({ d, sel, plans, counts, state, patientType, running,
           onToggle={sel.toggleCode}
           onAdopt={sel.toggleOption}
           onEdit={editable ? (tooth) => c.openSheet(tooth === undefined ? "wählen" : { tooth }) : undefined}
+          onRemove={editable ? c.remove : undefined}
         />
       )}
       {hasResult && <CopyPreview blocks={sel.blocks} kasse={d.resultType === "kasse"} />}

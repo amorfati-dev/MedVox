@@ -5,12 +5,14 @@ vor der Korrektur, nur 24 Stunden wie das Diktat). Wird es übertragen (Büro od
 es ab, bleiben davon nur die geänderten Stellen – beim Verwerfen oder Löschen nichts:
 
 - Text: je geänderte Stelle vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (zusammen
-  höchstens 4); Stellen mit mehr als 12 geänderten Wörtern werden verworfen.
+  höchstens 4); Stellen, deren Umfeld sich berührt, zählen als eine. Stellen mit mehr als 12 geänderten
+  Wörtern werden verworfen.
 - Ziffern: `13b` → `13c` (Familie ersetzt), `` → `107` (ergänzt), `13b` → `` (abgewählt oder entfallen),
   `25` → `2x 25` (Anzahl), ohne Zahn.
 
 Dazu nur Patiententyp, Kalenderwoche und Katalogstand. Nie Evident-Nummer, Kürzel, Behandler, Datum
-oder Uhrzeit, Diktat-ID oder der ganze Text; die Tabelle hat keine Verknüpfung zu anderen. Jede Zeile
+oder Uhrzeit, Diktat-ID oder der ganze Text; die Tabelle hat keine Verknüpfung zu anderen, die Zeilen-ID
+ist zufällig (keine Reihenfolge, die Zeilen eines Diktats verbindet). Jede Zeile
 bleibt, bis sie gelöscht wird, höchstens 12 Monate (`purge`, bei jedem Aufräumen in `db.purge_expired`).
 Geschrieben wird in derselben Transaktion, in der `db.bury` das Diktat löscht.
 """
@@ -20,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import secrets
 import sqlite3
 from datetime import datetime
 from difflib import SequenceMatcher
@@ -42,11 +45,23 @@ def week(ts: float) -> str:
 
 
 def text_spots(before: str, after: str) -> list[tuple[str, str]]:
-    """Geänderte Stellen (vorher, nachher) mit höchstens `AROUND` Wörtern Umfeld je Seite."""
+    """Geänderte Stellen (vorher, nachher) mit höchstens `AROUND` Wörtern Umfeld je Seite.
+
+    Stellen, deren Umfeld sich berührt oder überschneidet, sind eine Stelle; die Grenze `MAX_SPOT` gilt
+    für diese ganze Stelle – sonst ergäben mehrere kurze Stellen zusammen den Text.
+    """
     a, b = before.split(), after.split()
-    spots = []
+    merged: list[list[int]] = []
     for tag, i1, i2, j1, j2 in SequenceMatcher(a=a, b=b, autojunk=False).get_opcodes():
-        if tag == "equal" or max(i2 - i1, j2 - j1) > MAX_SPOT:
+        if tag == "equal":
+            continue
+        if merged and i1 - merged[-1][1] <= 2 * AROUND:
+            merged[-1][1], merged[-1][3] = i2, j2
+        else:
+            merged.append([i1, i2, j1, j2])
+    spots = []
+    for i1, i2, j1, j2 in merged:
+        if max(i2 - i1, j2 - j1) > MAX_SPOT:
             continue
         old = a[max(0, i1 - AROUND):i2 + AROUND]
         new = b[max(0, j1 - AROUND):j2 + AROUND]
@@ -73,10 +88,16 @@ def code_changes(original: list[dict], data: dict) -> list[tuple[str, str]]:
     dropped = set(data.get("deselected", []))
     chosen = {_COUNT.sub("", c) for c in data.get("codes", []) if c not in dropped}
     before = _per_tooth([(p.get("tooth"), p["code"], int(p.get("count", 1))) for p in original])
-    after = _per_tooth([
-        ((s.get("teeth") or [None])[0], s["code"], int(s.get("count", 1)))
+    main = [
+        ((s.get("teeth") or [None])[0], s["code"], int(s.get("count", 1)), s.get("source") == "hand")
         for s in data.get("suggestions", [])
-        if not s.get("alternative") and not s.get("planned") and s["code"] in chosen
+        if not s.get("alternative") and not s.get("planned")
+    ]
+    # Zeilen „von Hand“ ohne Regel-Vorschlag derselben Ziffer am Zahn werden immer kopiert (wie result.ts).
+    ruled = {(tooth, code) for tooth, code, _n, hand in main if not hand}
+    after = _per_tooth([
+        (tooth, code, count) for tooth, code, count, hand in main
+        if code in chosen or (hand and (tooth, code) not in ruled)
     ])
     changes: list[tuple[str, str]] = []
     for tooth in dict.fromkeys([*before, *after]):
@@ -116,9 +137,9 @@ def record(conn: sqlite3.Connection, where: str, params: tuple, now: float) -> i
             continue
         for kind, old, new in found:
             conn.execute(
-                "INSERT INTO corrections (week, patient_type, kind, before, after, catalog_version)"
-                " VALUES (?, ?, ?, ?, ?, ?)",
-                (week(now), data.get("patient_type"), kind, old, new, version),
+                "INSERT INTO corrections (id, week, patient_type, kind, before, after, catalog_version)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (secrets.randbits(62), week(now), data.get("patient_type"), kind, old, new, version),
             )
         count += len(found)
     if count:
