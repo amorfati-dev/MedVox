@@ -8,7 +8,7 @@ greifen kann – entschieden wird sie nie automatisch.
 
 from __future__ import annotations
 
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 from medvox.extract_catalog import Catalog
 
 APART = "Zähne in verschiedenen Quadranten – separates Operationsgebiet möglich"

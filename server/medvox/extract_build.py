@@ -10,10 +10,11 @@ getrennt gesammelt; Befundwörter gelten für beide.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field, replace
+from dataclasses import replace
 
+from medvox.extract_anesthesia import ANESTHESIA, anesthesia, annotate
 from medvox.extract_catalog import Catalog, Entry
-from medvox.extract_match import Hit
+from medvox.extract_draft import Draft, Tagged
 from medvox.extract_rules import (
     CANALS_OPEN,
     CANALS_TEETH,
@@ -34,39 +35,6 @@ from medvox.extract_rules import (
 )
 from medvox.extract_text import TextContext
 from medvox.normalize import ToothRef
-
-
-@dataclass
-class Tagged:
-    hit: Hit
-    teeth: tuple[ToothRef, ...]
-    plan: str | None  # Plan-Marker oder None (= erbracht)
-    sentence: tuple[int, int]
-
-
-@dataclass
-class Draft:
-    entry: Entry
-    fdi: int | None  # Zahn bei Einheit je Zahn/je Kanal, sonst None
-    planned: bool
-    hits: list[Tagged] = field(default_factory=list)
-    count: int = 1
-    context: tuple[int, ...] = ()  # zugehörige Zähne bei Einheit je Sitzung
-    decide: list[str] = field(default_factory=list)
-    plan: str | None = None
-    alternative_to: Draft | None = None
-    reason: str = ""
-    surfaces: int | None = None  # diktierte Flächenzahl 1..4 bei Füllungen, None wenn nicht erkannt
-    limit_note: str = ""  # Höchstzahl (extract_limits) bzw. übernommene Kanalzahl (extract_endo), in der Begründung
-    counted: bool = False  # Kanalzahl ausdrücklich diktiert ("WK*3", "3 Kanäle"), nicht angenommen
-
-    @property
-    def key(self) -> tuple[str, str, int | None, bool]:
-        return self.entry.system, self.entry.code, self.fdi, self.planned
-
-    @property
-    def start(self) -> int:
-        return min((t.hit.start for t in self.hits), default=10**9)
 
 
 class Builder:
@@ -105,6 +73,8 @@ class Builder:
                     self.dictated_surcharges.append(t)
             elif entry.key in INCISION:
                 self._incision(t)
+            elif entry.key in ANESTHESIA and anesthesia(self, t):
+                continue  # Anästhesie mit Zahn: je Zahn gezählt, sonst unten je Sitzung
             elif (entry.system, entry.code) in ROOT_PAIRS:
                 self._root_pair(t)
             elif (unit := self.catalog.unit(entry)) == "session":
@@ -115,6 +85,7 @@ class Builder:
             self._session(group)
         self._absorb_toothless()
         self._incision_flags()
+        annotate(self.ctx, self.drafts.values())
         for d in self.drafts.values():  # eine Fundstelle mit Kanalzahl ("WK mal 3") gilt für die ganze Position
             if d.counted and CANALS_OPEN in d.decide:
                 d.decide.remove(CANALS_OPEN)

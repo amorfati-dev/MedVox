@@ -1,0 +1,799 @@
+{
+  "pilot-kasse": {
+    "transcript": "Der Patient kommt für 4 Achter, hat keine Fragen mehr. Wir spritzen ein Infiltrationsanästhesie 18 2x mit lange Dauer bei der zweiten. 28 Infiltrationsanästhesie 2x, OS2, 38 OS2, Leitungsanästhesie 2x lange Dauer, 48 Leitungsanästhesie 2x lange Dauer, 18 OS2, 48 OS2, OPG zur Kontrolle, ob noch kurz drin drin sind.",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "4x 40",
+      "4x 48",
+      "4x 41a",
+      "Ä935d"
+    ],
+    "suggestions": [
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          18
+        ],
+        "count": 2,
+        "reason": "wegen: Infiltrationsanästhesie – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "i",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          28
+        ],
+        "count": 2,
+        "reason": "wegen: Infiltrationsanästhesie",
+        "decide": [
+          "2× diktiert – eine zweite Anästhesie nur bei lang dauerndem Eingriff, Begründung prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "i",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "48",
+        "system": "BEMA",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 78,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "wegen: OS2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "ost2",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "48",
+        "system": "BEMA",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 78,
+        "teeth": [
+          38
+        ],
+        "count": 1,
+        "reason": "wegen: OS2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "ost2",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "41a",
+        "system": "BEMA",
+        "title": "Leitungsanästhesie, intraoral",
+        "points": 12,
+        "teeth": [
+          38
+        ],
+        "count": 2,
+        "reason": "wegen: Leitungsanästhesie – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "l1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "41a",
+        "system": "BEMA",
+        "title": "Leitungsanästhesie, intraoral",
+        "points": 12,
+        "teeth": [
+          48
+        ],
+        "count": 2,
+        "reason": "wegen: Leitungsanästhesie – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "l1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "48",
+        "system": "BEMA",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 78,
+        "teeth": [
+          18
+        ],
+        "count": 1,
+        "reason": "wegen: OS2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "ost2",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "48",
+        "system": "BEMA",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 78,
+        "teeth": [
+          48
+        ],
+        "count": 1,
+        "reason": "wegen: OS2",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "ost2",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä935d",
+        "system": "BEMA",
+        "title": "OPG (Orthopantomogramm)",
+        "points": 36,
+        "teeth": [
+          48
+        ],
+        "count": 1,
+        "reason": "wegen: OPG",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "opg",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä1",
+        "system": "BEMA",
+        "title": "Beratung",
+        "points": 9,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "bema",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "107",
+        "system": "BEMA",
+        "title": "Entfernung harter Zahnbeläge (Zahnstein)",
+        "points": 16,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "bema",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      }
+    ],
+    "planned": [],
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 38,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 48,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
+  },
+  "pilot-privat": {
+    "transcript": "Der Patient kommt für 4 Achter, hat keine Fragen mehr. Wir spritzen ein Infiltrationsanästhesie 18 2x mit lange Dauer bei der zweiten. 28 Infiltrationsanästhesie 2x, OS2, 38 OS2, Leitungsanästhesie 2x lange Dauer, 48 Leitungsanästhesie 2x lange Dauer, 18 OS2, 48 OS2, OPG zur Kontrolle, ob noch kurz drin drin sind.",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "4x 0090",
+      "4x 3040",
+      "4x 0100",
+      "Ä5004",
+      "0510"
+    ],
+    "suggestions": [
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          18
+        ],
+        "count": 2,
+        "reason": "wegen: Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ) – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          28
+        ],
+        "count": 2,
+        "reason": "wegen: Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "2× diktiert – eine zweite Anästhesie nur bei lang dauerndem Eingriff, Begründung prüfen",
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3040",
+        "system": "GOZ",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 540,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "wegen: OS2 (BEMA 48 ↔ GOZ 3040, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3040",
+        "system": "GOZ",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 540,
+        "teeth": [
+          38
+        ],
+        "count": 1,
+        "reason": "wegen: OS2 (BEMA 48 ↔ GOZ 3040, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0100",
+        "system": "GOZ",
+        "title": "Leitungsanästhesie, intraoral",
+        "points": 70,
+        "teeth": [
+          38
+        ],
+        "count": 2,
+        "reason": "wegen: Leitungsanästhesie (BEMA 41a ↔ GOZ 0100, für Privatpatienten GOZ) – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": "l1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0100",
+        "system": "GOZ",
+        "title": "Leitungsanästhesie, intraoral",
+        "points": 70,
+        "teeth": [
+          48
+        ],
+        "count": 2,
+        "reason": "wegen: Leitungsanästhesie (BEMA 41a ↔ GOZ 0100, für Privatpatienten GOZ) – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": "l1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3040",
+        "system": "GOZ",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 540,
+        "teeth": [
+          18
+        ],
+        "count": 1,
+        "reason": "wegen: OS2 (BEMA 48 ↔ GOZ 3040, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3040",
+        "system": "GOZ",
+        "title": "Osteotomie, retinierter/verlagerter Zahn",
+        "points": 540,
+        "teeth": [
+          48
+        ],
+        "count": 1,
+        "reason": "wegen: OS2 (BEMA 48 ↔ GOZ 3040, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä5004",
+        "system": "GOÄ",
+        "title": "OPG (Panoramaschichtaufnahme)",
+        "points": 400,
+        "teeth": [
+          48
+        ],
+        "count": 1,
+        "reason": "wegen: OPG (BEMA Ä935d ↔ GOÄ Ä5004, für Privatpatienten GOÄ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": "opg",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0510",
+        "system": "GOZ",
+        "title": "Zuschlag zu chirurgischen Leistungen (500–799 Punkte)",
+        "points": 750,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "Zuschlag zu GOZ 3040 Osteotomie, retinierter/verlagerter Zahn (540 Punkte, höchstbewertete chirurgische Leistung der Sitzung) → Stufe 500–799 Punkte",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä1",
+        "system": "GOÄ",
+        "title": "Beratung",
+        "points": 80,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "goz",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      }
+    ],
+    "planned": [],
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 38,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 48,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
+  },
+  "pausen-kasse": {
+    "transcript": "Der Patient kommt für 4 Achter. Achter entfernt. Und zwar 18. IP, X2. Zahn im Ganzen rausgehebelt. 28. IP, 1. Infiltrationsanästhesie. 2x. Beim zweiten Mal lange Dauer. 28. Dann Ost, 1. zur Kontrolle ob noch ein Wurkelrest drin steckt.",
+    "patient_type": "kasse",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "3x 40",
+      "44",
+      "47a"
+    ],
+    "suggestions": [
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          18
+        ],
+        "count": 1,
+        "reason": "wegen: IP",
+        "decide": [
+          "Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal",
+          "„IP“ als I (Infiltrationsanästhesie) gelesen – prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "i",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "44",
+        "system": "BEMA",
+        "title": "Extraktion, mehrwurzeliger Zahn",
+        "points": 15,
+        "teeth": [
+          18
+        ],
+        "count": 1,
+        "reason": "wegen: rausgehebelt",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "40",
+        "system": "BEMA",
+        "title": "Infiltrationsanästhesie",
+        "points": 8,
+        "teeth": [
+          28
+        ],
+        "count": 2,
+        "reason": "wegen: IP, Infiltrationsanästhesie – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [
+          "„IP“ als I (Infiltrationsanästhesie) gelesen – prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "i",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "47a",
+        "system": "BEMA",
+        "title": "Osteotomie (Zahnentfernung durch Osteotomie)",
+        "points": 58,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "wegen: Ost, 1",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "bema",
+        "evident": "ost1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä1",
+        "system": "BEMA",
+        "title": "Beratung",
+        "points": 9,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "bema",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "107",
+        "system": "BEMA",
+        "title": "Entfernung harter Zahnbeläge (Zahnstein)",
+        "points": 16,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "bema",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      }
+    ],
+    "planned": [],
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
+  },
+  "pausen-privat": {
+    "transcript": "Der Patient kommt für 4 Achter. Achter entfernt. Und zwar 18. IP, X2. Zahn im Ganzen rausgehebelt. 28. IP, 1. Infiltrationsanästhesie. 2x. Beim zweiten Mal lange Dauer. 28. Dann Ost, 1. zur Kontrolle ob noch ein Wurkelrest drin steckt.",
+    "patient_type": "privat",
+    "duration_s": 10.0,
+    "latency_s": 0.8,
+    "codes": [
+      "4x 0090",
+      "3010",
+      "3030",
+      "0500"
+    ],
+    "suggestions": [
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          18
+        ],
+        "count": 2,
+        "reason": "wegen: IP (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
+        "decide": [
+          "2× diktiert – eine zweite Anästhesie nur bei lang dauerndem Eingriff, Begründung prüfen",
+          "„IP“ als I (Infiltrationsanästhesie) gelesen – prüfen",
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3010",
+        "system": "GOZ",
+        "title": "Extraktion, mehrwurzeliger Zahn",
+        "points": 110,
+        "teeth": [
+          18
+        ],
+        "count": 1,
+        "reason": "wegen: rausgehebelt (BEMA 44 ↔ GOZ 3010, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0090",
+        "system": "GOZ",
+        "title": "Infiltrationsanästhesie",
+        "points": 60,
+        "teeth": [
+          28
+        ],
+        "count": 2,
+        "reason": "wegen: IP, Infiltrationsanästhesie (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ) – 2× diktiert, zweite wegen „lange Dauer“",
+        "decide": [
+          "„IP“ als I (Infiltrationsanästhesie) gelesen – prüfen",
+          "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
+        ],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "3030",
+        "system": "GOZ",
+        "title": "Osteotomie (Zahn/Implantat)",
+        "points": 350,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "wegen: Ost, 1 (BEMA 47a ↔ GOZ 3030, für Privatpatienten GOZ)",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": "ost1",
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "0500",
+        "system": "GOZ",
+        "title": "Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130)",
+        "points": 400,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "Zuschlag zu GOZ 3030 Osteotomie (Zahn/Implantat) (350 Punkte, höchstbewertete chirurgische Leistung der Sitzung) → Stufe 250–499 Punkte",
+        "decide": [],
+        "planned": false,
+        "alternative": false,
+        "kind": "goz",
+        "evident": null,
+        "addon": false,
+        "source": "regel",
+        "tapped": false
+      },
+      {
+        "code": "Ä1",
+        "system": "GOÄ",
+        "title": "Beratung",
+        "points": 80,
+        "teeth": [
+          28
+        ],
+        "count": 1,
+        "reason": "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht",
+        "decide": [],
+        "planned": false,
+        "alternative": true,
+        "kind": "goz",
+        "evident": null,
+        "addon": true,
+        "source": "regel",
+        "tapped": false
+      }
+    ],
+    "planned": [],
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
+  }
+}

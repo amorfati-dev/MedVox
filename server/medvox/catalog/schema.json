@@ -102,6 +102,30 @@
           "description": "Nur zusammen mit einer Höchstzahl (count): bestaetigt = vom Behandler bestätigt, der Extraktor begrenzt darauf; vorschlag = aus dem amtlichen Text gelesen, wartet auf Bestätigung, wirkt noch nicht.",
           "enum": ["vorschlag", "bestaetigt"]
         },
+        "repeat": {
+          "description": "Praxisregel: mehr als einmal je Zahn nur, wenn am selben Zahn eine Position aus only_with erbracht ist (ohne Zahnangabe: in der Sitzung); sonst setzt der Extraktor die Anzahl auf 1 und zeigt note. Ziele stehen in derselben Datei.",
+          "type": "object",
+          "required": ["only_with", "note", "source"],
+          "additionalProperties": false,
+          "properties": {
+            "only_with": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "required": ["system", "code"],
+                "additionalProperties": false,
+                "properties": {
+                  "system": {"enum": ["BEMA", "GOZ", "GOÄ"]},
+                  "code": {"type": "string", "pattern": "^[0-9A-Za-zÄ]{1,6}$"}
+                }
+              }
+            },
+            "note": {"type": "string", "minLength": 10, "maxLength": 240},
+            "source": {"type": "string", "minLength": 3}
+          }
+        },
         "surfaces_to_code": {
           "description": "Füllungs-Familien: Flächenzahl 1..4 (4 = mehr als dreiflächig) -> Ziffer im selben System.",
           "type": "object",

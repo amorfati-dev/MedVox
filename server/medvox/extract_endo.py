@@ -15,7 +15,7 @@ Je Kanal berechnete Zuzahlungen zählen die am selben Zahn diktierte Kanalzahl i
 from __future__ import annotations
 
 from medvox.extract_billing import translate_draft
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_rules import CANALS_OPEN, CANALS_TEETH
 

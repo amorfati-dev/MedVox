@@ -164,7 +164,8 @@ def test_private_patient_gets_goz_only(logged_in: TestClient, whisper: FakeWhisp
     body = _upload(logged_in, make_wav(), patient_type="privat").json()
     assert body["patient_type"] == "privat"
     assert body["codes"] == ["2x 0100", "3030", "0500"]
-    assert {(s["system"], s["kind"]) for s in body["suggestions"]} == {("GOZ", "goz")}
+    assert {(s["system"], s["kind"]) for s in body["suggestions"] if not s["addon"]} == {("GOZ", "goz")}
+    assert [(s["code"], s["alternative"]) for s in body["suggestions"] if s["addon"]] == [("Ä1", True)]
     assert [(p["code"], p["teeth"]) for p in body["planned"]] == [("3010", [48])]
 
 

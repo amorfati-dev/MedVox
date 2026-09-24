@@ -14,7 +14,7 @@ import pytest
 
 from medvox.catalog import validate as v
 from medvox.extract import Extraction, Suggestion, analyze, billable_codes
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 from medvox.extract_catalog import Catalog, load_catalog
 from medvox.extract_limits import NO_REGION, apply_limits, region
 from medvox.lexicon import correct
@@ -141,8 +141,9 @@ def test_proposed_limit_changes_nothing():
 
 
 def test_unlimited_position_still_multiplies():
-    result = run("Leitungsanästhesie 2x, Zahn drei sechs Wurzelkanalaufbereitung drei Kanäle.")
-    assert billable_codes(result.suggestions) == ["2x 41a", "3x 32"]
+    # zweite L1 nur neben einer Osteotomie am Zahn (Praxisregel repeat, tests/test_extract_anesthesia.py)
+    result = run("Zahn drei acht Osteotomie, Leitungsanästhesie 2x. Zahn drei sechs Wurzelkanalaufbereitung drei Kanäle.")
+    assert billable_codes(result.suggestions) == ["47a", "2x 41a", "3x 32"]
     assert all("höchstens" not in s.reason for s in result.suggestions)
 
 

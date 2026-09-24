@@ -45,6 +45,11 @@ def analogs(catalog: dict) -> list[dict]:
     return [e for e in catalog["entries"] if e.get("analog")]
 
 
+def repeats(catalog: dict) -> list[dict]:
+    """Einträge mit Praxisregel ``repeat`` (zweites Mal je Zahn nur neben ``only_with``)."""
+    return [e for e in catalog["entries"] if e.get("repeat")]
+
+
 def conflicts(catalog: dict) -> list[tuple[dict, dict]]:
     """(Eintrag, Konflikt) je notiertem „nicht in derselben Sitzung“."""
     return [(e, c) for e in catalog["entries"] for c in e.get("conflicts", [])]
@@ -83,6 +88,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
   (Praxisregel, Feld `analog`); der Vorschlag nennt das in der Begründung.
 - **Konflikt:** nicht in derselben Sitzung abrechenbar (Feld `conflicts`, Ausnahme in „außer“); der
   Extraktor streicht keine der beiden, sondern markiert beide mit dem Hinweis.
+- **Zweites Mal je Zahn:** nur neben einer der genannten Positionen am selben Zahn (Praxisregel, Feld
+  `repeat`); sonst setzt der Extraktor die Anzahl auf 1 und zeigt den Hinweis.
 - **neu, bitte prüfen:** Position, die für den Patiententyp aus dem erweiterten Katalog nach v1 geholt wurde
   und noch nicht in der geprüften Fassung stand.
 """
@@ -126,6 +133,11 @@ def markdown(parts: list[tuple[str, dict]]) -> str:
                     "| ☐ | Ziffer | nicht neben | außer | Hinweis im Vorschlag | Quelle |", "|---|---|---|---|---|---|"]
             out += [f"| ☐ | {_marked(e)} | {c['system']} {c['code']} | {c.get('except', '–')} | {c['note']} | {c['source']} |"
                     for e, c in conflicts(catalog)]
+        if repeats(catalog):
+            out += ["", "### Zweites Mal je Zahn (Praxisregel)", "",
+                    "| ☐ | Ziffer | nur neben | Hinweis im Vorschlag | Quelle |", "|---|---|---|---|---|"]
+            out += [f"| ☐ | {_marked(e)} | {', '.join(f'{t['system']} {t['code']}' for t in e['repeat']['only_with'])} | "
+                    f"{e['repeat']['note']} | {e['repeat']['source']} |" for e in repeats(catalog)]
         out.append("")
     out += ["## Quellen", ""] + [f"- Q{n}: [{names.get(url, url)}]({url})" for url, n in refs.items()]
     return "\n".join(out)

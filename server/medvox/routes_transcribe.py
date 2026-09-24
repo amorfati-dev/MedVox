@@ -46,6 +46,7 @@ class SuggestionOut(BaseModel):
     alternative: bool
     kind: str  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
     evident: str | None = None  # Evident-Kurzform ("l1"), sonst None – dann gilt die Ziffer
+    addon: bool = False  # Option „ggf. dazu“ (Ä1/Zst zur Weisheitszahn-OP): per Tipp übernehmbar wie eine Zuzahlung
     # Herkunft: regel (Extraktor), hand (am iPad aus dem Katalog ergänzt), geaendert (am iPad ersetzt, z. B. 13b → 13c)
     source: Literal["regel", "hand", "geaendert"] = "regel"
     tapped: bool = False  # nur am iPad: Zahn im Zahnschema angetippt (Je-Zahn-Position, app/src/teeth.ts)
@@ -75,7 +76,7 @@ def _out(s: Suggestion) -> SuggestionOut:
     return SuggestionOut(
         code=s.code, system=s.system, title=s.title, points=s.points, teeth=list(s.teeth), count=s.count,
         reason=s.reason, decide=list(s.decide), planned=s.planned, alternative=s.alternative, kind=s.kind,
-        evident=s.evident,
+        evident=s.evident, addon=s.addon,
     )
 
 

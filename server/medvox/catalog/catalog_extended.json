@@ -248,7 +248,6 @@
         "mav",
         "mund antrum verbindung",
         "kieferhöhle eröffnet",
-        "plastische deckung",
         "kieferhöhlenverschluss",
         "pla1",
         "mav verschluss",
@@ -257,29 +256,6 @@
       "rules": [
         "selbständig oder mit Extraktion; in Verbindung mit Osteotomie: 51b",
         "Privatpatient: GOZ 3090"
-      ],
-      "sources": [
-        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
-        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "51b",
-      "system": "BEMA",
-      "area": "Chirurgie",
-      "title": "Plastischer Verschluss Kieferhöhle bei Osteotomie",
-      "abbrev": "Pla0",
-      "points": 40,
-      "keywords": [
-        "pla0",
-        "kieferhöhle verschlossen nach osteotomie",
-        "mav nach osteotomie"
-      ],
-      "rules": [
-        "nur in Verbindung mit Osteotomie (47a/48)"
       ],
       "sources": [
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
@@ -1716,41 +1692,6 @@
           "36"
         ],
         "note": "Kassenleistung BEMA 36 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
-        "sources": [
-          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
-          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
-      "code": "3060",
-      "system": "GOZ",
-      "area": "Chirurgie",
-      "title": "Blutstillung durch Umstechen/Abbinden/Knochenbolzung",
-      "points": 140,
-      "keywords": [
-        "umstechung",
-        "umstochen",
-        "gefäß abgebunden",
-        "knochenbolzung",
-        "3060"
-      ],
-      "rules": [
-        "Kassenpatient: BEMA 37"
-      ],
-      "zuzahlung": {
-        "allowed": false,
-        "basis": [
-          "37"
-        ],
-        "note": "Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
         "sources": [
           "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
           "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"

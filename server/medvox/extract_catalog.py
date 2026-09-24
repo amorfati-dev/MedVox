@@ -70,6 +70,14 @@ class Conflict:
 
 
 @dataclass(frozen=True)
+class Repeat:
+    """Praxisregel ``repeat``: mehr als einmal je Zahn nur neben einer dieser Positionen am selben Zahn."""
+
+    only_with: frozenset[tuple[str, str]]
+    note: str
+
+
+@dataclass(frozen=True)
 class Entry:
     code: str
     system: str  # BEMA | GOZ | GOÄ
@@ -86,6 +94,7 @@ class Entry:
     limit: tuple[str, int] | None = None  # bestätigtes max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; sonst None
     analog: str | None = None  # Begründung, wenn beim Kassenpatienten als Analogposition berechnet (``analog``)
     conflicts: tuple[Conflict, ...] = ()  # nicht in derselben Sitzung (``conflicts``)
+    repeat: Repeat | None = None  # zweites Mal je Zahn nur neben ``only_with`` (``repeat``), sonst None = ohne Regel
 
     @property
     def key(self) -> tuple[str, str]:
@@ -126,10 +135,12 @@ class Catalog:
             m = e.get("max_per")
             limit = (m["unit"], m["count"]) if e.get("max_per_status") == "bestaetigt" else None
             conflicts = tuple(Conflict(c["system"], c["code"], c["note"]) for c in e.get("conflicts", []))
+            r = e.get("repeat")
+            repeat = Repeat(frozenset((x["system"], x["code"]) for x in r["only_with"]), r["note"]) if r else None
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
                 tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"), limit,
-                (e.get("analog") or {}).get("note"), conflicts,
+                (e.get("analog") or {}).get("note"), conflicts, repeat,
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}

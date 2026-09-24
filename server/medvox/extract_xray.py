@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 from medvox.extract_text import TextContext
 
 BOTH_SIDES = re.compile(r"\s*(?:rechts\s+und\s+links|links\s+und\s+rechts|beidseits|beidseitig\w*)(?![a-z])")

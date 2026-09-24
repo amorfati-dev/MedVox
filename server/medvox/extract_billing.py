@@ -12,7 +12,7 @@ Entscheidungshinweis. Der Zuschlag 0500–0530 gilt nur für Privatpatienten.
 
 from __future__ import annotations
 
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 from medvox.extract_catalog import Catalog, Entry, related
 from medvox.extract_rules import INCLUDED_IN, REMOVAL, ROOT_PAIRS, SURCHARGE_CODES, multi_rooted, surcharge_for
 
