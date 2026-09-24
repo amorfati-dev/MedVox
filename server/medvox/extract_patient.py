@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from medvox.extract_billing import counterpart_drafts, exclusive
-from medvox.extract_build import Draft, Tagged
+from medvox.extract_draft import Draft, Tagged
 from medvox.extract_catalog import Catalog, Entry, related
 from medvox.extract_match import Hit
 from medvox.extract_rules import private_only

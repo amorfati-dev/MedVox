@@ -14,7 +14,7 @@ const fixtures = JSON.parse(readFileSync(new URL("./fixtures/endo-beispiel.json"
   TranscribeResult
 >;
 const none = new Set<string>();
-const ENDO_KASSE = ["46,32*3,40,Ä925a,28*3,34", "", "46,2420*3,2400*3"];
+const ENDO_KASSE = ["46,32*3,i,Ä925a,28*3,34", "", "46,2420*3,2400*3"];
 const ENDO_PRIVAT = ["46,2410*3,0090,Ä5000,2360*3,2430,2420*3,2400*3"];
 
 for (const name of ["original", "gesprochen", "verhoert", "getippt"]) {
@@ -39,7 +39,7 @@ test("Endo-Option kommt nur nach Antippen in den Privatblock", () => {
   const option = r.suggestions.find((s) => s.code === "2197");
   assert.ok(option);
   assert.deepEqual(copyLines(r.suggestions, r.codes, new Set([optionKey(option)])), [
-    "46,32*3,40,Ä925a,28*3,34",
+    "46,32*3,i,Ä925a,28*3,34",
     "",
     "46,2197,2420*3,2400*3",
   ]);
@@ -47,7 +47,7 @@ test("Endo-Option kommt nur nach Antippen in den Privatblock", () => {
 
 test("Pilot-Diktat „2x WD, 2x WK, MET“: Anzahl davor kopiert wie „WK*2“, 46 unverändert", () => {
   const r = fixtures["pilot-wd-kasse"];
-  assert.deepEqual(copyLines(r.suggestions, r.codes, none), ["25,40,32*2,28*2,34", "46,13c,l1,pan1,bmf"]);
+  assert.deepEqual(copyLines(r.suggestions, r.codes, none), ["25,i,32*2,28*2,34", "46,13c,l1,pan1,bmf"]);
   const options = r.suggestions.filter((s) => s.alternative).map((s) => `${s.code}@${s.teeth.join("+")}`);
   assert.deepEqual(options, ["2400@25", "2420@25", "2197@25", "2430@25", "2100@46"]);
 });

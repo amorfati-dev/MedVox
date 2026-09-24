@@ -46,7 +46,8 @@ def test_catalog_v1_is_a_mini_catalog(catalog):
     # Positionen (2020, 2350, 3020, 3300, 1000, 4000, 4020, 4070, 4075) und die Inlays 2150-2170.
     # Nachgefordert: Abszesseroeffnung BEMA Ae161 (Inz1), GOAe Ae2428/Ae2430 (inz1/inz2) und GOZ 2420
     # („phys“, Endo-Zuzahlung je Kanal; Angabe des Behandlers 2026-09-24, aus dem erweiterten Katalog geholt).
-    assert 60 <= len(catalog["entries"]) <= 100
+    # Weisheitszahn-OP (Angabe des Behandlers 2026-09-24): Nbl2 (BEMA 37 / GOZ 3060), Pla0 (BEMA 51b / GOZ 3090).
+    assert 60 <= len(catalog["entries"]) <= 104
 
 
 def test_positions_new_in_v1_are_marked_for_review(catalog):
@@ -219,7 +220,8 @@ def test_evident_short_forms_are_only_the_confirmed_ones(catalog, extended):
     forms = {(e["system"], e["code"]): e["evident"] for e in catalog["entries"] + extended["entries"] if "evident" in e}
     assert forms == {
         ("BEMA", "41a"): "l1", ("GOZ", "0100"): "l1", ("BEMA", "35"): "wf",
-        ("BEMA", "47a"): "ost1", ("GOZ", "3030"): "ost1",
+        ("BEMA", "47a"): "ost1", ("GOZ", "3030"): "ost1", ("BEMA", "48"): "ost2", ("BEMA", "40"): "i",
+        ("BEMA", "37"): "nbl2", ("BEMA", "51b"): "pla0",
         ("BEMA", "Ä935d"): "opg", ("GOÄ", "Ä5004"): "opg", ("BEMA", "Ä935a"): "pan1", ("GOÄ", "Ä5002"): "pan1",
         ("BEMA", "12"): "bmf",
         ("BEMA", "Ä161"): "inz1", ("GOÄ", "Ä2428"): "inz1", ("GOÄ", "Ä2430"): "inz2",

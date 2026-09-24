@@ -22,6 +22,7 @@ export type Suggestion = {
   decide: string[];
   alternative: boolean;
   evident?: string | null; // Evident-Kurzform aus dem Katalog ("l1"), sonst die Ziffer verwenden
+  addon?: boolean; // Option „ggf. dazu“ (Ä1/Zst zur Weisheitszahn-OP): per Tipp übernehmbar wie eine Zuzahlung
   source?: Source; // fehlt = regel (Extraktor)
   replaced?: string; // nur am iPad: Ziffer, die „geaendert“ an diesem Zahn ersetzt hat (13b bei 13c)
   counted?: number; // nur am iPad: Anzahl mit − / + von Hand gesetzt; Wert = diktierte Anzahl davor, 0 = nicht diktiert (correction.ts setCount)
@@ -70,7 +71,7 @@ export type DictationContent = {
   planned: Suggestion[];
   notes: string[];
   deselected: string[]; // Ziffern im Kopierformat ("2x 41a")
-  adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
+  adopted: string[]; // optionKey übernommener Optionen (Zuzahlung, „ggf. dazu“)
   original?: Original | null; // nur bei einer Korrektur am iPad: Stand davor (Büro zeigt ihn)
 };
 // `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).

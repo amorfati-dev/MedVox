@@ -5,7 +5,7 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
 
 | Datei | Zweck |
 |---|---|
-| `catalog_v1.json` | die 60–99 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
+| `catalog_v1.json` | die rund 100 Alltagspositionen, die der Extraktor kennt (Quelle der Wahrheit, von Hand pflegbar) |
 | `catalog_extended.json` | weitere geprüfte Positionen (Prothetik, PAR-Chirurgie, UPT, Kinder-Früherkennung …), gleiches Schema; wird nicht geladen, Saat für den Vollimport in Phase 2 |
 | `schema.json` | JSON-Schema für beide Dateien |
 | `validate.py` | prüft Schema + Fachregeln, druckt die Review-Tabelle (`cd server && make catalog-check` prüft beide Kataloge) |
@@ -42,6 +42,8 @@ Er ist bewusst klein (Alltag einer Zahnarztpraxis), vom Captain geprüft und ohn
   // "analog": {"patient": "kasse", "note": "Analogposition: …", "source": "Angabe des Behandlers"},
                                        //   nur GOZ/GOÄ ohne BEMA-Paar und ohne erlaubte Zuzahlung: beim
                                        //   Kassenpatienten als Analogposition vorgeschlagen, note in der Begründung
+  // "repeat": {"only_with": [{"system": "BEMA", "code": "47a"}], "note": "…", "source": "Angabe des Behandlers …"},
+                                       //   zweites Mal je Zahn nur neben only_with am selben Zahn, sonst Anzahl 1 mit note
   // "conflicts": [{"system": "BEMA", "code": "47a", "unit": "sitzung", "except": "separates Operationsgebiet",
   //                "note": "…", "source": "Angabe des Behandlers"}],
                                        //   nicht in derselben Sitzung; beide bleiben mit note als Hinweis stehen
@@ -73,7 +75,16 @@ außer separates Operationsgebiet). Der Extraktor (`extract_conflicts.py`) strei
 sondern markiert beide Positionen; liegen ihre Zähne in verschiedenen Quadranten, nennt der Hinweis die
 mögliche Ausnahme. `validate.py` prüft: `analog` nur ohne BEMA-Paar und ohne erlaubte Zuzahlung, Konfliktziel
 in derselben Datei, und das Paar einer Position trägt denselben Konflikt mit dem Paar des Ziels. Beide
-erscheinen in `PRUEFLISTE.md`.
+erscheinen in `PRUEFLISTE.md`, ebenso `repeat`: BEMA 40/41a ein zweites Mal je Zahn nur neben Ost1/Ost2
+(47a/48) am selben Zahn (KZVB, Angabe des Behandlers 2026-09-24; der Extraktor setzt sonst auf 1 mit Hinweis,
+`extract_anesthesia.py`), geprüft von `praxis.py` (Ziel in derselben Datei).
+
+Weisheitszahn-OP (Angabe des Behandlers 2026-09-24): Nbl2 (BEMA 37 = GOZ 3060, Stillung einer übermäßigen
+Blutung durch Abbinden/Umstechen/Knochenbolzung, 29 bzw. 140 Punkte) und Pla0 (BEMA 51b = GOZ 3090,
+plastischer Verschluss einer eröffneten Kieferhöhle in Verbindung mit Osteotomie, 40 bzw. 370 Punkte) stehen
+mit den Wörtern des Behandlers in v1 (KZBV-Gesamtfassung 2026-01-01, GOZ Anlage 1); 3060 und 51b kamen aus dem
+erweiterten Katalog, „plastische Deckung“ gehört jetzt zu 51b (nicht mehr 51a). Pla1 (51a) und Nbl1 (36)
+bleiben draußen und erscheinen nur in Hinweisen.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche`, `halbjahr`, `jahr` – oder `unbegrenzt` ohne `count`, wo

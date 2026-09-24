@@ -42,6 +42,10 @@ _TIMES_BEFORE = re.compile(r"(?<![\w.])(\d+)\s*(?:x|mal)\s*$")
 # hinter der Zahnnummer ("3x WK", "36 3x WK"). Nie "x3" – das ist die Kurzform X3 (BEMA 45).
 _COUNT_AFTER = re.compile(r"\s*(?:(?:\*|mal)\s*(\d+)(?!\d)|(\d+)\s*(?:x|mal)(?![a-z]))")
 _COUNT_LEAD = re.compile(r"\s*(?:und\s+)?(\d+)\s*(?:x|mal)\s*")
+# Whisper setzt bei Diktierpausen Punkte: „Und zwar 18. IP, X2.“, „Infiltrationsanästhesie. 2x.“ – ein Satz nur aus
+# Zahnnummer (mit Füllwort) gehört zum folgenden, ein Satz nur aus einer Anzahl zum vorigen.
+_TOOTH_ONLY = re.compile(r"[\s,]*(?:(?:und|zwar|zahn|regio|dann|an|am)[\s,]+)*[\s,]*")
+_COUNT_ONLY = re.compile(r"\s*\d+\s*(?:x|mal)\s*\.")
 
 
 @dataclass(frozen=True)
@@ -88,12 +92,36 @@ def _groups(folded: str, teeth: list[ToothRef]) -> list[ToothGroup]:
 class TextContext:
     def __init__(self, text: str, teeth: list[ToothRef]) -> None:
         self.text = text
-        self.folded, self._index = fold_with_map(text)
-        self.groups = _groups(self.folded, teeth)
+        folded, self._index = fold_with_map(text)
+        self.groups = _groups(folded, teeth)
+        self.folded = self._join_fragments(folded)
         ends = [m.end() for m in _SENTENCE_END.finditer(self.folded)]
         starts = [0] + ends
         self.sentences = [(s, e) for s, e in zip(starts, ends + [len(self.folded)]) if s < e]
         self._planned = self._plan_spans()
+
+    def _join_fragments(self, folded: str) -> str:
+        """Punkt hinter einem Satz nur aus Zahnnummer bzw. vor einem Satz nur aus Anzahl wird Leerzeichen."""
+        chars = list(folded)
+        start = 0
+        for m in _SENTENCE_END.finditer(folded):
+            if m.group() == "." and self._tooth_only(folded, start, m.start()):
+                chars[m.start()] = " "
+            nxt = _SENTENCE_END.search(folded, m.end())
+            if m.group() == "." and nxt and _COUNT_ONLY.fullmatch(folded, m.end(), nxt.end()):
+                chars[m.start()] = " "
+            start = m.end()
+        return "".join(chars)
+
+    def _tooth_only(self, folded: str, start: int, end: int) -> bool:
+        inside = [g for g in self.groups if start <= g.start and g.end <= end]
+        if not inside:
+            return False
+        rest, pos = [], start
+        for g in inside:
+            rest.append(folded[pos:g.start])
+            pos = g.end
+        return _TOOTH_ONLY.fullmatch(" ".join(rest + [folded[pos:end]])) is not None
 
     def original(self, start: int, end: int) -> str:
         return self.text[self._index[start] : self._index[end - 1] + 1]
@@ -147,6 +175,16 @@ class TextContext:
         before = [g for g in self.groups if s <= g.start and g.end <= start]
         return before[-1].teeth if before else ()
 
+    def teeth_carried(self, start: int, end: int) -> tuple[ToothRef, ...]:
+        """Wie ``teeth_for``; nennt der Satz gar keine Zahnnummer, gilt die zuletzt diktierte davor
+        („28. IP. Infiltrationsanästhesie. 2x.“, „18. IP, X2. Zahn im Ganzen rausgehebelt.“)."""
+        found = self.teeth_for(start, end)
+        s, e = self.sentence(start)
+        if found or any(s <= g.start < e for g in self.groups):
+            return found
+        before = [g for g in self.groups if g.end <= start]
+        return before[-1].teeth if before else ()
+
     def _nearest(self, pattern: re.Pattern[str], start: int) -> int | None:
         s, e = self.sentence(start)
         found = [(abs(m.start() - start), int(m.group(1))) for m in pattern.finditer(self.folded, s, e)]
@@ -162,6 +200,15 @@ class TextContext:
         """Diktierte Anzahl, die zu genau dieser Fundstelle gehört – nie die einer Nachbarposition."""
         lead = max([self.clause(start)[0]] + [g.end for g in self.groups if g.end <= start])
         m = _COUNT_AFTER.match(self.folded, end) or _COUNT_LEAD.fullmatch(self.folded, lead, start)
+        return int(next(g for g in m.groups() if g)) if m else None
+
+    def count_near(self, start: int, end: int) -> int | None:
+        """Wie ``count_at``, auch hinter der direkt folgenden Zahnnummer ("Infiltrationsanästhesie 18 2x")."""
+        found = self.count_at(start, end)
+        if found is not None:
+            return found
+        group = next((g for g in self.groups if g.start >= end and _LEAD_IN.fullmatch(self.folded, end, g.start)), None)
+        m = _COUNT_AFTER.match(self.folded, group.end) if group else None
         return int(next(g for g in m.groups() if g)) if m else None
 
     def times(self, start: int, end: int) -> int | None:

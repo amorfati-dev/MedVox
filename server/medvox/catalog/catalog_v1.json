@@ -1,7 +1,7 @@
 {
   "meta": {
     "name": "MedVox Katalog v1 (BEMA/GOZ/GOÄ, Alltagspositionen)",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "stand": {
       "BEMA": "KZBV, Stand 1. Januar 2026",
       "GOZ": "GOZ 2012, Anlage 1 (Bundesrecht, gesetze-im-internet.de)",
@@ -184,7 +184,7 @@
         "url": "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/kinderkronen-in-der-paediatrischen-zahnheilkunde"
       }
     ],
-    "abgerufen": "2026-09-23",
+    "abgerufen": "2026-09-24",
     "paar_quellen": [
       "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf"
     ]
@@ -590,6 +590,7 @@
       "system": "BEMA",
       "area": "Anästhesie",
       "title": "Infiltrationsanästhesie",
+      "evident": "i",
       "abbrev": "I",
       "points": 8,
       "keywords": [
@@ -615,6 +616,20 @@
       ],
       "max_per": {
         "unit": "unbegrenzt"
+      },
+      "repeat": {
+        "only_with": [
+          {
+            "system": "BEMA",
+            "code": "47a"
+          },
+          {
+            "system": "BEMA",
+            "code": "48"
+          }
+        ],
+        "note": "Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal",
+        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern)"
       },
       "equivalent": [
         {
@@ -654,6 +669,20 @@
       ],
       "max_per": {
         "unit": "unbegrenzt"
+      },
+      "repeat": {
+        "only_with": [
+          {
+            "system": "BEMA",
+            "code": "47a"
+          },
+          {
+            "system": "BEMA",
+            "code": "48"
+          }
+        ],
+        "note": "Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal",
+        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern)"
       },
       "equivalent": [
         {
@@ -1258,7 +1287,9 @@
         "gezogen",
         "entfernung einwurzelig",
         "wurzelrest entfernt",
-        "milchzahn extrahiert"
+        "milchzahn extrahiert",
+        "rausgehebelt",
+        "herausgehebelt"
       ],
       "rules": [
         "einwurzelig: alle Frontzähne, OK 5er, UK 4er und 5er, alle Milchfrontzähne",
@@ -1368,6 +1399,10 @@
       "keywords": [
         "osteotomie",
         "ost1",
+        "ost 1",
+        "os1",
+        "os 1",
+        "ost, 1",
         "operative entfernung",
         "operative zahnentfernung",
         "aufklappung",
@@ -1401,12 +1436,17 @@
       "system": "BEMA",
       "area": "Chirurgie",
       "title": "Osteotomie, retinierter/verlagerter Zahn",
+      "evident": "ost2",
       "abbrev": "Ost2",
       "points": 78,
       "keywords": [
         "retiniert",
         "verlagert",
         "ost2",
+        "ost 2",
+        "os2",
+        "os 2",
+        "ost, 2",
         "weisheitszahn osteotomie",
         "impaktiert",
         "zahnkeim",
@@ -1433,6 +1473,94 @@
       ],
       "review": {
         "status": "draft"
+      }
+    },
+    {
+      "code": "37",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Blutstillung durch Umstechen/Abbinden/Knochenbolzung",
+      "evident": "nbl2",
+      "abbrev": "Nbl2",
+      "points": 29,
+      "keywords": [
+        "nbl2",
+        "nbl 2",
+        "starke blutung",
+        "umschlingungsnaht",
+        "umschlingsnaht",
+        "umstechung",
+        "umstochen",
+        "gefäß abgebunden",
+        "knochenbolzung",
+        "bipo",
+        "bipolar",
+        "parasorb"
+      ],
+      "rules": [
+        "Stillung einer übermäßigen Blutung durch Abbinden oder Umstechen eines Gefäßes oder durch Knochenbolzung",
+        "Praxisregel des Behandlers: starke Blutung während der OP mit Umschlingungsnaht, bipolarer Koagulation oder Parasorb-Vlies",
+        "ohne Umstechen/Abbinden/Knochenbolzung: 36 (Nbl1, nicht im Katalog v1)",
+        "Privatpatient: GOZ 3060"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3060"
+        }
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+      }
+    },
+    {
+      "code": "51b",
+      "system": "BEMA",
+      "area": "Chirurgie",
+      "title": "Plastischer Verschluss Kieferhöhle bei Osteotomie",
+      "evident": "pla0",
+      "abbrev": "Pla0",
+      "points": 40,
+      "keywords": [
+        "pla0",
+        "pla 0",
+        "plastische deckung",
+        "kieferhöhle verschlossen",
+        "speicheldichter verschluss der kieferhöhle",
+        "speicheldichter verschluss einer kieferhöhle",
+        "kieferhöhle verschlossen nach osteotomie",
+        "mav nach osteotomie"
+      ],
+      "rules": [
+        "nur in Verbindung mit Osteotomie (47a/48); selbständig oder mit Extraktion: 51a (Pla1, nicht im Katalog v1)",
+        "Praxisregel des Behandlers: plastische Deckung und speicheldichter Verschluss einer Kieferhöhle",
+        "Privatpatient: GOZ 3090"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "GOZ",
+          "code": "3090",
+          "note": "GOZ 3090 nur bei eröffneter Kieferhöhle; plastische Deckung ohne Kieferhöhle ist GOZ 3100 – prüfen"
+        }
+      ],
+      "sources": [
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf",
+        "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
       }
     },
     {
@@ -3461,6 +3589,93 @@
       ],
       "review": {
         "status": "draft"
+      }
+    },
+    {
+      "code": "3060",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Blutstillung durch Umstechen/Abbinden/Knochenbolzung",
+      "points": 140,
+      "keywords": [
+        "blutstillung durch umstechung privat",
+        "3060",
+        "drei null sechs null"
+      ],
+      "rules": [
+        "Kassenpatient: BEMA 37"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "37"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "37"
+        ],
+        "note": "Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+      }
+    },
+    {
+      "code": "3090",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Plastischer Verschluss einer eröffneten Kieferhöhle",
+      "points": 370,
+      "keywords": [
+        "kieferhöhlenverschluss privat",
+        "3090",
+        "drei null neun null"
+      ],
+      "rules": [
+        "nicht neben 3100 für dasselbe Operationsgebiet",
+        "Kassenpatient: BEMA 51b (mit Osteotomie) bzw. 51a"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "equivalent": [
+        {
+          "system": "BEMA",
+          "code": "51b"
+        }
+      ],
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [
+          "51b"
+        ],
+        "note": "Kassenleistung BEMA 51a/51b – privat nicht zusätzlich berechenbar (Zuzahlungsverbot).",
+        "sources": [
+          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
+          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
+      ],
+      "review": {
+        "status": "draft",
+        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
       }
     },
     {

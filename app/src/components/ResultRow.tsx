@@ -97,12 +97,15 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProp
 
 type OptionProps = { option: Option; onAdopt: (key: string) => void; counter?: Counter | null };
 
-// Option (`alternative`): Zuzahlungs-Optionen sind abgewählt voreingestellt und per Tipp übernehmbar;
-// andere Optionen (Privat-Gegenstück ohne Paar) bleiben ein Hinweis. Übernommen zählt sie wie eine Zeile.
+// Option (`alternative`): Zuzahlungs-Optionen und „ggf. dazu“ (`addon`: Ä1/Zst zur Weisheitszahn-OP) sind
+// abgewählt voreingestellt und per Tipp übernehmbar; andere Optionen (Privat-Gegenstück ohne Paar) bleiben
+// ein Hinweis. Übernommen zählt sie wie eine Zeile.
 export function OptionRow({ option, onAdopt, counter }: OptionProps) {
   const { s, adoptable, adopted } = option;
   const range = adopted && counter ? counter.range(s) : null;
-  const label = adopted ? "Zuzahlung · übernommen" : adoptable ? "Option · Zuzahlung möglich" : "Option · nur Hinweis";
+  const label = s.addon
+    ? adopted ? "Option · übernommen" : "Option · ggf. dazu"
+    : adopted ? "Zuzahlung · übernommen" : adoptable ? "Option · Zuzahlung möglich" : "Option · nur Hinweis";
   const body = (
     <>
       <span className="box" aria-hidden="true">

@@ -15,6 +15,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
   (Praxisregel, Feld `analog`); der Vorschlag nennt das in der Begründung.
 - **Konflikt:** nicht in derselben Sitzung abrechenbar (Feld `conflicts`, Ausnahme in „außer“); der
   Extraktor streicht keine der beiden, sondern markiert beide mit dem Hinweis.
+- **Zweites Mal je Zahn:** nur neben einer der genannten Positionen am selben Zahn (Praxisregel, Feld
+  `repeat`); sonst setzt der Extraktor die Anzahl auf 1 und zeigt den Hinweis.
 - **neu, bitte prüfen:** Position, die für den Patiententyp aus dem erweiterten Katalog nach v1 geholt wurde
   und noch nicht in der geprüften Fassung stand.
 
@@ -56,6 +58,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | 45 | Extraktion, tieffrakturierter Zahn | GOZ 3020 **(neu, bitte prüfen)** | Extraktion, tief frakturierter/zerstörter Zahn |  | [Q1] [Q4] [Q3] |
 | ☐ | 47a | Osteotomie (Zahnentfernung durch Osteotomie) | GOZ 3030 | Osteotomie (Zahn/Implantat) |  | [Q1] [Q4] [Q3] |
 | ☐ | 48 | Osteotomie, retinierter/verlagerter Zahn | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn |  | [Q1] [Q4] [Q3] |
+| ☐ | 37 | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | GOZ 3060 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung |  | [Q1] [Q4] [Q3] |
+| ☐ | 51b | Plastischer Verschluss Kieferhöhle bei Osteotomie | GOZ 3090 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Plastischer Verschluss einer eröffneten Kieferhöhle | GOZ 3090 nur bei eröffneter Kieferhöhle; plastische Deckung ohne Kieferhöhle ist GOZ 3100 – prüfen | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3300 **(neu, bitte prüfen)** | Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren) |  | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | GOZ 3290 ist die reine Kontrolle; mit Behandlung (Tamponieren, Spülen) GOZ 3300 – prüfen | [Q1] [Q4] [Q3] |
 | ☐ | Ä161 | Eröffnung eines oberflächlichen Abszesses (Inzision) | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) |  | [Q1] [Q2] [Q3] |
@@ -138,6 +142,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 3020 **(neu, bitte prüfen)** | Extraktion, tief frakturierter/zerstörter Zahn | 45 | Kassenleistung BEMA 45 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3030 | Osteotomie (Zahn/Implantat) | 47a | Kassenleistung BEMA 47a – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn | 48 | Kassenleistung BEMA 48 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
+| ☐ | nein | GOZ 3060 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | 37 | Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
+| ☐ | nein | GOZ 3090 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Plastischer Verschluss einer eröffneten Kieferhöhle | 51b | Kassenleistung BEMA 51a/51b – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | 38 | Umstritten: Kontrolle ohne Nachbehandlung hat kein BEMA-Pendant, ist aber medizinisch notwendig; keine Quelle für private Vereinbarung gefunden. | [Q3] [Q1] |
 | ☐ | nein | GOZ 3300 **(neu, bitte prüfen)** | Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren) | 38 | Kassenleistung BEMA 38 (Nachbehandlung) – privat nicht zusätzlich berechenbar. | [Q1] [Q3] |
 | ☐ | nein | GOZ 0500 | Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
@@ -185,6 +191,13 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | BEMA 48 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
 | ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | GOZ 3030 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
 | ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | GOZ 3040 | separates Operationsgebiet | Inzision und Osteotomie nur getrennt abrechenbar (andere Sitzung), es sei denn separates Operationsgebiet – bitte prüfen | Angabe des Behandlers |
+
+### Zweites Mal je Zahn (Praxisregel)
+
+| ☐ | Ziffer | nur neben | Hinweis im Vorschlag | Quelle |
+|---|---|---|---|---|
+| ☐ | BEMA 40 | BEMA 47a, BEMA 48 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern) |
+| ☐ | BEMA 41a | BEMA 47a, BEMA 48 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern) |
 
 ## Erweiterter Katalog (Saat für Phase 2, wird nicht geladen)
 
@@ -247,7 +260,6 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 |---|---|---|---|---|---|---|
 | ☐ | nein | GOZ 3045 | Osteotomie, extrem verlagert/retiniert (umfangreich) | 48 | Extrem verlagerter Zahn ist beim Kassenpatienten BEMA 48; keine private Zuzahlung. | [Q3] [Q5] |
 | ☐ | nein | GOZ 3050 | Blutstillung, als selbstständige Leistung | 36 | Kassenleistung BEMA 36 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
-| ☐ | nein | GOZ 3060 | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | 37 | Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3070 | Exzision Schleimhaut/Granulationsgewebe | 49 | Kassenleistung BEMA 49 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 
 ### Zuzahlung – Prophylaxe

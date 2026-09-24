@@ -47,6 +47,10 @@ Einfügen in Evident immer lesen.
 | „Bissflügel rechts und links" / „Bissflügel beidseits" | Ä925a (privat 2× GOÄ Ä5000, je Projektion) |
 | „Füllung zweiflächig" (getippt auch „2 flächig") | 13b |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
+| „Eins acht Infiltrationsanästhesie zweimal, lange Dauer" / „drei acht Leitungsanästhesie zweimal" | 40 an 18 (i*2) / 41a an 38 (l1*2) – zweimal nur mit Osteotomie am Zahn |
+| „Ost zwei" (auch „OS2", „Ost, 1") an 18/28/38/48 | 48 (ost2) bzw. 47a (ost1), dazu Ä1 und Zst als Option |
+| „starke Blutung", „Umschlingungsnaht", „Bipo", „Parasorb" (während der OP) | 37 (nbl2) |
+| „plastische Deckung", „Kieferhöhle verschlossen" | 51b (pla0), nur neben Osteotomie |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
 | „Tiefliegenden Abszess drei sechs eröffnet" / „Inz zwei" | GOÄ Ä2430 (Kasse als Analogposition) |
 | „Chlorhexidin Spülung" | 105 |
@@ -64,6 +68,15 @@ medikamentösen Einlage (34) GOZ 2430 (erst ab der 4. Einlage) und die adhäsive
 Diktiert („Längenbestimmung", „phys") stehen 2400 bzw. 2420 gleich als Zuzahlung da. Je Kanal gilt
 die diktierte Kanalzahl („WK mal drei" → auch 2400 und 2420 dreimal); ohne Kanalzahl bleibt es bei 1
 mit Hinweis.
+
+**Weisheitszahn-OP.** Die Anzahl der Anästhesie gehört zum Zahn: „eins acht Infiltrationsanästhesie zweimal"
+ergibt `18,i*2`. Beim Kassenpatienten gibt es die zweite Anästhesie an einem Zahn nur, wenn dort eine
+Osteotomie (Ost1 oder Ost2) erbracht ist, mit „lange Dauer" als Begründung (KZVB, Angabe des Behandlers) –
+sonst steht sie einmal da, mit Hinweis. „lange Dauer" zählt nie hoch. Whisper schreibt die Kurzform „i"
+oft als „IP" und macht aus Pausen Punkte („Und zwar 18. IP, X2."): „IP" an einem Zahn ist I, „X2" direkt
+dahinter die Anzahl (mit Hinweis, falls die Extraktion X2 gemeint war); „18 X2" allein bleibt die
+Extraktion. Zu jeder Osteotomie an einem Weisheitszahn stehen Beratung (Ä1) und Zahnstein (Zst, 107) als
+Option „ggf. dazu" – abgewählt, erst ein Tipp übernimmt sie in die Kassenzeile.
 
 ## Die Anzeige am iPad
 
@@ -311,7 +324,8 @@ mesial okklusal Kompositfüllung. Zahn vier sechs Extraktion. Zahnsteinentfernun
 
 Evident nimmt eine Mischung aus Ziffern und Kurzformen: steht im Katalog eine Evident-Kurzform
 (Feld `evident`), wird sie statt der Ziffer kopiert (`l1` statt 41a), sonst die Ziffer.
-Bisher bestätigt, für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a, GOZ 3030), opg
+Bisher bestätigt: i (40), ost2 (48), nbl2 (37), pla0 (51b) – nur Kasse, die GOZ-Paare kopieren noch die
+Ziffer, bis der Behandler die Kurzform auch dort bestätigt; für Kasse und privat: l1 (41a, GOZ 0100), wf (35), ost1 (47a, GOZ 3030), opg
 (Ä935d, GOÄ Ä5004), pan1 (Ä935a, GOÄ Ä5002), bmf (12, klein wie in Evident), inz1 (Ä161, GOÄ Ä2428),
 inz2 (GOÄ Ä2430) – eine private Osteotomie an 48 kopiert als
 `48,ost1,0500`; die Liste wächst mit den Meldungen aus dem Praxisalltag. Mehrfach erbrachte

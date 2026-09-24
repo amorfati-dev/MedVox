@@ -1,0 +1,72 @@
+"""Weisheitszahn-OP im Regel-Extraktor: Optionen „ggf. dazu“ und Pla0 nur neben einer Osteotomie.
+
+Praxisregel des Behandlers (2026-09-24): zu einer erbrachten Osteotomie (Ost1/Ost2: BEMA 47a/48 bzw.
+GOZ 3030/3040) an einem Weisheitszahn (18, 28, 38, 48) kommen Beratung (Ä1) und Zahnsteinentfernung
+(Zst, BEMA 107) „ggf. dazu“. Sie stehen als Option zum Antippen am ersten operierten Weisheitszahn,
+nie vorausgewählt und nie, wenn sie schon diktiert sind. Beim Privatpatienten nur GOÄ Ä1: Zst ist dort
+GOZ 4050/4055 je Zahn, und welche Zähne, sagt das Diktat nicht.
+
+„starke Blutung“ ist Nbl2 (BEMA 37 / GOZ 3060) nur während einer OP: ohne Zahnentfernung oder Osteotomie in
+der Sitzung (etwa „BMF, starke Blutung“ an einer Füllung – Papillenblutung, Teil von BEMA 12) fällt sie mit
+Hinweis weg. Umschlingungsnaht, Bipo, Parasorb und „Nbl2“ selbst gelten immer.
+
+BEMA 51b (Pla0) gilt laut amtlichem Text nur in Verbindung mit einer Osteotomie; ohne 47a/48 in der
+Sitzung bleibt sie stehen, aber mit Hinweis auf 51a (Pla1, nicht im Katalog v1).
+"""
+
+from __future__ import annotations
+
+from medvox.extract_catalog import Catalog
+from medvox.extract_draft import Draft
+from medvox.extract_rules import REMOVAL
+from medvox.extract_text import TextContext
+
+WISDOM_TEETH = frozenset({18, 28, 38, 48})
+OSTEOTOMY = frozenset({("BEMA", "47a"), ("BEMA", "48"), ("GOZ", "3030"), ("GOZ", "3040")})
+WISDOM_OPTIONS = {"kasse": (("BEMA", "Ä1"), ("BEMA", "107")), "privat": (("GOÄ", "Ä1"),)}
+WISDOM_NOTE = "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht"
+NBL2 = frozenset({("BEMA", "37"), ("GOZ", "3060")})
+ONLY_IN_SURGERY = frozenset({"starke blutung"})
+LONE_BLEEDING = ("„{word}“ ohne Zahnentfernung/Osteotomie in dieser Sitzung – Nbl2 ({code}) nicht vorgeschlagen; "
+                 "Papillenblutung gehört zu den besonderen Maßnahmen (bmf), sonst Nbl1 (BEMA 36 / GOZ 3050) prüfen")
+PLA0 = ("BEMA", "51b")
+PLA0_ALONE = "BEMA 51b (Pla0) nur in Verbindung mit einer Osteotomie (47a/48) – sonst 51a (Pla1) prüfen"
+
+
+def wisdom_offers(catalog: Catalog, primaries: list[Draft], patient: str) -> list[Draft]:
+    """Ä1 und Zst als Option zur ersten erbrachten Osteotomie an einem Weisheitszahn."""
+    host = next((d for d in primaries if d.entry.key in OSTEOTOMY and d.fdi in WISDOM_TEETH), None)
+    if host is None:
+        return []
+    have = {d.entry.key for d in primaries}
+    offers = []
+    for key in WISDOM_OPTIONS[patient]:
+        entry = catalog.get(*key)
+        if entry is None or key in have or any((entry.system, c) in have for c in catalog.not_beside(entry)):
+            continue
+        offers.append(Draft(entry, None, False, context=(host.fdi,), alternative_to=host, reason=WISDOM_NOTE,
+                            addon=True))
+    return offers
+
+
+def flag_lone_pla0(primaries: list[Draft]) -> None:
+    """Pla0 ohne Osteotomie in derselben Sitzung: Hinweis statt stiller Wahl."""
+    if any(d.entry.key in OSTEOTOMY for d in primaries):
+        return
+    for d in primaries:
+        if d.entry.key == PLA0 and PLA0_ALONE not in d.decide:
+            d.decide.append(PLA0_ALONE)
+
+
+def drop_lone_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -> list[Draft]:
+    """Nbl2 nur aus „starke Blutung“ ohne OP in der Sitzung: weglassen, im Hinweis nennen."""
+    if any(d.entry.code in REMOVAL.get(d.entry.system, {}).values() for d in primaries):
+        return primaries
+    kept = []
+    for d in primaries:
+        if d.entry.key in NBL2 and all(t.hit.keyword in ONLY_IN_SURGERY for t in d.hits):
+            word = ctx.original(d.hits[0].hit.start, d.hits[0].hit.end)
+            notes.append(LONE_BLEEDING.format(word=word, code=d.entry.label))
+            continue
+        kept.append(d)
+    return kept

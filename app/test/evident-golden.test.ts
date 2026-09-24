@@ -5,6 +5,8 @@
 // einzelne Ziffer abgewählt, mit Kurzformen und „Nur Ziffern“.
 // Bewusst geändert (Pilot-Befunde): BEMA 12 kopiert als Kurzform „bmf“, und beim Kassenpatienten stehen
 // Privatpositionen (Zuzahlung) nach einer Leerzeile hinter allen Kassenzeilen; Privat unverändert.
+// Weisheitszahn-OP (Angabe des Behandlers 2026-09-24): BEMA 40 kopiert als Kurzform „i“, und eine Anästhesie
+// ohne Zahnnummer im Satz steht am zuletzt diktierten Zahn (Abnahme: an 36 statt in der Zeile ohne Zahn).
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";

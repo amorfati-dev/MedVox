@@ -29,6 +29,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -45,7 +46,8 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
-        "evident": null,
+        "evident": "i",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -63,6 +65,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -80,6 +83,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -97,6 +101,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -114,6 +119,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -131,6 +137,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -148,6 +155,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -165,6 +173,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -201,6 +210,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -220,6 +230,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -239,6 +250,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -256,6 +268,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -273,6 +286,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -290,6 +304,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -307,6 +322,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -345,6 +361,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -362,6 +379,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -379,6 +397,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -396,6 +415,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -412,7 +432,8 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
-        "evident": null,
+        "evident": "i",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -430,6 +451,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -447,6 +469,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -464,6 +487,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -481,6 +505,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -498,6 +523,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -515,6 +541,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -532,6 +559,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -572,6 +600,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -589,6 +618,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -606,6 +636,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -625,6 +656,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -644,6 +676,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -661,6 +694,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -678,6 +712,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -695,6 +730,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -712,6 +748,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -748,6 +785,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -764,7 +802,8 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
-        "evident": null,
+        "evident": "i",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -782,6 +821,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -799,6 +839,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -816,6 +857,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -833,6 +875,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -850,6 +893,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -867,6 +911,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -884,6 +929,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -920,6 +966,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -939,6 +986,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -958,6 +1006,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -975,6 +1024,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -992,6 +1042,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1009,6 +1060,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1026,6 +1078,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -1064,6 +1117,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1081,6 +1135,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1098,6 +1153,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1115,6 +1171,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1131,7 +1188,8 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
-        "evident": null,
+        "evident": "i",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1149,6 +1207,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1166,6 +1225,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1183,6 +1243,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1200,6 +1261,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1217,6 +1279,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1234,6 +1297,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1251,6 +1315,7 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -1291,6 +1356,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1308,6 +1374,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1325,6 +1392,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1344,6 +1412,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1363,6 +1432,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1380,6 +1450,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1397,6 +1468,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1414,6 +1486,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1431,6 +1504,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
@@ -1467,7 +1541,8 @@
         "planned": false,
         "alternative": false,
         "kind": "bema",
-        "evident": null,
+        "evident": "i",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1485,6 +1560,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1502,6 +1578,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1519,6 +1596,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1536,6 +1614,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1553,6 +1632,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1570,6 +1650,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1587,6 +1668,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1604,6 +1686,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1621,6 +1704,7 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1638,6 +1722,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": "l1",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1655,6 +1740,7 @@
         "alternative": false,
         "kind": "bema",
         "evident": "pan1",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1672,11 +1758,14 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
+        "addon": false,
         "source": "regel"
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [
+      "„Starke Blutung“ ohne Zahnentfernung/Osteotomie in dieser Sitzung – Nbl2 (BEMA 37) nicht vorgeschlagen; Papillenblutung gehört zu den besonderen Maßnahmen (bmf), sonst Nbl1 (BEMA 36 / GOZ 3050) prüfen"
+    ]
   },
   "pilot-wd-privat": {
     "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
@@ -1711,6 +1800,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1728,6 +1818,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1745,6 +1836,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1762,6 +1854,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1781,6 +1874,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1798,6 +1892,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": "l1",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1815,6 +1910,7 @@
         "alternative": false,
         "kind": "goz",
         "evident": "pan1",
+        "addon": false,
         "source": "regel"
       },
       {
@@ -1832,10 +1928,13 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
+        "addon": false,
         "source": "regel"
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [
+      "„Starke Blutung“ ohne Zahnentfernung/Osteotomie in dieser Sitzung – Nbl2 (GOZ 3060) nicht vorgeschlagen; Papillenblutung gehört zu den besonderen Maßnahmen (bmf), sonst Nbl1 (BEMA 36 / GOZ 3050) prüfen"
+    ]
   }
 }

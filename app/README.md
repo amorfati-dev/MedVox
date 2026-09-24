@@ -6,7 +6,7 @@ Vite + React + TypeScript ohne UI-Framework und ohne weitere Laufzeit-Abhängigk
 
 | Pfad | Zweck |
 |---|---|
-| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen, Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), Anzahl − / + an Positionen je Kanal oder bestätigt mehrmals je Sitzung, „Rückgängig“ |
+| `/` | Diktat: Anmeldung; quer (≥ 900 px) links Steuerung (wer diktiert – Behandler, ein Tipp, fragt nach Übergabe und langer Pause neu –, aktiver Patient mit Evident-Nummer und Tastenfeld, Schalter Kassenpatient/Privatpatient, Statusfeld, Aufnahmeknopf), rechts Ergebnis (Transkript, Liste nach Zahn mit Begründung und Prüfhinweis, Mehrkosten-Rahmen, Zuzahlungs-Optionen und Optionen „ggf. dazu“ (Ä1/Zst zur Weisheitszahn-OP), Geplantes, Hinweise), Leiste Text · Ziffern · An Rezeption (Kurzcode + QR); hoch untereinander. Korrektur nur hier: „Bearbeiten“ am Transkript (Ziffern neu berechnen), „Ziffer ändern oder ergänzen“ je Zahn (Katalog-Blatt), Anzahl − / + an Positionen je Kanal oder bestätigt mehrmals je Sitzung, „Rückgängig“ |
 | `/patienten` | Büro (mit Anmeldung): Patienten von heute und Diktate „ohne Patient“ mit Behandler, Filter nach Behandler (Voreinstellung „Alle“), neue Diktate erscheinen sofort (Live-Strom, `live.ts`; ohne Strom Abgleich alle 30 s, Anzeige „Live“/„Abgleich alle 30 s“), je Diktat Text/Ziffern/Nur Ziffern kopieren, zuordnen, „Als übertragen markieren“ (löscht den Inhalt); am iPad korrigierte Diktate mit „am iPad korrigiert“ und aufklappbarem Original (nur lesen) |
 | `/behandler` | Behandlerliste (mit Anmeldung): Name, optionale Behandlernummer, aktiv/inaktiv – nur Zuordnung, keine Rechte |
 | `/woerterbuch` | Wörterbuch (mit Anmeldung, vor allem Büro-PC): Ersetzungen „falsch gehört → richtig“ mit Probe vor dem Speichern, Fachbegriffe für den Whisper-Prompt mit Füllstand, Vorschläge aus Korrekturen (übernehmen per Tipp), „Alle löschen“ für die Korrektur-Sammlung; gilt sofort für alle Diktate, abschalten statt löschen |
@@ -60,7 +60,7 @@ Entwickelt wird gegen den echten Server (`server/`, `make dev`); im Betrieb lief
    Diktat, während einer Aufnahme ist der Schalter gesperrt), Aufnehmen, „Zahn drei sechs …“ diktieren,
    Stopp: das Statusfeld zeigt „Ergebnis da“, rechts Transkript und die Liste nach Zahn mit dem Typ, für
    den sie berechnet wurde („Kassenpatient“); Zuzahlungen sind indigo, Kassenanteil und Zuzahlung am
-   selben Zahn stehen in einem Rahmen, Zuzahlungs-Optionen gestrichelt und abgewählt (ein Tipp übernimmt sie).
+   selben Zahn stehen in einem Rahmen, Zuzahlungs-Optionen und Optionen „ggf. dazu“ gestrichelt und abgewählt (ein Tipp übernimmt sie).
    Während der Aufnahme hängt „Abschnitt anhängen“ einen weiteren Abschnitt an. Kurz vor 60 s wird der
    Abschnitt automatisch beendet und hochgeladen; die App zeigt dann „Unterbrochen – nichts verloren“ mit
    „Weiter aufnehmen“ (nächsten Abschnitt anhängen) und „Verwerfen“ (löscht das Diktat, auch beim Patienten).

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from medvox.extract_build import Draft
+from medvox.extract_draft import Draft
 
 PER = {
     "sitzung": "je Sitzung",

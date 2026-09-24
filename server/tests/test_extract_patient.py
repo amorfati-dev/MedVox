@@ -40,8 +40,12 @@ def surgical(result: Extraction) -> list[str]:
 def test_osteotomy_is_47a_for_statutory_and_3030_for_private_never_both():
     kasse = run("Osteotomie drei acht", "kasse")
     privat = run("Osteotomie drei acht", "privat")
-    assert [(s.code, s.teeth, s.kind) for s in kasse.suggestions] == [("47a", (38,), "bema")]
-    assert [(s.code, s.teeth, s.kind) for s in privat.suggestions if s.code != "0500"] == [("3030", (38,), "goz")]
+    assert [(s.code, s.teeth, s.kind) for s in kasse.suggestions if not s.addon] == [("47a", (38,), "bema")]
+    assert [(s.code, s.teeth, s.kind) for s in privat.suggestions if s.code != "0500" and not s.addon] == [
+        ("3030", (38,), "goz")]
+    # Weisheitszahn-OP: Ä1 und Zst nur als Option (extract_surgery), beim Privatpatienten nur GOÄ Ä1
+    assert [(s.code, s.kind) for s in kasse.suggestions if s.addon] == [("Ä1", "bema"), ("107", "bema")]
+    assert [(s.system, s.code) for s in privat.suggestions if s.addon] == [("GOÄ", "Ä1")]
     assert "BEMA 47a ↔ GOZ 3030" in privat.suggestions[0].reason
 
 
@@ -50,7 +54,8 @@ def test_private_surcharge_bracket_follows_from_3030_points():
     bracket = surcharge_for(points)
     result = run("Osteotomie drei acht", "privat")
     assert surgical(result) == [bracket[0]] == ["0500"]
-    assert f"{points} Punkte" in result.suggestions[-1].reason
+    (zuschlag,) = [s for s in result.suggestions if s.code == "0500"]
+    assert f"{points} Punkte" in zuschlag.reason
 
 
 def test_statutory_patient_never_gets_a_surcharge():
@@ -66,9 +71,9 @@ def test_unrecorded_pair_still_comes_back_as_decide_alternative(monkeypatch):
             entry.pop("equivalent")
     monkeypatch.setattr(extract_module, "load_catalog", lambda: Catalog(raw))
     result = run("Osteotomie drei acht, GOZ drei null drei null", "kasse")
-    assert [(s.code, s.alternative) for s in result.suggestions] == [("47a", False), ("3030", True)]
-    assert all(any("BEMA 47a" in f and "GOZ 3030" in f and "nur eine" in f for f in s.decide)
-               for s in result.suggestions)
+    ruled = [s for s in result.suggestions if not s.addon]
+    assert [(s.code, s.alternative) for s in ruled] == [("47a", False), ("3030", True)]
+    assert all(any("BEMA 47a" in f and "GOZ 3030" in f and "nur eine" in f for f in s.decide) for s in ruled)
 
 
 def test_each_single_pair_resolves_to_exactly_one_code():
@@ -102,7 +107,7 @@ def test_mixed_bema_and_goz_in_one_session():
 def test_bema_and_goz_surgery_on_same_tooth_are_one_service():
     # Ost1 = BEMA 47a / GOZ 3030: beide diktiert ist dieselbe Leistung, der Patiententyp wählt eine Ziffer.
     kasse = run("Osteotomie drei acht, GOZ drei null drei null", "kasse")
-    assert [(s.code, s.alternative, s.decide) for s in kasse.suggestions] == [("47a", False, ())]
+    assert [(s.code, s.alternative, s.decide) for s in kasse.suggestions if not s.addon] == [("47a", False, ())]
 
     privat = run("Osteotomie drei acht, GOZ drei null drei null, Zuschlag GOZ null fünf drei null", "privat")
     assert billable_codes(privat.suggestions) == ["3030", "0500"]
@@ -251,4 +256,5 @@ def test_suggestions_carry_the_evident_short_form():
         ("35", "wf", 3, [36], False), ("2197", None, 1, [36], True), ("41a", "l1", 1, [36], False),
     ]
     privat = build_response("Zahn vier acht Osteotomie. OPG.", 1, 1, "privat")
-    assert {s.code: s.evident for s in privat.suggestions} == {"3030": "ost1", "Ä5004": "opg", "0500": None}
+    assert {s.code: s.evident for s in privat.suggestions if not s.addon} == {
+        "3030": "ost1", "Ä5004": "opg", "0500": None}

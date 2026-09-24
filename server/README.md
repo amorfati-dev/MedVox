@@ -208,8 +208,9 @@ Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_mat
 (Patiententyp: Fundstellen auf ihr Paar umstellen, Rückfall ohne Paar), `extract_build.py`
 (Regelfamilien), `extract_billing.py` (Enthaltensein, „nicht neben“, Zuzahlungs-Angebote, Zuschlag),
 `extract_endo.py` (Zuzahlungs-Optionen der Endo, Kanalzahl der Je-Kanal-Zuzahlungen),
-`extract_limits.py` (Höchstzahl aus dem Katalogfeld `max_per`), `extract_rules.py` (die festen
-Fachtabellen zum Nachlesen).
+`extract_limits.py` (Höchstzahl aus dem Katalogfeld `max_per`), `extract_anesthesia.py` (Anästhesie je
+Zahn, „IP“, Praxisregel `repeat`), `extract_surgery.py` (Weisheitszahn-OP: Optionen Ä1/Zst, Nbl2 nur mit OP,
+Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachlesen).
 
 - **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 je Zahn – ein freistehendes Zählwort
   („dreiflächig“, „Kompositfüllung MOD“, „BEMA 13a“) gilt nur für die Zähne seines Satzes und geht
@@ -226,6 +227,21 @@ Fachtabellen zum Nachlesen).
   Zuzahlung je Kanal (2400, 2420) übernimmt die diktierte Kanalzahl ihrer Basis am selben Zahn („WK*3,
   Längenbestimmung“ → 3x 2400), samt deren Hinweis zur Kanalzahl (mehrere Zähne genannt). Ohne
   Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
+- **Anästhesie je Zahn** (40, 41a, GOZ 0090, 0100): die Anzahl gehört zum Zahn, mit dem sie diktiert wird
+  („Infiltrationsanästhesie 18 2x“, „38 Ost2, Leitungsanästhesie 2x“ → I*2 an 18, L1*2 an 38); eine
+  Fundstelle mit mehreren Zähnen bleibt eine BEMA-40 („Infiltration 36, 37“), getrennt diktierte
+  Nachbarzähne tragen einen Hinweis. „lange Dauer“ zählt nie hoch, es steht in der Begründung. Ein zweites
+  Mal je Zahn beim Kassenpatienten nur neben Ost1/Ost2 am selben Zahn (Katalogfeld `repeat`, KZVB laut
+  Behandler), sonst 1 mit Hinweis. Whisper schreibt „i“ als „IP“: an einer Zahnnummer oder mit „X2“ ist das
+  I; „X2“ direkt hinter I/IP ist die Anzahl, allein bleibt es die Extraktion 44.
+- **Diktierpausen:** Whisper setzt Punkte („Und zwar 18. IP, X2.“, „Infiltrationsanästhesie. 2x.“): ein Satz
+  nur aus Zahnnummer gehört zum folgenden, ein Satz nur aus Anzahl zum vorigen. Anästhesie und
+  Zahnentfernung ohne Zahnnummer im Satz gehören zum zuletzt diktierten Zahn („Zahn im Ganzen
+  rausgehebelt“ nach „18.“ → 44 an 18). „Ost2“, „Ost 2“, „OS2“, „Ost, 1“ sind Ost2 bzw. Ost1.
+- **Weisheitszahn-OP:** zu einer erbrachten Osteotomie an 18/28/38/48 stehen Ä1 und Zst (107) als Option
+  „ggf. dazu“ (`addon`, per Tipp übernehmbar, beim Privatpatienten nur GOÄ Ä1). „starke Blutung“ ist Nbl2
+  (37) nur mit Zahnentfernung/Osteotomie in der Sitzung (sonst Papillenblutung, BMF – Hinweis); Pla0 (51b)
+  ohne Osteotomie trägt den Hinweis auf 51a.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.

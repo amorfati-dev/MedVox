@@ -126,7 +126,7 @@ def multi_rooted(fdi: int) -> bool:
 
 # Keywords einer Entfernungs-Ziffer, die eine Handlung beschreiben; die übrigen ("retiniert",
 # "Längsfraktur", "mehrwurzelig") sind Befundwörter und lösen allein nichts aus.
-REMOVAL_ACT = re.compile(r"extrah|extrakt|entfern|gezogen|osteotom|ost\d|x\d|operativ|aufklappung|abgetragen")
+REMOVAL_ACT = re.compile(r"extrah|extrakt|entfern|gezogen|gehebelt|osteotom|ost?,?\s?\d|x\d|operativ|aufklappung|abgetragen")
 _RETAINED = re.compile(r"retinier|verlager|impaktiert|zahnkeim")
 _FRACTURED = re.compile(r"fraktur|zerstoert")
 

@@ -73,7 +73,7 @@
     "planned": false,
     "alternative": false,
     "kind": "bema",
-    "evident": null
+    "evident": "i"
    },
    {
     "code": "12",
@@ -1916,14 +1916,16 @@
     "system": "BEMA",
     "title": "Infiltrationsanästhesie",
     "points": 8,
-    "teeth": [],
+    "teeth": [
+     36
+    ],
     "count": 1,
     "reason": "wegen: Infiltrationsanästhesie, Artikain",
     "decide": [],
     "planned": false,
     "alternative": false,
     "kind": "bema",
-    "evident": null
+    "evident": "i"
    },
    {
     "code": "12",
@@ -2080,11 +2082,12 @@
     "system": "GOZ",
     "title": "Infiltrationsanästhesie",
     "points": 60,
-    "teeth": [],
+    "teeth": [
+     36
+    ],
     "count": 1,
     "reason": "wegen: Infiltrationsanästhesie, Artikain (BEMA 40 ↔ GOZ 0090, für Privatpatienten GOZ)",
     "decide": [
-     "Zahn nicht diktiert – je Zahn",
      "BEMA 40 gilt je Sitzung für bis zu 2 Nachbarzähne, GOZ 0090 je Zahn – Zähne prüfen"
     ],
     "planned": false,

@@ -20,7 +20,7 @@ export type Tag = "bema" | "goz" | "kassenanteil" | "zuzahlung";
 export type Option = {
   key: string; // optionKey: Ziffer und Zähne
   s: Suggestion;
-  adoptable: boolean; // Zuzahlungs-Option beim Kassenpatienten: per Tipp übernehmbar (E4)
+  adoptable: boolean; // Zuzahlungs-Option beim Kassenpatienten (E4) oder „ggf. dazu“ (addon): per Tipp übernehmbar
   adopted: boolean;
 };
 
@@ -50,7 +50,7 @@ export function optionKey(s: Suggestion): string {
 }
 
 function adoptable(s: Suggestion): boolean {
-  return s.alternative && s.kind === "zuzahlung";
+  return s.alternative && (s.kind === "zuzahlung" || s.addon === true);
 }
 
 // Vorschläge für das Kopierformat: übernommene Zuzahlungs-Optionen zählen wie jede gewählte Position.
@@ -133,6 +133,10 @@ export function selectedLines(
 function basisCodes(reason: string): string[] {
   const m = /^Zuzahlung(?: möglich)? zu BEMA ([^\s:]+)/.exec(reason);
   return m ? m[1].split("/") : [];
+}
+
+function optionTag(s: Suggestion): Tag {
+  return s.addon ? s.kind : "zuzahlung";
 }
 
 function tagOf(s: Suggestion): Tag {
@@ -269,13 +273,14 @@ export function countGroups(groups: Group[], planned: Suggestion[]): Counts {
   return counts;
 }
 
-// Gewählte Positionen für die Rezeption (E6): Zahn, Ziffer, Art – übernommene Optionen als Zuzahlung.
+// Gewählte Positionen für die Rezeption (E6): Zahn, Ziffer, Art – übernommene Optionen als Zuzahlung,
+// „ggf. dazu“ (addon) in ihrer eigenen Art (Ä1/Zst beim Kassenpatienten sind Kassenleistungen).
 export function positionsOf(groups: Group[]): TransferPosition[] {
   const result: TransferPosition[] = [];
   const add = (s: Suggestion, kind: Tag) => result.push({ tooth: s.teeth[0] ?? null, code: s.code, kind });
   const row = (r: Row) => {
     if (r.selected) add(r.s, r.tag);
-    for (const o of r.options) if (o.adopted) add(o.s, "zuzahlung");
+    for (const o of r.options) if (o.adopted) add(o.s, optionTag(o.s));
   };
   for (const g of groups) {
     for (const item of g.items) {
@@ -283,7 +288,7 @@ export function positionsOf(groups: Group[]): TransferPosition[] {
       else if ("frame" in item) {
         if (item.frame.basis) row(item.frame.basis);
         row(item.frame.copay);
-      } else if (item.option.adopted) add(item.option.s, "zuzahlung");
+      } else if (item.option.adopted) add(item.option.s, optionTag(item.option.s));
     }
   }
   return result;
