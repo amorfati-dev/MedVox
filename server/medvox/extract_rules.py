@@ -8,6 +8,7 @@ diesen Tabellen muss in ``catalog_v1.json`` stehen (``tests/test_extract_rules.p
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 
 # Zahnentfernung: je System die Ziffer für jede Art. Ein-/mehrwurzelig entscheidet die
 # FDI-Nummer; "tieffrakturiert" nur mit Befundwort, Osteotomie retiniert/verlagert nur mit
@@ -80,6 +81,22 @@ def incision_depth_open(hit) -> str | None:
 def incision_depth_stated(hit) -> bool:
     """Abszesseröffnung mit diktierter Tiefe („tiefliegenden Abszess“, „Inz1“)."""
     return (hit.via or hit.entry).key in INCISION and not incision_depth_open(hit)
+
+
+def incision_depth(tagged: list) -> list:
+    """„Subperiostaler Abszess inzidiert“: ein Wort ohne Tiefe gehört zur Abszesseröffnung mit Tiefe im selben Satz."""
+    stated = [t for t in tagged if incision_depth_stated(t.hit)]
+    result = []
+    for t in tagged:
+        host = next((s for s in stated if s.sentence == t.sentence and (
+            not t.teeth or not s.teeth or set(t.teeth) & set(s.teeth))), None) if incision_depth_open(t.hit) else None
+        result.append(replace(t, hit=replace(t.hit, entry=host.hit.entry, via=None)) if host else t)
+    return result
+
+# Je-Kanal-Position ohne diktierte Kanalzahl: nie hochzählen, der Behandler trägt die Anzahl ein.
+CANALS_OPEN = "Kanalzahl nicht diktiert – je Kanal berechnen"
+# Eine Kanalzahl an einer Fundstelle mit mehreren Zähnen: gilt je Zahn, aber der Behandler prüft sie.
+CANALS_TEETH = "mehrere Zähne genannt – Kanalzahl je Zahn prüfen"
 
 # GOZ-Zuschläge zu chirurgischen Leistungen (Anlage 1, Abschnitt L): Ziffer, Punkte von, bis.
 SURCHARGES: tuple[tuple[str, int, int | None], ...] = (

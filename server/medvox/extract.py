@@ -17,6 +17,7 @@ from medvox.extract_billing import co_payment_offers, drop_included, flag_not_be
 from medvox.extract_build import Builder, Draft, Tagged
 from medvox.extract_catalog import Catalog, load_catalog
 from medvox.extract_conflicts import flag_conflicts
+from medvox.extract_endo import adopt_canal_counts, endo_offers
 from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
@@ -68,8 +69,10 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     drafts, extra = settle(catalog, drafts, patient, notes)
     flag_not_beside(catalog, drafts)
     primaries = [d for d in drafts if not d.planned]
+    adopt_canal_counts(catalog, primaries)
     if patient == "kasse":
         extra += co_payment_offers(catalog, primaries)
+        extra += endo_offers(catalog, primaries, primaries + extra)
         primaries = co_payment_basis(catalog, ctx, primaries)
     flag_not_beside(catalog, extra, primaries + extra)
     flag_conflicts(catalog, primaries)

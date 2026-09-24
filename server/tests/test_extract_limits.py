@@ -37,7 +37,8 @@ LIMITED = {
     ("GOZ", "3290"): ("kieferhaelfte", 1), ("GOZ", "3300"): ("kieferhaelfte", 2),
     ("GOZ", "1040"): ("zahn", 1), ("GOZ", "2000"): ("zahn", 1), ("GOZ", "2430"): ("zahn", 1),
     ("GOZ", "4050"): ("zahn", 1), ("GOZ", "4055"): ("zahn", 1), ("GOZ", "4070"): ("zahn", 1), ("GOZ", "4075"): ("zahn", 1),
-    ("GOZ", "2360"): ("kanal", 1), ("GOZ", "2400"): ("kanal", 2), ("GOZ", "2410"): ("kanal", 1), ("GOZ", "2440"): ("kanal", 1),
+    ("GOZ", "2360"): ("kanal", 1), ("GOZ", "2400"): ("kanal", 2), ("GOZ", "2410"): ("kanal", 1), ("GOZ", "2420"): ("kanal", 1),
+    ("GOZ", "2440"): ("kanal", 1),
 }
 CONFIRMED = {("BEMA", "12")}
 

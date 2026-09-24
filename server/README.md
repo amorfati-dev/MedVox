@@ -138,7 +138,11 @@ Angezeigt und kopiert wird `medvox.normalize_display.display_text` des korrigier
 `correct` behebt systematische Whisper-Verhörer anhand eines kuratierten Dental-Lexikons
 ("Artikein" → "Artikain", "Psycho 3" → "PSI 3", "L935d" → "Ä935d") und gibt jede Korrektur
 mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde; häufige
-deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst.
+deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Einige Verhörer
+gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“ → „VitE 3x“ nur vor einer Anzahl, „Röntgen
+zwei“/„Rö zwei“ → „Rö2“ nur, wenn keine weitere Ziffer folgt („Röntgen zwei sechs“ bleibt Zahn 26);
+„2 flächig“ → „zweiflächig“. Zwei-Wort-Ersetzungen greifen nur bei Leerraum zwischen den Wörtern (vor
+„flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert).
 
 `display_text` (`normalize_display.py`) erzeugt daraus den Text, den der Behandler liest und ins PVS
 kopiert: dieselbe Zahn- und Code-Normalisierung wie `normalize` („drei sechs“ → 36, „BEMA dreizehn a“
@@ -171,6 +175,7 @@ Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_mat
 `extract_text.py` (Sätze, Zahngruppen, Plan-Marker, Verneinung, Anzahlen), `extract_patient.py`
 (Patiententyp: Fundstellen auf ihr Paar umstellen, Rückfall ohne Paar), `extract_build.py`
 (Regelfamilien), `extract_billing.py` (Enthaltensein, „nicht neben“, Zuzahlungs-Angebote, Zuschlag),
+`extract_endo.py` (Zuzahlungs-Optionen der Endo, Kanalzahl der Je-Kanal-Zuzahlungen),
 `extract_limits.py` (Höchstzahl aus dem Katalogfeld `max_per`), `extract_rules.py` (die festen
 Fachtabellen zum Nachlesen).
 
@@ -182,8 +187,13 @@ Fachtabellen zum Nachlesen).
   Handlungswort (Extraktion, Osteotomie, X1, Ost1); Befundwörter (retiniert, Längsfraktur) wählen nur
   die Ziffer (48 statt 47a, 45 statt 43/44). „Implantat entfernt“ bleibt GOZ 3000 (Implantat, nicht Zahn;
   beim Kassenpatienten nur ein Hinweis, weil keine Kassenleistung).
-- **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl („3 Kanäle“),
-  ohne Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
+- **Anzahl:** je Zahn ein Vorschlag pro Zahn, je Kanal mit der diktierten Kanalzahl – direkt an der
+  Position („WK mal drei“, „WK*3“, „VitE 3x“, „3x WK“) oder „3 Kanäle“ im Satz; eine Anzahl gilt nur für
+  die Position, an der sie steht („WK 3x, VitE“ → VitE einmal mit Hinweis). Ohne Kanalzahl bleibt es bei
+  1 mit „Kanalzahl nicht diktiert“ – nie hochgezählt. „x3“ ist keine Anzahl, sondern X3 (BEMA 45). Eine
+  Zuzahlung je Kanal (2400, 2420) übernimmt die diktierte Kanalzahl ihrer Basis am selben Zahn („WK*3,
+  Längenbestimmung“ → 3x 2400), samt deren Hinweis zur Kanalzahl (mehrere Zähne genannt). Ohne
+  Zahnangabe „28 Zähne“; Sitzungsleistungen zählen ein wiederholtes Wort („L1, L1“) oder „2x“.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.
@@ -205,7 +215,11 @@ Fachtabellen zum Nachlesen).
     zweiflächig“ → 13b und 2080, „Keramikinlay 36 dreiflächig“ → 13c und 2170), außer die Basis ist am Zahn
     schon erbracht. Ist die Flächenzahl unbekannt und deckt die GOZ-Ziffer mehrere BEMA-Stufen ab (2170 =
     drei- oder vierflächig), trägt die Basis „Flächenzahl nicht erkannt – 13a–d prüfen“. Das erlaubte Zuzahlungs-Paar einer erbrachten BEMA-Position (Kompositfüllung adhäsiv zu
-    13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Andere diktierte Privatziffern werden
+    13a–d) erscheint zusätzlich als `alternative` (nicht in `codes`). Ebenso bei jeder erbrachten
+    Endo-Position (`extract_endo.py`): die erlaubten Zuzahlungen, die sie als Basis nennen (2400
+    Längenbestimmung und 2420 „phys“ neben 32, 2197 neben 34/35), und ihr eigenständiges Privat-Paar (2430 zu 34, erst ab der 4. Einlage) –
+    nur als Option, nie vorausgewählt; eine schon diktierte Position wird nicht noch einmal angeboten.
+    Andere diktierte Privatziffern werden
     auf ihr BEMA-Paar umgestellt („Osteotomie privat“ → 47a) oder mit Hinweis in `notes` weggelassen
     (keine Kassenleistung, z. B. „Implantat entfernt“, Oberflächenanästhesie).
   - `privat`: nur GOZ/GOÄ (`kind: "goz"`); BEMA-Leistungen ohne Privat-Paar (ATG, MHU, BEV) entfallen

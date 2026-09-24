@@ -1,7 +1,8 @@
 """Kuratiertes deutsches Dental-Lexikon mit Fuzzy-Korrektur der Whisper-Ausgabe (WP-6).
 
 ``correct(text)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
-"PSI", "bis Registrat" -> "Bissregistrat") sowie Tokens mit Levenshtein-Distanz
+"PSI", "bis Registrat" -> "Bissregistrat"), Verhörer aus ``CONTEXT_ALIASES`` nur in ihrem
+Zusammenhang ("PTE 3x" -> "VitE 3x", "Röntgen zwei" -> "Rö2") sowie Tokens mit Levenshtein-Distanz
 1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
 Token stehen: Distanz 2 wird nicht mehr geraten, weil das den klinischen Sinn
 verändert hat ("schwere" -> "Schmerz").
@@ -48,7 +49,8 @@ TERMS: tuple[str, ...] = (
     "Kontaktpunkt", "Fissurenversiegelung", "Versiegelung",
     # Endo
     "Trepanation", "Vitalexstirpation", "Wurzelkanalaufbereitung", "Wurzelkanalbehandlung", "Wurzelkanal",
-    "Wurzelkanäle", "Kanal", "Kanäle", "Kanüle", "elektrometrisch", "Längenbestimmung", "medikamentös", "Einlage",
+    "Wurzelkanäle", "Kanal", "Kanäle", "Kanüle", "elektrometrisch", "Längenbestimmung", "Längenbestimmungen",
+    "medikamentös", "Einlage",
     "Kalziumhydroxid", "Wurzelfüllung", "Guttapercha", "provisorisch", "Verschluss",
     "Wurzelspitzenresektion", "Revision",
     # Chirurgie
@@ -85,6 +87,25 @@ ALIASES: dict[tuple[str, ...], str] = {
     ("composite",): "Komposit",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
 }
+# Flächenzahl als Ziffer oder getrennt geschrieben ("2 flächig", "2-flächig", "3flächig") -> "zweiflächig".
+for _n, _word in (("1", "ein"), ("2", "zwei"), ("3", "drei"), ("4", "vier")):
+    for _flaechig in ("flächig", "flaechig"):
+        ALIASES[(_n, _flaechig)] = ALIASES[(_word, _flaechig)] = ALIASES[(_n + _flaechig,)] = _word + "flächig"
+
+# Kurzformen und Verhörer, die nur in ihrem Zusammenhang gelten: ersetzt wird nur, wenn der Text hinter
+# dem Wortfenster auf das Muster passt. "PTE 3x" ist die verhörte Vitalexstirpation (VitE), ein anderes
+# "PTE" bleibt stehen; "Röntgen zwei" ist Rö2, aber "Röntgen zwei sechs" ist Zahn 26.
+_NUMBER_WORDS = "eins|zwei|zwo|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn"
+_COUNT_AFTER = re.compile(
+    rf"\s*(?:[*×]\s*\d|\d+\s*[x×](?!\w)|mal\s+(?:\d|(?:{_NUMBER_WORDS})(?!\w))|(?:{_NUMBER_WORDS})\s*mal(?!\w))",
+    re.I,
+)
+_NO_NUMBER_AFTER = re.compile(rf"(?!\s*(?:\d|null|{_NUMBER_WORDS})(?!\w))", re.I)
+CONTEXT_ALIASES: dict[tuple[str, ...], tuple[str, re.Pattern[str]]] = {("pte",): ("VitE", _COUNT_AFTER)}
+for _n, _word in (("2", "zwei"), ("5", "fünf")):  # Katalog-Kurzformen Rö2 (Ä925a) und Rö5 (Ä925b)
+    for _xray in ("röntgen", "rö"):
+        for _count in (_n, _word):
+            CONTEXT_ALIASES[(_xray, _count)] = ("Rö" + _n, _NO_NUMBER_AFTER)
 
 # Häufige deutsche Wörter, die nie zu einem Begriff "korrigiert" werden dürfen.
 NEVER_CORRECT: frozenset[str] = frozenset("""
@@ -175,17 +196,37 @@ def correct_token(token: str) -> str | None:
     return None if ambiguous else best
 
 
+def _joined(text: str, first: tuple[int, int, str], second: tuple[int, int, str]) -> bool:
+    """Zwei Tokens gehören zusammen: nur Leerraum dazwischen, vor "flächig" auch ein Bindestrich ("2-flächig")."""
+    gap = text[first[1] : second[0]]
+    return gap.isspace() or gap == "-" and second[2].lower() in ("flächig", "flaechig")
+
+
+def _window(text: str, tokens: list[tuple[int, int, str]], i: int) -> tuple[int, str] | None:
+    """(Anzahl Tokens, Ersatz) für ein bekanntes Wortfenster ab Token ``i``, sonst None."""
+    for size in (2, 1):
+        window = tuple(t[2].lower() for t in tokens[i : i + size])
+        if len(window) < size or size == 2 and not _joined(text, tokens[i], tokens[i + 1]):
+            continue
+        rule = CONTEXT_ALIASES.get(window)
+        if rule and rule[1].match(text, tokens[i + size - 1][1]):
+            return size, rule[0]
+        if size == 2 and window in ALIASES:
+            return size, ALIASES[window]
+    return None
+
+
 def correct(text: str) -> tuple[str, list[Correction]]:
     """Korrigierter Text und alle angewandten Korrekturen (Offsets beziehen sich auf ``text``)."""
     tokens = [(m.start(), m.end(), m.group()) for m in _TOKEN.finditer(text)]
     corrections: list[Correction] = []
     i = 0
     while i < len(tokens):
-        pair = tuple(t[2].lower() for t in tokens[i : i + 2])
-        if len(pair) == 2 and pair in ALIASES:
-            start, end = tokens[i][0], tokens[i + 1][1]
-            corrections.append(Correction(text[start:end], ALIASES[pair], start, end))
-            i += 2
+        if window := _window(text, tokens, i):
+            size, replacement = window
+            start, end = tokens[i][0], tokens[i + size - 1][1]
+            corrections.append(Correction(text[start:end], replacement, start, end))
+            i += size
             continue
         start, end, token = tokens[i]
         if (replacement := correct_token(token)) is not None:

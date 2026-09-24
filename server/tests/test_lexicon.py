@@ -188,3 +188,46 @@ def test_bleeding_terms_are_kept():
 )
 def test_bleeding_mishearings_are_corrected(raw, expected):
     assert correct(raw)[0] == expected
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("PTE 3x, WK", "VitE 3x, WK"),
+    ("PTE mal drei", "VitE mal drei"),
+    ("PTE*3", "VitE*3"),
+    ("PTE dreimal", "VitE dreimal"),
+])
+def test_pte_is_vite_only_before_a_count(raw, expected):
+    assert correct(raw)[0] == expected
+
+
+@pytest.mark.parametrize("raw", ["PTE", "PTE besprochen", "Zahn 46 PTE, WK mal drei", "PTE 36"])
+def test_pte_elsewhere_is_left_alone(raw):
+    assert correct(raw) == (raw, [])
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Röntgen zwei, WK", "Rö2, WK"), ("Rö zwei.", "Rö2."), ("Röntgen 2", "Rö2"), ("Röntgen fünf", "Rö5"),
+    ("Röntgen zwei sechs", "Röntgen zwei sechs"),  # Zahn 26, keine Kurzform
+    ("Röntgen 2 6", "Röntgen 2 6"),
+])
+def test_spoken_xray_short_form(raw, expected):
+    assert correct(raw)[0] == expected
+
+
+@pytest.mark.parametrize("raw", ["Röntgen, zwei Kanäle aufbereitet.", "Röntgen. Zwei Kanäle aufbereitet.",
+                                 "Füllung 2, flächig", "Gutta. Percha", "bis, Registrat"])
+def test_word_windows_never_span_punctuation(raw):
+    assert correct(raw) == (raw, [])
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("2 flächig", "zweiflächig"), ("3-flächig", "dreiflächig"), ("4flächig", "vierflächig"),
+    ("zwei flächig", "zweiflächig"), ("1 flächig", "einflächig"),
+])
+def test_surface_count_as_digit_becomes_the_word(raw, expected):
+    assert correct(f"Füllung {raw}")[0] == f"Füllung {expected}"
+
+
+def test_captains_spellings_of_endo_words():
+    assert correct_token("Vitalextirpation") == "Vitalexstirpation"
+    assert correct_token("längenbestimungen") == "Längenbestimmungen"

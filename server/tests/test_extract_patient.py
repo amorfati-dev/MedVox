@@ -82,7 +82,9 @@ def test_each_single_pair_resolves_to_exactly_one_code():
             continue
         dictation = f"{bema.label}, {other.label}."
         for patient, want in (("kasse", bema), ("privat", other)):
-            codes = [(s.system, s.code) for s in run(dictation, patient).suggestions if not s.code.startswith("05")]
+            # Zuzahlungs-Optionen (Endo: 2400 zu BEMA 32) sind keine zweite Ziffer derselben Leistung.
+            codes = [(s.system, s.code) for s in run(dictation, patient).suggestions
+                     if not s.code.startswith("05") and not (s.alternative and s.kind == "zuzahlung")]
             assert codes == [want.key], (dictation, patient, codes)
 
 
@@ -245,8 +247,8 @@ def test_unknown_patient_type_is_rejected():
 
 def test_suggestions_carry_the_evident_short_form():
     kasse = build_response("Zahn drei sechs Wurzelfüllung an drei Kanälen, Leitungsanästhesie.", 1, 1, "kasse")
-    assert [(s.code, s.evident, s.count, s.teeth) for s in kasse.suggestions] == [
-        ("35", "wf", 3, [36]), ("41a", "l1", 1, [36]),
+    assert [(s.code, s.evident, s.count, s.teeth, s.alternative) for s in kasse.suggestions] == [
+        ("35", "wf", 3, [36], False), ("2197", None, 1, [36], True), ("41a", "l1", 1, [36], False),
     ]
     privat = build_response("Zahn vier acht Osteotomie. OPG.", 1, 1, "privat")
     assert {s.code: s.evident for s in privat.suggestions} == {"3030": "ost1", "Ä5004": "opg", "0500": None}

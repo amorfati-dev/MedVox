@@ -19,7 +19,8 @@ FALLBACK_PROMPT = (
     "Zahnarzt-Diktat. Zahn drei sechs mesial okklusal distal, Karies profunda, "
     "Kompositfüllung Adhäsivtechnik, Kofferdam, Infiltrationsanästhesie, "
     "Leitungsanästhesie, PSI, Zahnfilm, OPG, Extraktion, Osteotomie, "
-    "Wurzelkanalaufbereitung, Kürettage, UPT, BEMA 13a, GOZ 2100, Ä935d."
+    "Wurzelkanalaufbereitung, Vitalexstirpation, VitE mal drei, WK, Längenbestimmung, phys, "
+    "Kürettage, UPT, BEMA 13a, GOZ 2100, Ä935d."
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
