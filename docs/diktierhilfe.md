@@ -44,6 +44,7 @@ Einfügen in Evident immer lesen.
 | „Zahn eins eins Wurzelkanalbehandlung drei Kanäle" | 3x 32 |
 | „Zahn vier sechs WK mal drei, VitE mal drei" (getippt „WK*3, VitE*3") | 32*3, 28*3 |
 | „Röntgen zwei" / „Rö zwei" (getippt „Rö2") | Ä925a |
+| „Bissflügel rechts und links" / „Bissflügel beidseits" | Ä925a (privat 2× GOÄ Ä5000, je Projektion) |
 | „Füllung zweiflächig" (getippt auch „2 flächig") | 13b |
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
