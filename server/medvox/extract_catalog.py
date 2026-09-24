@@ -177,8 +177,8 @@ class Catalog:
         """Anzahl je Zeile am iPad änderbar (− / +) und ihre bestätigte Höchstzahl (None = keine).
 
         Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals laut vom Behandler bestätigtem
-        ``max_per`` (Einheit ``sitzung``, Anzahl über 1) – ein Vorschlag oder eine Grenze je Halbjahr/Jahr bzw.
-        je Kieferhälfte gibt kein − / +. Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das
+        ``max_per`` (Einheit ``sitzung``, Anzahl über 1) – ein Vorschlag oder eine Grenze je Kieferhälfte gibt
+        kein − / +; Grenzen je Halbjahr/Jahr stehen als ``sitzung`` und gelten bestätigt mit. Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das
         Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
         """
         unit = self.unit(entry)
