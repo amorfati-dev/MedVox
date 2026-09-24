@@ -1,0 +1,123 @@
+/* Aufnahmeknopf „Ring“ wie Sprachmemos: roter Kern im Ring, das Wort groß darunter. Während der
+   Aufnahme wird der Kern zum Quadrat „Stopp“ und der Ring füllt sich bis zur Abschnittsgrenze
+   (--progress aus RecordButton); beim Senden dreht er sich. Die Maske (schwarz = sichtbar) macht
+   aus der Kreisfläche einen Ring und ist keine Farbe. */
+.record {
+  --record-size: 190px;
+  display: grid;
+  grid-template-areas: "dial" "text";
+  justify-items: center;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  height: auto;
+  padding: 4px 16px 8px;
+  border-radius: 24px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.record-ring {
+  display: block;
+  grid-area: dial;
+  width: var(--record-size);
+  height: var(--record-size);
+  border-radius: 50%;
+  background: conic-gradient(var(--rec) calc(var(--progress, 0) * 1turn), var(--line) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), black calc(100% - 8px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 9px), black calc(100% - 8px));
+}
+.record-core {
+  display: flex;
+  grid-area: dial;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--record-size) - 34px);
+  height: calc(var(--record-size) - 34px);
+  border-radius: 50%;
+  background: var(--rec);
+  color: var(--on-rec);
+  box-shadow: var(--rec-shadow);
+  transition: width 180ms ease, height 180ms ease, border-radius 180ms ease;
+}
+.record-icon {
+  width: 52px;
+  height: 52px;
+}
+.record-text {
+  display: flex;
+  grid-area: text;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+.record-label {
+  font-size: var(--fs-state);
+}
+.record-clock {
+  display: block;
+  font-size: var(--fs-reason);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+/* Aufnahme: Kern wird zum Quadrat „Stopp“, der Ring zeigt die Zeit bis zur Grenze. */
+.record-stopp .record-core {
+  width: calc(var(--record-size) * 0.42);
+  height: calc(var(--record-size) * 0.42);
+  border-radius: 18px;
+}
+.record-stopp .record-icon {
+  display: none;
+}
+.record-final .record-ring {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.record-final .record-clock {
+  color: var(--rec);
+  font-weight: 800;
+}
+.record-neu {
+  --record-size: 120px;
+}
+.record-neu .record-icon {
+  width: 40px;
+  height: 40px;
+}
+.record-neu .record-label {
+  font-size: var(--fs-base);
+}
+/* Senden: der Ring dreht sich, der Kern ist grau. Gesperrt: grauer Kern im gestrichelten Ring. */
+.record-warten .record-ring {
+  background: conic-gradient(var(--busy) 0.28turn, var(--line) 0);
+  animation: spin 1.1s linear infinite;
+}
+.record-warten .record-icon {
+  animation: none;
+}
+.record-erneut .record-core {
+  background: var(--warn);
+  color: var(--on-solid);
+  box-shadow: none;
+}
+.record-erneut .record-ring {
+  background: var(--warn);
+}
+.record:disabled {
+  color: var(--busy);
+  cursor: default;
+}
+.record:disabled .record-core {
+  background: var(--busy-bg);
+  color: var(--busy);
+  box-shadow: none;
+}
+.record:disabled:not(.record-warten) .record-ring {
+  background: none;
+  border: 3px dashed var(--line);
+  -webkit-mask: none;
+  mask: none;
+}

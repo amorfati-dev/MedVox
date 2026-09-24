@@ -69,12 +69,12 @@ mit Hinweis.
 
 | Statusfeld | Bedeutung | Knopf |
 |---|---|---|
-| **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kreis **Aufnehmen** – beginnt ein neues Diktat |
-| **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Quadrat **Stopp**; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
-| **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | gesperrt – warten |
-| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** (weiteres Diktat für denselben Patienten, das bisherige bleibt gespeichert), **Nächster Patient** (Bildschirm leeren, nächste Nummer eingeben) |
-| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | **Erneut senden**, **Weiter aufnehmen** (hängt an), leise **Verwerfen** (löscht das Diktat auch beim Patienten) |
-| **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen** |
+| **Bereit** (weiß, Mikrofon) | nichts läuft | roter Kern im Ring, darunter **Aufnehmen** – beginnt ein neues Diktat |
+| **Aufnahme** (rot, Uhr) | nimmt auf; Balken bis 60 s, die letzten 10 s schraffiert | rotes Stopp-Quadrat im Ring, der sich bis 60 s füllt; darunter **Stopp** und Laufzeit / Grenze (z. B. **0:23 / 1:00**), in den letzten 10 s rot hervorgehoben; **Abschnitt anhängen** sendet das Bisherige, die Aufnahme läuft weiter |
+| **Wird übertragen** (grau) | der Praxis-Mac schreibt ab | **Bitte warten** unter dem grauen Kern; der Ring dreht sich, der Knopf ist gesperrt |
+| **Ergebnis da** (grün) | Liste lesen, abwählen, senden | **Neu** unter dem Aufnahmeknopf (weiteres Diktat für denselben Patienten, das bisherige bleibt gespeichert), **Nächster Patient** (Bildschirm leeren, nächste Nummer eingeben) |
+| **Unterbrochen – nichts verloren** (Bernstein) | 60-s-Grenze, WLAN weg oder Anmeldung abgelaufen; der Abschnitt ist gesichert | bernsteinfarbener Ring und Kern, darunter **Erneut senden**; **Weiter aufnehmen** (hängt an), leise **Verwerfen** (löscht das Diktat auch beim Patienten) |
+| **Fehler** (rot getönt) | Mikrofon, Browser oder ein Abschnitt, den der Server ablehnt | sagt, was zu tun ist, z. B. **Diesen Abschnitt verwerfen**; ein gesperrter Aufnahmeknopf hat einen grauen Kern im gestrichelten Ring |
 
 Rechts steht das Ergebnis **nach Zahn**: je Zahn ein Block, im Kopf leise die Zeile(n), die
 „Ziffern kopieren" liefert. Jede Zeile: Kästchen · Ziffer · Leistung · „wegen: …". Antippen
