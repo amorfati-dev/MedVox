@@ -108,6 +108,21 @@ def test_count_for_several_teeth_is_flagged():
     assert all(any("mehrere Zähne" in f for f in s.decide) for s in wk)
 
 
+def test_adopted_count_keeps_the_several_teeth_note():
+    result = run("Zahn drei sechs, drei sieben WK mal drei, Längenbestimmung.")
+    adopted = [s for s in result.suggestions if s.code in {"2400", "2420"}]
+    assert sorted((s.code, s.teeth, s.count) for s in adopted) == [
+        ("2400", (36,), 3), ("2400", (37,), 3), ("2420", (36,), 3), ("2420", (37,), 3)]
+    assert all(any("mehrere Zähne" in f for f in s.decide) for s in adopted)
+
+
+@pytest.mark.parametrize("said", ["Röntgen, zwei Kanäle aufbereitet", "Röntgen. Zwei Kanäle aufbereitet"])
+def test_xray_before_punctuation_is_no_short_form(said):
+    result = run(f"Zahn drei sechs {said}.")
+    assert not any(s.code == "Ä925a" for s in result.suggestions)
+    assert [s.count for s in result.suggestions if s.code == "32"] == [2]
+
+
 def test_session_counts_are_unchanged():
     assert billable_codes(run("Drei sechs, drei sieben okklusal Karies, BEMA dreizehn a zweimal.").suggestions) == [
         "2x 13a"]

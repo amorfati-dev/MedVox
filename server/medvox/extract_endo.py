@@ -17,7 +17,7 @@ from __future__ import annotations
 from medvox.extract_billing import translate_draft
 from medvox.extract_build import Draft
 from medvox.extract_catalog import Catalog, Entry
-from medvox.extract_rules import CANALS_OPEN
+from medvox.extract_rules import CANALS_OPEN, CANALS_TEETH
 
 ENDO = "Endodontie"
 
@@ -69,4 +69,5 @@ def _canal_count(z: Draft, host: Draft) -> None:
     z.count, z.counted = host.count, True
     if CANALS_OPEN in z.decide:
         z.decide.remove(CANALS_OPEN)
+    z.decide += [f for f in host.decide if f.endswith(CANALS_TEETH) and f not in z.decide]
     z.limit_note = f"Kanalzahl wie {host.entry.label} ({host.count}×)"

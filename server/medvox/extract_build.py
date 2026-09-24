@@ -16,6 +16,7 @@ from medvox.extract_catalog import Catalog, Entry
 from medvox.extract_match import Hit
 from medvox.extract_rules import (
     CANALS_OPEN,
+    CANALS_TEETH,
     INCISION,
     INCISION_REPEATED,
     INCISION_TEETH,
@@ -275,7 +276,7 @@ class Builder:
         if t.teeth:
             teeth = _unique(t.teeth)
             if said and len(teeth) > 1:
-                flag = f"{said}× diktiert, mehrere Zähne genannt – Kanalzahl je Zahn prüfen"
+                flag = f"{said}× diktiert, {CANALS_TEETH}"
             for tooth in teeth:
                 self.add(entry, tooth.fdi, t, canals or 1, flag).counted |= canals is not None
             return

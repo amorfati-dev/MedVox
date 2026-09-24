@@ -95,6 +95,8 @@ def incision_depth(tagged: list) -> list:
 
 # Je-Kanal-Position ohne diktierte Kanalzahl: nie hochzählen, der Behandler trägt die Anzahl ein.
 CANALS_OPEN = "Kanalzahl nicht diktiert – je Kanal berechnen"
+# Eine Kanalzahl an einer Fundstelle mit mehreren Zähnen: gilt je Zahn, aber der Behandler prüft sie.
+CANALS_TEETH = "mehrere Zähne genannt – Kanalzahl je Zahn prüfen"
 
 # GOZ-Zuschläge zu chirurgischen Leistungen (Anlage 1, Abschnitt L): Ziffer, Punkte von, bis.
 SURCHARGES: tuple[tuple[str, int, int | None], ...] = (

@@ -196,11 +196,17 @@ def correct_token(token: str) -> str | None:
     return None if ambiguous else best
 
 
+def _joined(text: str, first: tuple[int, int, str], second: tuple[int, int, str]) -> bool:
+    """Zwei Tokens gehören zusammen: nur Leerraum dazwischen, vor "flächig" auch ein Bindestrich ("2-flächig")."""
+    gap = text[first[1] : second[0]]
+    return gap.isspace() or gap == "-" and second[2].lower() in ("flächig", "flaechig")
+
+
 def _window(text: str, tokens: list[tuple[int, int, str]], i: int) -> tuple[int, str] | None:
     """(Anzahl Tokens, Ersatz) für ein bekanntes Wortfenster ab Token ``i``, sonst None."""
     for size in (2, 1):
         window = tuple(t[2].lower() for t in tokens[i : i + size])
-        if len(window) < size:
+        if len(window) < size or size == 2 and not _joined(text, tokens[i], tokens[i + 1]):
             continue
         rule = CONTEXT_ALIASES.get(window)
         if rule and rule[1].match(text, tokens[i + size - 1][1]):

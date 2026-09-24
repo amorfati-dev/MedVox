@@ -214,6 +214,12 @@ def test_spoken_xray_short_form(raw, expected):
     assert correct(raw)[0] == expected
 
 
+@pytest.mark.parametrize("raw", ["Röntgen, zwei Kanäle aufbereitet.", "Röntgen. Zwei Kanäle aufbereitet.",
+                                 "Füllung 2, flächig", "Gutta. Percha", "bis, Registrat"])
+def test_word_windows_never_span_punctuation(raw):
+    assert correct(raw) == (raw, [])
+
+
 @pytest.mark.parametrize("raw, expected", [
     ("2 flächig", "zweiflächig"), ("3-flächig", "dreiflächig"), ("4flächig", "vierflächig"),
     ("zwei flächig", "zweiflächig"), ("1 flächig", "einflächig"),
