@@ -1,8 +1,8 @@
 // Steuerung unter dem Statusfeld: Aufnahmeknopf und die Aktionen des jeweiligen Zustands.
 // Nur Anzeige – alle Aktionen sind die von useDictation (stop, next, resume, retry, dropSegment)
 // bzw. „neues Diktat“, „nächster Patient“ und „verwerfen“ aus der Diktat-Ansicht.
-import type { Dictation } from "../hooks/useDictation";
-import type { UiState } from "../status";
+import { MAX_SECONDS, type Dictation } from "../hooks/useDictation";
+import { formatClock, type UiState } from "../status";
 import { Icon } from "./Icon";
 import { RecordButton } from "./RecordButton";
 
@@ -20,7 +20,13 @@ export function Controls({ state, d, onNew, onNext, onDiscard, handedOver }: Pro
     case "aufnahme":
       return (
         <div className="controls">
-          <RecordButton variant="stopp" onClick={d.stop} />
+          <RecordButton
+            variant="stopp"
+            onClick={d.stop}
+            progress={d.seconds / MAX_SECONDS}
+            clock={`${formatClock(d.seconds)} / ${formatClock(MAX_SECONDS)}`}
+            final={d.remaining <= 10}
+          />
           <button type="button" className="btn btn-block" onClick={d.next}>
             <Icon name="plus" />
             <span className="btn-text">

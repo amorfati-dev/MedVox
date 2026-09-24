@@ -1,4 +1,4 @@
-/* Statusfeld (Farbe + Symbol + Wort) und Aufnahmeknopf (Kreis ⇄ Quadrat). */
+/* Statusfeld (Farbe + Symbol + Wort) und Steuerung darunter. */
 .status {
   border-radius: var(--radius);
   padding: 16px 18px;
@@ -98,57 +98,12 @@
   background: repeating-linear-gradient(135deg, var(--on-rec-hatch) 0 4px, transparent 4px 9px);
 }
 
-/* Aufnahmeknopf: Kreis ⇄ Quadrat */
+/* Steuerung unter dem Statusfeld; der Aufnahmeknopf selbst steht in record.css. */
 .controls {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-}
-.record {
-  --record-size: 190px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: var(--record-size);
-  height: var(--record-size);
-  border-radius: 50%;
-  border: none;
-  background: var(--rec);
-  color: var(--on-rec);
-  font: inherit;
-  font-size: 1.1rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: var(--rec-shadow);
-  -webkit-tap-highlight-color: transparent;
-  transition: border-radius 150ms ease;
-}
-.record-icon {
-  width: 44px;
-  height: 44px;
-}
-.record-stopp {
-  border-radius: 28px;
-}
-.record-stopp .record-icon {
-  fill: currentColor;
-}
-.record-neu {
-  --record-size: 120px;
-}
-.record-erneut {
-  background: var(--warn);
-  color: var(--on-solid);
-  box-shadow: none;
-}
-.record:disabled {
-  background: var(--busy-bg);
-  color: var(--busy);
-  box-shadow: none;
-  cursor: default;
 }
 .btn-text {
   display: flex;
@@ -161,4 +116,3 @@
   font-weight: 400;
   color: var(--ink-2);
 }
-
