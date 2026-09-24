@@ -22,6 +22,7 @@ from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
 from medvox.extract_text import TextContext
+from medvox.extract_xray import bitewing_projections
 from medvox.normalize import ToothRef
 
 
@@ -67,6 +68,8 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     drafts = drop_included(builder.build(translate(catalog, tagged, patient)), notes)
     pair_flags(catalog, drafts)
     drafts, extra = settle(catalog, drafts, patient, notes)
+    if patient == "privat":
+        bitewing_projections(ctx, drafts)
     flag_not_beside(catalog, drafts)
     primaries = [d for d in drafts if not d.planned]
     adopt_canal_counts(catalog, primaries)

@@ -8,7 +8,7 @@ Grenze: whisper.cpp nimmt vom Prompt höchstens `n_text_ctx / 2` Token (`max_pro
 `src/whisper.cpp`), eines davon für das Vorgänger-Zeichen, und schneidet vorne ab – zuerst ginge also
 der Anfang des Grundtexts verloren. Nachgemessen am 24.09.2026 mit dem installierten
 `ggml-large-v3-turbo.bin` (whisper.cpp-Stand aus `infra/whisper/install.sh`): `n_text_ctx` 448, also
-223 Token Text; der Grundtext aus `infra/whisper/prompt.txt` hat 150. Ab dem zweiten 30-s-Fenster einer
+223 Token Text; der Grundtext aus `infra/whisper/prompt.txt` hat 154. Ab dem zweiten 30-s-Fenster einer
 Aufnahme teilt sich der Platz mit dem bis dahin erkannten Text – das bestimmt whisper.cpp, nicht MedVox.
 
 Gezählt wird wie in whisper.cpp (`tokenize`): Text nach dessen Regex in Wörter teilen (Buchstaben nur

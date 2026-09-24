@@ -81,7 +81,7 @@ kommt, sonst direkt vom Peer.
 | `POST /dentists` | ja | JSON `{"name": "Dr. Hartmann", "practitioner_id"?: "12"}` (Name 1–60 Zeichen, Nummer ≤ 20 Zeichen `A-Za-z0-9./-`) | der neue Behandler |
 | `PATCH /dentists/{id}` | ja | JSON mit beliebigen von `name`, `practitioner_id` (leer = keine), `active` | der geänderte Behandler; 404 |
 | `DELETE /dentists/{id}` | ja | – | inaktiv setzen (nie löschen): der Behandler mit `active: false`; 404 |
-| `GET /lexicon` | ja | – | `{"entries": [{id, kind, wrong, right, active, source, created_at}], "builtin": [{wrong, right}], "prompt": {base, base_tokens, terms_tokens, limit, exact}}` – Wörterbuch der Praxis (`kind` = `ersetzung` \| `begriff`, `source` = `hand` \| `korrektur`), eingeschaltete zuerst; `builtin` = die zehn eingebauten Ersetzungen (nur lesen); `prompt` = Grundtext und Füllstand in Token (`limit` 223 bei allen Whisper-Modellen, `exact` = mit dem Modell-Vokabular gezählt) |
+| `GET /lexicon` | ja | – | `{"entries": [{id, kind, wrong, right, active, source, created_at}], "builtin": [{wrong, right}], "prompt": {base, base_tokens, terms_tokens, limit, exact}}` – Wörterbuch der Praxis (`kind` = `ersetzung` \| `begriff`, `source` = `hand` \| `korrektur`), eingeschaltete zuerst; `builtin` = die dreizehn eingebauten Ersetzungen (nur lesen); `prompt` = Grundtext und Füllstand in Token (`limit` 223 bei allen Whisper-Modellen, `exact` = mit dem Modell-Vokabular gezählt) |
 | `POST /lexicon` | ja | JSON `{"kind": "ersetzung"\|"begriff", "wrong"?: str, "right": str, "source"?: "hand"\|"korrektur"}` | der neue, eingeschaltete Eintrag – gilt ab der nächsten Anfrage (kein Neustart); Schutzregel verletzt (Ziffer/Zahlwort, Allerweltswort allein, eingebaute Ersetzung oder eingebauter Fachbegriff, schon vorhanden, Prompt voll): 422 mit Begründung |
 | `PUT /lexicon/{id}` | ja | JSON `{"active": bool}` | ab- oder wieder einschalten (nie löschen; beim Einschalten gelten die Schutzregeln erneut); 404, 422 |
 | `GET /lexicon/suggestions` | ja | – | `{"suggestions": [{kind, before, after, count, takeable, taken}], "total", "first_week", "last_week"}` – gleiche Änderungen aus der Korrektur-Sammlung gezählt (Textstellen ohne gemeinsames Umfeld), häufigste zuerst, höchstens 30; `takeable` nur für Textpaare, die die Schutzregeln bestehen; Ziffernänderungen sind nur Information |
@@ -145,7 +145,7 @@ Ersetzungen „falsch gehört → richtig“ (1–3 ganze Wörter) gehen je Anfr
 Fachbegriffe hinter den Grundtext in den Prompt (`whisper_prompt.compose`; keine unscharfe Korrektur für sie).
 Beides wird bei jeder Transkription und jedem `/analyze` aus SQLite gelesen – kein Neustart, kein `make install`.
 Einträge werden nur abgeschaltet, nie gelöscht. Prompt-Grenze nachgemessen mit dem installierten
-ggml-large-v3-turbo (`n_text_ctx` 448 → 223 Token Text, Grundtext 150 Token; Einzelheiten im Docstring von
+ggml-large-v3-turbo (`n_text_ctx` 448 → 223 Token Text, Grundtext 154 Token; Einzelheiten im Docstring von
 `medvox/whisper_prompt.py`): ein Begriff, der nicht mehr passt, wird abgelehnt, statt dass whisper.cpp den
 Anfang des Grundtexts abschneidet.
 
@@ -168,7 +168,8 @@ Angezeigt und kopiert wird `medvox.normalize_display.display_text` des korrigier
 ("Artikein" → "Artikain", "Psycho 3" → "PSI 3", "L935d" → "Ä935d") und gibt jede Korrektur
 mit ihren Zeichen-Offsets zurück, damit die UI zeigen kann, was geändert wurde; häufige
 deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefasst. Einige Verhörer
-gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“ → „VitE 3x“ nur vor einer Anzahl, „Röntgen
+gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“/„2x WD“ → VitE nur neben einer Anzahl (davor oder
+dahinter), „MET“ → „med“ nur im Abschnitt eines Zahns mit Wurzelkanalbehandlung (`lexicon_endo.py`), „Röntgen
 zwei“/„Rö zwei“ → „Rö2“ nur, wenn keine weitere Ziffer folgt („Röntgen zwei sechs“ bleibt Zahn 26);
 „2 flächig“ → „zweiflächig“. Zwei-Wort-Ersetzungen greifen nur bei Leerraum zwischen den Wörtern (vor
 „flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert). Dazu kommen je

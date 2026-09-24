@@ -2,8 +2,9 @@
 
 ``correct(text, extra)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
 "PSI", "bis Registrat" -> "Bissregistrat"), Verhörer aus ``CONTEXT_ALIASES`` nur in ihrem
-Zusammenhang ("PTE 3x" -> "VitE 3x", "Röntgen zwei" -> "Rö2") sowie Tokens mit Levenshtein-Distanz
-1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
+Zusammenhang ("PTE 3x" -> "VitE 3x", "2x WD" -> "2x VitE", "Röntgen zwei" -> "Rö2", "MET" -> "med"
+nur am Zahn mit Wurzelkanalbehandlung) sowie Tokens
+mit Levenshtein-Distanz 1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
 Token stehen: Distanz 2 wird nicht mehr geraten, weil das den klinischen Sinn
 verändert hat ("schwere" -> "Schmerz").
 ``extra`` sind die Ersetzungen aus dem Wörterbuch der Praxis (``medvox/lexicon_entries.py``, je Anfrage
@@ -18,6 +19,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+
+from medvox.lexicon_endo import ENDO_ONLY, endo_only
 
 
 @dataclass(frozen=True)
@@ -87,10 +90,11 @@ ALIASES: dict[tuple[str, ...], str] = {
     ("psycho",): "PSI", ("goetz",): "GOZ", ("götz",): "GOZ",
     ("occlusal",): "okklusal", ("perichoronitis",): "Perikoronitis",
     ("bis", "registrat"): "Bissregistrat", ("biss", "registrat"): "Bissregistrat",
-    ("composite",): "Komposit",
+    ("composite",): "Komposit", ("bisflügel",): "Bissflügel",
+    ("bisflügelaufnahme",): "Bissflügelaufnahme", ("bisflügelaufnahmen",): "Bissflügelaufnahmen",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
 }
-# Die zehn von Hand gepflegten Ersetzungen oben; die Wörterbuch-Seite zeigt sie, ohne sie änderbar zu machen.
+# Die dreizehn von Hand gepflegten Ersetzungen oben; die Wörterbuch-Seite zeigt sie, ohne sie änderbar zu machen.
 BUILTIN_SHOWN: tuple[tuple[tuple[str, ...], str], ...] = tuple(ALIASES.items())
 # Flächenzahl als Ziffer oder getrennt geschrieben ("2 flächig", "2-flächig", "3flächig") -> "zweiflächig".
 for _n, _word in (("1", "ein"), ("2", "zwei"), ("3", "drei"), ("4", "vier")):
@@ -98,19 +102,25 @@ for _n, _word in (("1", "ein"), ("2", "zwei"), ("3", "drei"), ("4", "vier")):
         ALIASES[(_n, _flaechig)] = ALIASES[(_word, _flaechig)] = ALIASES[(_n + _flaechig,)] = _word + "flächig"
 
 # Kurzformen und Verhörer, die nur in ihrem Zusammenhang gelten: ersetzt wird nur, wenn der Text hinter
-# dem Wortfenster auf das Muster passt. "PTE 3x" ist die verhörte Vitalexstirpation (VitE), ein anderes
-# "PTE" bleibt stehen; "Röntgen zwei" ist Rö2, aber "Röntgen zwei sechs" ist Zahn 26.
+# dem Wortfenster auf das erste Muster passt oder der Text davor auf das zweite. "PTE 3x" und "2x WD" sind
+# die verhörte Vitalexstirpation (VitE), ein anderes "PTE"/"WD" bleibt stehen; "Röntgen zwei" ist Rö2,
+# aber "Röntgen zwei sechs" ist Zahn 26.
 _NUMBER_WORDS = "eins|zwei|zwo|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn"
 _COUNT_AFTER = re.compile(
     rf"\s*(?:[*×]\s*\d|\d+\s*[x×](?!\w)|mal\s+(?:\d|(?:{_NUMBER_WORDS})(?!\w))|(?:{_NUMBER_WORDS})\s*mal(?!\w))",
     re.I,
 )
+# Anzahl direkt davor ("2x WD", "2 mal WD", "zweimal WD"); wird am Ende des Textes vor dem Fenster gesucht.
+_COUNT_BEFORE = re.compile(rf"(?<!\w)(?:\d+\s*[x×]|(?:\d+|{_NUMBER_WORDS})\s*mal)\s*\Z", re.I)
 _NO_NUMBER_AFTER = re.compile(rf"(?!\s*(?:\d|null|{_NUMBER_WORDS})(?!\w))", re.I)
-CONTEXT_ALIASES: dict[tuple[str, ...], tuple[str, re.Pattern[str]]] = {("pte",): ("VitE", _COUNT_AFTER)}
+_ContextRule = tuple[str, re.Pattern[str], "re.Pattern[str] | None"]
+CONTEXT_ALIASES: dict[tuple[str, ...], _ContextRule] = {
+    ("pte",): ("VitE", _COUNT_AFTER, _COUNT_BEFORE), ("wd",): ("VitE", _COUNT_AFTER, _COUNT_BEFORE),
+}
 for _n, _word in (("2", "zwei"), ("5", "fünf")):  # Katalog-Kurzformen Rö2 (Ä925a) und Rö5 (Ä925b)
     for _xray in ("röntgen", "rö"):
         for _count in (_n, _word):
-            CONTEXT_ALIASES[(_xray, _count)] = ("Rö" + _n, _NO_NUMBER_AFTER)
+            CONTEXT_ALIASES[(_xray, _count)] = ("Rö" + _n, _NO_NUMBER_AFTER, None)
 
 # Häufige deutsche Wörter, die nie zu einem Begriff "korrigiert" werden dürfen.
 NEVER_CORRECT: frozenset[str] = frozenset("""
@@ -218,6 +228,12 @@ def _joined(text: str, first: tuple[int, int, str], second: tuple[int, int, str]
     return gap.isspace() or gap == "-" and second[2].lower() in ("flächig", "flaechig")
 
 
+def _in_context(text: str, rule: _ContextRule, start: int, end: int) -> bool:
+    """Der Text hinter dem Fenster passt auf das erste Muster oder der Text davor auf das zweite."""
+    _, after, before = rule
+    return bool(after.match(text, end) or before and before.search(text, 0, start))
+
+
 def _window(
     text: str, tokens: list[tuple[int, int, str]], i: int, extra: dict[tuple[str, ...], str]
 ) -> tuple[int, str] | None:
@@ -230,7 +246,7 @@ def _window(
         if len(window) < size or any(not _joined(text, tokens[k], tokens[k + 1]) for k in range(i, i + size - 1)):
             continue
         rule = CONTEXT_ALIASES.get(window)
-        if rule and rule[1].match(text, tokens[i + size - 1][1]):
+        if rule and _in_context(text, rule, tokens[i][0], tokens[i + size - 1][1]):
             return size, rule[0]
         if window in ALIASES:
             return size, ALIASES[window]
@@ -256,9 +272,13 @@ def correct(text: str, extra: dict[tuple[str, ...], str] | None = None) -> tuple
             i += size
             continue
         start, end, token = tokens[i]
-        if (replacement := correct_token(token)) is not None:
+        if token.lower() in ENDO_ONLY:
+            pass  # erst unten, wenn alle Korrekturen (auch "2x WD" -> VitE) feststehen
+        elif (replacement := correct_token(token)) is not None:
             corrections.append(Correction(token, replacement, start, end))
         i += 1
+    corrections += [Correction(*hit) for hit in endo_only(text, tokens, corrections)]
+    corrections.sort(key=lambda c: c.start)
     pieces, last = [], 0
     for c in corrections:
         pieces += [text[last : c.start], c.corrected]
