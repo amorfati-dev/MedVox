@@ -173,6 +173,20 @@ class Catalog:
             return "tooth"
         return "session"
 
+    def stepper(self, entry: Entry) -> tuple[bool, int | None]:
+        """Anzahl je Zeile am iPad änderbar (− / +) und ihre bestätigte Höchstzahl (None = keine).
+
+        Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals laut vom Behandler bestätigtem
+        ``max_per`` (Einheit ``sitzung``, Anzahl über 1) – ein Vorschlag, eine Grenze je Kieferhälfte oder je
+        Halbjahr/Jahr (``halbjahr``/``jahr``, IP4, 4000, 4005) gibt kein − / +, auch bestätigt nicht.
+        Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
+        """
+        unit = self.unit(entry)
+        per_session = entry.limit is not None and entry.limit[0] == "sitzung"
+        counted = unit == "canal" or (unit == "session" and per_session)
+        limit = entry.limit[1] if entry.limit and entry.limit[0] != "kanal" else None
+        return counted and (limit is None or limit > 1), limit
+
     def counterparts(self, entry: Entry) -> list[Counterpart]:
         """Privat-Gegenstücke einer BEMA-Position laut Regeltext (auch solche, die nicht im Katalog stehen)."""
         if entry.system != "BEMA":

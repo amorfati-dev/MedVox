@@ -2,6 +2,7 @@
 // kopierten Evident-Zeile, dann „Geplant – wird nicht abgerechnet“ und „Hinweise“. Am Fuß jedes Zahnblocks
 // und unter der Liste öffnet sich das Katalog-Blatt (Ziffer ändern oder ergänzen), sofern `onEdit` da ist.
 import type { PatientType, Suggestion } from "../api";
+import type { Counter } from "../hooks/useCorrection";
 import type { Counts, Group } from "../result";
 import { plural } from "../status";
 import { CopyButton } from "./CopyButton";
@@ -44,9 +45,10 @@ type Props = {
   onAdopt: (key: string) => void;
   onEdit?: (tooth: number | undefined) => void; // Katalog-Blatt: an diesem Zahn, undefined = Zahn erst wählen
   onRemove?: (s: Suggestion) => void; // Zeile „von Hand“ entfernen
+  counter?: Counter | null; // Anzahl mit − / + ändern
 };
 
-export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove }: Props) {
+export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, onEdit, onRemove, counter }: Props) {
   const elsewhere = onEdit && (
     <button type="button" className="list-add" onClick={() => onEdit(undefined)}>
       <Icon name="plus" />
@@ -83,7 +85,7 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
           <ul className="rows">
             {g.items.map((item) =>
               "row" in item ? (
-                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
+                <ResultRow key={item.row.key} row={item.row} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} counter={counter} />
               ) : "frame" in item ? (
                 <FrameRows
                   key={item.frame.key}
@@ -92,9 +94,10 @@ export function ResultList({ groups, planned: plans, notes, onToggle, onAdopt, o
                   onToggle={onToggle}
                   onAdopt={onAdopt}
                   onRemove={onRemove}
+                  counter={counter}
                 />
               ) : (
-                <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} />
+                <OptionRow key={item.option.key} option={item.option} onAdopt={onAdopt} counter={counter} />
               ),
             )}
           </ul>

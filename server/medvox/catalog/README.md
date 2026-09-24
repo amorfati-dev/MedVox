@@ -76,14 +76,19 @@ in derselben Datei, und das Paar einer Position trägt denselben Konflikt mit de
 erscheinen in `PRUEFLISTE.md`.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
-(je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche` – oder `unbegrenzt` ohne `count`, wo
+(je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche`, `halbjahr`, `jahr` – oder `unbegrenzt` ohne `count`, wo
 der amtliche Text keine Grenze nennt (nie eine erfinden). Jeder v1-Eintrag trägt das Feld, geprüft gegen
-KZBV-Gesamtfassung bzw. GOZ-Text; Grenzen über längere Zeiträume („einmal je Kalenderhalbjahr“,
-„höchstens zweimal je Jahr“) gelten mit derselben Anzahl je Sitzung. Jede Höchstzahl mit `count` trägt
+KZBV-Gesamtfassung bzw. GOZ-Text; Grenzen über längere Zeiträume („einmal je Kalenderhalbjahr (hohes
+Kariesrisiko: zweimal)“, „höchstens zweimal je Jahr“) stehen mit `count` über 1 als `halbjahr` bzw. `jahr`
+(IP4, 4000, 4005; `validate.py` lehnt sie als `sitzung` ab); mit `count` 1 (01, IP1, 1000) darf `sitzung`
+stehen. Der Extraktor begrenzt eine bestätigte Grenze je Halbjahr/Jahr auf dieselbe Anzahl je Sitzung
+(frühere Sitzungen kennt er nicht). Jede Höchstzahl mit `count` trägt
 `max_per_status`: `vorschlag` = aus dem amtlichen Text gelesen, wartet auf die Bestätigung des Behandlers;
 `bestaetigt` = vom Behandler bestätigt. Der Extraktor begrenzt die Anzahl nur bei `bestaetigt`
 (`extract_limits.py`), bisher nur BEMA 12; ein Vorschlag ändert an den Vorschlägen nichts, bis der
-Behandler ihn bestätigt (ein Wechsel auf `bestaetigt` je Eintrag). Bereiche aus der FDI-Nummer: Frontzahnbereich = 13–23 bzw. 33–43,
+Behandler ihn bestätigt (ein Wechsel auf `bestaetigt` je Eintrag). Anzahl − / + am iPad
+(`Catalog.stepper`): je Kanal (Regel „je Kanal“), oder `sitzung` mit `count` über 1 nur bei `bestaetigt` (nie aus einem Vorschlag) – nie bei `halbjahr`/`jahr`
+oder `kieferhaelfte`, auch bestätigt nicht (IP4, 4000, 4005, 2030, 3300). Bereiche aus der FDI-Nummer: Frontzahnbereich = 13–23 bzw. 33–43,
 Kieferhälfte = Seitenzähne 4–8 eines Quadranten (KZVB-Abrechnungsmappe zu BEMA 12). Im erweiterten
 Katalog fehlt das Feld noch (gilt als ungeprüft/unbegrenzt).
 

@@ -89,12 +89,12 @@
           "items": {"type": "string", "minLength": 3}
         },
         "max_per": {
-          "description": "Höchstzahl laut amtlichem Text: count-mal je unit (Diktat = eine Sitzung; kieferhaelfte = je Kieferhälfte oder Frontzahnbereich). unbegrenzt ohne count, wo der Text keine Grenze nennt. Fehlt das Feld, gilt unbegrenzt (noch nicht geprüft). Der Extraktor begrenzt die Anzahl nur, wenn max_per_status \"bestaetigt\" ist.",
+          "description": "Höchstzahl laut amtlichem Text: count-mal je unit (Diktat = eine Sitzung; kieferhaelfte = je Kieferhälfte oder Frontzahnbereich; halbjahr/jahr = je Kalenderhalbjahr/Jahr laut Regeltext, nie als sitzung). unbegrenzt ohne count, wo der Text keine Grenze nennt. Fehlt das Feld, gilt unbegrenzt (noch nicht geprüft). Der Extraktor begrenzt die Anzahl nur, wenn max_per_status \"bestaetigt\" ist.",
           "type": "object",
           "required": ["unit"],
           "additionalProperties": false,
           "properties": {
-            "unit": {"enum": ["sitzung", "kieferhaelfte", "zahn", "kanal", "flaeche", "unbegrenzt"]},
+            "unit": {"enum": ["sitzung", "kieferhaelfte", "zahn", "kanal", "flaeche", "halbjahr", "jahr", "unbegrenzt"]},
             "count": {"type": "integer", "minimum": 1}
           }
         },

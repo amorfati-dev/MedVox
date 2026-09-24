@@ -24,6 +24,7 @@ export type Suggestion = {
   evident?: string | null; // Evident-Kurzform aus dem Katalog ("l1"), sonst die Ziffer verwenden
   source?: Source; // fehlt = regel (Extraktor)
   replaced?: string; // nur am iPad: Ziffer, die „geaendert“ an diesem Zahn ersetzt hat (13b bei 13c)
+  counted?: number; // nur am iPad: Anzahl mit − / + von Hand gesetzt; Wert = diktierte Anzahl davor, 0 = nicht diktiert (correction.ts setCount)
 };
 // Herkunft eines Vorschlags: Extraktor, am iPad aus dem Katalog ergänzt, am iPad ersetzt (correction.ts).
 export type Source = "regel" | "hand" | "geaendert";

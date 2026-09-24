@@ -1733,7 +1733,7 @@
         "Privatpatient/Erwachsene: GOZ 1020"
       ],
       "max_per": {
-        "unit": "sitzung",
+        "unit": "halbjahr",
         "count": 2
       },
       "max_per_status": "vorschlag",
@@ -3888,7 +3888,7 @@
         "Kassenpatient: BEMA 4"
       ],
       "max_per": {
-        "unit": "sitzung",
+        "unit": "jahr",
         "count": 2
       },
       "max_per_status": "vorschlag",
@@ -3940,7 +3940,7 @@
         "Kassenpatient: BEMA 04"
       ],
       "max_per": {
-        "unit": "sitzung",
+        "unit": "jahr",
         "count": 2
       },
       "max_per_status": "vorschlag",

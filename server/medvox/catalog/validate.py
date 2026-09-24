@@ -29,6 +29,8 @@ CODE_FORMAT = {
     "GOÄ": re.compile(r"^Ä\d{1,4}$"),
 }
 ANNOTATIONS = {"$schema", "$id", "title", "description", "$defs"}
+# Grenzen über längere Zeiträume: eigene max_per-Einheit, nie `sitzung` mit count > 1 (sonst − / + am iPad)
+PERIOD = {"halbjahr": re.compile(r"je Kalenderhalbjahr", re.I), "jahr": re.compile(r"je (?:Kalender)?jahr", re.I)}
 # Reihenfolge der Fachbereiche in der Review-Tabelle (GOZ-Nummern springen zwischen Bereichen)
 AREAS = review.AREAS
 TYPES = {
@@ -129,6 +131,9 @@ def check_rules(catalog: dict) -> tuple[list[str], list[str]]:
             errors.append(f"{label}: max_per braucht 'count' genau dann, wenn 'unit' nicht 'unbegrenzt' ist")
         if ("max_per_status" in e) != bool(limit and "count" in limit):
             errors.append(f"{label}: max_per_status gehört genau zu einer Höchstzahl mit 'count'")
+        said = [u for u, rx in PERIOD.items() if any(rx.search(r) for r in e["rules"])]
+        if limit and (limit["unit"] in PERIOD and limit["unit"] not in said or limit["unit"] == "sitzung" and limit.get("count", 1) > 1 and said):
+            errors.append(f"{label}: Grenze je Halbjahr/Jahr als max_per 'halbjahr'/'jahr' eintragen, passend zum Regeltext")
         for kw in e["keywords"]:
             if kw != kw.strip() or "  " in kw:
                 errors.append(f"{label}: Keyword {kw!r} hat überflüssige Leerzeichen")
