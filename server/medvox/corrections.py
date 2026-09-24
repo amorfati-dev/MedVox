@@ -6,7 +6,8 @@ es ab, bleiben davon nur die geänderten Stellen – beim Verwerfen oder Lösche
 
 - Text: je geänderte Stelle vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (zusammen
   höchstens 4); Stellen, deren Umfeld sich berührt, zählen als eine. Stellen mit mehr als 12 geänderten
-  Wörtern werden verworfen.
+  Wörtern werden verworfen, ebenso Stellen, die vorher oder nachher mehr als die Hälfte der Wörter des
+  Diktats umfassen (ein ganz neu geschriebenes kurzes Diktat hinterlässt keinen Text).
 - Ziffern: `13b` → `13c` (Familie ersetzt), `` → `107` (ergänzt), `13b` → `` (abgewählt oder entfallen),
   `25` → `2x 25` (Anzahl), ohne Zahn.
 
@@ -48,7 +49,8 @@ def text_spots(before: str, after: str) -> list[tuple[str, str]]:
     """Geänderte Stellen (vorher, nachher) mit höchstens `AROUND` Wörtern Umfeld je Seite.
 
     Stellen, deren Umfeld sich berührt oder überschneidet, sind eine Stelle; die Grenze `MAX_SPOT` gilt
-    für diese ganze Stelle – sonst ergäben mehrere kurze Stellen zusammen den Text.
+    für diese ganze Stelle – sonst ergäben mehrere kurze Stellen zusammen den Text. Umfasst eine Stelle
+    vorher oder nachher mehr als die Hälfte der Wörter, fällt sie weg (nie der ganze Text, auch kurz nicht).
     """
     a, b = before.split(), after.split()
     merged: list[list[int]] = []
@@ -65,6 +67,8 @@ def text_spots(before: str, after: str) -> list[tuple[str, str]]:
             continue
         old = a[max(0, i1 - AROUND):i2 + AROUND]
         new = b[max(0, j1 - AROUND):j2 + AROUND]
+        if 2 * len(old) > len(a) or 2 * len(new) > len(b):
+            continue
         spots.append((" ".join(old), " ".join(new)))
     return spots
 

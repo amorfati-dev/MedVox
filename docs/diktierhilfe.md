@@ -213,7 +213,9 @@ und wird mit ihm gelöscht (übertragen, spätestens nach 24 Stunden). Damit Med
 lernen kann (Wörterbuch, ab der nächsten Ausbaustufe), bleiben beim Übertragen oder Ablauf – nicht beim
 Verwerfen oder Löschen – nur die **geänderten Stellen** stehen (Entscheidung des Behandlers): je Stelle
 vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (nahe Stellen, deren Umfeld sich
-berührt, zählen als eine; Stellen mit mehr als 12 geänderten Wörtern werden verworfen), dazu die Ziffernänderungen ohne Zahn (z. B. „13b → 13c“, „107 ergänzt“),
+berührt, zählen als eine; Stellen mit mehr als 12 geänderten Wörtern werden verworfen, ebenso Stellen, die vorher oder nachher
+mehr als die Hälfte der Wörter des Diktats umfassen – ein ganz neu geschriebenes kurzes Diktat hinterlässt
+also keinen Text, nur seine Ziffernänderungen), dazu die Ziffernänderungen ohne Zahn (z. B. „13b → 13c“, „107 ergänzt“),
 Patiententyp (Kasse/Privat), Kalenderwoche und Katalogstand. **Nie** gespeichert werden
 Evident-Nummer, Kürzel, Behandler, Datum oder Uhrzeit, Diktat-ID oder der ganze Text; die Zeilen sind
 mit nichts anderem verknüpft und tragen eine zufällige Nummer, sodass auch ihre Reihenfolge nicht

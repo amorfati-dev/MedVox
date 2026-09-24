@@ -87,7 +87,7 @@ def test_long_rewrites_are_dropped_and_context_is_short() -> None:
     before = "eins zwei drei vier " + " ".join(f"alt{i}" for i in range(13)) + " fünf sechs sieben acht"
     after = "eins zwei drei vier " + " ".join(f"neu{i}" for i in range(13)) + " fünf sechs sieben acht"
     assert corrections.text_spots(before, after) == []
-    spots = corrections.text_spots("a b c d falsch e f g h", "a b c d richtig e f g h")
+    spots = corrections.text_spots("a b c d falsch e f g h i j", "a b c d richtig e f g h i j")
     assert spots == [("c d falsch e f", "c d richtig e f")]
 
 
@@ -186,3 +186,10 @@ def test_rows_older_than_twelve_months_are_purged(db_path: Path) -> None:
 def test_week_sorts_as_text() -> None:
     assert corrections.week(time.mktime((2025, 12, 29, 12, 0, 0, 0, 0, -1))) == "2026-W01"
     assert corrections.week(time.mktime((2025, 12, 22, 12, 0, 0, 0, 0, -1))) < "2026-W01"
+
+
+def test_rewritten_short_dictation_stores_no_text() -> None:
+    fixed = "Zahn 36 Karies profunda, Kompositfüllung mesial okklusal distal. Zahnsteinentfernung."
+    assert corrections.text_spots("www.sdk.g.g.a.", fixed) == []
+    # eine Stelle, die mehr als die Hälfte der Wörter vorher oder nachher umfasst, ist fast der ganze Text
+    assert corrections.text_spots("a b c d e f", "a b X d e f") == []
