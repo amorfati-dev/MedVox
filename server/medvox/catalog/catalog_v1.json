@@ -1487,6 +1487,8 @@
         "nbl2",
         "nbl 2",
         "starke blutung",
+        "nachblutung stark",
+        "starke nachblutung",
         "umschlingungsnaht",
         "umschlingsnaht",
         "umstechung",
@@ -1499,7 +1501,7 @@
       ],
       "rules": [
         "Stillung einer übermäßigen Blutung durch Abbinden oder Umstechen eines Gefäßes oder durch Knochenbolzung",
-        "Praxisregel des Behandlers: starke Blutung während der OP mit Umschlingungsnaht, bipolarer Koagulation oder Parasorb-Vlies",
+        "Praxisregel des Behandlers: starke Blutung während der OP mit Umschlingungsnaht, bipolarer Koagulation oder Parasorb-Vlies – eine Maßnahme allein nur als Option",
         "ohne Umstechen/Abbinden/Knochenbolzung: 36 (Nbl1, nicht im Katalog v1)",
         "Privatpatient: GOZ 3060"
       ],

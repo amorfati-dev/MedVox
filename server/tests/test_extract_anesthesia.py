@@ -92,6 +92,26 @@ def test_anesthesia_without_tooth_still_counts_per_session():
     assert billable_codes(run("L1, L1, Ost1 an 38.").suggestions) == ["2x 41a", "47a"]
 
 
+@pytest.mark.parametrize(("said", "code"), [
+    ("38 L1, L1 lange Dauer, Ost2.", "41a"), ("L1, L1 lange Dauer, Ost2 38.", "41a"),
+    ("18 IP, IP lange Dauer, Ost2.", "40"),
+])
+def test_repeated_short_form_counts_twice_wherever_the_tooth_stands(said, code):
+    s = next(s for s in main(run(said)) if s.code == code)
+    assert s.count == 2 and "lange Dauer" in s.reason
+    assert not any(REPEATED.format(n=2) == d for d in s.decide)
+
+
+def test_repeated_short_form_without_osteotomy_stays_one():
+    s = one(run("38 L1, L1 lange Dauer, Extraktion 38."), "41a", 38)
+    assert s.count == 1 and KZVB in s.decide and REPEATED.format(n=2) not in s.decide
+
+
+def test_repeated_hint_only_when_counted_once():
+    s = next(s for s in main(run("L1, L1, Ost2 38.")) if s.code == "41a")
+    assert s.count == 2 and REPEATED.format(n=2) not in s.decide
+
+
 # --- Praxisregel repeat (KZVB): zweite Anästhesie erst ab Ost1 am selben Zahn ------------------------
 
 

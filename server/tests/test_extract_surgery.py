@@ -114,19 +114,31 @@ def test_repeated_tooth_does_not_double_count_the_osteotomy():
 # --- Nbl2, Pla0 --------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("word", ["starke Blutung", "Umschlingungsnaht", "Bipo", "bipolare Koagulation",
-                                  "Parasorb Fleece", "Nbl2", "Nbl zwei", "Umstechung"])
-def test_nbl2_words_during_surgery(word):
-    result = run(f"48 Ost2, {word}.")
+@pytest.mark.parametrize("words", ["Nbl2", "Nbl zwei", "starke Blutung, Umschlingungsnaht", "starke Blutung, Naht",
+                                   "starke Blutung, Bipo", "Nachblutung stark, Parasorb Fleece",
+                                   "starke Blutung, Umstechung"])
+def test_nbl2_only_when_said_or_bleeding_with_a_measure(words):
+    result = run(f"48 Ost2, {words}.")
     assert [(s.code, s.teeth, s.evident) for s in main(result) if s.code == "37"] == [("37", (48,), "nbl2")]
-    assert [s.code for s in main(run(f"48 Ost2, {word}.", "privat")) if s.code == "3060"] == ["3060"]
+    assert [s.code for s in main(run(f"48 Ost2, {words}.", "privat")) if s.code == "3060"] == ["3060"]
+
+
+@pytest.mark.parametrize("dictation", ["Extraktion 46. Parasorb eingelegt.", "Extraktion 46. Bipolar koaguliert.",
+                                       "48 Ost2, Umschlingungsnaht.", "48 Ost2, starke Blutung.",
+                                       "Parasorb eingelegt."])
+def test_lone_measure_or_bleeding_is_only_an_option(dictation):
+    for patient, code in (("kasse", "37"), ("privat", "3060")):
+        result = run(dictation, patient)
+        assert code not in [s.code for s in main(result)]
+        option = next(s for s in result.suggestions if s.code == code)
+        assert option.alternative and option.addon and "antippen, wenn erbracht" in option.decide[0]
+        assert code not in billable_codes(result.suggestions)
 
 
 def test_strong_bleeding_without_surgery_is_papilla_bleeding_not_nbl2():
     result = run("Zahn 46 dreiflächige Füllung, BMF, starke Blutung, Blutungsstillung.")
     assert "37" not in [s.code for s in result.suggestions]
     assert any("Nbl2 (BEMA 37) nicht vorgeschlagen" in n for n in result.notes)
-    # eine Umschlingungsnaht ist immer Nbl2
     assert "37" in [s.code for s in main(run("Zahn 46 starke Blutung, Umschlingungsnaht."))]
 
 

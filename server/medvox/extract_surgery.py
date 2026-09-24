@@ -6,15 +6,19 @@ GOZ 3030/3040) an einem Weisheitszahn (18, 28, 38, 48) kommen Beratung (Ä1) und
 nie vorausgewählt und nie, wenn sie schon diktiert sind. Beim Privatpatienten nur GOÄ Ä1: Zst ist dort
 GOZ 4050/4055 je Zahn, und welche Zähne, sagt das Diktat nicht.
 
-„starke Blutung“ ist Nbl2 (BEMA 37 / GOZ 3060) nur während einer OP: ohne Zahnentfernung oder Osteotomie in
-der Sitzung (etwa „BMF, starke Blutung“ an einer Füllung – Papillenblutung, Teil von BEMA 12) fällt sie mit
-Hinweis weg. Umschlingungsnaht, Bipo, Parasorb und „Nbl2“ selbst gelten immer.
+Nbl2 (BEMA 37 / GOZ 3060) wird nur vorgeschlagen, wenn „Nbl2“ selbst diktiert ist oder eine starke Blutung
+zusammen mit einer Maßnahme (Umschlingungsnaht/Naht/Umstechung, Bipo, Parasorb). Eine Maßnahme oder die Blutung
+allein steht nur als Option zum Antippen mit Prüfhinweis da. „starke Blutung“ ohne Maßnahme und ohne
+Zahnentfernung oder Osteotomie in der Sitzung (etwa „BMF, starke Blutung“ an einer Füllung – Papillenblutung,
+Teil von BEMA 12) fällt mit Hinweis weg.
 
 BEMA 51b (Pla0) gilt laut amtlichem Text nur in Verbindung mit einer Osteotomie; ohne 47a/48 in der
 Sitzung bleibt sie stehen, aber mit Hinweis auf 51a (Pla1, nicht im Katalog v1).
 """
 
 from __future__ import annotations
+
+import re
 
 from medvox.extract_catalog import Catalog
 from medvox.extract_draft import Draft
@@ -26,7 +30,11 @@ OSTEOTOMY = frozenset({("BEMA", "47a"), ("BEMA", "48"), ("GOZ", "3030"), ("GOZ",
 WISDOM_OPTIONS = {"kasse": (("BEMA", "Ä1"), ("BEMA", "107")), "privat": (("GOÄ", "Ä1"),)}
 WISDOM_NOTE = "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht"
 NBL2 = frozenset({("BEMA", "37"), ("GOZ", "3060")})
-ONLY_IN_SURGERY = frozenset({"starke blutung"})
+BLEEDING = frozenset({"starke blutung", "nachblutung stark", "starke nachblutung"})
+_MEASURE = re.compile(r"(?<![a-z])(?:[a-z]*naht|umstech[a-z]*|umstochen|abgebunden|knochenbolzung|bipo[a-z]*|parasorb)"
+                      r"(?![a-z])")
+NBL2_OPTION = ("Nbl2 ({code}) nur bei starker Blutung mit Umschlingungsnaht/Naht/Umstechung, Bipo oder Parasorb – "
+               "diktiert nur „{words}“; antippen, wenn erbracht")
 LONE_BLEEDING = ("„{word}“ ohne Zahnentfernung/Osteotomie in dieser Sitzung – Nbl2 ({code}) nicht vorgeschlagen; "
                  "Papillenblutung gehört zu den besonderen Maßnahmen (bmf), sonst Nbl1 (BEMA 36 / GOZ 3050) prüfen")
 PLA0 = ("BEMA", "51b")
@@ -58,15 +66,24 @@ def flag_lone_pla0(primaries: list[Draft]) -> None:
             d.decide.append(PLA0_ALONE)
 
 
-def drop_lone_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -> list[Draft]:
-    """Nbl2 nur aus „starke Blutung“ ohne OP in der Sitzung: weglassen, im Hinweis nennen."""
-    if any(d.entry.code in REMOVAL.get(d.entry.system, {}).values() for d in primaries):
-        return primaries
-    kept = []
+def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -> tuple[list[Draft], list[Draft]]:
+    """Nbl2 bleibt nur mit „Nbl2“ oder starker Blutung plus Maßnahme; sonst Option (bzw. ohne OP: Hinweis)."""
+    surgery = any(d.entry.code in REMOVAL.get(d.entry.system, {}).values() for d in primaries)
+    kept, offers = [], []
     for d in primaries:
-        if d.entry.key in NBL2 and all(t.hit.keyword in ONLY_IN_SURGERY for t in d.hits):
+        if d.entry.key not in NBL2 or any(t.hit.code_word for t in d.hits):
+            kept.append(d)
+            continue
+        bleeding = any(t.hit.keyword in BLEEDING for t in d.hits)
+        if bleeding and _MEASURE.search(ctx.folded):
+            kept.append(d)
+            continue
+        if not surgery and all(t.hit.keyword in BLEEDING for t in d.hits):
             word = ctx.original(d.hits[0].hit.start, d.hits[0].hit.end)
             notes.append(LONE_BLEEDING.format(word=word, code=d.entry.label))
             continue
-        kept.append(d)
-    return kept
+        words = ", ".join(dict.fromkeys(ctx.original(t.hit.start, t.hit.end) for t in d.hits))
+        d.addon = True
+        d.decide.append(NBL2_OPTION.format(code=d.entry.label, words=words))
+        offers.append(d)
+    return kept, offers

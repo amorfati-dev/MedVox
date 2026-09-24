@@ -24,7 +24,7 @@ from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
 from medvox.extract_rules import REMOVAL
-from medvox.extract_surgery import drop_lone_bleeding, flag_lone_pla0, wisdom_offers
+from medvox.extract_surgery import flag_lone_pla0, split_bleeding, wisdom_offers
 from medvox.extract_text import TextContext
 from medvox.extract_xray import bitewing_projections
 from medvox.normalize import ToothRef
@@ -44,7 +44,7 @@ class Suggestion:
     alternative: bool = False  # zusätzlicher Kandidat (Zuzahlung, Gegenstück ohne Paar, Zuschlag dazu)
     kind: str = "bema"  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
     evident: str | None = None  # Evident-Kurzform aus dem Katalog ("l1"); None = Ziffer verwenden
-    addon: bool = False  # Option „ggf. dazu“ (Ä1/Zst zur Weisheitszahn-OP): per Tipp übernehmbar, nie vorausgewählt
+    addon: bool = False  # Option „ggf. dazu“ (Ä1/Zst, unsicheres Nbl2): per Tipp übernehmbar, nie vorausgewählt
 
 
 @dataclass
@@ -78,7 +78,8 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     if patient == "privat":
         bitewing_projections(ctx, drafts)
     flag_not_beside(catalog, drafts)
-    primaries = drop_lone_bleeding(ctx, [d for d in drafts if not d.planned], notes)
+    primaries, bleeding = split_bleeding(ctx, [d for d in drafts if not d.planned], notes)
+    extra += bleeding
     adopt_canal_counts(catalog, primaries)
     if patient == "kasse":
         extra += co_payment_offers(catalog, primaries)
@@ -150,5 +151,5 @@ def _suggestion(catalog: Catalog, ctx: TextContext, d: Draft, patient: str) -> S
     teeth = (d.fdi,) if d.fdi is not None else d.context
     return Suggestion(
         d.entry.code, d.entry.system, d.entry.title, d.entry.points, tuple(teeth), d.count, reason,
-        tuple(d.decide), d.planned, d.alternative_to is not None, kind_, d.entry.evident, d.addon,
+        tuple(d.decide), d.planned, d.alternative_to is not None or d.addon, kind_, d.entry.evident, d.addon,
     )

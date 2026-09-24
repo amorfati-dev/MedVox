@@ -13,7 +13,9 @@ ebenfalls mit Hinweis, solange am Zahn keine Zahnentfernung diktiert ist. „X2�
 Ein zweites Mal je Zahn (BEMA 40 Nr. 3, 41 Nr. 4: bei lang dauernden Eingriffen) nur nach der Praxisregel
 im Katalog (``repeat``, KZVB: erst ab Ost1 am selben Zahn), sonst auf 1 mit Hinweis. „lange Dauer“ zählt nie
 hoch: bei zwei gezählten Anästhesien steht es in der Begründung, sonst gibt es einen Prüfhinweis. Dieselbe
-Anästhesie an einem Zahn noch einmal genannt zählt einmal mit der höchsten diktierten Anzahl.
+Anästhesie an einem Zahn noch einmal genannt zählt einmal mit der höchsten diktierten Anzahl – außer die
+Kurzform selbst wiederholt („38 l1, l1“, „18 i, i“): das ist die Schreibweise des Behandlers für zwei (höchstens 2,
+dann Praxisregel ``repeat``), ob die Zahnnummer davor oder dahinter steht.
 """
 
 from __future__ import annotations
@@ -83,6 +85,8 @@ def annotate(ctx: TextContext, drafts: Iterable[Draft]) -> None:
     starts = sorted(t.hit.start for d in own for t in d.hits)
     for d in own:
         said = [c for t in d.hits if (c := _count(ctx, t))]
+        if not said and len({t.hit.start for t in d.hits if t.hit.code_word}) > 1:
+            d.count = max(d.count, 2)
         capped = _repeat(d, drafts)
         long = next((m for t in d.hits if (m := _long(ctx, t, starts))), None)
         if d.count >= 2 and long:
@@ -92,7 +96,7 @@ def annotate(ctx: TextContext, drafts: Iterable[Draft]) -> None:
         elif long and not capped:
             _flag(d, LONG_UNCOUNTED.format(word=long))
         mentions = len({ctx.clause(t.hit.start) for t in d.hits})  # „Infiltrationsanästhesie mit Artikain“ ist eine
-        if not said and mentions > 1:
+        if not said and mentions > 1 and d.count == 1 and not capped:
             _flag(d, REPEATED.format(n=mentions))
         if any(t.hit.keyword == "ip" for t in d.hits):
             _flag(d, IP_AS_I)

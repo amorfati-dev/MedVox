@@ -209,7 +209,7 @@ Paare und Zuzahlungs-Liste, Privat-Gegenstücke aus dem Regeltext), `extract_mat
 (Regelfamilien), `extract_billing.py` (Enthaltensein, „nicht neben“, Zuzahlungs-Angebote, Zuschlag),
 `extract_endo.py` (Zuzahlungs-Optionen der Endo, Kanalzahl der Je-Kanal-Zuzahlungen),
 `extract_limits.py` (Höchstzahl aus dem Katalogfeld `max_per`), `extract_anesthesia.py` (Anästhesie je
-Zahn, „IP“, Praxisregel `repeat`), `extract_surgery.py` (Weisheitszahn-OP: Optionen Ä1/Zst, Nbl2 nur mit OP,
+Zahn, „IP“, Praxisregel `repeat`), `extract_surgery.py` (Weisheitszahn-OP: Optionen Ä1/Zst, Nbl2 nur mit Blutung plus Maßnahme,
 Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachlesen).
 
 - **Füllungen:** die Flächenzahl wählt 13a–d bzw. 2060–2120 je Zahn – ein freistehendes Zählwort
@@ -239,8 +239,10 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
   Zahnentfernung ohne Zahnnummer im Satz gehören zum zuletzt diktierten Zahn („Zahn im Ganzen
   rausgehebelt“ nach „18.“ → 44 an 18). „Ost2“, „Ost 2“, „OS2“, „Ost, 1“ sind Ost2 bzw. Ost1.
 - **Weisheitszahn-OP:** zu einer erbrachten Osteotomie an 18/28/38/48 stehen Ä1 und Zst (107) als Option
-  „ggf. dazu“ (`addon`, per Tipp übernehmbar, beim Privatpatienten nur GOÄ Ä1). „starke Blutung“ ist Nbl2
-  (37) nur mit Zahnentfernung/Osteotomie in der Sitzung (sonst Papillenblutung, BMF – Hinweis); Pla0 (51b)
+  „ggf. dazu“ (`addon`, per Tipp übernehmbar, beim Privatpatienten nur GOÄ Ä1). Nbl2 (37) nur bei „Nbl2“
+  oder starker Blutung plus Maßnahme (Umschlingungsnaht/Naht/Umstechung, Bipo, Parasorb); eine Maßnahme oder
+  die Blutung allein nur als Option zum Antippen, „starke Blutung“ ohne OP gar nicht (Papillenblutung, BMF –
+  Hinweis); Pla0 (51b)
   ohne Osteotomie trägt den Hinweis auf 51a.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
