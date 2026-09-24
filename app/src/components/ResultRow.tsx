@@ -1,8 +1,11 @@
 // Eine Zeile der Ergebnisliste: Kästchen · Ziffer · Leistung · „wegen: …“ · Prüfstreifen.
 // Die ganze Zeile ist die Tippfläche (Handschuhe). Abgewählte Zeilen bleiben stehen, durchgestrichen.
 // Am iPad ergänzte Zeilen tragen statt „wegen: …“ den Vermerk „von Hand“, ersetzte „geändert“.
+// Mengenweise berechnete Zeilen (je Kanal, mehrmals je Sitzung) tragen rechts die Knöpfe − Anzahl +.
 import type { Suggestion } from "../api";
+import type { Counter } from "../hooks/useCorrection";
 import type { Frame, Option, Row, Tag } from "../result";
+import { CountStepper } from "./CountStepper";
 import { Icon } from "./Icon";
 
 const TAG_LABEL: Record<Tag, (s: Suggestion) => string> = {
@@ -28,22 +31,32 @@ function Teeth({ s }: { s: Suggestion }) {
 }
 
 // `onRemove`: Zeile „von Hand“ entfernen (wird immer kopiert, also nicht abwählbar); fehlt = nicht änderbar.
-type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void; onRemove?: (s: Suggestion) => void };
+// `counter`: Anzahl mit − / + ändern (nur am iPad); fehlt = nur anzeigen.
+type RowProps = {
+  row: Row;
+  onToggle: (code: string) => void;
+  onAdopt: (key: string) => void;
+  onRemove?: (s: Suggestion) => void;
+  counter?: Counter | null;
+};
 
 // Vermerk einer Korrektur am iPad; null = so vom Extraktor.
 function edited(row: Row): string | null {
   if (row.source === "hand") return "von Hand";
   if (row.source !== "geaendert") return null;
   if (row.s.source !== "geaendert") return "Anzahl von Hand";
-  return row.s.replaced ? `geändert · vorher ${row.s.replaced}` : "geändert";
+  if (row.s.replaced) return `geändert · vorher ${row.s.replaced}`;
+  return row.s.counted ? "Anzahl von Hand" : "geändert";
 }
 
-export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
+export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProps) {
   const { s, tag, count, selected } = row;
   const mark = edited(row);
   const hand = row.source === "hand";
+  // Abgewählt: keine Knöpfe – eine Zeile fällt nur über die Abwahl weg, nie über die Anzahl.
+  const range = selected && counter ? counter.range(s) : null;
   return (
-    <li className={`row row-${tag}${selected ? "" : " row-off"}`}>
+    <li className={`row row-${tag}${selected ? "" : " row-off"}${range ? " row-stepped" : ""}`}>
       <button
         type="button"
         className="row-main"
@@ -57,7 +70,7 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
         </span>
         <span className="row-code">
           {s.code}
-          {count > 1 && <span className="row-count">{count}×</span>}
+          {count > 1 && !range && <span className="row-count">{count}×</span>}
         </span>
         <span className="row-body">
           <span className="row-title">
@@ -69,6 +82,7 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove }: RowProps) {
           {row.source !== "hand" && <span className="row-reason">{s.reason}</span>}
         </span>
       </button>
+      {range && counter && <CountStepper s={s} count={count} max={range.max} onSet={counter.set} />}
       <Checks decide={s.decide} />
       {row.options.length > 0 && (
         <ul className="options">
@@ -128,7 +142,7 @@ export function OptionRow({ option, onAdopt }: OptionProps) {
 type FrameProps = { frame: Frame; tooth: number | null } & Omit<RowProps, "row">;
 
 // Mehrkosten: Kassenanteil und Zuzahlung am selben Zahn in einem Rahmen.
-export function FrameRows({ frame, tooth, onToggle, onAdopt, onRemove }: FrameProps) {
+export function FrameRows({ frame, tooth, onToggle, onAdopt, onRemove, counter }: FrameProps) {
   const { basis, copay } = frame;
   const where = tooth === null ? "" : ` Zahn ${tooth}`;
   return (
@@ -146,8 +160,8 @@ export function FrameRows({ frame, tooth, onToggle, onAdopt, onRemove }: FramePr
         )}
       </p>
       <ul className="rows">
-        {basis && <ResultRow row={basis} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />}
-        <ResultRow row={copay} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} />
+        {basis && <ResultRow row={basis} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} counter={counter} />}
+        <ResultRow row={copay} onToggle={onToggle} onAdopt={onAdopt} onRemove={onRemove} counter={counter} />
       </ul>
     </li>
   );

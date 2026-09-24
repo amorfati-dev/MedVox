@@ -218,3 +218,48 @@
   flex: 1 1 0;
   min-width: 0;
 }
+
+/* Anzahl − / + rechts in der Zeile (je Kanal, mehrmals je Sitzung); Prüfstreifen und Optionen darunter */
+.row-stepped {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.row-stepped > :not(.row-main, .stepper) {
+  grid-column: 1 / -1;
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 12px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.step .icon {
+  width: 28px;
+  height: 28px;
+  stroke-width: 3;
+}
+.step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.step-count {
+  min-width: 3ch;
+  font-family: var(--mono);
+  font-size: var(--fs-ziffer);
+  font-weight: 800;
+  text-align: center;
+}

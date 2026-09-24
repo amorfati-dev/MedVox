@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, type PatientType, type Suggestion } from "../api";
 import { byCode, codesOf, mainPositions, toothOf, type CatalogEntry } from "../catalog";
-import { addPosition, keepAdopted, recompute, remapDeselected, replaceFamily, type Content } from "../correction";
+import { addPosition, countRange, keepAdopted, recompute, remapDeselected, replaceFamily, setCount, type Content } from "../correction";
 import { codeChanges, type Change } from "../textdiff";
 import type { Dictation } from "./useDictation";
 import type { Selection } from "./useSelection";
@@ -38,9 +38,13 @@ export type Correction = {
   add: (entry: CatalogEntry, tooth: number | null) => void;
   replace: (tooth: number | null, from: string, to: CatalogEntry) => void;
   remove: (s: Suggestion) => void; // Zeile „von Hand“ wieder entfernen
+  counter: Counter | null; // Knöpfe − / + an mengenweise berechneten Zeilen; null = Katalog noch nicht da
   notice: { title: string; changes: Change[] } | null; // Streifen mit „Rückgängig“
   undo: () => void;
 };
+
+// Anzahl einer Zeile ändern: `range` null = hier keine Knöpfe (nicht mengenweise berechnet).
+export type Counter = { range: (s: Suggestion) => { max: number | null } | null; set: (s: Suggestion, count: number) => void };
 
 export function useCorrection(d: Dictation, sel: Selection, fallback: PatientType): Correction {
   const [editing, setEditing] = useState(false);
@@ -49,7 +53,8 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
   const [last, setLast] = useState<Undo | null>(null);
   const type = d.resultType ?? fallback;
-  const cat = useCatalog(type, sheet !== null);
+  // Auch ohne Katalog-Blatt: welche Zeilen Knöpfe − / + bekommen, steht im Katalog.
+  const cat = useCatalog(type, sheet !== null || d.suggestions.length > 0);
   const catalogMap = useMemo(() => byCode(cat.entries ?? []), [cat.entries]);
   // Angezeigte Vorschläge; ändern sie sich während /analyze läuft (anderer Patient, anderer Behandler,
   // neuer Abschnitt), gehört das Ergebnis nicht mehr zu diesem Stand und wird verworfen.
@@ -131,6 +136,15 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     commit(content(next.suggestions), "Ziffer geändert", catalogMap, next.adopted);
   };
 
+  const counter: Counter | null = cat.entries && {
+    range: (s) => countRange(catalogMap.get(s.code)),
+    set: (s, count) => {
+      const max = countRange(catalogMap.get(s.code))?.max ?? null;
+      const next = setCount(d.suggestions, toothOf(s), s.code, count, max);
+      commit(content(next), "Anzahl geändert", catalogMap);
+    },
+  };
+
   const valid = last !== null && last.after === d.suggestions;
   const undo = () => {
     if (!valid) return;
@@ -157,6 +171,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     add,
     replace,
     remove,
+    counter,
     notice: valid ? { title: last.title, changes: last.changes } : null,
     undo,
   };
