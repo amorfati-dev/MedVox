@@ -14,8 +14,9 @@ import pytest
 
 from medvox.catalog import validate as v
 from medvox.extract import Extraction, Suggestion, analyze, billable_codes
-from medvox.extract_catalog import load_catalog
-from medvox.extract_limits import NO_REGION, region
+from medvox.extract_build import Draft
+from medvox.extract_catalog import Catalog, load_catalog
+from medvox.extract_limits import NO_REGION, apply_limits, region
 from medvox.lexicon import correct
 from medvox.normalize import normalize
 
@@ -24,13 +25,13 @@ from medvox.normalize import normalize
 LIMITED = {
     ("BEMA", "01"): ("sitzung", 1), ("BEMA", "04"): ("sitzung", 1), ("BEMA", "8"): ("sitzung", 1),
     ("BEMA", "105"): ("sitzung", 1), ("BEMA", "107"): ("sitzung", 1), ("BEMA", "IP1"): ("sitzung", 1),
-    ("BEMA", "IP2"): ("sitzung", 1), ("BEMA", "IP4"): ("sitzung", 2),
+    ("BEMA", "IP2"): ("sitzung", 1), ("BEMA", "IP4"): ("halbjahr", 2),
     ("BEMA", "12"): ("kieferhaelfte", 1), ("BEMA", "38"): ("kieferhaelfte", 1),
     ("BEMA", "26"): ("zahn", 1), ("BEMA", "34"): ("zahn", 1), ("BEMA", "IP5"): ("zahn", 1),
     ("BEMA", "AITa"): ("zahn", 1), ("BEMA", "AITb"): ("zahn", 1),
     ("BEMA", "28"): ("kanal", 1), ("BEMA", "32"): ("kanal", 1), ("BEMA", "35"): ("kanal", 1),
     ("GOZ", "0070"): ("sitzung", 1), ("GOZ", "1000"): ("sitzung", 1), ("GOZ", "1020"): ("sitzung", 1),
-    ("GOZ", "4000"): ("sitzung", 2), ("GOZ", "4005"): ("sitzung", 2), ("GOZ", "4020"): ("sitzung", 1),
+    ("GOZ", "4000"): ("jahr", 2), ("GOZ", "4005"): ("jahr", 2), ("GOZ", "4020"): ("sitzung", 1),
     ("GOZ", "0500"): ("sitzung", 1), ("GOZ", "0510"): ("sitzung", 1), ("GOZ", "0520"): ("sitzung", 1),
     ("GOZ", "0530"): ("sitzung", 1),
     ("GOZ", "0080"): ("kieferhaelfte", 1), ("GOZ", "2030"): ("kieferhaelfte", 2), ("GOZ", "2040"): ("kieferhaelfte", 1),
@@ -151,3 +152,38 @@ def test_unlimited_position_still_multiplies():
 ])
 def test_region_from_fdi(fdi, expected):
     assert region(fdi) == expected
+
+
+@pytest.mark.parametrize("code, limit", [
+    ("IP4", {"unit": "sitzung", "count": 2}),  # „einmal je Kalenderhalbjahr (hohes Kariesrisiko: zweimal)“
+    ("4000", {"unit": "sitzung", "count": 2}),  # „höchstens zweimal je Jahr“
+    ("IP4", {"unit": "jahr", "count": 2}),  # Einheit passt nicht zum Regeltext
+])
+def test_validator_rejects_period_limits_as_session_limits(code, limit):
+    _errors, _infos, catalog = v.validate()
+    broken = copy.deepcopy(catalog)
+    next(e for e in broken["entries"] if e["code"] == code)["max_per"] = limit
+    errors, _ = v.check_rules(broken)
+    assert any(f"{code}: Grenze je Halbjahr/Jahr" in err for err in errors)
+
+
+def _confirmed(codes: set[str]) -> Catalog:
+    _errors, _infos, raw = v.validate()
+    raw = copy.deepcopy(raw)
+    for e in raw["entries"]:
+        if e["code"] in codes and "count" in e.get("max_per", {}):
+            e["max_per_status"] = "bestaetigt"
+    return Catalog(raw)
+
+
+def test_period_limits_never_get_a_stepper_even_when_confirmed():
+    cat = _confirmed({"IP4", "4000", "4005", "2030", "3300"})
+    for system, code in (("BEMA", "IP4"), ("GOZ", "4000"), ("GOZ", "4005"), ("GOZ", "2030"), ("GOZ", "3300")):
+        entry = cat.get(system, code)
+        assert entry.limit is not None and not cat.stepper(entry)[0], code
+
+
+def test_confirmed_period_limit_caps_one_session():
+    entry = _confirmed({"4000"}).get("GOZ", "4000")
+    [draft] = apply_limits([Draft(entry, None, False, count=3)])
+    assert draft.count == 2 and draft.limit_note == "3× diktiert, höchstens 2× je Jahr"
