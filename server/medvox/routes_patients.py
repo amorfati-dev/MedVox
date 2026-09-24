@@ -53,6 +53,22 @@ class PatientCreate(BaseModel):
     number: str = Field(pattern=NUMBER_PATTERN)
 
 
+class Position(BaseModel):
+    """Ziffer an einem Zahn, wie der Extraktor sie vorgeschlagen hat (Original vor der Korrektur)."""
+
+    tooth: int | None = Field(default=None, ge=11, le=85)  # FDI-Nummer, None = ohne Zahn
+    code: Code
+    count: int = Field(default=1, ge=1, le=99)
+
+
+class Original(BaseModel):
+    """Stand vor der Korrektur am iPad: Transkript und Ziffern aller Abschnitte, wie sie kamen."""
+
+    transcript: str = Field(default="", max_length=50_000)
+    codes: list[Code] = Field(default_factory=list, max_length=200)
+    positions: list[Position] = Field(default_factory=list, max_length=500)
+
+
 class DictationIn(BaseModel):
     """Stand eines Diktats vom iPad: dieselben Felder wie die Antwort von /transcribe plus Auswahl."""
 
@@ -66,6 +82,8 @@ class DictationIn(BaseModel):
     notes: list[Text] = Field(default_factory=list, max_length=200)
     deselected: list[Code] = Field(default_factory=list, max_length=200)  # abgewählte Ziffern ("2x 41a")
     adopted: list[Code] = Field(default_factory=list, max_length=200)  # übernommene Optionen (optionKey)
+    # nur bei einem am iPad korrigierten Diktat: das Original (24 h wie das Diktat; Sammlung: corrections.py)
+    original: Original | None = None
     # Behandler beim Start der Aufnahme; zählt nur beim ersten Speichern, None = ohne Behandler
     dentist_id: int | None = Field(default=None, ge=1)
 
