@@ -88,7 +88,8 @@ ALIASES: dict[tuple[str, ...], str] = {
     ("psycho",): "PSI", ("goetz",): "GOZ", ("götz",): "GOZ",
     ("occlusal",): "okklusal", ("perichoronitis",): "Perikoronitis",
     ("bis", "registrat"): "Bissregistrat", ("biss", "registrat"): "Bissregistrat",
-    ("composite",): "Komposit",
+    ("composite",): "Komposit", ("bisflügel",): "Bissflügel",
+    ("bisflügelaufnahme",): "Bissflügelaufnahme", ("bisflügelaufnahmen",): "Bissflügelaufnahmen",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
 }
 # Die zehn von Hand gepflegten Ersetzungen oben; die Wörterbuch-Seite zeigt sie, ohne sie änderbar zu machen.

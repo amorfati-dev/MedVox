@@ -259,3 +259,11 @@ def test_met_is_med_next_to_a_root_canal_treatment(raw, expected):
 ])
 def test_met_elsewhere_is_left_alone(raw):
     assert correct(raw) == (raw, [])
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("Bisflügel", "Bissflügel"), ("Bisflügelaufnahme rechts", "Bissflügelaufnahme rechts"),
+    ("Bisflügelaufnahmen", "Bissflügelaufnahmen"),
+])
+def test_bitewing_with_one_s(raw, expected):
+    assert correct(raw)[0] == expected
