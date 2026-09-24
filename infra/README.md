@@ -134,7 +134,9 @@ Nach einem Neustart des Macs (`sudo shutdown -r now`, Abnahme Punkt 6): anmelden
 
 ## 7. Prompt ändern
 
-Der Dental-Prompt (Vokabular-Anker für Whisper) steht **nur** in `infra/whisper/prompt.txt` – eine Zeile. Eigene Begriffe (Materialnamen, Praxis-Kürzel) einfach hinten anhängen, kurz halten (Whisper nutzt ca. 220 Tokens davon), dann:
+Eigene Fachbegriffe (Materialnamen, Praxis-Kürzel) und Verhörer („Zahn steinentfernung“ → „Zahnsteinentfernung“) trägt die Praxis auf der Seite **Wörterbuch** ein (⋯ → Wörterbuch, `https://medvox.local/woerterbuch`) – sie gelten sofort, ohne Neustart und ohne `make install`.
+
+Der Grundtext des Prompts (Vokabular-Anker für Whisper) steht **nur** in `infra/whisper/prompt.txt` – eine Zeile; die Begriffe aus dem Wörterbuch hängt der Server je Anfrage dahinter. whisper.cpp nimmt davon höchstens 223 Token (nachgemessen mit dem installierten Modell; der Grundtext hat 150), darüber schneidet es vorne ab – die Wörterbuch-Seite zeigt den Füllstand. Den Grundtext ändern:
 
 ```bash
 make install                # schreibt die plists neu und startet die Dienste

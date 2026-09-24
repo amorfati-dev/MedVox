@@ -84,7 +84,7 @@ in einem Rahmen „Mehrkosten Zahn 46 · Kasse zahlt 13a · Patient zahlt 2150 �
 Darunter „Geplant – wird nicht abgerechnet" und „Hinweise" (z. B. verneint). Die Leiste unten:
 **Text kopieren** · **Ziffern kopieren** · **An Rezeption**; „Nur Ziffern" steht in der Kopfzeile.
 Oben links schaltet ☾ zwischen Auto/Hell/Dunkel (je Gerät), ⋯ enthält Patientenliste,
-Behandlerliste, Gerätetest und Abmelden.
+Behandlerliste, Wörterbuch, Gerätetest und Abmelden.
 
 ### Korrigieren am iPad
 
@@ -219,7 +219,7 @@ erlaubt sind. Wer das nicht möchte, lässt das Feld einfach leer.
 
 **Datenschutz – Korrekturen:** das Original eines am iPad korrigierten Diktats liegt nur beim Diktat
 und wird mit ihm gelöscht (übertragen, spätestens nach 24 Stunden). Damit MedVox aus Korrekturen
-lernen kann (Wörterbuch, ab der nächsten Ausbaustufe), bleiben beim Übertragen oder Ablauf – nicht beim
+lernen kann (Vorschläge auf der Wörterbuch-Seite), bleiben beim Übertragen oder Ablauf – nicht beim
 Verwerfen oder Löschen – nur die **geänderten Stellen** stehen (Entscheidung des Behandlers): je Stelle
 vorher/nachher mit höchstens zwei Wörtern Umfeld auf jeder Seite (nahe Stellen, deren Umfeld sich
 berührt, zählen als eine; Stellen mit mehr als 12 geänderten Wörtern werden verworfen, ebenso Stellen, die vorher oder nachher
@@ -230,12 +230,36 @@ Evident-Nummer, Kürzel, Behandler, Datum oder Uhrzeit, Diktat-ID oder der ganze
 mit nichts anderem verknüpft und tragen eine zufällige Nummer, sodass auch ihre Reihenfolge nicht
 verrät, welche Stellen aus demselben Diktat stammen. Sie bleiben, bis sie gelöscht werden, **höchstens 12 Monate**, und liegen
 nur auf dem Praxis-Mac. Restrisiko: ein Textstück kann einen Befund enthalten, der sich ohne Nummer aber
-keinem Patienten zuordnen lässt. Anzeigen und Löschen kommt mit der Wörterbuch-Seite.
+keinem Patienten zuordnen lässt. Die Wörterbuch-Seite zeigt sie gezählt als Vorschläge; **Alle löschen**
+(mit Rückfrage) leert die Sammlung sofort.
 
 **„Dieses Diktat wurde bereits übertragen":** erscheint am iPad, wenn man ein Diktat noch ändert,
 das schon übertragen (Büro oder Kurzcode), gelöscht oder älter als 24 Stunden ist. Es wird dann
 nicht mehr gespeichert und nicht wieder angelegt; „An Rezeption" ist gesperrt. **Neues Diktat
 beginnen** (oder **Neu** / **Nächster Patient**) – nichts anderes ist nötig.
+
+## Wörterbuch pflegen (⋯ → Wörterbuch)
+
+Gedacht vor allem für den Büro-PC (`https://medvox.local/woerterbuch`), am iPad geht es auch. Was hier
+gespeichert wird, gilt **ab dem nächsten Diktat für alle iPads** – ohne Neustart (Entscheidung des
+Behandlers). Nichts wird gelöscht: **Abschalten** nimmt einen Eintrag heraus, **Wieder einschalten** holt
+ihn zurück; „seit …“ und die Herkunft (von Hand / aus Korrekturen übernommen) stehen dabei.
+
+- **Ersetzungen** „falsch gehört → richtig“, z. B. „Zahn steinentfernung“ → „Zahnsteinentfernung“: 1–3
+  ganze Wörter, wie Whisper sie schreibt. Sie wirken vor der Auswertung, ändern also Text und Ziffern.
+  Erst **Probe**: ein Beispielsatz läuft einmal ohne und einmal mit dem Entwurf durch die Auswertung
+  („Ziffern vorher IP4 · nachher 107, IP4“), dann **Hinzufügen**. Abgelehnt wird mit Begründung: Zahlen
+  oder Zahlwörter (Zahnnummern und Codes bleiben unangetastet), ein Allerweltswort allein („Zahn“), was
+  eine der zehn eingebauten Ersetzungen oder einen eingebauten Fachbegriff überschreiben würde, und ein
+  „richtig“, das das falsch Gehörte selbst enthält.
+- **Fachbegriffe** (z. B. „Keramikinlay“) kommen nur in den Prompt, der Whisper vorab zeigt, welche Wörter
+  vorkommen; sie werden nicht unscharf korrigiert. Der Balken zeigt, wie voll der Prompt ist: whisper.cpp
+  nimmt höchstens 223 Token, der feste Grundtext belegt 150, ein Begriff etwa 4–8. Ist er voll, lehnt
+  MedVox weitere Begriffe ab – erst einen anderen abschalten.
+- **Aus Korrekturen:** gleiche Änderungen aus der Korrektur-Sammlung, gezählt („3× Zahn steinentfernung →
+  Zahnsteinentfernung“). **Als Ersetzung übernehmen** füllt das Formular und zeigt gleich die Probe –
+  gespeichert wird erst mit **Hinzufügen**. Ziffernänderungen („13b → 13c“) sind nur Information für die
+  Pflege der Regeln; der Katalog wird weiter im Code gepflegt. **Alle löschen** leert die Sammlung.
 
 ## „Ziffern kopieren" für Evident
 
@@ -325,5 +349,4 @@ Katalog (GOÄ/BEMA-Röntgen mit „Ä", z. B. `Ä925a`); an der Rezeption (Kurzc
 - Ein Abschnitt dauert höchstens 60 s – bei längeren Diktaten „Abschnitt anhängen" antippen.
   Hat MedVox bei 60 s selbst angehalten, geht es mit „Weiter aufnehmen" im selben Diktat weiter.
 - Echte Praxisakustik (Absauger, Maske) ist schlechter als die Testaufnahmen: nah ans iPad
-  sprechen. Wiederkehrende Hörfehler notieren – sie kommen ins Wörterbuch bzw. in den
-  Prompt (`infra/whisper/prompt.txt`).
+  sprechen. Wiederkehrende Hörfehler auf der Seite **Wörterbuch** eintragen (siehe oben).
