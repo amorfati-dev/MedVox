@@ -74,8 +74,7 @@ def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -
         if d.entry.key not in NBL2 or any(t.hit.code_word for t in d.hits):
             kept.append(d)
             continue
-        bleeding = any(t.hit.keyword in BLEEDING for t in d.hits)
-        if bleeding and _MEASURE.search(ctx.folded):
+        if any(t.hit.keyword in BLEEDING and _measure_beside(ctx, t.sentence) for t in d.hits):
             kept.append(d)
             continue
         if not surgery and all(t.hit.keyword in BLEEDING for t in d.hits):
@@ -87,3 +86,8 @@ def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -
         d.decide.append(NBL2_OPTION.format(code=d.entry.label, words=words))
         offers.append(d)
     return kept, offers
+
+
+def _measure_beside(ctx: TextContext, sentence: tuple[int, int]) -> bool:
+    """Nicht verneinte Maßnahme im Satz der starken Blutung („keine Naht“, Naht am anderen Zahn zählen nicht)."""
+    return any(not ctx.negated(m.start(), m.end()) for m in _MEASURE.finditer(ctx.folded, *sentence))
