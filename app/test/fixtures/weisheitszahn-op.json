@@ -27,7 +27,8 @@
         "kind": "bema",
         "evident": "i",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -47,7 +48,8 @@
         "kind": "bema",
         "evident": "i",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "48",
@@ -65,7 +67,8 @@
         "kind": "bema",
         "evident": "ost2",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "48",
@@ -83,7 +86,8 @@
         "kind": "bema",
         "evident": "ost2",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "41a",
@@ -101,7 +105,8 @@
         "kind": "bema",
         "evident": "l1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "41a",
@@ -119,7 +124,8 @@
         "kind": "bema",
         "evident": "l1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "48",
@@ -137,7 +143,8 @@
         "kind": "bema",
         "evident": "ost2",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "48",
@@ -155,7 +162,8 @@
         "kind": "bema",
         "evident": "ost2",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä935d",
@@ -173,7 +181,8 @@
         "kind": "bema",
         "evident": "opg",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä1",
@@ -191,7 +200,8 @@
         "kind": "bema",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "107",
@@ -209,11 +219,34 @@
         "kind": "bema",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 38,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 48,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "pilot-privat": {
     "transcript": "Der Patient kommt für 4 Achter, hat keine Fragen mehr. Wir spritzen ein Infiltrationsanästhesie 18 2x mit lange Dauer bei der zweiten. 28 Infiltrationsanästhesie 2x, OS2, 38 OS2, Leitungsanästhesie 2x lange Dauer, 48 Leitungsanästhesie 2x lange Dauer, 18 OS2, 48 OS2, OPG zur Kontrolle, ob noch kurz drin drin sind.",
@@ -246,7 +279,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -267,7 +301,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3040",
@@ -285,7 +320,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3040",
@@ -303,7 +339,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0100",
@@ -321,7 +358,8 @@
         "kind": "goz",
         "evident": "l1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0100",
@@ -339,7 +377,8 @@
         "kind": "goz",
         "evident": "l1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3040",
@@ -357,7 +396,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3040",
@@ -375,7 +415,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5004",
@@ -393,7 +434,8 @@
         "kind": "goz",
         "evident": "opg",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0510",
@@ -411,7 +453,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä1",
@@ -429,11 +472,34 @@
         "kind": "goz",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 38,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 48,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "pausen-kasse": {
     "transcript": "Der Patient kommt für 4 Achter. Achter entfernt. Und zwar 18. IP, X2. Zahn im Ganzen rausgehebelt. 28. IP, 1. Infiltrationsanästhesie. 2x. Beim zweiten Mal lange Dauer. 28. Dann Ost, 1. zur Kontrolle ob noch ein Wurkelrest drin steckt.",
@@ -465,7 +531,8 @@
         "kind": "bema",
         "evident": "i",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "44",
@@ -483,7 +550,8 @@
         "kind": "bema",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -503,7 +571,8 @@
         "kind": "bema",
         "evident": "i",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "47a",
@@ -521,7 +590,8 @@
         "kind": "bema",
         "evident": "ost1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä1",
@@ -539,7 +609,8 @@
         "kind": "bema",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "107",
@@ -557,11 +628,24 @@
         "kind": "bema",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "pausen-privat": {
     "transcript": "Der Patient kommt für 4 Achter. Achter entfernt. Und zwar 18. IP, X2. Zahn im Ganzen rausgehebelt. 28. IP, 1. Infiltrationsanästhesie. 2x. Beim zweiten Mal lange Dauer. 28. Dann Ost, 1. zur Kontrolle ob noch ein Wurkelrest drin steckt.",
@@ -595,7 +679,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3010",
@@ -613,7 +698,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -634,7 +720,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "3030",
@@ -652,7 +739,8 @@
         "kind": "goz",
         "evident": "ost1",
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0500",
@@ -670,7 +758,8 @@
         "kind": "goz",
         "evident": null,
         "addon": false,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä1",
@@ -688,10 +777,23 @@
         "kind": "goz",
         "evident": null,
         "addon": true,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 18,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 28,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   }
 }

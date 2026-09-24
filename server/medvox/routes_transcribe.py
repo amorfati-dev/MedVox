@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 import logging
-from typing import Literal
+from typing import Annotated, Literal
 
 import httpx
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from medvox import lexicon_entries, transcribe, whisper_prompt
 from medvox.auth import require_session
 from medvox.extract import Suggestion, analyze, billable_codes
+from medvox.extract_findings import extract_findings
 from medvox.extract_patient import PATIENT_TYPES
 from medvox.lexicon import correct
 from medvox.normalize import normalize
@@ -48,6 +49,15 @@ class SuggestionOut(BaseModel):
     addon: bool = False  # Option „ggf. dazu“ (Ä1/Zst zur Weisheitszahn-OP): per Tipp übernehmbar wie eine Zuzahlung
     # Herkunft: regel (Extraktor), hand (am iPad aus dem Katalog ergänzt), geaendert (am iPad ersetzt, z. B. 13b → 13c)
     source: Literal["regel", "hand", "geaendert"] = "regel"
+    tapped: bool = False  # nur am iPad: Zahn im Zahnschema angetippt (Je-Zahn-Position, app/src/teeth.ts)
+
+
+class ToothOut(BaseModel):
+    """Zahn fürs Zahnschema: diktierte Flächen und Befundwörter (``extract_findings``), nie eine Ziffer."""
+
+    tooth: int | None  # FDI-Nummer, None = Befund ohne Zahn
+    surfaces: str = Field(default="", max_length=20)
+    findings: list[Annotated[str, Field(max_length=100)]] = Field(default_factory=list, max_length=20)
 
 
 class TranscribeResponse(BaseModel):
@@ -59,6 +69,7 @@ class TranscribeResponse(BaseModel):
     suggestions: list[SuggestionOut] = []  # erbracht: Hauptvorschläge und Privat-Alternativen
     planned: list[SuggestionOut] = []  # nur geplant – nie abrechnen
     notes: list[str] = []  # Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
+    teeth: list[ToothOut] = []  # Zahnschema: diktierte Zähne mit Flächen und Befunden
 
 
 def _out(s: Suggestion) -> SuggestionOut:
@@ -73,7 +84,7 @@ def build_response(
     text: str, duration_s: float, latency_s: float, patient_type: str = "kasse",
     extra: dict[tuple[str, ...], str] | None = None,
 ) -> TranscribeResponse:
-    """Lexikon -> Normalisierer -> Extraktor; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert).
+    """Lexikon -> Normalisierer -> Extraktor und Befunde; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert).
 
     `extra`: die eingeschalteten Ersetzungen aus dem Wörterbuch (`lexicon_entries.active`).
     """
@@ -86,6 +97,10 @@ def build_response(
         suggestions=[_out(s) for s in result.suggestions if not s.planned],
         planned=[_out(s) for s in result.suggestions if s.planned],
         notes=result.notes,
+        teeth=[
+            ToothOut(tooth=t.tooth, surfaces=t.surfaces, findings=list(t.findings))
+            for t in extract_findings(normalized.text, normalized.teeth)
+        ],
     )
 
 

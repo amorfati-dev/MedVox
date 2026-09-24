@@ -11,7 +11,9 @@ Ziffern-Eingabe gibt es nicht. In Logs stehen nur Anzahlen, nie Text.
 
 from __future__ import annotations
 
+import json
 import logging
+from functools import lru_cache
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -19,8 +21,9 @@ from pydantic import BaseModel, Field
 
 from medvox import lexicon_entries
 from medvox.auth import require_session
-from medvox.extract_catalog import load_catalog
+from medvox.extract_catalog import CATALOG_PATH, load_catalog
 from medvox.extract_patient import kind
+from medvox.extract_rules import ROOT_PAIRS
 from medvox.routes_transcribe import TranscribeResponse, build_response
 
 log = logging.getLogger("medvox.correction")
@@ -57,12 +60,25 @@ class CatalogItem(BaseModel):
     # Anzahl je Zeile am iPad mit − / + änderbar (je Kanal, mehrmals je Sitzung) und bestätigte Höchstzahl
     counted: bool = False
     max_count: int | None = None
+    # im Katalog „je Zahn“ (`max_per.unit` zahn): am iPad per Zahnschema antippbar (app/src/teeth.ts)
+    per_tooth: bool = False
+    # Paar nach Wurzelzahl [einwurzelig, mehrwurzelig] (4050/4055, AITa/AITb), sonst leer
+    roots: list[str] = []
 
 
 class CatalogOut(BaseModel):
     version: str
     patient_type: PatientType
     entries: list[CatalogItem]
+
+
+@lru_cache(maxsize=1)
+def _per_tooth() -> frozenset[tuple[str, str]]:
+    """(System, Ziffer) der Positionen mit `max_per.unit` „zahn“ – auch unbestätigt, es geht nur ums Antippen."""
+    raw = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    return frozenset(
+        (e["system"], e["code"]) for e in raw["entries"] if (e.get("max_per") or {}).get("unit") == "zahn"
+    )
 
 
 @router.post("/analyze", response_model=TranscribeResponse)
@@ -99,5 +115,6 @@ def catalog(patient_type: PatientType = "kasse") -> CatalogOut:
         entries.append(CatalogItem(
             code=e.code, system=e.system, title=e.title, area=e.area, points=e.points, kind=k,
             evident=e.evident, family=list(e.family), counted=counted, max_count=most,
+            per_tooth=e.key in _per_tooth(), roots=list(ROOT_PAIRS.get(e.key, ())),
         ))
     return CatalogOut(version=cat.version, patient_type=patient_type, entries=entries)

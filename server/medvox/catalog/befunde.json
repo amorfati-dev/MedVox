@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "name": "MedVox Befundwörter (Zahnschema, Ship 3)",
+    "version": "1.0.0",
+    "hinweis": "Nur Anzeige und „Befund kopieren“: aus einem Befundwort wird nie eine Ziffer. Saat: Abschnitt „Befunde“ in lexicon.TERMS. Der Behandler prüft jeden Eintrag (review: vorschlag -> bestaetigt), Pflege in catalog/README.md."
+  },
+  "findings": [
+    {"label": "Karies profunda", "keywords": ["karies profunda", "caries profunda", "tiefe karies"], "review": "vorschlag"},
+    {"label": "Karies media", "keywords": ["karies media", "caries media"], "review": "vorschlag"},
+    {"label": "Sekundärkaries", "keywords": ["sekundärkaries", "sekundäre karies"], "review": "vorschlag"},
+    {"label": "Karies", "keywords": ["karies", "kariös", "kariöse läsion"], "review": "vorschlag"},
+    {"label": "Pulpitis", "keywords": ["pulpitis"], "review": "vorschlag"},
+    {"label": "Pulpanekrose", "keywords": ["pulpanekrose", "nekrose"], "review": "vorschlag"},
+    {"label": "avital", "keywords": ["avital", "devital"], "review": "vorschlag"},
+    {"label": "apikale Parodontitis", "keywords": ["apikale parodontitis", "apikale ostitis"], "review": "vorschlag"},
+    {"label": "Parodontitis", "keywords": ["parodontitis"], "review": "vorschlag"},
+    {"label": "Gingivitis", "keywords": ["gingivitis"], "review": "vorschlag"},
+    {"label": "Perikoronitis", "keywords": ["perikoronitis", "dentitio difficilis"], "review": "vorschlag"},
+    {"label": "Fistel", "keywords": ["fistel"], "review": "vorschlag"},
+    {"label": "Abszess", "keywords": ["abszess"], "review": "vorschlag"},
+    {"label": "Zyste", "keywords": ["zyste"], "review": "vorschlag"},
+    {"label": "Längsfraktur", "keywords": ["längsfraktur"], "review": "vorschlag"},
+    {"label": "Fraktur", "keywords": ["fraktur", "frakturiert", "abgebrochen"], "review": "vorschlag"},
+    {"label": "Sprung", "keywords": ["sprung", "sprünge", "infraktion"], "review": "vorschlag"},
+    {"label": "retiniert", "keywords": ["retiniert"], "review": "vorschlag"},
+    {"label": "verlagert", "keywords": ["verlagert"], "review": "vorschlag"},
+    {"label": "Attrition", "keywords": ["attrition"], "review": "vorschlag"},
+    {"label": "Erosion", "keywords": ["erosion"], "review": "vorschlag"},
+    {"label": "Aufbissbeschwerden", "keywords": ["aufbissbeschwerden", "aufbissempfindlich"], "review": "vorschlag"},
+    {"label": "Hypersensibilität", "keywords": ["hypersensibilität", "überempfindlich"], "review": "vorschlag"},
+    {"label": "Schmerzen", "keywords": ["schmerzen", "schmerz"], "review": "vorschlag"}
+  ]
+}

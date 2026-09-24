@@ -2,8 +2,10 @@
 // Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern, je Behandlung) – Format unverändert (patients.ts). Dazu der
 // Behandler, der es diktiert hat (nur Anzeige, nie im Kopiertext); fehlt er, bernsteinfarben „Behandler fehlt“.
 // Am iPad korrigiert: Etikett „am iPad korrigiert“ und aufklappbar das Original – das Büro ändert nichts.
+// Zahnschema klein (beide Kiefer, nur Anzeige) mit Befundliste und „Befund kopieren“ (Zeile je Zahn).
 import type { ReactNode } from "react";
 import { evidentText, type StoredDictation } from "../api";
+import { findingText } from "../findings";
 import { dentistLabel } from "../dentists";
 import { clock, dictationCopy } from "../patients";
 import { CopayTable } from "./CopayTable";
@@ -12,6 +14,7 @@ import { EvidentLines } from "./EvidentLines";
 import { HandoverWarning } from "./HandoverWarning";
 import { OriginalDiff } from "./OriginalDiff";
 import { PATIENT_LABEL } from "./PatientSwitch";
+import { ToothChartMini } from "./ToothChart";
 import { TreatmentCopy } from "./TreatmentCopy";
 
 type Props = { d: StoredDictation; title: string; children?: ReactNode };
@@ -34,6 +37,7 @@ export function DictationCard({ d, title, children }: Props) {
       <HandoverWarning earlier={d.handovers ?? []} current={copy.blocks} allPrivate={copy.allPrivate} labelled={labelled} />
       <p className="transcript">{d.transcript || <span className="muted">(leer)</span>}</p>
       {d.original && <OriginalDiff d={d} original={d.original} />}
+      <ToothChartMini rows={copy.findings} />
       <h2>Ziffern für Evident</h2>
       <EvidentLines blocks={copy.blocks} labelled={labelled} />
       <CopayTable positions={copy.positions} />
@@ -41,6 +45,7 @@ export function DictationCard({ d, title, children }: Props) {
         <CopyButton label="Text kopieren" text={d.transcript} primary />
         <CopyButton label="Ziffern kopieren" text={evidentText(copy.evident)} />
         <CopyButton label="Nur Ziffern" text={evidentText(copy.numbers)} />
+        {copy.findings.length > 0 && <CopyButton label="Befund kopieren" text={findingText(copy.findings)} />}
         {children}
       </div>
       <TreatmentCopy blocks={copy.blocks} labelled={labelled} />

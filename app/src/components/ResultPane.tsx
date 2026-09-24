@@ -7,6 +7,8 @@ import type { Correction } from "../hooks/useCorrection";
 import type { Dictation } from "../hooks/useDictation";
 import type { Selection } from "../hooks/useSelection";
 import type { Transfer } from "../hooks/useTransfer";
+import { byCode } from "../catalog";
+import { findingRows } from "../findings";
 import type { Counts } from "../result";
 import type { UiState } from "../status";
 import { CopyButton } from "./CopyButton";
@@ -19,6 +21,8 @@ import { ResultHead, ResultList } from "./ResultList";
 import { TranscriptEditor } from "./TranscriptEditor";
 import { TransferBoard } from "./TransferBoard";
 import { TranscriptText } from "./TranscriptText";
+import { ToothChart } from "./ToothChart";
+import { ToothTapSheet } from "./ToothTapSheet";
 
 type Props = {
   d: Dictation;
@@ -47,6 +51,8 @@ const EMPTY: Partial<Record<UiState, string>> = {
 export function ResultPane({ d, sel, plans, counts, state, patientType, running, hasResult, closed, transfer, c, onClear, onHandover }: Props) {
   // Korrigieren nur mit fertigem Ergebnis, das noch gespeichert wird – nie während Aufnahme oder Senden.
   const editable = state === "fertig" && !closed && d.resultType !== null;
+  const active = d.codes.filter((code) => !sel.deselected.includes(code));
+  const rows = findingRows(d.suggestions, plans, active, new Set(sel.adopted), d.teeth);
   if (c.editing) {
     return (
       <main className="result">
@@ -94,6 +100,7 @@ export function ResultPane({ d, sel, plans, counts, state, patientType, running,
           <TranscriptText text={d.transcript} original={d.corrected ? d.original.transcript : null} />
         </section>
       )}
+      {hasResult && <ToothChart rows={rows} />}
       {hasResult && (
         <ResultList
           groups={sel.groups}
@@ -104,6 +111,8 @@ export function ResultPane({ d, sel, plans, counts, state, patientType, running,
           onEdit={editable ? (tooth) => c.openSheet(tooth === undefined ? "wählen" : { tooth }) : undefined}
           onRemove={editable ? c.remove : undefined}
           counter={editable ? c.counter : undefined}
+          tapCodes={c.tapCodes}
+          onTap={editable ? c.openTap : undefined}
         />
       )}
       {hasResult && <CopyPreview blocks={sel.blocks} kasse={d.resultType === "kasse"} />}
@@ -132,6 +141,16 @@ export function ResultPane({ d, sel, plans, counts, state, patientType, running,
           onAdd={c.add}
           onReplace={c.replace}
           onClose={c.closeSheet}
+        />
+      )}
+      {c.tap !== null && d.resultType && c.catalog && (
+        <ToothTapSheet
+          codes={c.tap}
+          catalog={byCode(c.catalog)}
+          patientType={d.resultType}
+          suggestions={d.suggestions}
+          onApply={c.applyTeeth}
+          onClose={c.closeTap}
         />
       )}
     </main>
