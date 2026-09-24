@@ -10,6 +10,7 @@ import "./styles/ergebnis-extra.css";
 import "./styles/rezeption.css";
 import "./styles/patienten.css";
 import "./styles/behandler.css";
+import "./styles/korrektur.css";
 import { applyTheme, loadTheme } from "./theme";
 
 // Farbschema vor dem ersten Zeichnen setzen, damit nichts hell aufblitzt.

@@ -9,6 +9,7 @@ import {
   isToothless,
   joinBlocks,
   type EvidentBlocks,
+  type Source,
   type Suggestion,
   type TransferPosition,
 } from "./api.ts";
@@ -30,6 +31,7 @@ export type Row = {
   count: number; // höchste Anzahl, falls ein späterer Abschnitt dieselbe Ziffer am Zahn wiederholt
   selected: boolean; // wird kopiert und an die Rezeption gesendet
   options: Option[];
+  source: Source; // „von Hand“ ergänzt oder am iPad geändert (auch: Anzahl von Hand erhöht)
 };
 
 // Mehrkosten-Rahmen: „Kasse zahlt 13a · Patient zahlt 2150“; ohne Basis eigenständige Zuzahlung (PZR).
@@ -133,6 +135,9 @@ export function buildGroups(
     const key = `${s.alternative ? "o" : "p"}|${tooth ?? "-"}|${s.code}`;
     const known = seen.get(key);
     if (known) {
+      if ("count" in known && s.count > known.count && s.source && s.source !== "regel" && known.source === "regel") {
+        known.source = "geaendert"; // Anzahl am Katalog-Blatt erhöht
+      }
       if ("count" in known) known.count = Math.max(known.count, s.count);
       continue;
     }
@@ -144,7 +149,7 @@ export function buildGroups(
       else group.rows.push({ option });
       continue;
     }
-    const row: Row = { key, s, tag: tagOf(s), count: s.count, selected: chosen.has(s.code), options: [] };
+    const row: Row = { key, s, tag: tagOf(s), count: s.count, selected: chosen.has(s.code), options: [], source: s.source ?? "regel" };
     seen.set(key, row);
     group.rows.push({ row });
     group.last = row;

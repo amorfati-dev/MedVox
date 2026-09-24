@@ -123,6 +123,16 @@ def test_short_code_transfer_collects(logged_in: TestClient, settings: Settings)
     assert len(rows(settings.db_path)) == 4
 
 
+def test_ipad_hand_position_is_saved(logged_in: TestClient) -> None:
+    """Eine am iPad ergänzte Position hat die Felder der App (ohne `planned`) und wird gespeichert."""
+    hand = {"code": "107", "system": "BEMA", "title": "Zahnstein", "kind": "bema", "count": 1, "points": None,
+            "teeth": [], "reason": "von Hand ergänzt", "decide": [], "alternative": False, "evident": None, "source": "hand"}
+    body = {**CORRECTED, "suggestions": [*CORRECTED["suggestions"][:3], hand]}
+    saved = logged_in.put("/api/v1/dictations/diktat-0002", json=body)
+    assert saved.status_code == 200
+    assert saved.json()["suggestions"][-1]["source"] == "hand" and saved.json()["suggestions"][-1]["planned"] is False
+
+
 def test_uncorrected_dictation_leaves_nothing(db_path: Path) -> None:
     plain = {k: v for k, v in CORRECTED.items() if k != "original"}
     saved = patients.save_dictation(db_path, "diktat-0001", plain, "4711")

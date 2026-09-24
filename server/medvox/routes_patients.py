@@ -56,9 +56,10 @@ class PatientCreate(BaseModel):
 class Position(BaseModel):
     """Ziffer an einem Zahn, wie der Extraktor sie vorgeschlagen hat (Original vor der Korrektur)."""
 
-    tooth: int | None = Field(default=None, ge=11, le=85)  # FDI-Nummer, None = ohne Zahn
+    # wie `SuggestionOut.teeth`/`count` ohne Grenzen: eine strengere Prüfung ließe das Speichern dauerhaft scheitern
+    tooth: int | None = None  # FDI-Nummer, None = ohne Zahn
     code: Code
-    count: int = Field(default=1, ge=1, le=99)
+    count: int = 1
 
 
 class Original(BaseModel):

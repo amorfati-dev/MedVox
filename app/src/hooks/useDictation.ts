@@ -2,6 +2,8 @@
 // übergeben, die die Transkripte der Abschnitte aneinanderhängt.
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PatientType, Suggestion, SuggestionKind } from "../api";
+import type { Original } from "../catalog";
+import type { Content } from "../correction";
 import {
   MIC_MESSAGES,
   pickMimeType,
@@ -38,6 +40,9 @@ export type Dictation = {
   planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
   notes: string[]; // Hinweise aller Abschnitte
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
+  original: Original; // Stand vor einer Korrektur am iPad
+  corrected: boolean;
+  replace: (content: Content, corrected: boolean) => void; // Korrektur übernehmen oder rückgängig (useCorrection)
   error: string | null;
   lastLatency: number | null;
   supported: boolean; // MediaRecorder mit passendem MIME vorhanden
@@ -243,6 +248,9 @@ export function useDictation(patientType: PatientType): Dictation {
     planned: uploads.planned,
     notes: uploads.notes,
     resultType: uploads.resultType,
+    original: uploads.original,
+    corrected: uploads.corrected,
+    replace: uploads.replace,
     error: uploads.error,
     lastLatency: uploads.lastLatency,
     supported: mime.current !== null,

@@ -41,7 +41,7 @@ class SuggestionOut(BaseModel):
     count: int
     reason: str
     decide: list[str]
-    planned: bool
+    planned: bool = False  # fehlt bei am iPad ergänzten Positionen (nie geplant)
     alternative: bool
     kind: str  # bema | goz (Privatleistung, auch GOÄ) | zuzahlung (Privatleistung beim Kassenpatienten)
     evident: str | None = None  # Evident-Kurzform ("l1"), sonst None – dann gilt die Ziffer

@@ -1,6 +1,7 @@
 // Zugriff auf die MedVox-API (server/). Alle Fehler werden als ApiError mit
 // deutscher Meldung geworfen, damit die Ansichten sie direkt anzeigen können (http.ts).
 import { json, request } from "./http.ts";
+import type { CatalogList, Original } from "./catalog.ts";
 
 export { ApiError } from "./http.ts";
 
@@ -21,7 +22,11 @@ export type Suggestion = {
   decide: string[];
   alternative: boolean;
   evident?: string | null; // Evident-Kurzform aus dem Katalog ("l1"), sonst die Ziffer verwenden
+  source?: Source; // fehlt = regel (Extraktor)
+  replaced?: string; // nur am iPad: Ziffer, die „geaendert“ an diesem Zahn ersetzt hat (13b bei 13c)
 };
+// Herkunft eines Vorschlags: Extraktor, am iPad aus dem Katalog ergänzt, am iPad ersetzt (correction.ts).
+export type Source = "regel" | "hand" | "geaendert";
 export type TranscribeResult = {
   transcript: string;
   patient_type: PatientType;
@@ -65,6 +70,7 @@ export type DictationContent = {
   notes: string[];
   deselected: string[]; // Ziffern im Kopierformat ("2x 41a")
   adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
+  original?: Original | null; // nur bei einer Korrektur am iPad: Stand davor (Büro zeigt ihn)
 };
 // `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).
 // `patient_label`: Kürzel (Initialen) zur Nummer, nur zum Wiederfinden in Evident – nie in den Kopierzeilen.
@@ -112,6 +118,11 @@ export const api = {
     form.append("patient_type", patientType);
     return request<TranscribeResult>("/api/v1/transcribe", { method: "POST", body: form });
   },
+
+  // Korrektur: Ziffern aus dem berichtigten Text neu berechnen (ohne Audio), Katalog fürs Katalog-Blatt.
+  analyze: (text: string, patientType: PatientType) =>
+    request<TranscribeResult>("/api/v1/analyze", json("POST", { text, patient_type: patientType })),
+  catalog: (patientType: PatientType) => request<CatalogList>(`/api/v1/catalog?patient_type=${patientType}`),
 
   // `link`: gespeichertes Diktat; der erste Abruf des Kurzcodes schließt genau diesen Stand wie
   // „übertragen“ im Büro. War es schon übertragen, lehnt der Abruf mit 410 ab.

@@ -1,5 +1,6 @@
 // Eine Zeile der Ergebnisliste: Kästchen · Ziffer · Leistung · „wegen: …“ · Prüfstreifen.
 // Die ganze Zeile ist die Tippfläche (Handschuhe). Abgewählte Zeilen bleiben stehen, durchgestrichen.
+// Am iPad ergänzte Zeilen tragen statt „wegen: …“ den Vermerk „von Hand“, ersetzte „geändert“.
 import type { Suggestion } from "../api";
 import type { Frame, Option, Row, Tag } from "../result";
 import { Icon } from "./Icon";
@@ -28,8 +29,17 @@ function Teeth({ s }: { s: Suggestion }) {
 
 type RowProps = { row: Row; onToggle: (code: string) => void; onAdopt: (key: string) => void };
 
+// Vermerk einer Korrektur am iPad; null = so vom Extraktor.
+function edited(row: Row): string | null {
+  if (row.source === "hand") return "von Hand";
+  if (row.source !== "geaendert") return null;
+  if (row.s.source !== "geaendert") return "Anzahl von Hand";
+  return row.s.replaced ? `geändert · vorher ${row.s.replaced}` : "geändert";
+}
+
 export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
   const { s, tag, count, selected } = row;
+  const mark = edited(row);
   return (
     <li className={`row row-${tag}${selected ? "" : " row-off"}`}>
       <button
@@ -37,7 +47,7 @@ export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
         className="row-main"
         role="checkbox"
         aria-checked={selected}
-        aria-label={`${s.system} ${s.code}${count > 1 ? `, ${count}-mal` : ""}, ${s.title}${selected ? "" : ", abgewählt"}`}
+        aria-label={`${s.system} ${s.code}${count > 1 ? `, ${count}-mal` : ""}, ${s.title}${mark ? `, ${mark}` : ""}${selected ? "" : ", abgewählt"}`}
         onClick={() => onToggle(s.code)}
       >
         <span className="box" aria-hidden="true">
@@ -50,10 +60,11 @@ export function ResultRow({ row, onToggle, onAdopt }: RowProps) {
         <span className="row-body">
           <span className="row-title">
             {s.title} <span className="row-tag">{TAG_LABEL[tag](s)}</span>
+            {mark && <span className="row-tag tag-hand">{mark}</span>}
           </span>
           {s.evident && <span className="row-meta">Evident: {s.evident}</span>}
           <Teeth s={s} />
-          <span className="row-reason">{s.reason}</span>
+          {row.source !== "hand" && <span className="row-reason">{s.reason}</span>}
         </span>
       </button>
       <Checks decide={s.decide} />

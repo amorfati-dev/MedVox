@@ -1,8 +1,11 @@
 // Upload-Warteschlange: aufgenommene Abschnitte in Aufnahmereihenfolge an
 // /api/v1/transcribe schicken. Kein Fehlerpfad verwirft Audio – bei einem
-// Fehler bleibt der Abschnitt am Kopf der Warteschlange stehen.
+// Fehler bleibt der Abschnitt am Kopf der Warteschlange stehen. Jeder Abschnitt kommt auch ins
+// Original (Stand vor einer Korrektur am iPad); `replace` setzt den korrigierten Inhalt (useCorrection).
 import { useCallback, useRef, useState, type RefObject } from "react";
 import { api, ApiError, kindsOf, type PatientType, type Suggestion, type SuggestionKind } from "../api";
+import { EMPTY_ORIGINAL, mainPositions, type Original } from "../catalog";
+import type { Content } from "../correction";
 import { filenameFor } from "./recorder";
 
 // Fehler, die eine Wiederholung desselben Abschnitts nie bestehen würde.
@@ -21,6 +24,9 @@ export type UploadQueue = {
   planned: Suggestion[]; // Geplantes aller Abschnitte (nie abrechnen)
   notes: string[]; // Hinweise aller Abschnitte, ohne Wiederholungen
   resultType: PatientType | null; // Patiententyp, für den die Ziffern berechnet wurden
+  original: Original; // alle Abschnitte, wie sie kamen
+  corrected: boolean; // am iPad korrigiert (Text oder Ziffern)
+  replace: (content: Content, corrected: boolean) => void; // Korrektur übernehmen oder rückgängig machen
   lastLatency: number | null;
   error: string | null;
   setError: (message: string | null) => void;
@@ -45,6 +51,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
   const [planned, setPlanned] = useState<Suggestion[]>([]);
   const [notes, setNotes] = useState<string[]>([]);
   const [resultType, setResultType] = useState<PatientType | null>(null);
+  const [original, setOriginal] = useState<Original>(EMPTY_ORIGINAL);
+  const [corrected, setCorrected] = useState(false);
   const [lastLatency, setLastLatency] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,6 +89,11 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
           setSuggestions((prev) => [...prev, ...result.suggestions]);
           setPlanned((prev) => [...prev, ...(result.planned ?? [])]);
           setNotes((prev) => Array.from(new Set([...prev, ...(result.notes ?? [])])));
+          setOriginal((prev) => ({
+            transcript: prev.transcript && text ? `${prev.transcript} ${text}` : prev.transcript || text,
+            codes: Array.from(new Set([...prev.codes, ...result.codes])),
+            positions: [...prev.positions, ...mainPositions(result.suggestions)],
+          }));
           setResultType(result.patient_type);
           setLastLatency(result.latency_s);
           setError(null);
@@ -130,6 +143,16 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     resume();
   }, [resume]);
 
+  const replace = useCallback((content: Content, isCorrected: boolean) => {
+    setTranscript(content.transcript);
+    setCodes(content.codes);
+    setKinds(kindsOf(content.suggestions));
+    setSuggestions(content.suggestions);
+    setPlanned(content.planned);
+    setNotes(content.notes);
+    setCorrected(isCorrected);
+  }, []);
+
   const reset = useCallback(() => {
     epoch.current += 1;
     queue.current = [];
@@ -144,6 +167,8 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     setPlanned([]);
     setNotes([]);
     setResultType(null);
+    setOriginal(EMPTY_ORIGINAL);
+    setCorrected(false);
     setLastLatency(null);
     setError(null);
   }, []);
@@ -161,6 +186,9 @@ export function useUploadQueue(onSessionLost: () => void, patientType: RefObject
     planned,
     notes,
     resultType,
+    original,
+    corrected,
+    replace,
     lastLatency,
     error,
     setError,
