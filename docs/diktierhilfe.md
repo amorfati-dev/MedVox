@@ -110,9 +110,10 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
 - **Anzahl − / +** (rechts in der Zeile, geht mit Handschuhen): nur an Positionen, die mengenweise
   berechnet werden – je Kanal (28, 32, 35, 2400 …) oder laut vom Behandler bestätigter
   Katalog-Höchstzahl mehrmals je Sitzung; nicht an Je-Zahn-Positionen wie Füllungen oder Extraktionen
-  (weiterer Zahn: über „Ziffer ändern oder ergänzen“), nicht an Positionen ohne amtliche oder mit noch
-  unbestätigter Höchstzahl und nie an Grenzen je Halbjahr/Jahr oder je Kieferhälfte (IP4, 4000, 4005,
-  2030, 3300) – auch nicht, wenn der Behandler sie bestätigt. Gilt nur an diesem Zahn und ändert die Evident-Zeile (`32*3`, `wf*3`); der Hinweis
+  (weiterer Zahn: über „Ziffer ändern oder ergänzen“). Bei Leistungen je Sitzung braucht es eine
+  bestätigte Höchstzahl über 1; eine noch unbestätigte Grenze gibt keine Knöpfe. Grenzen je
+  Halbjahr/Jahr oder je Kieferhälfte (IP4, 4000, 4005, 2030, 3300) geben auch nach Bestätigung
+  keine Knöpfe. Gilt nur an diesem Zahn und ändert die Evident-Zeile (`32*3`, `wf*3`); der Hinweis
   „Kanalzahl nicht diktiert“ ist damit erledigt, die Zeile trägt „Anzahl von Hand“. Nie unter 1 – weg
   nur über die Abwahl –, nie über eine vom Behandler bestätigte Höchstzahl. Eine übernommene
   Zuzahlungs-Option je Kanal (2400 neben 32) hat ihre eigenen Knöpfe. Abgewählte Zeilen und das Büro

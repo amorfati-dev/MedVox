@@ -15,7 +15,7 @@ export type CatalogEntry = {
   evident?: string | null;
   family: string[]; // Füllungsfamilie nach Flächenzahl 1–4 (13a–13d, 2150/2160/2170/2170), sonst leer
   counted?: boolean; // Anzahl je Zeile mit − / + änderbar (je Kanal, mehrmals je Sitzung)
-  max_count?: number | null; // bestätigte Höchstzahl dafür, sonst keine
+  max_count?: number | null; // bestätigte Höchstzahl, auch ohne Knöpfe möglich; sonst keine
 };
 export type CatalogList = { version: string; patient_type: PatientType; entries: CatalogEntry[] };
 
