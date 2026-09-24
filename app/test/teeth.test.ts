@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Suggestion, SuggestionKind } from "../src/api.ts";
 import { byCode, codesOf, type CatalogEntry } from "../src/catalog.ts";
-import { recompute } from "../src/correction.ts";
+import { recompute, withoutTapped } from "../src/correction.ts";
 import { chartMarks, findingRows, findingText, shownFindings } from "../src/findings.ts";
 import { buildGroups, copyLines } from "../src/result.ts";
 import {
@@ -116,6 +116,20 @@ test("Neu berechnen: angetippte Zähne bleiben, die Regel-Zeile ohne Zahn kommt 
   const next = recompute(edited, fresh, CATALOG);
   assert.deepEqual(codesOf(next), ["2100", "4050", "4055"]);
   assert.ok(!next.some((x) => x.teeth.length === 0));
+});
+
+test("Neuer Abschnitt: die Position mit angetippten Zähnen kommt nicht noch einmal dazu", () => {
+  const edited = applyTap(PSI, ZST, tapped([11, 16]), CATALOG);
+  const section = [s("4050", [], { decide: ["Zahn nicht diktiert – 4050/4055 je Zahn wählen"] }), s("4055", [26]), s("2000", [17])];
+  const next = [...edited, ...withoutTapped(edited, section, CATALOG)];
+  assert.deepEqual(copyLines(next, codesOf(next), new Set()), ["11,4050", "16,4055", "36,2100", "17,2000"]);
+  assert.deepEqual(withoutTapped(PSI, section, CATALOG), section); // ohne Antippen bleibt alles
+});
+
+test("Position entfernen: alle Zähne herausnehmen nimmt die angetippte Position ganz heraus", () => {
+  const edited = applyTap(PSI, ZST, tapped([11, 16]), CATALOG);
+  const next = applyTap(edited, ZST, toggleTooth(toggleTooth(tapStart(edited, ZST), 11), 16), CATALOG);
+  assert.deepEqual(copyLines(next, codesOf(next), new Set()), ["36,2100"]);
 });
 
 test("Sammelblock: angetippte Zeilen je Leistung, Zahnblöcke behalten ihre volle Evident-Zeile", () => {

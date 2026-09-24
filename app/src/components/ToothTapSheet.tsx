@@ -3,6 +3,7 @@
 // Spalte ist derselbe Zahntyp, 1–5 einwurzelig, 6–8 mehrwurzelig. Antippen wählt den Zahn, noch einmal
 // antippen nimmt ihn heraus; die Ziffer folgt der Wurzelzahl (teeth.ts). An 14/24 fragt das Blatt nach der
 // Wurzelzahl, „Übernehmen“ geht erst danach. Keinen „ganzen Kiefer“: fehlende Zähne würden sonst mitgezählt.
+// Alle Zähne einer schon angetippten Position herausnehmen und „Position entfernen“ nimmt sie ganz heraus.
 import { useEffect, useState } from "react";
 import type { PatientType, Suggestion } from "../api";
 import type { CatalogEntry } from "../catalog";
@@ -43,6 +44,7 @@ export function ToothTapSheet({ codes, catalog, patientType, suggestions, onAppl
   const open = openTeeth(state, codes);
   const ask = open[0];
   const total = state.teeth.length;
+  const remove = total === 0 && suggestions.some((s) => s.tapped && codes.includes(s.code));
   const title = `${label} · Zähne antippen · ${PATIENT_LABEL[patientType]}`;
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export function ToothTapSheet({ codes, catalog, patientType, suggestions, onAppl
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const go = open.length > 0 ? `Erst Zahn ${ask} klären` : total === 0 ? "Mindestens einen Zahn antippen" : `Übernehmen · ${plural(total, "Zahn", "Zähne")}`;
+  const go = open.length > 0 ? `Erst Zahn ${ask} klären` : remove ? "Position entfernen" : total === 0 ? "Mindestens einen Zahn antippen" : `Übernehmen · ${plural(total, "Zahn", "Zähne")}`;
   return (
     <div className="picker-backdrop">
       <section className="picker chart-sheet" role="dialog" aria-modal="true" aria-label={title}>
@@ -123,7 +125,7 @@ export function ToothTapSheet({ codes, catalog, patientType, suggestions, onAppl
           <button type="button" className="btn" onClick={onClose}>
             Abbrechen
           </button>
-          <button type="button" className="btn btn-primary" disabled={open.length > 0 || total === 0} onClick={() => onApply(state)}>
+          <button type="button" className="btn btn-primary" disabled={open.length > 0 || (total === 0 && !remove)} onClick={() => onApply(state)}>
             {open.length === 0 && total > 0 && <Icon name="check" />}
             {go}
           </button>

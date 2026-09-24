@@ -151,7 +151,8 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
 
   const applyTeeth = (state: TapState) => {
     if (tap === null) return;
-    commit(content(applyTap(d.suggestions, tap, state, catalogMap)), "Zähne angetippt", catalogMap);
+    const title = state.teeth.length > 0 ? "Zähne angetippt" : "Position entfernt";
+    commit(content(applyTap(d.suggestions, tap, state, catalogMap)), title, catalogMap);
     setTap(null);
   };
 

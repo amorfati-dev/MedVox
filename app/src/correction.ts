@@ -135,11 +135,19 @@ export function replaceFamily(
   return { suggestions: list, adopted: adopted.map((k) => keys.get(k) ?? k) };
 }
 
+// Frische Vorschläge ohne die Positionen, deren Zähne schon angetippt sind (ganzes Paar 4050/4055): die
+// angetippten Zähne sind die ganze Position, nichts zählt doppelt – beim Neu berechnen und bei jedem neuen Abschnitt.
+export function withoutTapped(previous: Suggestion[], fresh: Suggestion[], catalog: Map<string, CatalogEntry>): Suggestion[] {
+  const tapped = new Set(previous.filter((s) => s.tapped).flatMap((s) => {
+    const entry = catalog.get(s.code);
+    return entry ? tapCodes(entry) : [s.code];
+  }));
+  return fresh.filter((s) => s.alternative || !tapped.has(s.code));
+}
+
 // Neu berechnet: frische Regel-Vorschläge, darauf die Ersetzungen von vorher, dazu alles „von Hand“.
 export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: Map<string, CatalogEntry>): Suggestion[] {
-  const pairs = previous.filter((s) => s.tapped).map((s) => catalog.get(s.code));
-  const tapped = new Set(pairs.flatMap((entry) => (entry ? tapCodes(entry) : [])));
-  let list = fresh.filter((s) => s.alternative || !tapped.has(s.code));
+  let list = withoutTapped(previous, fresh, catalog);
   for (const s of previous) {
     const entry = catalog.get(s.code);
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);
