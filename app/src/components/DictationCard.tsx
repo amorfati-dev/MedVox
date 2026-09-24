@@ -1,5 +1,5 @@
 // Ein gespeichertes Diktat im Büro: Transkript, Evident-Zeilen je Zahn, Mehrkosten und dieselben
-// Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern) – Format unverändert (patients.ts). Dazu der
+// Kopieraktionen wie am iPad (Text, Ziffern, Nur Ziffern, je Behandlung) – Format unverändert (patients.ts). Dazu der
 // Behandler, der es diktiert hat (nur Anzeige, nie im Kopiertext); fehlt er, bernsteinfarben „Behandler fehlt“.
 import type { ReactNode } from "react";
 import { evidentText, type StoredDictation } from "../api";
@@ -10,6 +10,7 @@ import { CopyButton } from "./CopyButton";
 import { EvidentLines } from "./EvidentLines";
 import { HandoverWarning } from "./HandoverWarning";
 import { PATIENT_LABEL } from "./PatientSwitch";
+import { TreatmentCopy } from "./TreatmentCopy";
 
 type Props = { d: StoredDictation; title: string; children?: ReactNode };
 
@@ -38,6 +39,7 @@ export function DictationCard({ d, title, children }: Props) {
         <CopyButton label="Nur Ziffern" text={evidentText(copy.numbers)} />
         {children}
       </div>
+      <TreatmentCopy blocks={copy.blocks} labelled={labelled} />
     </article>
   );
 }

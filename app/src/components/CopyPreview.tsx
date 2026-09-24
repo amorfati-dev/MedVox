@@ -1,9 +1,10 @@
 // Kopiertext für Evident unter der Ergebnisliste: genau die Zeilen, die „Ziffern kopieren“ liefert, eine
 // je Zahn zum zeilenweisen Einfügen. Beim Kassenpatienten beschriftet nach Kassen- und Privatblock (der
-// Privatblock steht zuletzt), dazu je Block eine eigene Kopieraktion.
+// Privatblock steht zuletzt), dazu je Block eine eigene Kopieraktion und bei mehreren Zähnen je Behandlung.
 import { evidentText, type EvidentBlocks } from "../api";
 import { CopyButton } from "./CopyButton";
 import { EvidentLines } from "./EvidentLines";
+import { TreatmentCopy } from "./TreatmentCopy";
 
 type Props = { blocks: EvidentBlocks; kasse: boolean };
 
@@ -19,6 +20,7 @@ export function CopyPreview({ blocks, kasse }: Props) {
           <CopyButton label="Privatleistungen kopieren" text={evidentText(blocks.privat)} />
         </div>
       )}
+      <TreatmentCopy blocks={blocks} labelled={kasse} />
     </section>
   );
 }
