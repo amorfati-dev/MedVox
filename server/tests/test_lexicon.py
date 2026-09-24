@@ -200,7 +200,17 @@ def test_pte_is_vite_only_before_a_count(raw, expected):
     assert correct(raw)[0] == expected
 
 
-@pytest.mark.parametrize("raw", ["PTE", "PTE besprochen", "Zahn 46 PTE, WK mal drei", "PTE 36"])
+@pytest.mark.parametrize("short", ["PTE", "WD"])
+@pytest.mark.parametrize("raw, expected", [
+    ("2x {}, 2x WK", "2x VitE, 2x WK"), ("{} 2x", "VitE 2x"), ("{} mal zwei", "VitE mal zwei"),
+    ("zweimal {}", "zweimal VitE"), ("2 mal {}", "2 mal VitE"), ("{}*2", "VitE*2"),
+])
+def test_vite_mishearing_with_count_on_either_side(short, raw, expected):
+    assert correct(raw.format(short))[0] == expected
+
+
+@pytest.mark.parametrize("raw", ["PTE", "PTE besprochen", "Zahn 46 PTE, WK mal drei", "PTE 36",
+                                 "WD", "WD besprochen", "Zahn 46 WD, WK mal drei", "WD 36", "2 WD", "Zahn 25 WD"])
 def test_pte_elsewhere_is_left_alone(raw):
     assert correct(raw) == (raw, [])
 

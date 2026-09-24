@@ -44,3 +44,10 @@ test("Endo-Option kommt nur nach Antippen in den Privatblock", () => {
     "46,2197,2420*3,2400*3",
   ]);
 });
+
+test("Pilot-Diktat „2x WD, 2x WK“: Anzahl davor kopiert wie „WK*2“, 46 unverändert", () => {
+  const r = fixtures["pilot-wd-kasse"];
+  assert.deepEqual(copyLines(r.suggestions, r.codes, none), ["25,40,32*2,28*2", "46,13c,l1,pan1,bmf"]);
+  const options = r.suggestions.filter((s) => s.alternative).map((s) => `${s.code}@${s.teeth.join("+")}`);
+  assert.deepEqual(options, ["2400@25", "2420@25", "2100@46"]);
+});
