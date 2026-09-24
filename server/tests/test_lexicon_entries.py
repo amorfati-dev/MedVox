@@ -50,6 +50,18 @@ def test_a_built_in_term_may_stay_inside_a_longer_replacement() -> None:
     assert check_replacement("Karies profunder", "Karies profunda", []) == ("Karies profunder", "Karies profunda")
 
 
+@pytest.mark.parametrize(
+    "wrong, right",
+    [
+        ("Zahnstein entfernung", "Zahnsteinentfernung"),
+        ("Komposit füllung", "Kompositfüllung"),
+        ("Wurzel kanal behandlung", "Wurzelkanalbehandlung"),
+    ],
+)
+def test_a_split_compound_may_be_joined_again(wrong: str, right: str) -> None:
+    assert check_replacement(wrong, right, []) == (wrong, right)
+
+
 def test_replacement_is_cleaned_and_accepted() -> None:
     assert check_replacement("  Zahn   steinentfernung ", "Zahnsteinentfernung", []) == (
         "Zahn steinentfernung", "Zahnsteinentfernung")
