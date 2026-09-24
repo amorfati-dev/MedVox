@@ -160,6 +160,6 @@ def test_without_extra_nothing_changes() -> None:
     assert correct(raw) == correct(raw, {}) == (raw, [])
 
 
-def test_ten_built_in_replacements_are_shown() -> None:
-    assert len(BUILTIN_SHOWN) == 10
+def test_thirteen_built_in_replacements_are_shown() -> None:
+    assert len(BUILTIN_SHOWN) == 13
     assert (("psycho",), "PSI") in BUILTIN_SHOWN

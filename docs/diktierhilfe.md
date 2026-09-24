@@ -251,7 +251,7 @@ ihn zurück; „seit …“ und die Herkunft (von Hand / aus Korrekturen überno
   Erst **Probe**: ein Beispielsatz läuft einmal ohne und einmal mit dem Entwurf durch die Auswertung
   („Ziffern vorher IP4 · nachher 107, IP4“), dann **Hinzufügen**. Abgelehnt wird mit Begründung: Zahlen
   oder Zahlwörter (Zahnnummern und Codes bleiben unangetastet), ein Allerweltswort allein („Zahn“), was
-  eine der zehn eingebauten Ersetzungen oder einen eingebauten Fachbegriff überschreiben würde, und ein
+  eine der dreizehn eingebauten Ersetzungen oder einen eingebauten Fachbegriff überschreiben würde, und ein
   „richtig“, das das falsch Gehörte selbst enthält.
 - **Fachbegriffe** (z. B. „Keramikinlay“) kommen nur in den Prompt, der Whisper vorab zeigt, welche Wörter
   vorkommen; sie werden nicht unscharf korrigiert. Der Balken zeigt, wie voll der Prompt ist: whisper.cpp

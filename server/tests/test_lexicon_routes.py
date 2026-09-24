@@ -32,7 +32,7 @@ def test_lexicon_needs_a_session(client: TestClient) -> None:
 def test_page_data_shows_built_ins_and_the_prompt_gauge(logged_in: TestClient) -> None:
     body = logged_in.get(LEXICON).json()
     assert body["entries"] == []
-    assert len(body["builtin"]) == 10 and {"wrong": "bis registrat", "right": "Bissregistrat"} in body["builtin"]
+    assert len(body["builtin"]) == 13 and {"wrong": "bis registrat", "right": "Bissregistrat"} in body["builtin"]
     prompt = body["prompt"]
     assert prompt["base"].startswith("Zahnarzt-Diktat.")
     assert prompt["terms_tokens"] == 0 and prompt["limit"] == 223 and prompt["exact"] is False
