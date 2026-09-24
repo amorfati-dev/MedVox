@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from medvox import (
     __version__,
     db,
+    events,
     routes_auth,
     routes_correction,
     routes_dentists,
@@ -54,15 +55,19 @@ def create_app(
         # Datei (FALLBACK_PROMPT) sofort im Log steht und nicht erst beim ersten Diktat.
         settings.whisper_prompt
         app.state.http = httpx.Client(transport=transport)
+        app.state.changes.bind(asyncio.get_running_loop())
+        unsubscribe = db.on_change(app.state.changes.notify)
         sweep = asyncio.create_task(purge_loop(settings))
         try:
             yield
         finally:
             sweep.cancel()
+            unsubscribe()
             app.state.http.close()
 
     app = FastAPI(title="MedVox Server", version=__version__, lifespan=lifespan)
     app.state.settings = settings
+    app.state.changes = events.ChangeHub(settings.db_path)
     app.state.transfer_limiter = RateLimiter(settings.transfer_lookups_per_min)
     app.state.login_limiter = RateLimiter(settings.login_attempts_per_min)
     app.include_router(routes_transcribe.router)
@@ -71,6 +76,7 @@ def create_app(
     app.include_router(routes_patients.router)
     app.include_router(routes_dentists.router)
     app.include_router(routes_correction.router)
+    app.include_router(events.router)
     return app
 
 

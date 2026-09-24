@@ -56,6 +56,8 @@ class Settings:
     transfer_lookups_per_min: int = 10
     login_attempts_per_min: int = 10
     purge_interval_s: float = 5 * 60
+    events_heartbeat_s: float = 15.0  # Live-Strom des Büros: Lebenszeichen und erneute Sitzungsprüfung
+    events_max_s: float = 10 * 60  # danach endet der Strom, der Browser verbindet sich neu
     dentist_idle_s: int = 30 * 60  # so lange ohne Bedienung, dann fragt das iPad neu, wer diktiert
 
     @classmethod

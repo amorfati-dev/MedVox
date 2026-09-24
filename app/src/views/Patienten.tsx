@@ -15,6 +15,7 @@ import { PatientPicker } from "../components/PatientPicker";
 import { ThemeSwitch } from "../components/ThemeSwitch";
 import { dentistApi, filterByDentist, filterChoices, type Dentist } from "../dentists";
 import { usePatientList } from "../hooks/usePatientList";
+import { LIVE_TEXT } from "../live";
 import { dictationCopy, patientName, patientState, STATE_LABEL } from "../patients";
 
 type Props = { onLogout: () => void };
@@ -220,6 +221,11 @@ export function Patienten({ onLogout }: Props) {
         <h1>MedVox · Patienten</h1>
         <nav>
           <ThemeSwitch />
+          {data.live && (
+            <span className="muted small" title={LIVE_TEXT[data.live].title}>
+              {LIVE_TEXT[data.live].label}
+            </span>
+          )}
           <button type="button" className="btn" onClick={() => void data.refresh()}>
             Aktualisieren
           </button>

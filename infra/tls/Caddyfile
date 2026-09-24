@@ -24,7 +24,16 @@
 https://medvox.local:@@HTTPS_PORT@@, https://@@LAN_IP@@:@@HTTPS_PORT@@ {
 	tls "@@CERT@@" "@@KEY@@"
 
-	encode gzip
+	# gzip puffert – der Live-Strom des Büros (Server-Sent Events) muss sofort durch.
+	@compressible not path /api/v1/events
+	encode @compressible gzip
+
+	# Live-Strom des Büros (server/medvox/events.py): jedes Ereignis sofort weiterreichen.
+	handle /api/v1/events {
+		reverse_proxy @@API_UPSTREAM@@ {
+			flush_interval -1
+		}
+	}
 
 	# Backend (WP-2): FastAPI/uvicorn auf 127.0.0.1:8000
 	handle /api/* {

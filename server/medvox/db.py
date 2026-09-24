@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import sqlite3
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -139,6 +139,17 @@ def init_db(path: Path) -> None:
             conn.execute("INSERT INTO dentists (name, created_at) VALUES (?, ?)", (FIRST_DENTIST, time.time()))
 
 
+# Wird nach jedem Commit mit Änderungen aufgerufen (Pfad der Datenbank): Live-Aktualisierung des Büros
+# (`medvox/events.py`). Nur das Signal „geändert“, nie Inhalte.
+_listeners: list[Callable[[Path], None]] = []
+
+
+def on_change(listener: Callable[[Path], None]) -> Callable[[], None]:
+    """Meldet `listener` für Änderungen an; liefert die Abmeldung."""
+    _listeners.append(listener)
+    return lambda: _listeners.remove(listener)
+
+
 @contextmanager
 def connect(path: Path) -> Iterator[sqlite3.Connection]:
     """Kurzlebige Verbindung je Aufruf; Commit bei Erfolg, Rollback bei Fehler."""
@@ -148,11 +159,15 @@ def connect(path: Path) -> Iterator[sqlite3.Connection]:
     try:
         yield conn
         conn.commit()
+        changed = conn.total_changes > 0
     except BaseException:
         conn.rollback()
         raise
     finally:
         conn.close()
+    if changed:
+        for listener in list(_listeners):
+            listener(path)
 
 
 def bury(conn: sqlite3.Connection, where: str, params: tuple, now: float, collect: bool = False) -> int:
