@@ -261,6 +261,16 @@ def test_met_elsewhere_is_left_alone(raw):
     assert correct(raw) == (raw, [])
 
 
+@pytest.mark.parametrize("raw, extra, expected", [
+    ("Zahn 25 WK, MET Einlage", {("met", "einlage"): "med"}, "Zahn 25 WK, med"),
+    ("Zahn 25 WK, MET", {("met",): "Metronidazol"}, "Zahn 25 WK, Metronidazol"),
+])
+def test_met_inside_a_practice_entry_is_replaced_once(raw, extra, expected):
+    text, corrections = correct(raw, extra)
+    assert text == expected
+    assert len(corrections) == 1
+
+
 @pytest.mark.parametrize("raw, expected", [
     ("Bisflügel", "Bissflügel"), ("Bisflügelaufnahme rechts", "Bissflügelaufnahme rechts"),
     ("Bisflügelaufnahmen", "Bissflügelaufnahmen"),

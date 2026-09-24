@@ -27,7 +27,7 @@ def endo_only(
     Wurzelkanalbehandlung steht; ``found`` sind die übrigen Korrekturen ("2x WD" -> VitE zählt mit)."""
     result = []
     for start, end, token in tokens:
-        if (replacement := ENDO_ONLY.get(token.lower())) is None:
+        if (replacement := ENDO_ONLY.get(token.lower())) is None or any(c.start <= start < c.end for c in found):
             continue
         before = [m.end() for m in _TOOTH_MARK.finditer(text, 0, start)]
         after = _TOOTH_MARK.search(text, end)
