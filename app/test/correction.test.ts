@@ -5,7 +5,7 @@ import { test } from "node:test";
 import type { Suggestion, SuggestionKind } from "../src/api.ts";
 import { byCode, codesOf, filterCatalog, mainPositions, type CatalogEntry } from "../src/catalog.ts";
 import { addPosition, keepAdopted, recompute, remapDeselected, replaceFamily } from "../src/correction.ts";
-import { buildGroups, copyLines, optionKey } from "../src/result.ts";
+import { buildGroups, copiedMain, copyLines, optionKey } from "../src/result.ts";
 import { codeChanges, describe, excerpt, wordDiff } from "../src/textdiff.ts";
 
 const FILL = ["13a", "13b", "13c", "13d"];
@@ -128,6 +128,11 @@ test("Zeile „von Hand“ wird immer kopiert; die Abwahl derselben Ziffer an an
   assert.equal(at(36)?.selected, false);
   assert.equal(at(46)?.selected, true);
   assert.equal(at(46)?.source, "hand");
+  const office = codeChanges(mainPositions(TWO_TEETH), mainPositions(copiedMain(list, active)), CATALOG);
+  assert.equal(describe(office, "ergänzt"), describe(codeChanges(mainPositions(TWO_TEETH), [
+    { tooth: 36, code: "13b", count: 1 }, { tooth: 46, code: "13b", count: 1 }, { tooth: 46, code: "12", count: 1 },
+  ], CATALOG), "ergänzt"));
+  assert.ok(describe(office, "ergänzt").includes("12"));
   // Am Zahn mit Regel-Vorschlag derselben Ziffer zählt die Hand-Position mit und folgt der Abwahl.
   const more = addPosition(TWO_TEETH, CATALOG.get("12")!, 36);
   assert.deepEqual(lines(more, none, remapDeselected(["12"], codesOf(more))), ["36,13b", "46,13b"]);

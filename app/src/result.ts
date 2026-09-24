@@ -80,6 +80,14 @@ export function handOnly(suggestions: Suggestion[]): Set<string> {
   return new Set(main.filter((s) => s.source === "hand" && !ruled.has(spotOf(s))).map(spotOf));
 }
 
+// Kopierte Hauptvorschläge (ohne Optionen): gewählte Ziffern und alle Zeilen „von Hand“. Dieselbe Regel
+// fürs Kopieren und für die Ziffernänderungen im Büro (OriginalDiff).
+export function copiedMain(suggestions: Suggestion[], active: string[]): Suggestion[] {
+  const chosen = new Set(active.map(codeOf));
+  const own = handOnly(suggestions);
+  return suggestions.filter((s) => !s.alternative && (chosen.has(s.code) || own.has(spotOf(s))));
+}
+
 // Evident-Zeilen (mit Kurzformen oder „Nur Ziffern“) für die aktuelle Auswahl, Kassen- und Privatblock
 // getrennt („Kassenleistungen kopieren“, „Privatleistungen kopieren“). Eine übernommene Option bringt
 // nur sich selbst an ihrem Zahn mit, nie eine abgewählte Position mit derselben Ziffer.
@@ -90,8 +98,7 @@ export function copyBlocks(
   shortForms = true,
 ): EvidentBlocks {
   const chosen = new Set(active.map(codeOf));
-  const own = handOnly(suggestions);
-  const hand = suggestions.filter((s) => !s.alternative && !chosen.has(s.code) && own.has(spotOf(s)));
+  const hand = copiedMain(suggestions, active).filter((s) => !chosen.has(s.code));
   const kept =
     adopted.size === 0 && hand.length === 0
       ? suggestions
