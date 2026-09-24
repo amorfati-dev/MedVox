@@ -125,11 +125,11 @@ bleiben ohne Behandler (`null`) und funktionieren unverändert; das Büro trägt
 
 Korrektur-Sammlung (`medvox/corrections.py`, Tabelle `corrections`, Entscheidung des Behandlers F2 = b):
 Ein am iPad korrigiertes Diktat trägt `original`. Wird es übertragen (Büro oder Kurzcode) oder läuft es ab,
-schreibt `db.bury` in derselben Transaktion nur die geänderten Stellen: Text vorher/nachher mit höchstens
-zwei Wörtern Umfeld je Seite (Stellen mit mehr als 12 geänderten Wörtern werden verworfen) und
-Ziffernänderungen ohne Zahn (`13b` → `13c`, `` → `107`, `25` → `2x 25`), dazu Patiententyp, Kalenderwoche
-(`2026-W39`) und Katalogstand. Keine Evident-Nummer, kein Kürzel, kein Behandler, kein Datum, keine
-Diktat-ID, kein ganzer Text, keine Fremdschlüssel. Beim Verwerfen oder Löschen wird nichts gesammelt.
+schreibt `db.bury` in derselben Transaktion nur die geänderten Stellen (Text vorher/nachher mit wenig Umfeld,
+Ziffernänderungen ohne Zahn wie `13b` → `13c`, `` → `107`, `25` → `2x 25`), dazu Patiententyp, Kalenderwoche
+(`2026-W39`) und Katalogstand; zufällige Zeilen-ID, keine Fremdschlüssel. Welche Stellen bleiben und was nie
+gespeichert wird: Docstring von `medvox/corrections.py`, Datenschutz in `docs/diktierhilfe.md`. Beim Verwerfen
+oder Löschen wird nichts gesammelt.
 Zeilen bleiben, bis sie gelöscht werden, höchstens 12 Monate (`corrections.purge` bei jedem Aufräumen);
 angezeigt und gelöscht werden sie ab Ship 2 auf der Wörterbuch-Seite.
 
