@@ -29,11 +29,11 @@ type Props = {
 export function RecordButton({ variant, onClick, disabled, label, aria, progress, clock, final }: Props) {
   const look = LOOK[variant];
   const ref = useRef<HTMLButtonElement>(null);
-  // Während der Aufnahme bleiben „Stopp“ und die Uhr sichtbar: Im niedrigen iPad-Querformat ist die
+  // „Stopp“ samt Uhr und „Erneut senden“ bleiben sichtbar: Im niedrigen iPad-Querformat ist die
   // Seitenspalte mit Patient, Hinweisen und Fehlerzeilen höher als der Bildschirm – dann rollt sie
-  // gerade so weit, dass der ganze Knopf zu sehen ist (sonst nichts).
+  // gerade so weit, dass der ganze Knopf zu sehen ist.
   useEffect(() => {
-    if (variant === "stopp") ref.current?.scrollIntoView?.({ block: "nearest" });
+    if (variant === "stopp" || variant === "erneut") ref.current?.scrollIntoView?.({ block: "nearest" });
   }, [variant, clock, final]);
   const style = progress === undefined ? undefined : ({ "--progress": Math.min(1, Math.max(0, progress)) } as CSSProperties);
   const classes = ["record", `record-${variant}`, final ? "record-final" : ""].filter(Boolean).join(" ");
