@@ -106,6 +106,14 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   entfernt sie (mit **Rückgängig**).
   **Ziffer ohne Zahn oder an anderem Zahn** (unter der Liste): erst „Ohne Zahn“ oder den Quadranten,
   dann den Zahn antippen.
+- **Anzahl − / +** (rechts in der Zeile, geht mit Handschuhen): nur an Positionen, die mengenweise
+  berechnet werden – je Kanal (28, 32, 35, 2400 …) oder laut Katalog mehrmals je Sitzung (40, 41a,
+  Röntgen …); nicht an Je-Zahn-Positionen wie Füllungen (weiterer Zahn: über „Ziffer ändern oder
+  ergänzen“). Gilt nur an diesem Zahn und ändert die Evident-Zeile (`32*3`, `wf*3`); der Hinweis
+  „Kanalzahl nicht diktiert“ ist damit erledigt, die Zeile trägt „Anzahl von Hand“. Nie unter 1 – weg
+  nur über die Abwahl –, nie über eine vom Behandler bestätigte Höchstzahl. Eine übernommene
+  Zuzahlungs-Option je Kanal (2400 neben 32) hat ihre eigenen Knöpfe. Abgewählte Zeilen und das Büro
+  zeigen die Anzahl nur an.
 - Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
   Stufe: Text, Ziffern und Auswahl vor der letzten Änderung). Ein neuer Abschnitt wird wie immer
   angehängt; wurde schon ein Kurzcode abgeholt, zeigt die Rezeption wie gewohnt nur die Änderung.
