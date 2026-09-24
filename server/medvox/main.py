@@ -21,6 +21,7 @@ from medvox import (
     routes_auth,
     routes_correction,
     routes_dentists,
+    routes_lexicon,
     routes_patients,
     routes_transcribe,
     routes_transfer,
@@ -76,6 +77,7 @@ def create_app(
     app.include_router(routes_patients.router)
     app.include_router(routes_dentists.router)
     app.include_router(routes_correction.router)
+    app.include_router(routes_lexicon.router)
     app.include_router(events.router)
     return app
 

@@ -1,11 +1,14 @@
 """Kuratiertes deutsches Dental-Lexikon mit Fuzzy-Korrektur der Whisper-Ausgabe (WP-6).
 
-``correct(text)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
+``correct(text, extra)`` korrigiert bekannte Verhörer aus ``ALIASES`` ("Psycho" ->
 "PSI", "bis Registrat" -> "Bissregistrat"), Verhörer aus ``CONTEXT_ALIASES`` nur in ihrem
 Zusammenhang ("PTE 3x" -> "VitE 3x", "Röntgen zwei" -> "Rö2") sowie Tokens mit Levenshtein-Distanz
 1 zu einem Lexikon-Begriff ("Artikein" -> "Artikain"). Im Zweifel bleibt das
 Token stehen: Distanz 2 wird nicht mehr geraten, weil das den klinischen Sinn
 verändert hat ("schwere" -> "Schmerz").
+``extra`` sind die Ersetzungen aus dem Wörterbuch der Praxis (``medvox/lexicon_entries.py``, je Anfrage
+aus SQLite): 1–3 ganze Wörter, angewandt wie ``ALIASES``; ein längeres Wortfenster geht vor, bei gleicher
+Länge die eingebaute Ersetzung. Für neue Fachbegriffe gibt es bewusst keine Distanz-Korrektur.
 Häufige deutsche Wörter werden nie korrigiert, Codes und Zahlen nie angefasst,
 und jede Korrektur wird zurückgegeben, damit die UI sie anzeigen kann. Läuft
 vor ``normalize``. Rein, ohne I/O.
@@ -87,6 +90,8 @@ ALIASES: dict[tuple[str, ...], str] = {
     ("composite",): "Komposit",
     ("kalzium", "hydroxid"): "Kalziumhydroxid", ("gutta", "percha"): "Guttapercha",
 }
+# Die zehn von Hand gepflegten Ersetzungen oben; die Wörterbuch-Seite zeigt sie, ohne sie änderbar zu machen.
+BUILTIN_SHOWN: tuple[tuple[tuple[str, ...], str], ...] = tuple(ALIASES.items())
 # Flächenzahl als Ziffer oder getrennt geschrieben ("2 flächig", "2-flächig", "3flächig") -> "zweiflächig".
 for _n, _word in (("1", "ein"), ("2", "zwei"), ("3", "drei"), ("4", "vier")):
     for _flaechig in ("flächig", "flaechig"):
@@ -141,6 +146,17 @@ _NEVER_LOWER = frozenset(w.lower() for w in NEVER_CORRECT)
 _INFLECTIONS = ("e", "en", "er", "es", "em", "n", "s", "is", "us")
 _TOKEN = re.compile(r"\w+")
 _L_CODE = re.compile(r"^[Ll](\d{3}[a-z]?)$")  # "L935d" -> "Ä935d" (Whisper verliert den Umlaut)
+
+
+def is_common(word: str) -> bool:
+    """Allerweltswort aus ``NEVER_CORRECT`` (ohne Groß-/Kleinschreibung)."""
+    return word.lower() in _NEVER_LOWER
+
+
+def is_term(word: str) -> bool:
+    """Eingebauter Fachbegriff oder seine Beugung ("Füllungen")."""
+    low = word.lower()
+    return low in _TERMS_LOWER or any(_is_inflection(low, t) for t in _TERMS_LOWER)
 
 
 def levenshtein(a: str, b: str, limit: int) -> int:
@@ -202,27 +218,38 @@ def _joined(text: str, first: tuple[int, int, str], second: tuple[int, int, str]
     return gap.isspace() or gap == "-" and second[2].lower() in ("flächig", "flaechig")
 
 
-def _window(text: str, tokens: list[tuple[int, int, str]], i: int) -> tuple[int, str] | None:
-    """(Anzahl Tokens, Ersatz) für ein bekanntes Wortfenster ab Token ``i``, sonst None."""
-    for size in (2, 1):
+def _window(
+    text: str, tokens: list[tuple[int, int, str]], i: int, extra: dict[tuple[str, ...], str]
+) -> tuple[int, str] | None:
+    """(Anzahl Tokens, Ersatz) für ein bekanntes Wortfenster ab Token ``i``, sonst None.
+
+    Längere Fenster zuerst; bei gleicher Länge Zusammenhangsregel, dann eingebaute Ersetzung, dann ``extra``.
+    """
+    for size in (3, 2, 1):
         window = tuple(t[2].lower() for t in tokens[i : i + size])
-        if len(window) < size or size == 2 and not _joined(text, tokens[i], tokens[i + 1]):
+        if len(window) < size or any(not _joined(text, tokens[k], tokens[k + 1]) for k in range(i, i + size - 1)):
             continue
         rule = CONTEXT_ALIASES.get(window)
         if rule and rule[1].match(text, tokens[i + size - 1][1]):
             return size, rule[0]
-        if size == 2 and window in ALIASES:
+        if window in ALIASES:
             return size, ALIASES[window]
+        if window in extra:
+            return size, extra[window]
     return None
 
 
-def correct(text: str) -> tuple[str, list[Correction]]:
-    """Korrigierter Text und alle angewandten Korrekturen (Offsets beziehen sich auf ``text``)."""
+def correct(text: str, extra: dict[tuple[str, ...], str] | None = None) -> tuple[str, list[Correction]]:
+    """Korrigierter Text und alle angewandten Korrekturen (Offsets beziehen sich auf ``text``).
+
+    ``extra``: zusätzliche Ersetzungen (kleingeschriebenes Wortfenster -> Ersatz), siehe Modulkommentar.
+    """
+    extra = extra or {}
     tokens = [(m.start(), m.end(), m.group()) for m in _TOKEN.finditer(text)]
     corrections: list[Correction] = []
     i = 0
     while i < len(tokens):
-        if window := _window(text, tokens, i):
+        if window := _window(text, tokens, i, extra):
             size, replacement = window
             start, end = tokens[i][0], tokens[i + size - 1][1]
             corrections.append(Correction(text[start:end], replacement, start, end))

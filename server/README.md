@@ -39,7 +39,8 @@ z. B. `export MEDVOX_PASSWORD_HASH='pbkdf2_sha256$...'`; ohne ihn antwortet
 | Variable | Standard | Bedeutung |
 |---|---|---|
 | `WHISPER_URL` | `http://127.0.0.1:8178` | Adresse des whisper-servers |
-| `WHISPER_PROMPT_FILE` | `<repo>/infra/whisper/prompt.txt` | Diktat-Prompt für whisper; fehlt die Datei, gilt `FALLBACK_PROMPT` aus `medvox/settings.py` (Übergang bis WP-1, der Server warnt beim Start im Log) |
+| `WHISPER_PROMPT_FILE` | `<repo>/infra/whisper/prompt.txt` | Grundtext des Diktat-Prompts für whisper (dahinter je Anfrage die Fachbegriffe aus dem Wörterbuch); fehlt die Datei, gilt `FALLBACK_PROMPT` aus `medvox/settings.py` (Übergang bis WP-1, der Server warnt beim Start im Log) |
+| `WHISPER_MODEL` | `~/Library/Application Support/MedVox/models/ggml-large-v3-turbo.bin` | Nur zum Zählen der Prompt-Token (Vokabular vorne in der Datei, `medvox/whisper_prompt.py`); fehlt sie, wird vorsichtig geschätzt |
 | `MEDVOX_PASSWORD_HASH` | – (Pflicht) | PBKDF2-Hash des Behandler-Passworts (`make set-password`) |
 | `MEDVOX_DB_PATH` | `~/Library/Application Support/MedVox/medvox.db` | SQLite mit Sitzungen und Transfer-Codes |
 | `MEDVOX_TRANSFER_TTL_S` | `900` | Lebensdauer eines Kurzcodes (15 min) |
@@ -62,7 +63,7 @@ kommt, sonst direkt vom Peer.
 | `POST /logout` | – | – | 204, Cookie gelöscht |
 | `GET /session` | ja | – | 200 `{"status":"ok"}` oder 401 |
 | `POST /transcribe` | ja | multipart `file` (audio/mp4, audio/webm, audio/wav; ≤ 60 s, ≤ 10 MB), optional `patient_type` = `kasse` (Standard) \| `privat` | `{"transcript", "patient_type", "duration_s", "latency_s", "codes", "suggestions", "planned", "notes"}` – `transcript` ist die Anzeigefassung (lexikon-korrigiert, Zahnnummern als FDI, Codes zusammengefügt, Flächen wie diktiert); `patient_type` der Typ, für den die Vorschläge gelten; `codes` die erbrachten Hauptvorschläge im Kopierformat (`"13c"`, `"2x 41a"`); `suggestions`/`planned` je Vorschlag `code, system, title, points, teeth, count, reason, decide, planned, alternative, kind, evident, source` (Evident-Kurzform aus dem Katalog oder `null`; `source` = `regel`, am iPad `hand` bzw. `geaendert`) mit `kind` = `bema` \| `goz` (Privatleistung, auch GOÄ) \| `zuzahlung` (Privatleistung beim Kassenpatienten); siehe „Regel-Extraktor“. Unbekannter `patient_type`: 422 |
-| `POST /analyze` | ja | JSON `{"text": str, "patient_type"?: "kasse"\|"privat"}` – am iPad berichtigter Text aller Abschnitte (≤ 50 000 Zeichen) | wie `/transcribe` (`duration_s`/`latency_s` = 0): dieselbe Kette ohne Audio; für das angezeigte, unveränderte Transkript ergeben sich dieselben Ziffern (Fixpunkt, `tests/test_correction_routes.py`); Log nur Anzahlen |
+| `POST /analyze` | ja | JSON `{"text": str, "patient_type"?: "kasse"\|"privat", "draft"?: {"wrong", "right"}}` – am iPad berichtigter Text aller Abschnitte (≤ 50 000 Zeichen); `draft` = Probe auf der Wörterbuch-Seite: eine noch nicht gespeicherte Ersetzung nur für diese Anfrage | wie `/transcribe` (`duration_s`/`latency_s` = 0): dieselbe Kette ohne Audio, mit den eingeschalteten Ersetzungen des Wörterbuchs (und `draft`); für das angezeigte, unveränderte Transkript ergeben sich dieselben Ziffern (Fixpunkt, `tests/test_correction_routes.py`); `draft` verletzt eine Schutzregel: 422 mit Begründung; Log nur Anzahlen |
 | `GET /catalog?patient_type=kasse\|privat` | ja | – | `{"version", "patient_type", "entries": [{code, system, title, area, points, kind, evident, family}]}` – Positionen aus `catalog_v1.json`, die für den Patiententyp vorgeschlagen werden dürfen (wie der Extraktor: Kasse = BEMA inkl. Analogpositionen plus Zuzahlungs-Liste, Privat = GOZ/GOÄ, Zuschlag 0500–0530 nur Privat); `family` = Ziffern nach Flächenzahl 1–4 (13a–13d) oder leer. Für das Katalog-Blatt am iPad, keine freie Ziffern-Eingabe |
 | `POST /transfer` | ja | JSON `{"transcript": str, "codes": [str], "patient_type"?: "kasse"\|"privat", "positions"?: [{"tooth": int\|null, "code": str, "kind": "bema"\|"goz"\|"zuzahlung"\|"kassenanteil"}], "dictation_id"?: str, "dictation_revision"?: int, "dentist_id"?: int}` – die App schickt als `codes` die Evident-Zeilen, eine je Zahn (`"36,Ä925a,l1,13a"`, letzte Zeile ohne Zahn); `patient_type` und `positions` sind nur zur Anzeige an der Rezeption (Zuzahlung, Kassenanteil); `dictation_id`/`dictation_revision` verknüpfen den Code mit genau diesem Stand des gespeicherten Diktats (siehe unten); der Behandler ist der des gespeicherten Diktats, sonst `dentist_id` | `{"code": "ABC123", "expires_at": iso8601}` |
 | `GET /transfer/{code}` | nein | – | `{"transcript", "codes", "created_at", "patient_type", "positions", "earlier", "dentist_name"}` (ältere Einträge: `null`/`[]`; `earlier` = schon abgeholte Stände desselben Diktats) oder 404; 410 ohne Inhalt, wenn das verknüpfte Diktat schon übertragen ist (Code danach gelöscht); 429 bei > 10 Abrufen/min/IP |
@@ -80,6 +81,11 @@ kommt, sonst direkt vom Peer.
 | `POST /dentists` | ja | JSON `{"name": "Dr. Hartmann", "practitioner_id"?: "12"}` (Name 1–60 Zeichen, Nummer ≤ 20 Zeichen `A-Za-z0-9./-`) | der neue Behandler |
 | `PATCH /dentists/{id}` | ja | JSON mit beliebigen von `name`, `practitioner_id` (leer = keine), `active` | der geänderte Behandler; 404 |
 | `DELETE /dentists/{id}` | ja | – | inaktiv setzen (nie löschen): der Behandler mit `active: false`; 404 |
+| `GET /lexicon` | ja | – | `{"entries": [{id, kind, wrong, right, active, source, created_at}], "builtin": [{wrong, right}], "prompt": {base, base_tokens, terms_tokens, limit, exact}}` – Wörterbuch der Praxis (`kind` = `ersetzung` \| `begriff`, `source` = `hand` \| `korrektur`), eingeschaltete zuerst; `builtin` = die zehn eingebauten Ersetzungen (nur lesen); `prompt` = Grundtext und Füllstand in Token (`limit` 223 bei allen Whisper-Modellen, `exact` = mit dem Modell-Vokabular gezählt) |
+| `POST /lexicon` | ja | JSON `{"kind": "ersetzung"\|"begriff", "wrong"?: str, "right": str, "source"?: "hand"\|"korrektur"}` | der neue, eingeschaltete Eintrag – gilt ab der nächsten Anfrage (kein Neustart); Schutzregel verletzt (Ziffer/Zahlwort, Allerweltswort allein, eingebaute Ersetzung oder eingebauter Fachbegriff, schon vorhanden, Prompt voll): 422 mit Begründung |
+| `PUT /lexicon/{id}` | ja | JSON `{"active": bool}` | ab- oder wieder einschalten (nie löschen; beim Einschalten gelten die Schutzregeln erneut); 404, 422 |
+| `GET /lexicon/suggestions` | ja | – | `{"suggestions": [{kind, before, after, count, takeable, taken}], "total", "first_week", "last_week"}` – gleiche Änderungen aus der Korrektur-Sammlung gezählt (Textstellen ohne gemeinsames Umfeld), häufigste zuerst, höchstens 30; `takeable` nur für Textpaare, die die Schutzregeln bestehen; Ziffernänderungen sind nur Information |
+| `DELETE /corrections` | ja | – | 204 – „Alle löschen“: die ganze Korrektur-Sammlung, sofort |
 
 Fehler tragen eine deutsche Meldung in `{"detail": "…"}`: 400 unlesbare oder leere
 Aufnahme, 401 nicht angemeldet, 413 zu groß oder zu lang, 415 falscher Typ,
@@ -132,15 +138,25 @@ Ziffernänderungen ohne Zahn wie `13b` → `13c`, `` → `107`, `25` → `2x 25`
 gespeichert wird: Docstring von `medvox/corrections.py`, Datenschutz in `docs/diktierhilfe.md`. Beim Verwerfen
 oder Löschen wird nichts gesammelt.
 Zeilen bleiben, bis sie gelöscht werden, höchstens 12 Monate (`corrections.purge` bei jedem Aufräumen);
-angezeigt und gelöscht werden sie ab Ship 2 auf der Wörterbuch-Seite.
+die Wörterbuch-Seite zählt sie als Vorschläge (`medvox/lexicon_suggest.py`) und löscht sie mit „Alle löschen“.
+
+Wörterbuch der Praxis (`medvox/lexicon_entries.py`, Tabelle `lexicon_entries`, Entscheidung F5 = sofort wirksam):
+Ersetzungen „falsch gehört → richtig“ (1–3 ganze Wörter) gehen je Anfrage als `extra` an `lexicon.correct`,
+Fachbegriffe hinter den Grundtext in den Prompt (`whisper_prompt.compose`; keine unscharfe Korrektur für sie).
+Beides wird bei jeder Transkription und jedem `/analyze` aus SQLite gelesen – kein Neustart, kein `make install`.
+Einträge werden nur abgeschaltet, nie gelöscht. Prompt-Grenze nachgemessen mit dem installierten
+ggml-large-v3-turbo (`n_text_ctx` 448 → 223 Token Text, Grundtext 150 Token; Einzelheiten im Docstring von
+`medvox/whisper_prompt.py`): ein Begriff, der nicht mehr passt, wird abgelehnt, statt dass whisper.cpp den
+Anfang des Grundtexts abschneidet.
 
 ## Module
 
 `medvox/settings.py` (Umgebung), `transcribe.py` (ffmpeg → whisper, Temp-Dateien),
-`auth.py` (PBKDF2, Sitzungen), `transfer.py` (Kurzcodes), `corrections.py` (Korrektur-Sammlung), `handovers.py` (abgeholte Kurzcodes je Diktat), `patients.py` (Diktate je Patient,
+`auth.py` (PBKDF2, Sitzungen), `transfer.py` (Kurzcodes), `corrections.py` (Korrektur-Sammlung),
+`lexicon_entries.py`/`lexicon_suggest.py`/`whisper_prompt.py` (Wörterbuch, Vorschläge, Prompt je Anfrage), `handovers.py` (abgeholte Kurzcodes je Diktat), `patients.py` (Diktate je Patient,
 Aufbewahrung), `dentists.py` (Behandlerliste), `attribution.py` (Behandler nachtragen), `ratelimit.py` (Client-IP, Fenster),
 `db.py` (SQLite, Aufräumen), `lexicon.py`/`normalize*.py`/`extract*.py` (Text-Pipeline),
-`routes_*.py` (HTTP-Schicht; `routes_correction.py`: `/analyze`, `/catalog`), `main.py` (App-Fabrik). Tests in `tests/`, whisper und
+`routes_*.py` (HTTP-Schicht; `routes_correction.py`: `/analyze`, `/catalog`; `routes_lexicon.py`: Wörterbuch), `main.py` (App-Fabrik). Tests in `tests/`, whisper und
 ffmpeg dort per `httpx.MockTransport` bzw. Shell-Fake ersetzt.
 
 ## Text-Pipeline
@@ -155,7 +171,9 @@ deutsche Wörter stehen auf einer Whitelist, Codes und Zahlen werden nie angefas
 gelten nur im Zusammenhang (`CONTEXT_ALIASES`): „PTE 3x“ → „VitE 3x“ nur vor einer Anzahl, „Röntgen
 zwei“/„Rö zwei“ → „Rö2“ nur, wenn keine weitere Ziffer folgt („Röntgen zwei sechs“ bleibt Zahn 26);
 „2 flächig“ → „zweiflächig“. Zwei-Wort-Ersetzungen greifen nur bei Leerraum zwischen den Wörtern (vor
-„flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert).
+„flächig“ auch „-“), nie über Satzzeichen („Röntgen, zwei Kanäle“ bleibt unverändert). Dazu kommen je
+Anfrage die eingeschalteten Ersetzungen aus dem Wörterbuch der Praxis (`correct(text, extra)`, bis drei
+Wörter): das längere Wortfenster geht vor, bei gleicher Länge die eingebaute Ersetzung.
 
 `display_text` (`normalize_display.py`) erzeugt daraus den Text, den der Behandler liest und ins PVS
 kopiert: dieselbe Zahn- und Code-Normalisierung wie `normalize` („drei sechs“ → 36, „BEMA dreizehn a“

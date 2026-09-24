@@ -85,6 +85,7 @@ def settings(tmp_path: Path, ffmpeg: Path) -> Settings:
     return Settings(
         whisper_url="http://whisper.test",
         whisper_prompt_file=tmp_path / "fehlt.txt",
+        whisper_model=tmp_path / "fehlt.bin",  # Prompt-Länge geschätzt, unabhängig vom Rechner
         password_hash=hash_password(PASSWORD, iterations=1000),
         db_path=tmp_path / "db" / "medvox.db",
         ffmpeg=str(ffmpeg),

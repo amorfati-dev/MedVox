@@ -74,10 +74,13 @@ def convert_to_wav(ffmpeg: str, src: Path, dst: Path) -> None:
         raise TranscribeError(400, "Die Aufnahme konnte nicht gelesen werden.")
 
 
-def call_whisper(client: httpx.Client, settings: Settings, wav_path: Path) -> str:
-    """POST /inference beim whisper-server; liefert den rohen Text."""
+def call_whisper(client: httpx.Client, settings: Settings, wav_path: Path, prompt: str | None = None) -> str:
+    """POST /inference beim whisper-server; liefert den rohen Text.
+
+    `prompt`: Prompt dieser Anfrage (Grundtext plus Wörterbuch, `whisper_prompt.compose`), sonst der Grundtext.
+    """
     data = {"language": "de", "response_format": "json", "temperature": "0.0",
-            "prompt": settings.whisper_prompt}
+            "prompt": settings.whisper_prompt if prompt is None else prompt}
     try:
         with wav_path.open("rb") as fh:
             response = client.post(
@@ -100,7 +103,7 @@ def call_whisper(client: httpx.Client, settings: Settings, wav_path: Path) -> st
 
 
 def transcribe_bytes(
-    client: httpx.Client, settings: Settings, audio: bytes, content_type: str
+    client: httpx.Client, settings: Settings, audio: bytes, content_type: str, prompt: str | None = None
 ) -> Transcription:
     """Vollständiger Ablauf für eine Aufnahme (immer über ffmpeg); räumt Temp-Dateien auf."""
     suffix = ACCEPTED_TYPES[content_type]
@@ -116,7 +119,7 @@ def transcribe_bytes(
             raise TranscribeError(
                 413, f"Die Aufnahme ist länger als {settings.max_duration_s:.0f} Sekunden."
             )
-        text = call_whisper(client, settings, wav)
+        text = call_whisper(client, settings, wav, prompt)
     finally:
         for path in (src, wav):
             path.unlink(missing_ok=True)

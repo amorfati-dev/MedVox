@@ -49,6 +49,7 @@ render_template "$TEMPLATE" "$PLIST" \
   "FFMPEG=$(x "$FFMPEG")" \
   "WHISPER_URL=http://$WHISPER_HOST:$WHISPER_PORT" \
   "PROMPT_FILE=$(x "$MEDVOX_SERVER/prompt.txt")" \
+  "MODEL=$(x "$WHISPER_MODEL")" \
   "TMP_DIR=$(x "$MEDVOX_TMP")" \
   "LOG=$(x "$SERVER_LOG")"
 plutil -lint "$PLIST" >/dev/null || die "plist ist ungültig"

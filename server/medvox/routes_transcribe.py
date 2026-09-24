@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from medvox import transcribe
+from medvox import lexicon_entries, transcribe, whisper_prompt
 from medvox.auth import require_session
 from medvox.extract import Suggestion, analyze, billable_codes
 from medvox.extract_patient import PATIENT_TYPES
@@ -68,9 +68,15 @@ def _out(s: Suggestion) -> SuggestionOut:
     )
 
 
-def build_response(text: str, duration_s: float, latency_s: float, patient_type: str = "kasse") -> TranscribeResponse:
-    """Lexikon -> Normalisierer -> Extraktor; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert)."""
-    corrected, _ = correct(text)
+def build_response(
+    text: str, duration_s: float, latency_s: float, patient_type: str = "kasse",
+    extra: dict[tuple[str, ...], str] | None = None,
+) -> TranscribeResponse:
+    """Lexikon -> Normalisierer -> Extraktor; `transcript` ist die Anzeigefassung (FDI, Flächen wie diktiert).
+
+    `extra`: die eingeschalteten Ersetzungen aus dem Wörterbuch (`lexicon_entries.active`).
+    """
+    corrected, _ = correct(text, extra)
     normalized = normalize(corrected)
     result = analyze(normalized.text, normalized.teeth, patient_type)
     return TranscribeResponse(
@@ -115,7 +121,8 @@ async def transcribe_upload(
 ) -> TranscribeResponse:
     """Nimmt eine Aufnahme entgegen und liefert das lexikon-korrigierte Transkript plus Ziffernvorschläge.
 
-    ``patient_type`` (Formularfeld, Standard ``kasse``) wählt je Leistung BEMA oder GOZ/GOÄ.
+    ``patient_type`` (Formularfeld, Standard ``kasse``) wählt je Leistung BEMA oder GOZ/GOÄ. Das Wörterbuch
+    der Praxis wird je Anfrage gelesen: Fachbegriffe in den Prompt, Ersetzungen vor den Normalisierer.
     """
     settings = request.app.state.settings
     if patient_type not in PATIENT_TYPES:
@@ -128,10 +135,12 @@ async def transcribe_upload(
     audio = await _read_limited(file, settings.max_upload_bytes)
     if not audio:
         raise HTTPException(status_code=400, detail="Die Aufnahme ist leer.")
+    words = await run_in_threadpool(lexicon_entries.active, settings.db_path)
+    prompt = whisper_prompt.compose(settings.whisper_prompt, words.terms)
     try:
         result = await run_in_threadpool(
-            transcribe.transcribe_bytes, request.app.state.http, settings, audio, content_type
+            transcribe.transcribe_bytes, request.app.state.http, settings, audio, content_type, prompt
         )
     except transcribe.TranscribeError as exc:
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
-    return build_response(result.text, result.duration_s, result.latency_s, patient_type)
+    return build_response(result.text, result.duration_s, result.latency_s, patient_type, words.replacements)

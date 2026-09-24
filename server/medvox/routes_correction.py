@@ -1,7 +1,8 @@
 """Routen für die Korrektur am iPad: Ziffern aus berichtigtem Text neu berechnen, Katalog fürs Katalog-Blatt.
 
 `POST /api/v1/analyze` ist dieselbe Kette wie `/transcribe` (Lexikon -> Normalisierer -> Extraktor,
-`build_response`), nur ohne Audio: der Text kommt aus dem Transkript-Editor. `GET /api/v1/catalog`
+`build_response`, mit dem Wörterbuch der Praxis), nur ohne Audio: der Text kommt aus dem Transkript-Editor
+oder – mit `draft` – als Probe von der Wörterbuch-Seite. `GET /api/v1/catalog`
 liefert die Positionen aus `catalog_v1.json`, die für den Patiententyp vorgeschlagen werden dürfen –
 nach denselben Regeln wie der Extraktor (`extract_patient.kind`): Kasse = BEMA (auch Analogpositionen)
 plus Privatpositionen der Zuzahlungs-Liste, Privat = GOZ/GOÄ (Zuschlag 0500–0530 nur hier). Eine freie
@@ -13,9 +14,10 @@ from __future__ import annotations
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from medvox import lexicon_entries
 from medvox.auth import require_session
 from medvox.extract_catalog import load_catalog
 from medvox.extract_patient import kind
@@ -29,9 +31,17 @@ PatientType = Literal["kasse", "privat"]
 _FOREIGN = {"kasse": "goz", "privat": "bema"}
 
 
+class Draft(BaseModel):
+    """Probe: eine noch nicht gespeicherte Ersetzung, die nur für diese Anfrage dazukommt."""
+
+    wrong: str = Field(max_length=200)
+    right: str = Field(max_length=200)
+
+
 class AnalyzeIn(BaseModel):
     text: str = Field(max_length=50_000)  # ganzer, am iPad berichtigter Text aller Abschnitte
     patient_type: PatientType = "kasse"
+    draft: Draft | None = None
 
 
 class CatalogItem(BaseModel):
@@ -53,9 +63,22 @@ class CatalogOut(BaseModel):
 
 
 @router.post("/analyze", response_model=TranscribeResponse)
-def analyze_text(body: AnalyzeIn) -> TranscribeResponse:
-    """Ziffern neu berechnen aus dem ganzen Text; Dauer und Wartezeit sind 0 (kein Audio)."""
-    result = build_response(body.text, 0.0, 0.0, body.patient_type)
+def analyze_text(body: AnalyzeIn, request: Request) -> TranscribeResponse:
+    """Ziffern neu berechnen aus dem ganzen Text; Dauer und Wartezeit sind 0 (kein Audio).
+
+    Mit `draft` kommt der Entwurf zu den eingeschalteten Ersetzungen dazu, geprüft nach denselben
+    Schutzregeln wie beim Speichern (422 mit Begründung).
+    """
+    path = request.app.state.settings.db_path
+    extra = lexicon_entries.active(path).replacements
+    if body.draft is not None:
+        current = [e for e in lexicon_entries.list_entries(path) if e.active]
+        try:
+            wrong, right = lexicon_entries.check_replacement(body.draft.wrong, body.draft.right, current)
+        except lexicon_entries.Rejected as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        extra = {**extra, tuple(wrong.lower().split()): right}
+    result = build_response(body.text, 0.0, 0.0, body.patient_type, extra)
     log.info("Text neu berechnet (%d Zeichen, %d Ziffern)", len(body.text), len(result.codes))
     return result
 
