@@ -86,7 +86,6 @@ class Entry:
     limit: tuple[str, int] | None = None  # bestätigtes max_per: ("kieferhaelfte", 1) = höchstens 1× je Bereich; sonst None
     analog: str | None = None  # Begründung, wenn beim Kassenpatienten als Analogposition berechnet (``analog``)
     conflicts: tuple[Conflict, ...] = ()  # nicht in derselben Sitzung (``conflicts``)
-    per: tuple[str, int | None] | None = None  # ``max_per`` wie im Katalog, auch unbestätigt: ("unbegrenzt", None)
 
     @property
     def key(self) -> tuple[str, str]:
@@ -130,7 +129,7 @@ class Catalog:
             self.entries.append(Entry(
                 e["code"], e["system"], e["area"], e["title"], e.get("abbrev"), e["points"],
                 tuple(e["keywords"]), tuple(e["rules"]), family, links, co, e.get("evident"), limit,
-                (e.get("analog") or {}).get("note"), conflicts, (m["unit"], m.get("count")) if m else None,
+                (e.get("analog") or {}).get("note"), conflicts,
             ))
         self._by_key = {e.key: e for e in self.entries}
         self._by_folded: dict[tuple[str, str], Entry] = {(e.system, fold(e.code)): e for e in self.entries}
@@ -177,13 +176,14 @@ class Catalog:
     def stepper(self, entry: Entry) -> tuple[bool, int | None]:
         """Anzahl je Zeile am iPad änderbar (− / +) und ihre bestätigte Höchstzahl (None = keine).
 
-        Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals (``max_per`` mit einer Anzahl
-        über 1). „unbegrenzt“ heißt nur amtlich ohne Höchstzahl (Extraktion, Beratung) und gibt kein − / +.
-        Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
+        Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals laut vom Behandler bestätigtem
+        ``max_per`` (Einheit ``sitzung``, Anzahl über 1) – ein Vorschlag oder eine Grenze je Halbjahr/Jahr bzw.
+        je Kieferhälfte gibt kein − / +. Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das
+        Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
         """
         unit = self.unit(entry)
-        most = entry.per[1] if entry.per else None
-        counted = unit == "canal" or (unit == "session" and (most or 0) > 1)
+        per_session = entry.limit is not None and entry.limit[0] == "sitzung"
+        counted = unit == "canal" or (unit == "session" and per_session)
         limit = entry.limit[1] if entry.limit and entry.limit[0] != "kanal" else None
         return counted and (limit is None or limit > 1), limit
 

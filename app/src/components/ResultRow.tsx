@@ -46,7 +46,7 @@ function edited(row: Row): string | null {
   if (row.source !== "geaendert") return null;
   if (row.s.source !== "geaendert") return "Anzahl von Hand";
   if (row.s.replaced) return `geändert · vorher ${row.s.replaced}`;
-  return row.s.counted ? "Anzahl von Hand" : "geändert";
+  return row.s.counted !== undefined ? "Anzahl von Hand" : "geändert";
 }
 
 export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProps) {

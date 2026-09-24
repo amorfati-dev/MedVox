@@ -55,7 +55,7 @@ test("Anzahl setzen ändert die Evident-Zeile und entscheidet den Kanalzahl-Hinw
   const out = setCount(setCount(ENDO, 46, "32", 3), 46, "35", 3);
   assert.deepEqual(lines(out), ["46,32*3,wf*3", "36,13b"]);
   const wk = out.find((x) => x.code === "32")!;
-  assert.deepEqual([wk.count, wk.source, wk.counted, wk.decide], [3, "geaendert", 1, []]);
+  assert.deepEqual([wk.count, wk.source, wk.counted, wk.decide], [3, "geaendert", 0, []]);
   // Die Zuzahlungs-Option ist eine eigene Zeile: sie behält ihre Anzahl und ihren Hinweis.
   assert.deepEqual(out.find((x) => x.code === "2400")!.decide, [OPEN]);
   assert.equal(out.find((x) => x.code === "13b"), ENDO[3]); // andere Zeilen unverändert
@@ -90,6 +90,9 @@ test("Neu berechnen: eine jetzt diktierte Anzahl gilt statt der von Hand gesetzt
   const again = setCount(out, 46, "32", 2);
   assert.equal(again.find((x) => x.code === "32")!.counted, 4);
   assert.deepEqual(lines(recompute(again, fresh, CATALOG))[0], "46,32*2,wf");
+  // Jetzt ausdrücklich „WK*1“ diktiert: auch das gilt statt der Hand-Anzahl.
+  const one = ENDO.map((x) => (x.code === "32" ? { ...x, decide: [] } : x));
+  assert.deepEqual(lines(recompute(set, one, CATALOG))[0], "46,32,wf");
 });
 
 test("Streifen und Korrektur-Vergleich nennen die geänderte Anzahl", () => {
@@ -103,7 +106,7 @@ test("Übernommene Zuzahlungs-Option je Kanal: eigene Anzahl, die Hauptzeile ble
   const out = setCount(ENDO, 46, "2400", 3, null, true);
   assert.deepEqual(copyLines(out, codesOf(out), adopted), ["46,32,wf", "36,13b", "", "46,2400*3"]);
   const option = out.find((x) => x.code === "2400")!;
-  assert.deepEqual([option.count, option.decide, option.counted], [3, [], 1]);
+  assert.deepEqual([option.count, option.decide, option.counted], [3, [], 0]);
   assert.equal(out[0], ENDO[0]); // BEMA 32 unverändert
   assert.deepEqual(copyLines(recompute(out, ENDO, CATALOG), codesOf(ENDO), adopted).at(-1), "46,2400*3");
 });

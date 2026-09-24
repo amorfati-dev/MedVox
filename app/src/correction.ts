@@ -69,6 +69,11 @@ export function countRange(entry: CatalogEntry | undefined): { max: number | nul
 // Prüfhinweise, die eine von Hand gesetzte Anzahl entscheidet („Kanalzahl nicht diktiert – …“).
 const COUNT_CHECK = /Kanalzahl/;
 
+// Diktierte Anzahl eines Vorschlags; 0 = nicht diktiert (Kanalzahl-Prüfhinweis).
+function dictated(s: Suggestion): number {
+  return s.decide.some((d) => COUNT_CHECK.test(d)) ? 0 : s.count;
+}
+
 // Anzahl dieser Ziffer an diesem Zahn setzen (auf 1…Höchstzahl begrenzt); gilt für alle Hauptvorschläge
 // derselben Ziffer am Zahn, damit die Evident-Zeile (höchste Anzahl) genau diese Zahl zeigt – mit
 // `alternative` stattdessen für die übernommene Zuzahlungs-Option (2400 je Kanal neben BEMA 32).
@@ -89,7 +94,7 @@ export function setCount(
           count: n,
           decide: s.decide.filter((d) => !COUNT_CHECK.test(d)),
           source: s.source === "hand" ? "hand" : "geaendert",
-          counted: s.counted ?? s.count,
+          counted: s.counted ?? dictated(s),
         },
   );
 }
@@ -172,9 +177,9 @@ export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: 
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);
   }
   for (const s of previous) {
-    if (!s.counted || s.source === "hand") continue;
+    if (s.counted === undefined || s.source === "hand") continue;
     const same = list.find((f) => f.alternative === s.alternative && toothOf(f) === toothOf(s) && f.code === s.code);
-    if (same?.count === s.counted) list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
+    if (same && dictated(same) === s.counted) list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
   }
   return [...list, ...previous.filter((s) => s.source === "hand")];
 }
