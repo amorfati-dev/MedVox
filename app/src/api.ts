@@ -2,6 +2,7 @@
 // deutscher Meldung geworfen, damit die Ansichten sie direkt anzeigen können (http.ts).
 import { json, request } from "./http.ts";
 import type { CatalogList, Original } from "./catalog.ts";
+import type { ToothInfo } from "./teeth.ts";
 
 export { ApiError } from "./http.ts";
 
@@ -25,6 +26,7 @@ export type Suggestion = {
   source?: Source; // fehlt = regel (Extraktor)
   replaced?: string; // nur am iPad: Ziffer, die „geaendert“ an diesem Zahn ersetzt hat (13b bei 13c)
   counted?: number; // nur am iPad: Anzahl mit − / + von Hand gesetzt; Wert = diktierte Anzahl davor, 0 = nicht diktiert (correction.ts setCount)
+  tapped?: boolean; // nur am iPad: Zahn im Zahnschema angetippt (Je-Zahn-Position, teeth.ts)
 };
 // Herkunft eines Vorschlags: Extraktor, am iPad aus dem Katalog ergänzt, am iPad ersetzt (correction.ts).
 export type Source = "regel" | "hand" | "geaendert";
@@ -37,6 +39,7 @@ export type TranscribeResult = {
   suggestions: Suggestion[]; // erbracht: Hauptvorschläge und Optionen (`alternative`)
   planned?: Suggestion[]; // nur geplant – nie abrechnen
   notes?: string[]; // Hinweise ohne Ziffer (verneint, enthalten, Zuschlag nicht bestimmbar)
+  teeth?: ToothInfo[]; // Zahnschema: diktierte Zähne mit Flächen und Befunden
 };
 export type TransferCreated = { code: string; expires_at: string };
 // Früher an der Rezeption abgeholter Stand desselben Diktats (Kurzcode): Zeitpunkt und Evident-Zeilen.
@@ -71,6 +74,7 @@ export type DictationContent = {
   notes: string[];
   deselected: string[]; // Ziffern im Kopierformat ("2x 41a")
   adopted: string[]; // optionKey übernommener Zuzahlungs-Optionen
+  teeth?: ToothInfo[]; // Zahnschema (fehlt bei älteren Diktaten: dann nur die Zähne aus den Ziffern)
   original?: Original | null; // nur bei einer Korrektur am iPad: Stand davor (Büro zeigt ihn)
 };
 // `patient`: Evident-Patientennummer; fehlt sie, bleibt die bisherige Zuordnung („ohne Patient“ bei neuen).

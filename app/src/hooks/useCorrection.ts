@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, type PatientType, type Suggestion } from "../api";
 import { byCode, codesOf, mainPositions, toothOf, type CatalogEntry } from "../catalog";
 import { addPosition, countRange, keepAdopted, recompute, remapDeselected, replaceFamily, setCount, type Content } from "../correction";
+import { applyTap, tapTarget, type TapState } from "../teeth";
 import { codeChanges, type Change } from "../textdiff";
 import type { Dictation } from "./useDictation";
 import type { Selection } from "./useSelection";
@@ -39,6 +40,12 @@ export type Correction = {
   replace: (tooth: number | null, from: string, to: CatalogEntry) => void;
   remove: (s: Suggestion) => void; // Zeile „von Hand“ wieder entfernen
   counter: Counter | null; // Knöpfe − / + an mengenweise berechneten Zeilen; null = Katalog noch nicht da
+  // Zahnschema: Ziffern der Je-Zahn-Position, deren Zähne gerade angetippt werden (null = Blatt zu)
+  tap: string[] | null;
+  tapCodes: (code: string) => string[] | null; // Je-Zahn-Position laut Katalog: ihre Ziffern, sonst null
+  openTap: (code: string) => void;
+  closeTap: () => void;
+  applyTeeth: (state: TapState) => void; // „Übernehmen“
   notice: { title: string; changes: Change[] } | null; // Streifen mit „Rückgängig“
   undo: () => void;
 };
@@ -52,8 +59,9 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
   const [error, setError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
   const [last, setLast] = useState<Undo | null>(null);
+  const [tap, setTap] = useState<string[] | null>(null);
   const type = d.resultType ?? fallback;
-  // Auch ohne Katalog-Blatt: welche Zeilen Knöpfe − / + bekommen, steht im Katalog.
+  // Mit Ergebnis gleich laden: welche Zeilen Knöpfe − / + bzw. „Zähne antippen“ bekommen, steht im Katalog.
   const cat = useCatalog(type, sheet !== null || d.suggestions.length > 0);
   const catalogMap = useMemo(() => byCode(cat.entries ?? []), [cat.entries]);
   // Angezeigte Vorschläge; ändern sie sich während /analyze läuft (anderer Patient, anderer Behandler,
@@ -68,12 +76,13 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     if (!empty) return;
     setEditing(false);
     setSheet(null);
+    setTap(null);
     setLast(null);
   }, [empty]);
 
   const commit = useCallback(
     (next: Content, title: string, map: Map<string, CatalogEntry>, adopted = sel.adopted) => {
-      const before: Content = { transcript: d.transcript, codes: d.codes, suggestions: d.suggestions, planned: d.planned, notes: d.notes };
+      const before: Content = { transcript: d.transcript, codes: d.codes, suggestions: d.suggestions, planned: d.planned, notes: d.notes, teeth: d.teeth };
       setLast({
         content: before,
         choice: { deselected: sel.deselected, adopted: sel.adopted },
@@ -102,7 +111,14 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
         if (shown.current !== start) return;
         const map = byCode(entries);
         const suggestions = recompute(d.suggestions, result.suggestions, map);
-        const next = { transcript: result.transcript, codes: codesOf(suggestions), suggestions, planned: result.planned ?? [], notes: result.notes ?? [] };
+        const next = {
+          transcript: result.transcript,
+          codes: codesOf(suggestions),
+          suggestions,
+          planned: result.planned ?? [],
+          notes: result.notes ?? [],
+          teeth: result.teeth ?? [],
+        };
         commit(next, "Ziffern neu berechnet", map);
         setEditing(false);
       } catch (e) {
@@ -121,6 +137,7 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     suggestions,
     planned: d.planned,
     notes: d.notes,
+    teeth: d.teeth,
   });
 
   const remove = (s: Suggestion) => {
@@ -134,6 +151,13 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
   const replace = (tooth: number | null, from: string, to: CatalogEntry) => {
     const next = replaceFamily(d.suggestions, sel.adopted, tooth, from, to, catalogMap);
     commit(content(next.suggestions), "Ziffer geändert", catalogMap, next.adopted);
+  };
+
+  const applyTeeth = (state: TapState) => {
+    if (tap === null) return;
+    const title = state.teeth.length > 0 ? "Zähne angetippt" : "Position entfernt";
+    commit(content(applyTap(d.suggestions, tap, state, catalogMap)), title, catalogMap);
+    setTap(null);
   };
 
   const counter: Counter | null = cat.entries && {
@@ -172,6 +196,11 @@ export function useCorrection(d: Dictation, sel: Selection, fallback: PatientTyp
     replace,
     remove,
     counter,
+    tap,
+    tapCodes: (code) => tapTarget(code, catalogMap),
+    openTap: (code) => setTap(tapTarget(code, catalogMap)),
+    closeTap: () => setTap(null),
+    applyTeeth,
     notice: valid ? { title: last.title, changes: last.changes } : null,
     undo,
   };

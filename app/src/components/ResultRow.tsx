@@ -26,18 +26,32 @@ function Checks({ decide }: { decide: string[] }) {
   ));
 }
 
+// „Zähne antippen“ an einer Je-Zahn-Position (Zahnschema, ToothTapSheet); Türkis Kasse, Indigo privat.
+export function TapButton({ codes, kind, label, onTap }: { codes: string[]; kind: string; label?: string; onTap: () => void }) {
+  const what = codes.length === 2 ? `${codes[0]} / ${codes[1]} nach Wurzelzahl` : `${codes[0]} je Zahn`;
+  return (
+    <button type="button" className={kind === "bema" ? "tap-teeth kasse" : "tap-teeth"} onClick={onTap}>
+      <Icon name="edit" />
+      {label ?? `Zähne antippen · ${what}`}
+    </button>
+  );
+}
+
 function Teeth({ s }: { s: Suggestion }) {
   return s.teeth.length > 1 ? <span className="row-meta">Zähne {s.teeth.join(", ")}</span> : null;
 }
 
 // `onRemove`: Zeile „von Hand“ entfernen (wird immer kopiert, also nicht abwählbar); fehlt = nicht änderbar.
 // `counter`: Anzahl mit − / + ändern (nur am iPad); fehlt = nur anzeigen.
+// `tapCodes`/`onTap`: Je-Zahn-Position – Knopf „Zähne antippen“ unter der Zeile (nur am iPad).
 type RowProps = {
   row: Row;
   onToggle: (code: string) => void;
   onAdopt: (key: string) => void;
   onRemove?: (s: Suggestion) => void;
   counter?: Counter | null;
+  tapCodes?: (code: string) => string[] | null;
+  onTap?: (code: string) => void;
 };
 
 // Vermerk einer Korrektur am iPad; null = so vom Extraktor.
@@ -49,8 +63,9 @@ function edited(row: Row): string | null {
   return row.s.counted !== undefined ? "Anzahl von Hand" : "geändert";
 }
 
-export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProps) {
+export function ResultRow({ row, onToggle, onAdopt, onRemove, counter, tapCodes, onTap }: RowProps) {
   const { s, tag, count, selected } = row;
+  const tap = onTap && tapCodes?.(s.code);
   const mark = edited(row);
   const hand = row.source === "hand";
   // Abgewählt: keine Knöpfe – eine Zeile fällt nur über die Abwahl weg, nie über die Anzahl.
@@ -84,6 +99,7 @@ export function ResultRow({ row, onToggle, onAdopt, onRemove, counter }: RowProp
       </button>
       {range && counter && <CountStepper s={s} count={count} max={range.max} onSet={counter.set} />}
       <Checks decide={s.decide} />
+      {tap && onTap && <TapButton codes={tap} kind={s.kind} onTap={() => onTap(s.code)} />}
       {row.options.length > 0 && (
         <ul className="options">
           {row.options.map((o) => (

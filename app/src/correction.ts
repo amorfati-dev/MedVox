@@ -15,13 +15,23 @@
 // - Neu berechnen ersetzt die Regel-Vorschläge; Ersetzungen gelten wieder, wo die ersetzte Ziffer am Zahn
 //   wieder vorkommt, ebenso von Hand gesetzte Anzahlen, solange der Text dort dieselbe Anzahl diktiert wie
 //   vorher (eine neu diktierte Anzahl gilt, der Streifen nennt sie); Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
+//   Im Zahnschema angetippte Zähne (teeth.ts) bleiben die ganze Position: deren Regel-Vorschläge (auch die
+//   Zeile ohne Zahn) kommen nicht zurück, sonst zählte sie doppelt.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
 import { codeOf, type Suggestion } from "./api.ts";
-import { toothOf, type CatalogEntry } from "./catalog.ts";
+import { tapCodes, toothOf, type CatalogEntry } from "./catalog.ts";
 import { optionKey } from "./result.ts";
+import type { ToothInfo } from "./teeth.ts";
 
 // Inhalt eines Diktats, den eine Korrektur ersetzt (wie aus /transcribe bzw. /analyze).
-export type Content = { transcript: string; codes: string[]; suggestions: Suggestion[]; planned: Suggestion[]; notes: string[] };
+export type Content = {
+  transcript: string;
+  codes: string[];
+  suggestions: Suggestion[];
+  planned: Suggestion[];
+  notes: string[];
+  teeth: ToothInfo[]; // Zahnschema: Flächen und Befunde je Zahn
+};
 // Auswahl: abgewählte Ziffern im Kopierformat, übernommene Optionen (optionKey).
 export type Choice = { deselected: string[]; adopted: string[] };
 
@@ -169,9 +179,19 @@ export function replaceFamily(
   return { suggestions: list, adopted: adopted.map((k) => keys.get(k) ?? k) };
 }
 
+// Frische Vorschläge ohne die Positionen, deren Zähne schon angetippt sind (ganzes Paar 4050/4055): die
+// angetippten Zähne sind die ganze Position, nichts zählt doppelt – beim Neu berechnen und bei jedem neuen Abschnitt.
+export function withoutTapped(previous: Suggestion[], fresh: Suggestion[], catalog: Map<string, CatalogEntry>): Suggestion[] {
+  const tapped = new Set(previous.filter((s) => s.tapped).flatMap((s) => {
+    const entry = catalog.get(s.code);
+    return entry ? tapCodes(entry) : [s.code];
+  }));
+  return fresh.filter((s) => s.alternative || !tapped.has(s.code));
+}
+
 // Neu berechnet: frische Regel-Vorschläge, darauf die Ersetzungen von vorher, dazu alles „von Hand“.
 export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: Map<string, CatalogEntry>): Suggestion[] {
-  let list = fresh;
+  let list = withoutTapped(previous, fresh, catalog);
   for (const s of previous) {
     const entry = catalog.get(s.code);
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);

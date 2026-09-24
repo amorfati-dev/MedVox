@@ -1,0 +1,351 @@
+/* Zahnschema (Ship 3): ein Kiefer auf einmal, je Kieferhälfte eine Reihe mit 8 Zähnen von der Mitte aus
+   (≥ 64 px, Handschuhe). Farben wie überall: Türkis Kasse, Indigo Privat/Zuzahlung, gestrichelt geplant,
+   Bernstein prüfen bzw. Wurzelzahl offen; kein Rot. Büro: beide Kiefer klein, nur Anzeige. */
+.tchart {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 18px 16px;
+  margin-bottom: 18px;
+}
+.tchart .box-head {
+  gap: 12px;
+}
+.jaw-switch {
+  margin: 10px 0 12px;
+}
+.switch-on.switch-jaw {
+  background: var(--ink);
+  color: var(--surface);
+}
+.switch-option small {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.tq-rows {
+  display: grid;
+  gap: 8px;
+}
+.tq {
+  display: grid;
+  grid-template-columns: 84px repeat(8, minmax(64px, 1fr));
+  gap: 6px;
+}
+.tq-label {
+  display: flex;
+  align-items: center;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+.tk {
+  position: relative;
+  min-height: var(--tap);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 2px;
+  font: inherit;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+}
+button.tk {
+  cursor: pointer;
+}
+.tk b {
+  font-size: var(--fs-base);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.tk small {
+  font-family: var(--mono);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tk-none b {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.tk-kasse {
+  color: var(--kasse);
+  background: var(--kasse-bg);
+  border-color: var(--kasse);
+}
+.tk-privat {
+  color: var(--privat);
+  background: var(--privat-bg);
+  border-color: var(--privat);
+}
+.tk-plan {
+  background: var(--surface);
+  border-style: dashed;
+  border-color: var(--ink-2);
+}
+.tk-find {
+  color: var(--ink);
+  background: var(--surface);
+  border-color: var(--ink);
+}
+.tk-check::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 4px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--warn);
+}
+.tk-open {
+  color: var(--warn);
+  background: var(--warn-bg);
+  border: 3px solid var(--warn);
+}
+.tk-ask {
+  font-family: var(--sans) !important;
+  color: var(--ink-2);
+}
+
+.tchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 12px 0 0;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+.tchart-legend i {
+  display: inline-block;
+  width: 18px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 2px solid var(--line);
+  border-radius: 4px;
+}
+.tchart-legend .lg-kasse {
+  background: var(--kasse-bg);
+  border-color: var(--kasse);
+}
+.tchart-legend .lg-privat {
+  background: var(--privat-bg);
+  border-color: var(--privat);
+}
+.tchart-legend .lg-plan {
+  border-style: dashed;
+  border-color: var(--ink-2);
+}
+.tchart-legend .lg-check {
+  height: 6px;
+  background: var(--warn);
+  border-color: var(--warn);
+}
+
+/* Befundliste */
+.finding-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.finding {
+  display: grid;
+  grid-template-columns: 44px 56px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  font-size: var(--fs-reason);
+  border-bottom: 1px solid var(--line);
+}
+.finding:last-child {
+  border-bottom: none;
+}
+.finding .ft {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.finding .fs {
+  font-family: var(--mono);
+  color: var(--ink-2);
+}
+.finding .fb {
+  font-weight: 700;
+}
+.finding .fl {
+  color: var(--ink-2);
+}
+.finding code {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--privat);
+}
+.finding code.kasse {
+  color: var(--kasse);
+}
+
+/* „Zähne antippen“ an einer Je-Zahn-Zeile */
+.tap-teeth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% - 36px);
+  min-height: var(--tap);
+  margin: 4px 18px 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--privat);
+  background: var(--privat-bg);
+  border: 2px solid var(--privat);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.tap-teeth.kasse {
+  color: var(--kasse);
+  background: var(--kasse-bg);
+  border-color: var(--kasse);
+}
+.tooth-teeth {
+  display: block;
+  font-size: var(--fs-reason);
+  color: var(--ink-2);
+}
+
+/* Blatt „Zähne antippen“ */
+.chart-sheet .tq,
+.roots {
+  grid-template-columns: 96px repeat(8, minmax(64px, 1fr));
+  gap: 8px;
+}
+.chart-sheet .tk {
+  min-height: 92px;
+}
+.chart-sheet .tk b {
+  font-size: var(--fs-ziffer);
+}
+.roots {
+  display: grid;
+  margin-bottom: 6px;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.roots span {
+  padding-top: 4px;
+  text-align: center;
+  border-top: 3px solid var(--line);
+}
+.roots .r1 {
+  grid-column: 2 / span 5;
+}
+.roots .r2 {
+  grid-column: 7 / span 3;
+}
+.root-ask {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  font-size: var(--fs-reason);
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-left: 5px solid var(--warn);
+  border-radius: 12px;
+}
+.root-ask p {
+  margin: 0;
+}
+.root-ask .btn {
+  min-width: 170px;
+}
+.sheet-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.sheet-foot .btn {
+  flex: 1 1 180px;
+}
+.sheet-sum {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: var(--fs-reason);
+  color: var(--ink-2);
+}
+.sheet-sum b {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.sheet-sum .open {
+  font-weight: 700;
+  color: var(--warn);
+}
+
+/* Büro: beide Kiefer klein nebeneinander, nur Anzeige */
+.tchart-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 8px 20px;
+  margin: 6px 0 4px;
+}
+.tchart-mini h4 {
+  margin: 0 0 4px;
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tchart-mini .tq {
+  grid-template-columns: 70px repeat(8, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 4px;
+}
+.tchart-mini .tq-label {
+  font-size: 12px;
+}
+.tchart-mini .tk {
+  min-height: 38px;
+  padding: 2px;
+  border-radius: 8px;
+}
+.tchart-mini .tk b {
+  font-size: var(--fs-small);
+}
+.tchart-mini .tk-check::after {
+  bottom: 2px;
+  height: 3px;
+}
+
+@media (max-width: 899px) {
+  .tq,
+  .chart-sheet .tq,
+  .roots {
+    grid-template-columns: 70px repeat(8, minmax(64px, 1fr));
+    gap: 6px;
+  }
+  .sheet-sum {
+    flex-basis: 100%;
+  }
+  .root-ask {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .root-ask p {
+    grid-column: 1 / -1;
+  }
+}

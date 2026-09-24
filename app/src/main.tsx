@@ -12,6 +12,7 @@ import "./styles/rezeption.css";
 import "./styles/patienten.css";
 import "./styles/behandler.css";
 import "./styles/korrektur.css";
+import "./styles/zahnschema.css";
 import "./styles/woerterbuch.css";
 import { applyTheme, loadTheme } from "./theme";
 

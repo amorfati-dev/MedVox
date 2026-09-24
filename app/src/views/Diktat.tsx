@@ -73,12 +73,13 @@ export function Diktat({ onLogout }: Props) {
             suggestions: d.suggestions,
             planned: d.planned,
             notes: d.notes,
+            teeth: d.teeth,
             deselected: sel.deselected,
             adopted: sel.adopted,
             ...(d.corrected ? { original: d.original } : {}),
           }
         : null,
-    [hasResult, patient, patientLabel, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, sel.deselected, sel.adopted, d.corrected, d.original],
+    [hasResult, patient, patientLabel, dictDentist, d.transcript, d.resultType, d.codes, d.suggestions, d.planned, d.notes, d.teeth, sel.deselected, sel.adopted, d.corrected, d.original],
   );
   const save = useDictationSave(body, d.sessionExpired);
   const closed = save.state === "übertragen";

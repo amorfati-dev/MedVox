@@ -29,7 +29,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -46,7 +47,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä925a",
@@ -63,7 +65,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "28",
@@ -80,7 +83,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "34",
@@ -97,7 +101,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2197",
@@ -114,7 +119,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -131,7 +137,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -148,7 +155,8 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -165,11 +173,19 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "original-privat": {
     "transcript": "zahn 46 wurzelkanalbehandlung begonnen mit infiltrationsanästhesie,rö2, wk*3, vite*3 med phys und Längenbestimmungen als privat die letzten 2",
@@ -201,7 +217,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -220,7 +237,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5000",
@@ -239,7 +257,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2360",
@@ -256,7 +275,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -273,7 +293,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -290,7 +311,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -307,11 +329,19 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "gesprochen-kasse": {
     "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE mal 3, med phys und Längenbestimmungen als privat die letzten 2.",
@@ -345,7 +375,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2080",
@@ -362,7 +393,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "12",
@@ -379,7 +411,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "32",
@@ -396,7 +429,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -413,7 +447,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä925a",
@@ -430,7 +465,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "28",
@@ -447,7 +483,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "34",
@@ -464,7 +501,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2197",
@@ -481,7 +519,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -498,7 +537,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -515,7 +555,8 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -532,11 +573,24 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "gesprochen-privat": {
     "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE mal 3, med phys und Längenbestimmungen als privat die letzten 2.",
@@ -572,7 +626,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2030",
@@ -589,7 +644,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2410",
@@ -606,7 +662,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -625,7 +682,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5000",
@@ -644,7 +702,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2360",
@@ -661,7 +720,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -678,7 +738,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -695,7 +756,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -712,11 +774,24 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "verhoert-kasse": {
     "transcript": "Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE 3x, med phys und Längenbestimmungen.",
@@ -748,7 +823,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -765,7 +841,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä925a",
@@ -782,7 +859,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "28",
@@ -799,7 +877,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "34",
@@ -816,7 +895,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2197",
@@ -833,7 +913,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -850,7 +931,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -867,7 +949,8 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -884,11 +967,19 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "verhoert-privat": {
     "transcript": "Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK mal 3, VitE 3x, med phys und Längenbestimmungen.",
@@ -920,7 +1011,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -939,7 +1031,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5000",
@@ -958,7 +1051,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2360",
@@ -975,7 +1069,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -992,7 +1087,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -1009,7 +1105,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -1026,11 +1123,19 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "getippt-kasse": {
     "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2",
@@ -1064,7 +1169,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2080",
@@ -1081,7 +1187,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "12",
@@ -1098,7 +1205,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "32",
@@ -1115,7 +1223,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "40",
@@ -1132,7 +1241,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä925a",
@@ -1149,7 +1259,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "28",
@@ -1166,7 +1277,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "34",
@@ -1183,7 +1295,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2197",
@@ -1200,7 +1313,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -1217,7 +1331,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -1234,7 +1349,8 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -1251,11 +1367,24 @@
         "alternative": false,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "getippt-privat": {
     "transcript": "Zahn 25, Füllung zweiflächig, Kunststoff mit BMF. Zahn 46 Wurzelkanalbehandlung begonnen mit Infiltrationsanästhesie, Rö2, WK*3, VitE*3 med phys und Längenbestimmungen als privat die letzten 2",
@@ -1291,7 +1420,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2030",
@@ -1308,7 +1438,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2410",
@@ -1325,7 +1456,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0090",
@@ -1344,7 +1476,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5000",
@@ -1363,7 +1496,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2360",
@@ -1380,7 +1514,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -1397,7 +1532,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -1414,7 +1550,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -1431,11 +1568,24 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "",
+        "findings": []
+      }
+    ]
   },
   "pilot-wd-kasse": {
     "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
@@ -1468,7 +1618,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "32",
@@ -1485,7 +1636,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2400",
@@ -1502,7 +1654,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2420",
@@ -1519,7 +1672,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "28",
@@ -1536,7 +1690,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "34",
@@ -1553,7 +1708,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2197",
@@ -1570,7 +1726,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -1587,7 +1744,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "13c",
@@ -1604,7 +1762,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2100",
@@ -1621,7 +1780,8 @@
         "alternative": true,
         "kind": "zuzahlung",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "41a",
@@ -1638,7 +1798,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": "l1",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä935a",
@@ -1655,7 +1816,8 @@
         "alternative": false,
         "kind": "bema",
         "evident": "pan1",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "12",
@@ -1672,11 +1834,24 @@
         "alternative": false,
         "kind": "bema",
         "evident": "bmf",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "mod",
+        "findings": []
+      }
+    ]
   },
   "pilot-wd-privat": {
     "transcript": "Zahn 25 Infiltrationsanästhesie, Wurzelkanalbehandlung beginnen, 2x VitE, 2x WK, med, Zahn 46 Dreiflächige Füllung, MOD, Leitungsanästhesie, Viertelseite PAR 1, BMF, Starke Blutung, Blutungsstillung.",
@@ -1711,7 +1886,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2410",
@@ -1728,7 +1904,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2360",
@@ -1745,7 +1922,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2430",
@@ -1762,7 +1940,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2100",
@@ -1781,7 +1960,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "0100",
@@ -1798,7 +1978,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": "l1",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "Ä5002",
@@ -1815,7 +1996,8 @@
         "alternative": false,
         "kind": "goz",
         "evident": "pan1",
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       },
       {
         "code": "2030",
@@ -1832,10 +2014,23 @@
         "alternative": false,
         "kind": "goz",
         "evident": null,
-        "source": "regel"
+        "source": "regel",
+        "tapped": false
       }
     ],
     "planned": [],
-    "notes": []
+    "notes": [],
+    "teeth": [
+      {
+        "tooth": 25,
+        "surfaces": "",
+        "findings": []
+      },
+      {
+        "tooth": 46,
+        "surfaces": "mod",
+        "findings": []
+      }
+    ]
   }
 }
