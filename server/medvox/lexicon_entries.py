@@ -97,7 +97,9 @@ def check_replacement(wrong: str, right: str, active: list[Entry], own_id: int |
         raise Rejected("Ein einzelnes Wort braucht mindestens drei Buchstaben.")
     if low in ALIASES or low in CONTEXT_ALIASES:
         raise Rejected(f"Für „{wrong}“ gibt es schon eine eingebaute Ersetzung.")
-    if lost := [w for w in words if is_term(w) and w.lower() not in right.lower()]:
+    kept = {w.lower() for w in _WORD.findall(right)}
+    joined = len(words) > 1 and "".join(low) == re.sub(r"[ -]", "", right.lower())
+    if not joined and (lost := [w for w in words if is_term(w) and w.lower() not in kept]):
         raise Rejected(f"„{lost[0]}“ ist ein eingebauter Fachbegriff und wird nicht ersetzt.")
     right_words = tuple(w.lower() for w in _WORD.findall(right))
     if any(right_words[k : k + len(low)] == low for k in range(len(right_words))):

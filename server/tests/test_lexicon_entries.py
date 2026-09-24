@@ -39,6 +39,8 @@ def _entry(id_: int, kind: str, wrong: str, right: str, active: bool = True) -> 
         ("Ab", "Abformung", "drei Buchstaben"),
         ("", "Polyether", "ausfüllen"),
         ("Poly Ether", "Poly, Ether", "ohne Satzzeichen"),
+        ("Extraktion", "Extraktionswunde", "eingebauter Fachbegriff"),
+        ("Füllung", "Kompositfüllung", "eingebauter Fachbegriff"),
     ],
 )
 def test_guard_rules_reject_with_a_reason(wrong: str, right: str, reason: str) -> None:
