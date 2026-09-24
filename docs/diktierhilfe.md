@@ -113,7 +113,8 @@ Nur am iPad; das Büro sieht „am iPad korrigiert“ und auf Wunsch das Origina
   „Kanalzahl nicht diktiert“ ist damit erledigt, die Zeile trägt „Anzahl von Hand“. Nie unter 1 – weg
   nur über die Abwahl –, nie über eine vom Behandler bestätigte Höchstzahl. Eine übernommene
   Zuzahlungs-Option je Kanal (2400 neben 32) hat ihre eigenen Knöpfe. Abgewählte Zeilen und das Büro
-  zeigen die Anzahl nur an.
+  zeigen die Anzahl nur an. Neu berechnen behält die Anzahl von Hand; diktiert der berichtigte Text dort
+  eine andere Anzahl („WK*4“), gilt die diktierte, und der Streifen nennt sie.
 - Danach zeigt ein grüner Streifen, was sich an den Ziffern geändert hat, mit **Rückgängig** (eine
   Stufe: Text, Ziffern und Auswahl vor der letzten Änderung). Ein neuer Abschnitt wird wie immer
   angehängt; wurde schon ein Kurzcode abgeholt, zeigt die Rezeption wie gewohnt nur die Änderung.

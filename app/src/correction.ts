@@ -13,7 +13,8 @@
 //   Ziffer an diesem Zahn, nie unter 1 (weg nur über die Abwahl), nie über die bestätigte Höchstzahl; ein
 //   Kanalzahl-Prüfhinweis ist damit entschieden.
 // - Neu berechnen ersetzt die Regel-Vorschläge; Ersetzungen gelten wieder, wo die ersetzte Ziffer am Zahn
-//   wieder vorkommt, ebenso von Hand gesetzte Anzahlen; Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
+//   wieder vorkommt, ebenso von Hand gesetzte Anzahlen, solange der Text dort dieselbe Anzahl diktiert wie
+//   vorher (eine neu diktierte Anzahl gilt, der Streifen nennt sie); Positionen „von Hand“ und Abwahlen bleiben. Was dabei wegfällt, zeigt der Streifen.
 // Mit Endung, damit `node --test` das Modul direkt laden kann (allowImportingTsExtensions).
 import { codeOf, type Suggestion } from "./api.ts";
 import { toothOf, type CatalogEntry } from "./catalog.ts";
@@ -88,7 +89,7 @@ export function setCount(
           count: n,
           decide: s.decide.filter((d) => !COUNT_CHECK.test(d)),
           source: s.source === "hand" ? "hand" : "geaendert",
-          counted: true,
+          counted: s.counted ?? s.count,
         },
   );
 }
@@ -171,7 +172,9 @@ export function recompute(previous: Suggestion[], fresh: Suggestion[], catalog: 
     if (s.source === "geaendert" && s.replaced && entry) list = swap(list, toothOf(s), s.replaced, entry, s.alternative);
   }
   for (const s of previous) {
-    if (s.counted && s.source !== "hand") list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
+    if (!s.counted || s.source === "hand") continue;
+    const same = list.find((f) => f.alternative === s.alternative && toothOf(f) === toothOf(s) && f.code === s.code);
+    if (same?.count === s.counted) list = setCount(list, toothOf(s), s.code, s.count, null, s.alternative);
   }
   return [...list, ...previous.filter((s) => s.source === "hand")];
 }

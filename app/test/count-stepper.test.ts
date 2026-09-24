@@ -55,7 +55,7 @@ test("Anzahl setzen ändert die Evident-Zeile und entscheidet den Kanalzahl-Hinw
   const out = setCount(setCount(ENDO, 46, "32", 3), 46, "35", 3);
   assert.deepEqual(lines(out), ["46,32*3,wf*3", "36,13b"]);
   const wk = out.find((x) => x.code === "32")!;
-  assert.deepEqual([wk.count, wk.source, wk.counted, wk.decide], [3, "geaendert", true, []]);
+  assert.deepEqual([wk.count, wk.source, wk.counted, wk.decide], [3, "geaendert", 1, []]);
   // Die Zuzahlungs-Option ist eine eigene Zeile: sie behält ihre Anzahl und ihren Hinweis.
   assert.deepEqual(out.find((x) => x.code === "2400")!.decide, [OPEN]);
   assert.equal(out.find((x) => x.code === "13b"), ENDO[3]); // andere Zeilen unverändert
@@ -80,6 +80,18 @@ test("Neu berechnen behält die von Hand gesetzte Anzahl, wo die Ziffer am Zahn 
   assert.deepEqual(lines(recompute(set, [s("13b", [36])], CATALOG)), ["36,13b"]); // Endo nicht mehr diktiert
 });
 
+test("Neu berechnen: eine jetzt diktierte Anzahl gilt statt der von Hand gesetzten und steht im Streifen", () => {
+  const set = setCount(ENDO, 46, "32", 3);
+  const fresh = ENDO.map((x) => (x.code === "32" ? { ...x, count: 4, decide: [] } : x)); // „WK*4“ diktiert
+  const out = recompute(set, fresh, CATALOG);
+  assert.deepEqual(lines(out), ["46,32*4,wf", "36,13b"]);
+  assert.match(describe(codeChanges(mainPositions(set), mainPositions(out), CATALOG), "neu"), /4x 32.*46/);
+  // Wieder von Hand gesetzt, zählt ab jetzt gegen die diktierte 4.
+  const again = setCount(out, 46, "32", 2);
+  assert.equal(again.find((x) => x.code === "32")!.counted, 4);
+  assert.deepEqual(lines(recompute(again, fresh, CATALOG))[0], "46,32*2,wf");
+});
+
 test("Streifen und Korrektur-Vergleich nennen die geänderte Anzahl", () => {
   const changes = codeChanges(mainPositions(ENDO), mainPositions(setCount(ENDO, 46, "32", 3)), CATALOG);
   assert.equal(changes.length, 1);
@@ -91,7 +103,7 @@ test("Übernommene Zuzahlungs-Option je Kanal: eigene Anzahl, die Hauptzeile ble
   const out = setCount(ENDO, 46, "2400", 3, null, true);
   assert.deepEqual(copyLines(out, codesOf(out), adopted), ["46,32,wf", "36,13b", "", "46,2400*3"]);
   const option = out.find((x) => x.code === "2400")!;
-  assert.deepEqual([option.count, option.decide, option.counted], [3, [], true]);
+  assert.deepEqual([option.count, option.decide, option.counted], [3, [], 1]);
   assert.equal(out[0], ENDO[0]); // BEMA 32 unverändert
   assert.deepEqual(copyLines(recompute(out, ENDO, CATALOG), codesOf(ENDO), adopted).at(-1), "46,2400*3");
 });
