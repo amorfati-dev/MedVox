@@ -91,9 +91,11 @@ def test_catalog_for_privat_is_goz_and_goae_only(logged_in: TestClient) -> None:
 
 def test_catalog_marks_counted_positions_for_the_stepper(logged_in: TestClient) -> None:
     listed = {e["code"]: e for e in logged_in.get(CATALOG, params={"patient_type": "kasse"}).json()["entries"]}
-    for code in ("32", "35", "2400", "41a", "Ä925a"):  # je Kanal, mehrmals je Sitzung
+    for code in ("32", "35", "2400", "IP4"):  # je Kanal, laut max_per mehrmals je Sitzung
         assert listed[code]["counted"] and listed[code]["max_count"] is None, code
-    for code in ("13b", "34", "01", "12"):  # je Zahn, einmal je Sitzung, bestätigt einmal je Bereich
+    # je Zahn, einmal je Sitzung, bestätigt einmal je Bereich; „unbegrenzt“ heißt nur: amtlich ohne
+    # Höchstzahl – eine Extraktion (44) an einem Zahn ist nie 2×
+    for code in ("13b", "34", "01", "12", "43", "44", "Ä1", "Ä925a"):
         assert not listed[code]["counted"], code
 
 

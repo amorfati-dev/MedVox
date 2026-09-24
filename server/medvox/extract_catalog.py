@@ -177,13 +177,13 @@ class Catalog:
     def stepper(self, entry: Entry) -> tuple[bool, int | None]:
         """Anzahl je Zeile am iPad änderbar (− / +) und ihre bestätigte Höchstzahl (None = keine).
 
-        Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals (``max_per`` „unbegrenzt“
-        oder mit einer Anzahl über 1). Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das
-        Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
+        Nur mengenweise berechnete Positionen: je Kanal, oder je Sitzung mehrmals (``max_per`` mit einer Anzahl
+        über 1). „unbegrenzt“ heißt nur amtlich ohne Höchstzahl (Extraktion, Beratung) und gibt kein − / +.
+        Je-Zahn-Positionen stehen je Zahn einmal da – mehr Zähne ergänzt das Katalog-Blatt. Die Höchstzahl gilt nur bestätigt und nicht bei ``kanal`` (die zählt je Kanal).
         """
         unit = self.unit(entry)
-        per, most = entry.per or ("", None)
-        counted = unit == "canal" or (unit == "session" and (per == "unbegrenzt" or (most or 0) > 1))
+        most = entry.per[1] if entry.per else None
+        counted = unit == "canal" or (unit == "session" and (most or 0) > 1)
         limit = entry.limit[1] if entry.limit and entry.limit[0] != "kanal" else None
         return counted and (limit is None or limit > 1), limit
 
