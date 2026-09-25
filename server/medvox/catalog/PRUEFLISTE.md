@@ -58,8 +58,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | 45 | Extraktion, tieffrakturierter Zahn | GOZ 3020 **(neu, bitte prüfen)** | Extraktion, tief frakturierter/zerstörter Zahn |  | [Q1] [Q4] [Q3] |
 | ☐ | 47a | Osteotomie (Zahnentfernung durch Osteotomie) | GOZ 3030 | Osteotomie (Zahn/Implantat) |  | [Q1] [Q4] [Q3] |
 | ☐ | 48 | Osteotomie, retinierter/verlagerter Zahn | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn |  | [Q1] [Q4] [Q3] |
-| ☐ | 37 | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | GOZ 3060 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung |  | [Q1] [Q4] [Q3] |
-| ☐ | 51b | Plastischer Verschluss Kieferhöhle bei Osteotomie | GOZ 3090 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Plastischer Verschluss einer eröffneten Kieferhöhle | GOZ 3090 nur bei eröffneter Kieferhöhle; plastische Deckung ohne Kieferhöhle ist GOZ 3100 – prüfen | [Q1] [Q4] [Q3] |
+| ☐ | 37 | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | GOZ 3060 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung |  | [Q1] [Q4] [Q3] |
+| ☐ | 51b | Plastischer Verschluss Kieferhöhle bei Osteotomie | GOZ 3090 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Plastischer Verschluss einer eröffneten Kieferhöhle | GOZ 3090 nur bei eröffneter Kieferhöhle; plastische Deckung ohne Kieferhöhle ist GOZ 3100 – prüfen | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3300 **(neu, bitte prüfen)** | Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren) |  | [Q1] [Q4] [Q3] |
 | ☐ | 38 | Nachbehandlung nach chirurgischem Eingriff | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | GOZ 3290 ist die reine Kontrolle; mit Behandlung (Tamponieren, Spülen) GOZ 3300 – prüfen | [Q1] [Q4] [Q3] |
 | ☐ | Ä161 | Eröffnung eines oberflächlichen Abszesses (Inzision) | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) |  | [Q1] [Q2] [Q3] |
@@ -142,8 +142,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 3020 **(neu, bitte prüfen)** | Extraktion, tief frakturierter/zerstörter Zahn | 45 | Kassenleistung BEMA 45 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3030 | Osteotomie (Zahn/Implantat) | 47a | Kassenleistung BEMA 47a – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn | 48 | Kassenleistung BEMA 48 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
-| ☐ | nein | GOZ 3060 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | 37 | Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
-| ☐ | nein | GOZ 3090 **(Angabe des Behandlers 2026-09-24 – neu, bitte prüfen)** | Plastischer Verschluss einer eröffneten Kieferhöhle | 51b | Kassenleistung BEMA 51a/51b – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
+| ☐ | nein | GOZ 3060 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | 37 | Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
+| ☐ | nein | GOZ 3090 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Plastischer Verschluss einer eröffneten Kieferhöhle | 51b | Kassenleistung BEMA 51a/51b – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | 38 | Umstritten: Kontrolle ohne Nachbehandlung hat kein BEMA-Pendant, ist aber medizinisch notwendig; keine Quelle für private Vereinbarung gefunden. | [Q3] [Q1] |
 | ☐ | nein | GOZ 3300 **(neu, bitte prüfen)** | Nachbehandlung nach chirurgischem Eingriff (z. B. Tamponieren) | 38 | Kassenleistung BEMA 38 (Nachbehandlung) – privat nicht zusätzlich berechenbar. | [Q1] [Q3] |
 | ☐ | nein | GOZ 0500 | Zuschlag zu chirurgischen Leistungen (250–499 Punkte, auch 4090/4130) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
@@ -152,6 +152,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 0530 | Zuschlag zu chirurgischen Leistungen (ab 1200 Punkte) | – | Beim Kassenpatienten nie vorgeschlagen (Zuschlag nur für Privatpatienten); rechtlich nur zu privat vereinbarter GOZ-Chirurgie wie 4130 denkbar. | [Q16] [Q17] [Q4] |
 | ☐ | nein | GOÄ Ä2428 **(neu, bitte prüfen)** | Eröffnung eines oberflächlichen Abszesses (Inzision) | Ä161 | Kassenleistung BEMA Ä161 – privat nicht zusätzlich berechenbar. | [Q1] |
 | ☐ | nein | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | – | Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler GOÄ Ä2430 als Analogposition (Feld analog), nicht als Privatleistung. | [Q1] |
+| ☐ | nein | GOÄ Ä2650 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Entfernung extrem verlagerter/retinierter Zahn, umfangreiche Osteotomie | – | Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler GOÄ Ä2650 als Analogposition (Feld analog) statt BEMA 48, nicht als Privatleistung neben 48. | [Q1] |
 
 ### Zuzahlung – Prophylaxe
 
@@ -178,6 +179,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | Ziffer | Kurztext | Begründung im Vorschlag | Quelle |
 |---|---|---|---|---|
 | ☐ | GOÄ Ä2430 **(neu, bitte prüfen)** | Eröffnung eines tiefliegenden Abszesses (Inzision) | Analogposition: GOÄ Ä2430 wird beim Kassenpatienten analog berechnet (Praxisregel des Behandlers) | Angabe des Behandlers |
+| ☐ | GOÄ Ä2650 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Entfernung extrem verlagerter/retinierter Zahn, umfangreiche Osteotomie | Analogposition: schwere Osteotomie als GOÄ Ä2650 statt Ost2 (Angabe des Behandlers 2026-09-25) | Angabe des Behandlers 2026-09-25 |
 
 ### Nicht in derselben Sitzung (Konflikt)
 
@@ -196,8 +198,8 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 
 | ☐ | Ziffer | nur neben | Hinweis im Vorschlag | Quelle |
 |---|---|---|---|---|
-| ☐ | BEMA 40 | BEMA 47a, BEMA 48 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern) |
-| ☐ | BEMA 41a | BEMA 47a, BEMA 48 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern) |
+| ☐ | BEMA 40 | BEMA 47a, BEMA 48, GOÄ Ä2650 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern); Ä2650 zählt als Ost1 oder höher: Angabe des Behandlers 2026-09-25 |
+| ☐ | BEMA 41a | BEMA 47a, BEMA 48, GOÄ Ä2650 | Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal | Angabe des Behandlers 2026-09-24 (KZVB intern); Ä2650 zählt als Ost1 oder höher: Angabe des Behandlers 2026-09-25 |
 
 ## Erweiterter Katalog (Saat für Phase 2, wird nicht geladen)
 

@@ -47,7 +47,8 @@ def test_catalog_v1_is_a_mini_catalog(catalog):
     # Nachgefordert: Abszesseroeffnung BEMA Ae161 (Inz1), GOAe Ae2428/Ae2430 (inz1/inz2) und GOZ 2420
     # („phys“, Endo-Zuzahlung je Kanal; Angabe des Behandlers 2026-09-24, aus dem erweiterten Katalog geholt).
     # Weisheitszahn-OP (Angabe des Behandlers 2026-09-24): Nbl2 (BEMA 37 / GOZ 3060), Pla0 (BEMA 51b / GOZ 3090).
-    assert 60 <= len(catalog["entries"]) <= 104
+    # Schwere Osteotomie GOAe Ae2650 (Angabe des Behandlers 2026-09-25).
+    assert 60 <= len(catalog["entries"]) <= 105
 
 
 def test_positions_new_in_v1_are_marked_for_review(catalog):

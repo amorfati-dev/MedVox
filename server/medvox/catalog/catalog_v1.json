@@ -626,10 +626,14 @@
           {
             "system": "BEMA",
             "code": "48"
+          },
+          {
+            "system": "GOÄ",
+            "code": "Ä2650"
           }
         ],
         "note": "Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal",
-        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern)"
+        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern); Ä2650 zählt als Ost1 oder höher: Angabe des Behandlers 2026-09-25"
       },
       "equivalent": [
         {
@@ -679,10 +683,14 @@
           {
             "system": "BEMA",
             "code": "48"
+          },
+          {
+            "system": "GOÄ",
+            "code": "Ä2650"
           }
         ],
         "note": "Zweite Anästhesie nur ab Ost1 abrechenbar (KZVB) – auf 1 gesetzt; mit Osteotomie am Zahn und „lange Dauer“ als Begründung zweimal",
-        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern)"
+        "source": "Angabe des Behandlers 2026-09-24 (KZVB intern); Ä2650 zählt als Ost1 oder höher: Angabe des Behandlers 2026-09-25"
       },
       "equivalent": [
         {
@@ -1519,8 +1527,9 @@
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
       ],
       "review": {
-        "status": "draft",
-        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+        "status": "confirmed",
+        "date": "2026-09-25",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-25"
       }
     },
     {
@@ -1561,8 +1570,9 @@
         "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_Kurzfassung_2026-01-01.pdf"
       ],
       "review": {
-        "status": "draft",
-        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+        "status": "confirmed",
+        "date": "2026-09-25",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-25"
       }
     },
     {
@@ -3632,8 +3642,9 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft",
-        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+        "status": "confirmed",
+        "date": "2026-09-25",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-25"
       }
     },
     {
@@ -3676,8 +3687,9 @@
         "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
       ],
       "review": {
-        "status": "draft",
-        "note": "Angabe des Behandlers 2026-09-24 – neu, bitte prüfen"
+        "status": "confirmed",
+        "date": "2026-09-25",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-25"
       }
     },
     {
@@ -4817,6 +4829,55 @@
       "review": {
         "status": "draft",
         "note": "neu, bitte prüfen"
+      }
+    },
+    {
+      "code": "Ä2650",
+      "system": "GOÄ",
+      "area": "Chirurgie",
+      "title": "Entfernung extrem verlagerter/retinierter Zahn, umfangreiche Osteotomie",
+      "points": 740,
+      "keywords": [
+        "schwere ost",
+        "schwere os",
+        "schwere ost2",
+        "schwere ost 2",
+        "schwere osteotomie",
+        "ä2650"
+      ],
+      "rules": [
+        "amtlich: „Entfernung eines extrem verlagerten oder retinierten Zahnes durch umfangreiche Osteotomie bei gefährdeten anatomischen Nachbarstrukturen“ (GOÄ Anlage, gesetze-im-internet.de, 740 Punkte)",
+        "je Zahn (Entfernung eines extrem verlagerten oder retinierten Zahnes)",
+        "GOÄ Abschnitt L IX (Mund-, Kiefer- und Gesichtschirurgie), für Zahnärzte über § 6 Abs. 2 GOZ",
+        "schwere Osteotomie („schwere Ost“) statt Ost2 (BEMA 48 / GOZ 3040) am selben Zahn, nie beide – Angabe des Behandlers 2026-09-25",
+        "Kassenpatient: als Analogposition berechnet, BEMA hat über Ost2 (48) keine Ziffer – Angabe des Behandlers 2026-09-25",
+        "Privatpatient: ebenfalls GOÄ Ä2650; GOZ 3045 (extrem verlagerter Zahn) wäre die GOZ-Alternative, nicht hinterlegt",
+        "kein Zuschlag 0500–0530 (keine GOZ-Leistung); GOÄ-Zuschlag 443 (500–799 Punkte, Abschnitt C VIII) – nicht im Katalog v1"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "analog": {
+        "patient": "kasse",
+        "note": "Analogposition: schwere Osteotomie als GOÄ Ä2650 statt Ost2 (Angabe des Behandlers 2026-09-25)",
+        "source": "Angabe des Behandlers 2026-09-25"
+      },
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler GOÄ Ä2650 als Analogposition (Feld analog) statt BEMA 48, nicht als Privatleistung neben 48.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+        "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+      ],
+      "review": {
+        "status": "confirmed",
+        "date": "2026-09-25",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-25"
       }
     }
   ]

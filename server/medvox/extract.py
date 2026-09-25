@@ -24,7 +24,7 @@ from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
 from medvox.extract_rules import REMOVAL
-from medvox.extract_surgery import flag_lone_pla0, split_bleeding, wisdom_offers
+from medvox.extract_surgery import SEVERE_OSTEOTOMY, flag_lone_pla0, severe_osteotomy, split_bleeding, wisdom_offers
 from medvox.extract_text import TextContext
 from medvox.extract_xray import bitewing_projections
 from medvox.normalize import ToothRef
@@ -80,6 +80,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     flag_not_beside(catalog, drafts)
     primaries, bleeding = split_bleeding(ctx, [d for d in drafts if not d.planned], notes)
     extra += bleeding
+    primaries = severe_osteotomy(primaries)
     adopt_canal_counts(catalog, primaries)
     if patient == "kasse":
         extra += co_payment_offers(catalog, primaries)
@@ -98,7 +99,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
 
 def carried(entry) -> bool:
     """Anästhesie und Zahnentfernung ohne Zahnnummer im Satz gehören zum zuletzt diktierten Zahn (Diktierpausen)."""
-    return entry.key in ANESTHESIA or entry.code in REMOVAL.get(entry.system, {}).values()
+    return entry.key in ANESTHESIA or entry.key == SEVERE_OSTEOTOMY or entry.code in REMOVAL.get(entry.system, {}).values()
 
 
 def extract(text: str, teeth: list[ToothRef], patient: str = "kasse") -> list[Suggestion]:

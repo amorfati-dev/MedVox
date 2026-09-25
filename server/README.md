@@ -232,7 +232,7 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
   Fundstelle mit mehreren Zähnen bleibt eine BEMA-40 („Infiltration 36, 37“), getrennt diktierte
   Nachbarzähne tragen einen Hinweis. Die wiederholte Kurzform am Zahn („38 L1, L1“, „L1, L1, Ost2 38“)
   zählt zwei, ob die Zahnnummer davor oder dahinter steht. „lange Dauer“ zählt nie hoch, es steht in der Begründung. Ein zweites
-  Mal je Zahn beim Kassenpatienten nur neben Ost1/Ost2 am selben Zahn (Katalogfeld `repeat`, KZVB laut
+  Mal je Zahn beim Kassenpatienten nur neben Ost1/Ost2 oder schwerer Ost (GOÄ Ä2650) am selben Zahn (Katalogfeld `repeat`, KZVB laut
   Behandler), sonst 1 mit Hinweis. Whisper schreibt „i“ als „IP“: an einer Zahnnummer oder mit „X2“ ist das
   I; „X2“ direkt hinter I/IP ist die Anzahl, allein bleibt es die Extraktion 44.
 - **Diktierpausen:** Whisper setzt Punkte („Und zwar 18. IP, X2.“, „Infiltrationsanästhesie. 2x.“): ein Satz
@@ -244,7 +244,8 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
   oder starker Blutung plus Maßnahme (Umschlingungsnaht/Naht/Umstechung, Bipo, Parasorb); eine Maßnahme oder
   die Blutung allein nur als Option zum Antippen, „starke Blutung“ ohne OP gar nicht (Papillenblutung, BMF –
   Hinweis); Pla0 (51b)
-  ohne Osteotomie trägt den Hinweis auf 51a.
+  ohne Osteotomie trägt den Hinweis auf 51a. „schwere Ost“ ist GOÄ Ä2650 (Kasse als Analogposition) und
+  übernimmt eine Ost1/Ost2 am selben Zahn – nie beide.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.

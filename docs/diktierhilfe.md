@@ -49,6 +49,7 @@ Einfügen in Evident immer lesen.
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Eins acht Infiltrationsanästhesie zweimal, lange Dauer" / „drei acht Leitungsanästhesie zweimal" | 40 an 18 (i*2) / 41a an 38 (l1*2) – zweimal nur mit Osteotomie am Zahn |
 | „Ost zwei" (auch „OS2", „Ost, 1") an 18/28/38/48 | 48 (ost2) bzw. 47a (ost1), dazu Ä1 und Zst als Option |
+| „schwere Ost" (auch „schwere OS", „schwere Osteotomie") an einem Zahn | GOÄ Ä2650 statt Ost2 (Kasse als Analogposition, privat ebenfalls Ä2650), nie beides am Zahn |
 | „Nbl zwei" oder „starke Blutung" mit „Umschlingungsnaht", „Naht", „Umstechung", „Bipo" oder „Parasorb" | 37 (nbl2); eine Maßnahme oder die Blutung allein nur als Option zum Antippen |
 | „plastische Deckung", „Kieferhöhle verschlossen" | 51b (pla0), nur neben Osteotomie |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |
@@ -71,7 +72,7 @@ mit Hinweis.
 
 **Weisheitszahn-OP.** Die Anzahl der Anästhesie gehört zum Zahn: „eins acht Infiltrationsanästhesie zweimal"
 ergibt `18,i*2`. Beim Kassenpatienten gibt es die zweite Anästhesie an einem Zahn nur, wenn dort eine
-Osteotomie (Ost1 oder Ost2) erbracht ist, mit „lange Dauer" als Begründung (KZVB, Angabe des Behandlers) –
+Osteotomie (Ost1, Ost2 oder schwere Ost = GOÄ Ä2650) erbracht ist, mit „lange Dauer" als Begründung (KZVB, Angabe des Behandlers) –
 sonst steht sie einmal da, mit Hinweis. „lange Dauer" zählt nie hoch. Whisper schreibt die Kurzform „i"
 oft als „IP" und macht aus Pausen Punkte („Und zwar 18. IP, X2."): „IP" an einem Zahn ist I, „X2" direkt
 dahinter die Anzahl (mit Hinweis, falls die Extraktion X2 gemeint war); „18 X2" allein bleibt die
