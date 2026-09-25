@@ -71,6 +71,13 @@ def test_planned_private_severe_osteotomy_is_only_a_goz3045_hint(dictation):
     assert any(s.code == "Ä2650" and s.planned for s in run(dictation).suggestions)
 
 
+def test_planned_severe_osteotomy_replaces_planned_ost2_at_the_same_tooth():
+    planned = [(s.code, s.teeth) for s in run("38 Extraktion. Geplant: 48 Ost2 schwere Ost.").suggestions if s.planned]
+    assert planned == [("Ä2650", (48,))]
+    private = run("38 Extraktion. Geplant: 48 Ost2 schwere Ost.", "privat")
+    assert not any(s.planned for s in private.suggestions) and SEVERE_PRIVATE in private.notes
+
+
 def test_severe_osteotomy_is_confirmed_in_the_catalog():
     entry = load_catalog().get(*SEVERE_OSTEOTOMY)
     assert entry is not None and entry.points == 740 and entry.equivalents == ()

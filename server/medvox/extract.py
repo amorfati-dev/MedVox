@@ -93,7 +93,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     flag_conflicts(catalog, primaries)
     added = surcharge(catalog, primaries + extra, builder.dictated_surcharges, notes, patient)
     ordered = _ordered(primaries, extra + ([added] if added else []))
-    planned = private_severe([d for d in drafts if d.planned], patient, notes)
+    planned = private_severe(severe_osteotomy([d for d in drafts if d.planned]), patient, notes)
     suggestions = [_suggestion(catalog, ctx, d, patient) for d in apply_limits(ordered + planned)]
     return Extraction(suggestions, list(dict.fromkeys(notes)), patient)
 
