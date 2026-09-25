@@ -90,7 +90,8 @@ bleiben draußen und erscheinen nur in Hinweisen. Schwere Osteotomie („schwere
 2026-09-25) ist GOÄ Ä2650 (740 Punkte, amtlicher Titel in `rules`): BEMA hat über Ost2 (48) nichts, beim
 Kassenpatienten deshalb Analogposition (`analog`), beim Privatpatienten ebenfalls Ä2650 – GOZ 3045 (extrem
 verlagerter Zahn) ist die GOZ-Alternative, aber nicht hinterlegt (kein `equivalent`). Ä2650 übernimmt eine
-Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide.
+Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide, und gilt für Ä1/Zst, Pla0 und Nbl2
+als Osteotomie.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche`, `halbjahr`, `jahr` – oder `unbegrenzt` ohne `count`, wo

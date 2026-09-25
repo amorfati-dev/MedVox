@@ -12,11 +12,12 @@ allein steht nur als Option zum Antippen mit Prüfhinweis da. „starke Blutung�
 Zahnentfernung oder Osteotomie in der Sitzung (etwa „BMF, starke Blutung“ an einer Füllung – Papillenblutung,
 Teil von BEMA 12) fällt mit Hinweis weg.
 
-BEMA 51b (Pla0) gilt laut amtlichem Text nur in Verbindung mit einer Osteotomie; ohne 47a/48 in der
+BEMA 51b (Pla0) gilt laut amtlichem Text nur in Verbindung mit einer Osteotomie; ohne 47a/48/Ä2650 in der
 Sitzung bleibt sie stehen, aber mit Hinweis auf 51a (Pla1, nicht im Katalog v1).
 
 Schwere Osteotomie („schwere Ost“, Angabe des Behandlers 2026-09-25) ist GOÄ Ä2650 – beim Kassenpatienten als
-Analogposition, BEMA hat über Ost2 nichts. Sie ersetzt Ost1/Ost2 am selben Zahn, nie beide in den Vorschlägen.
+Analogposition, BEMA hat über Ost2 nichts. Sie ersetzt Ost1/Ost2 am selben Zahn, nie beide in den Vorschlägen,
+und gilt überall als Osteotomie: Ä1/Zst-Optionen am Weisheitszahn, Pla0 und Nbl2 wie neben Ost1/Ost2.
 """
 
 from __future__ import annotations
@@ -30,7 +31,9 @@ from medvox.extract_rules import REMOVAL
 from medvox.extract_text import TextContext
 
 WISDOM_TEETH = frozenset({18, 28, 38, 48})
-OSTEOTOMY = frozenset({("BEMA", "47a"), ("BEMA", "48"), ("GOZ", "3030"), ("GOZ", "3040")})
+SEVERE_OSTEOTOMY = ("GOÄ", "Ä2650")
+OST1_OST2 = frozenset({("BEMA", "47a"), ("BEMA", "48"), ("GOZ", "3030"), ("GOZ", "3040")})
+OSTEOTOMY = OST1_OST2 | {SEVERE_OSTEOTOMY}
 WISDOM_OPTIONS = {"kasse": (("BEMA", "Ä1"), ("BEMA", "107")), "privat": (("GOÄ", "Ä1"),)}
 WISDOM_NOTE = "ggf. dazu bei Weisheitszahn-OP (Praxisregel des Behandlers) – antippen, wenn erbracht"
 NBL2 = frozenset({("BEMA", "37"), ("GOZ", "3060")})
@@ -41,9 +44,8 @@ NBL2_OPTION = ("Nbl2 ({code}) nur bei starker Blutung mit Umschlingungsnaht/Naht
                "diktiert nur „{words}“; antippen, wenn erbracht")
 LONE_BLEEDING = ("„{word}“ ohne Zahnentfernung/Osteotomie in dieser Sitzung – Nbl2 ({code}) nicht vorgeschlagen; "
                  "Papillenblutung gehört zu den besonderen Maßnahmen (bmf), sonst Nbl1 (BEMA 36 / GOZ 3050) prüfen")
-SEVERE_OSTEOTOMY = ("GOÄ", "Ä2650")
 PLA0 = ("BEMA", "51b")
-PLA0_ALONE = "BEMA 51b (Pla0) nur in Verbindung mit einer Osteotomie (47a/48) – sonst 51a (Pla1) prüfen"
+PLA0_ALONE = "BEMA 51b (Pla0) nur in Verbindung mit einer Osteotomie (47a/48/Ä2650) – sonst 51a (Pla1) prüfen"
 
 
 def wisdom_offers(catalog: Catalog, primaries: list[Draft], patient: str) -> list[Draft]:
@@ -67,7 +69,7 @@ def severe_osteotomy(primaries: list[Draft]) -> list[Draft]:
     severe = {d.fdi: d for d in primaries if d.entry.key == SEVERE_OSTEOTOMY and d.fdi is not None}
     kept = []
     for d in primaries:
-        host = severe.get(d.fdi) if d.entry.key in OSTEOTOMY else None
+        host = severe.get(d.fdi) if d.entry.key in OST1_OST2 else None
         if host is None:
             kept.append(d)
             continue
@@ -87,7 +89,8 @@ def flag_lone_pla0(primaries: list[Draft]) -> None:
 
 def split_bleeding(ctx: TextContext, primaries: list[Draft], notes: list[str]) -> tuple[list[Draft], list[Draft]]:
     """Nbl2 bleibt nur mit „Nbl2“ oder starker Blutung plus Maßnahme; sonst Option (bzw. ohne OP: Hinweis)."""
-    surgery = any(d.entry.code in REMOVAL.get(d.entry.system, {}).values() for d in primaries)
+    surgery = any(d.entry.code in REMOVAL.get(d.entry.system, {}).values() or d.entry.key == SEVERE_OSTEOTOMY
+                  for d in primaries)
     kept, offers = [], []
     for d in primaries:
         if d.entry.key not in NBL2 or any(t.hit.code_word for t in d.hits):

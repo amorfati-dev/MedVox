@@ -10,7 +10,7 @@ from __future__ import annotations
 import pytest
 
 from medvox.extract_catalog import load_catalog
-from medvox.extract_surgery import SEVERE_OSTEOTOMY
+from medvox.extract_surgery import SEVERE_OSTEOTOMY, WISDOM_NOTE
 from tests.test_extract_surgery import main, one, per_tooth, run
 
 
@@ -63,3 +63,26 @@ def test_private_severe_osteotomy_is_goae_without_goz_surcharge():
 def test_severe_osteotomy_is_confirmed_in_the_catalog():
     entry = load_catalog().get(*SEVERE_OSTEOTOMY)
     assert entry is not None and entry.points == 740 and entry.equivalents == ()
+
+
+# --- Ä2650 gilt als Osteotomie: Ä1/Zst, Pla0, Nbl2 wie neben Ost1/Ost2 ----------------------------------
+
+
+def test_severe_osteotomy_at_a_wisdom_tooth_offers_a1_and_zst():
+    for patient, codes in (("kasse", ["Ä1", "107"]), ("privat", ["Ä1"])):
+        result = run("38 schwere Ost.", patient)
+        options = [s for s in result.suggestions if s.addon]
+        assert [s.code for s in options] == codes and all(s.teeth == (38,) and s.reason == WISDOM_NOTE for s in options)
+    assert not any(s.addon for s in run("36 schwere Ost.").suggestions)
+
+
+def test_pla0_beside_severe_osteotomy_needs_no_pla1_hint():
+    assert one(run("28 schwere Ost, plastische Deckung."), "51b", 28).decide == ()
+
+
+def test_bleeding_beside_severe_osteotomy_is_an_nbl2_option_not_papilla_bleeding():
+    result = run("48 schwere Ost, starke Blutung.")
+    option = next(s for s in result.suggestions if s.code == "37")
+    assert option.addon and not any("nicht vorgeschlagen" in n for n in result.notes)
+    assert [(s.code, s.teeth) for s in main(run("48 schwere Ost, starke Blutung, Umschlingungsnaht.")) if s.code == "37"] == [
+        ("37", (48,))]
