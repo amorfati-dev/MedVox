@@ -1,7 +1,7 @@
 """Schwere Osteotomie („schwere Ost“) = GOÄ Ä2650 (Angabe des Behandlers 2026-09-25).
 
 BEMA hat über Ost2 (48) keine Ziffer; beim Kassenpatienten berechnet der Behandler Ä2650 als Analogposition,
-beim Privatpatienten ebenfalls Ä2650 (GOZ 3045 ist nicht hinterlegt). Am selben Zahn nie zusätzlich Ost1/Ost2,
+beim Privatpatienten keine Ziffer, nur Prüfhinweis (GOZ 3045 ist nicht hinterlegt). Am selben Zahn nie zusätzlich Ost1/Ost2,
 und für die zweite Anästhesie (KZVB) zählt Ä2650 als „Ost1 oder höher“.
 """
 
@@ -10,15 +10,16 @@ from __future__ import annotations
 import pytest
 
 from medvox.extract_catalog import load_catalog
-from medvox.extract_surgery import SEVERE_OSTEOTOMY, WISDOM_NOTE
+from medvox.extract_surgery import SEVERE_OSTEOTOMY, SEVERE_PRIVATE, WISDOM_NOTE
 from tests.test_extract_surgery import main, one, per_tooth, run
 
 
 @pytest.mark.parametrize("word", ["schwere Ost", "schwere OS", "Schwere Osteotomie", "schwere Ost 2", "schwere Ost2",
                                   "schwere Ost zwei"])
 def test_severe_osteotomy_spellings(word):
-    for patient in ("kasse", "privat"):
-        assert [(s.system, s.code, s.teeth) for s in main(run(f"38 {word}.", patient))] == [("GOÄ", "Ä2650", (38,))]
+    assert [(s.system, s.code, s.teeth) for s in main(run(f"38 {word}."))] == [("GOÄ", "Ä2650", (38,))]
+    private = run(f"38 {word}.", "privat")
+    assert private.suggestions == [] and private.notes == [SEVERE_PRIVATE]
 
 
 def test_severe_osteotomy_at_38_statutory_allows_a_second_block():
@@ -40,10 +41,11 @@ def test_second_block_without_osteotomy_stays_capped():
 
 
 def test_severe_osteotomy_replaces_ost2_at_the_same_tooth():
-    for patient in ("kasse", "privat"):
-        result = run("38 Ost2, schwere Ost.", patient)
-        assert [(s.code, s.teeth) for s in main(result)] == [("Ä2650", (38,))]
-        assert "↔" not in one(result, "Ä2650", 38).reason  # Ost2 ist kein Paar von Ä2650
+    result = run("38 Ost2, schwere Ost.")
+    assert [(s.code, s.teeth) for s in main(result)] == [("Ä2650", (38,))]
+    assert "↔" not in one(result, "Ä2650", 38).reason  # Ost2 ist kein Paar von Ä2650
+    private = run("38 Ost2, schwere Ost.", "privat")
+    assert private.suggestions == [] and private.notes == [SEVERE_PRIVATE]
 
 
 def test_ost2_at_another_tooth_stays():
@@ -54,10 +56,11 @@ def test_plain_ost2_is_unchanged():
     assert [(s.code, s.teeth) for s in main(run("38 Ost2."))] == [("48", (38,))]
 
 
-def test_private_severe_osteotomy_is_goae_without_goz_surcharge():
+def test_private_severe_osteotomy_is_only_a_goz3045_hint():
     result = run("38 schwere Ost, Leitungsanästhesie.", "privat")
-    assert per_tooth(result) == {38: {"Ä2650": 1, "0100": 1}}
-    assert {s.code for s in result.suggestions}.isdisjoint({"3045", "3040", "0510"})
+    assert per_tooth(result) == {38: {"0100": 1}}
+    assert {s.code for s in result.suggestions}.isdisjoint({"Ä2650", "3045", "3040", "0510"})
+    assert result.notes == [SEVERE_PRIVATE]
 
 
 def test_severe_osteotomy_is_confirmed_in_the_catalog():
@@ -69,10 +72,8 @@ def test_severe_osteotomy_is_confirmed_in_the_catalog():
 
 
 def test_severe_osteotomy_at_a_wisdom_tooth_offers_a1_and_zst():
-    for patient, codes in (("kasse", ["Ä1", "107"]), ("privat", ["Ä1"])):
-        result = run("38 schwere Ost.", patient)
-        options = [s for s in result.suggestions if s.addon]
-        assert [s.code for s in options] == codes and all(s.teeth == (38,) and s.reason == WISDOM_NOTE for s in options)
+    options = [s for s in run("38 schwere Ost.").suggestions if s.addon]
+    assert [s.code for s in options] == ["Ä1", "107"] and all(s.teeth == (38,) and s.reason == WISDOM_NOTE for s in options)
     assert not any(s.addon for s in run("36 schwere Ost.").suggestions)
 
 

@@ -88,8 +88,8 @@ erweiterten Katalog, „plastische Deckung“ gehört jetzt zu 51b (nicht mehr 5
 am 2026-09-25 bestätigt (`review.status` „confirmed“). Pla1 (51a) und Nbl1 (36)
 bleiben draußen und erscheinen nur in Hinweisen. Schwere Osteotomie („schwere Ost“, Angabe des Behandlers
 2026-09-25) ist GOÄ Ä2650 (740 Punkte, amtlicher Titel in `rules`): BEMA hat über Ost2 (48) nichts, beim
-Kassenpatienten deshalb Analogposition (`analog`), beim Privatpatienten ebenfalls Ä2650 – GOZ 3045 (extrem
-verlagerter Zahn) ist die GOZ-Alternative, aber nicht hinterlegt (kein `equivalent`). Ä2650 übernimmt eine
+Kassenpatienten deshalb Analogposition (`analog`). Beim Privatpatienten gibt es keinen Vorschlag, nur den
+Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“ (kein `equivalent`; über GOZ 3045 entscheidet der Behandler). Ä2650 übernimmt eine
 Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide, und gilt für Ä1/Zst, Pla0 und Nbl2
 als Osteotomie.
 

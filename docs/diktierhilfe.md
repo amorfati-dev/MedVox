@@ -49,7 +49,7 @@ Einfügen in Evident immer lesen.
 | „Zahn vier sechs Extraktion" / „Zahn vier acht Osteotomie" | 44 / 47a |
 | „Eins acht Infiltrationsanästhesie zweimal, lange Dauer" / „drei acht Leitungsanästhesie zweimal" | 40 an 18 (i*2) / 41a an 38 (l1*2) – zweimal nur mit Osteotomie am Zahn |
 | „Ost zwei" (auch „OS2", „Ost, 1") an 18/28/38/48 | 48 (ost2) bzw. 47a (ost1), dazu Ä1 und Zst als Option |
-| „schwere Ost" (auch „schwere OS", „schwere Osteotomie") an einem Zahn | GOÄ Ä2650 statt Ost2 (Kasse als Analogposition, privat ebenfalls Ä2650), nie beides am Zahn; an 18/28/38/48 dazu Ä1 und Zst als Option |
+| „schwere Ost" (auch „schwere OS", „schwere Osteotomie") an einem Zahn | Kasse: GOÄ Ä2650 als Analogposition statt Ost2, nie beides am Zahn; an 18/28/38/48 dazu Ä1 und Zst als Option. Privat: keine Ziffer, nur Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“ |
 | „Nbl zwei" oder „starke Blutung" mit „Umschlingungsnaht", „Naht", „Umstechung", „Bipo" oder „Parasorb" | 37 (nbl2); eine Maßnahme oder die Blutung allein nur als Option zum Antippen |
 | „plastische Deckung", „Kieferhöhle verschlossen" | 51b (pla0), nur neben Osteotomie |
 | „Oberflächlichen Abszess drei sechs eröffnet" / „Inz eins" | Ä161 (privat GOÄ Ä2428) |

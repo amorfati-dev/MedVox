@@ -244,8 +244,9 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
   oder starker Blutung plus Maßnahme (Umschlingungsnaht/Naht/Umstechung, Bipo, Parasorb); eine Maßnahme oder
   die Blutung allein nur als Option zum Antippen, „starke Blutung“ ohne OP gar nicht (Papillenblutung, BMF –
   Hinweis); Pla0 (51b)
-  ohne Osteotomie trägt den Hinweis auf 51a. „schwere Ost“ ist GOÄ Ä2650 (Kasse als Analogposition) und
+  ohne Osteotomie trägt den Hinweis auf 51a. „schwere Ost“ ist beim Kassenpatienten GOÄ Ä2650 (Analogposition) und
   übernimmt eine Ost1/Ost2 am selben Zahn – nie beide; sie gilt als Osteotomie (Ä1/Zst-Option, Pla0, Nbl2).
+  Beim Privatpatienten keine Ziffer, nur der Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.

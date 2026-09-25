@@ -80,7 +80,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     flag_not_beside(catalog, drafts)
     primaries, bleeding = split_bleeding(ctx, [d for d in drafts if not d.planned], notes)
     extra += bleeding
-    primaries = severe_osteotomy(primaries)
+    primaries = severe_osteotomy(primaries, patient, notes)
     adopt_canal_counts(catalog, primaries)
     if patient == "kasse":
         extra += co_payment_offers(catalog, primaries)
