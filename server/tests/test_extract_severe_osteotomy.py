@@ -63,6 +63,14 @@ def test_private_severe_osteotomy_is_only_a_goz3045_hint():
     assert result.notes == [SEVERE_PRIVATE]
 
 
+@pytest.mark.parametrize("dictation", ["Nächste Sitzung 38 schwere Ost.", "38 Extraktion. Geplant: 48 schwere Ost."])
+def test_planned_private_severe_osteotomy_is_only_a_goz3045_hint(dictation):
+    result = run(dictation, "privat")
+    assert all(s.code != "Ä2650" for s in result.suggestions)
+    assert SEVERE_PRIVATE in result.notes
+    assert any(s.code == "Ä2650" and s.planned for s in run(dictation).suggestions)
+
+
 def test_severe_osteotomy_is_confirmed_in_the_catalog():
     entry = load_catalog().get(*SEVERE_OSTEOTOMY)
     assert entry is not None and entry.points == 740 and entry.equivalents == ()

@@ -65,10 +65,8 @@ def wisdom_offers(catalog: Catalog, primaries: list[Draft], patient: str) -> lis
     return offers
 
 
-def severe_osteotomy(primaries: list[Draft], patient: str, notes: list[str]) -> list[Draft]:
-    """Ä2650 an einem Zahn übernimmt die Fundstellen einer Osteotomie (47a/48 bzw. 3030/3040) desselben Zahns.
-
-    Privatpatient: keine Ziffer, nur Prüfhinweis (GOZ 3045 entscheidet der Behandler, nicht hinterlegt)."""
+def severe_osteotomy(primaries: list[Draft]) -> list[Draft]:
+    """Ä2650 an einem Zahn übernimmt die Fundstellen einer Osteotomie (47a/48 bzw. 3030/3040) desselben Zahns."""
     severe = {d.fdi: d for d in primaries if d.entry.key == SEVERE_OSTEOTOMY and d.fdi is not None}
     kept = []
     for d in primaries:
@@ -78,10 +76,15 @@ def severe_osteotomy(primaries: list[Draft], patient: str, notes: list[str]) -> 
             continue
         absorbed = [replace(t, hit=replace(t.hit, via=None)) for t in d.hits]  # kein Paar Ost2 ↔ Ä2650 anzeigen
         host.hits = sorted(host.hits + [t for t in absorbed if t not in host.hits], key=lambda t: t.hit.start)
-    if patient == "privat" and any(d.entry.key == SEVERE_OSTEOTOMY for d in kept):
-        notes.append(SEVERE_PRIVATE)
-        kept = [d for d in kept if d.entry.key != SEVERE_OSTEOTOMY]
     return kept
+
+
+def private_severe(drafts: list[Draft], patient: str, notes: list[str]) -> list[Draft]:
+    """Privatpatient: Ä2650 ist keine Ziffer, nur Prüfhinweis (GOZ 3045 entscheidet der Behandler, nicht hinterlegt)."""
+    if patient != "privat" or not any(d.entry.key == SEVERE_OSTEOTOMY for d in drafts):
+        return drafts
+    notes.append(SEVERE_PRIVATE)
+    return [d for d in drafts if d.entry.key != SEVERE_OSTEOTOMY]
 
 
 def flag_lone_pla0(primaries: list[Draft]) -> None:
