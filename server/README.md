@@ -246,7 +246,8 @@ Pla0 nur mit Osteotomie), `extract_rules.py` (die festen Fachtabellen zum Nachle
   Hinweis); Pla0 (51b)
   ohne Osteotomie trägt den Hinweis auf 51a. „schwere Ost“ ist beim Kassenpatienten GOÄ Ä2650 (Analogposition) und
   übernimmt eine Ost1/Ost2 am selben Zahn – nie beide; sie gilt als Osteotomie (Ä1/Zst-Option, Pla0, Nbl2).
-  Beim Privatpatienten keine Ziffer, nur der Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“.
+  Beim Privatpatienten ist sie GOZ 3045 (767 Punkte, gleiche Regeln) und bringt wie 3040 den Zuschlag nach
+  Punktzahl (0510); eine diktierte Ziffer des anderen Systems (Ä2650 privat, 3045 Kasse) wird umgestellt.
   Danach gilt die vom Behandler bestätigte Höchstzahl aus dem Katalog (`max_per` mit
   `max_per_status` „bestaetigt“, bisher nur BEMA 12): „Kofferdam gelegt“ an 36 und an 37 bleibt
   **einmal** BEMA 12 (je Kieferhälfte oder Frontzahnbereich), die Begründung nennt die Begrenzung.

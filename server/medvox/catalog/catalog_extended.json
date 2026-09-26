@@ -1635,41 +1635,6 @@
       }
     },
     {
-      "code": "3045",
-      "system": "GOZ",
-      "area": "Chirurgie",
-      "title": "Osteotomie, extrem verlagert/retiniert (umfangreich)",
-      "points": 767,
-      "keywords": [
-        "extrem verlagert",
-        "extrem retiniert",
-        "umfangreiche osteotomie",
-        "3045",
-        "nervnah"
-      ],
-      "rules": [
-        "bei gefährdeten anatomischen Nachbarstrukturen (z. B. N. alveolaris inferior)"
-      ],
-      "zuzahlung": {
-        "allowed": false,
-        "basis": [
-          "48"
-        ],
-        "note": "Extrem verlagerter Zahn ist beim Kassenpatienten BEMA 48; keine private Zuzahlung.",
-        "sources": [
-          "https://www.kzvbw.de/wp-content/uploads/Gegenueberstellung-der-BEMA-GOZ-final_29-03-2022.pdf",
-          "https://abrechnungsmappe.kzvb.de/leistungskataloge/schnittstellen-bema-und-goz/regularien-zur-vertragszahnaerztlichen-versorgung/zuzahlung-sachleistung/ze-versorgung"
-        ]
-      },
-      "sources": [
-        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
-        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf"
-      ],
-      "review": {
-        "status": "draft"
-      }
-    },
-    {
       "code": "3050",
       "system": "GOZ",
       "area": "Chirurgie",

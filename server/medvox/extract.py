@@ -24,7 +24,7 @@ from medvox.extract_limits import apply_limits
 from medvox.extract_match import find_hits
 from medvox.extract_patient import PATIENT_TYPES, co_payment_basis, kind, pair_flags, pair_label, settle, translate
 from medvox.extract_rules import REMOVAL
-from medvox.extract_surgery import (SEVERE_OSTEOTOMY, flag_lone_pla0, private_severe, severe_osteotomy, split_bleeding,
+from medvox.extract_surgery import (SEVERE, flag_lone_pla0, severe_entry, severe_osteotomy, split_bleeding,
                                     wisdom_offers)
 from medvox.extract_text import TextContext
 from medvox.extract_xray import bitewing_projections
@@ -73,7 +73,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
         tagged.append(Tagged(hit, teeth, ctx.plan_marker(hit.start),
                              ctx.sentence(hit.start)))
     builder = Builder(catalog, ctx)
-    drafts = drop_included(builder.build(translate(catalog, tagged, patient)), notes)
+    drafts = drop_included(builder.build(severe_entry(catalog, translate(catalog, tagged, patient), patient)), notes)
     pair_flags(catalog, drafts)
     drafts, extra = settle(catalog, drafts, patient, notes)
     if patient == "privat":
@@ -81,7 +81,7 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     flag_not_beside(catalog, drafts)
     primaries, bleeding = split_bleeding(ctx, [d for d in drafts if not d.planned], notes)
     extra += bleeding
-    primaries = private_severe(severe_osteotomy(primaries), patient, notes)
+    primaries = severe_osteotomy(primaries)
     adopt_canal_counts(catalog, primaries)
     if patient == "kasse":
         extra += co_payment_offers(catalog, primaries)
@@ -93,14 +93,14 @@ def analyze(text: str, teeth: list[ToothRef], patient: str = "kasse") -> Extract
     flag_conflicts(catalog, primaries)
     added = surcharge(catalog, primaries + extra, builder.dictated_surcharges, notes, patient)
     ordered = _ordered(primaries, extra + ([added] if added else []))
-    planned = private_severe(severe_osteotomy([d for d in drafts if d.planned]), patient, notes)
+    planned = severe_osteotomy([d for d in drafts if d.planned])
     suggestions = [_suggestion(catalog, ctx, d, patient) for d in apply_limits(ordered + planned)]
     return Extraction(suggestions, list(dict.fromkeys(notes)), patient)
 
 
 def carried(entry) -> bool:
     """Anästhesie und Zahnentfernung ohne Zahnnummer im Satz gehören zum zuletzt diktierten Zahn (Diktierpausen)."""
-    return entry.key in ANESTHESIA or entry.key == SEVERE_OSTEOTOMY or entry.code in REMOVAL.get(entry.system, {}).values()
+    return entry.key in ANESTHESIA or entry.key in SEVERE or entry.code in REMOVAL.get(entry.system, {}).values()
 
 
 def extract(text: str, teeth: list[ToothRef], patient: str = "kasse") -> list[Suggestion]:
