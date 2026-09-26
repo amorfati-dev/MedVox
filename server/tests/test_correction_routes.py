@@ -89,6 +89,13 @@ def test_catalog_for_privat_is_goz_and_goae_only(logged_in: TestClient) -> None:
     assert logged_in.get(CATALOG, params={"patient_type": "egal"}).status_code == 422
 
 
+def test_catalog_offers_severe_osteotomy_only_in_the_patients_system(logged_in: TestClient) -> None:
+    """Schwere Ost: Kasse nur Ä2650, Privat nur GOZ 3045 – nie Ä2650 beim Privatpatienten (§ 6 Abs. 2 GOZ)."""
+    for patient, have, never in (("privat", "3045", "Ä2650"), ("kasse", "Ä2650", "3045")):
+        codes = {e["code"] for e in logged_in.get(CATALOG, params={"patient_type": patient}).json()["entries"]}
+        assert have in codes and never not in codes, patient
+
+
 def test_catalog_marks_counted_positions_for_the_stepper(logged_in: TestClient) -> None:
     listed = {e["code"]: e for e in logged_in.get(CATALOG, params={"patient_type": "kasse"}).json()["entries"]}
     for code in ("32", "35", "2400"):  # je Kanal

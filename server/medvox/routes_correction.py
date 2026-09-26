@@ -24,6 +24,7 @@ from medvox.auth import require_session
 from medvox.extract_catalog import CATALOG_PATH, load_catalog
 from medvox.extract_patient import kind
 from medvox.extract_rules import ROOT_PAIRS
+from medvox.extract_surgery import SEVERE, SEVERE_OSTEOTOMY
 from medvox.routes_transcribe import TranscribeResponse, build_response
 
 log = logging.getLogger("medvox.correction")
@@ -109,7 +110,8 @@ def catalog(patient_type: PatientType = "kasse") -> CatalogOut:
     entries = []
     for e in cat.entries:
         k = kind(cat, e, patient_type)
-        if k == _FOREIGN[patient_type]:
+        # schwere Ost nur im System des Patienten: Privat nie Ä2650, sondern 3045 (wie `severe_entry`)
+        if k == _FOREIGN[patient_type] or (e.key in SEVERE and e.key != SEVERE_OSTEOTOMY[patient_type]):
             continue
         counted, most = cat.stepper(e)
         entries.append(CatalogItem(
