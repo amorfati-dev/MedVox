@@ -77,15 +77,21 @@ sondern markiert beide Positionen; liegen ihre Zähne in verschiedenen Quadrante
 mögliche Ausnahme. `validate.py` prüft: `analog` nur ohne BEMA-Paar und ohne erlaubte Zuzahlung, Konfliktziel
 in derselben Datei, und das Paar einer Position trägt denselben Konflikt mit dem Paar des Ziels. Beide
 erscheinen in `PRUEFLISTE.md`, ebenso `repeat`: BEMA 40/41a ein zweites Mal je Zahn nur neben Ost1/Ost2
-(47a/48) am selben Zahn (KZVB, Angabe des Behandlers 2026-09-24; der Extraktor setzt sonst auf 1 mit Hinweis,
+(47a/48) oder GOÄ Ä2650 am selben Zahn (KZVB, Angabe des Behandlers 2026-09-24, Ä2650 als „Ost1 oder höher“ 2026-09-25; der Extraktor setzt sonst auf 1 mit Hinweis,
 `extract_anesthesia.py`), geprüft von `praxis.py` (Ziel in derselben Datei).
 
 Weisheitszahn-OP (Angabe des Behandlers 2026-09-24): Nbl2 (BEMA 37 = GOZ 3060, Stillung einer übermäßigen
 Blutung durch Abbinden/Umstechen/Knochenbolzung, 29 bzw. 140 Punkte) und Pla0 (BEMA 51b = GOZ 3090,
 plastischer Verschluss einer eröffneten Kieferhöhle in Verbindung mit Osteotomie, 40 bzw. 370 Punkte) stehen
 mit den Wörtern des Behandlers in v1 (KZBV-Gesamtfassung 2026-01-01, GOZ Anlage 1); 3060 und 51b kamen aus dem
-erweiterten Katalog, „plastische Deckung“ gehört jetzt zu 51b (nicht mehr 51a). Pla1 (51a) und Nbl1 (36)
-bleiben draußen und erscheinen nur in Hinweisen.
+erweiterten Katalog, „plastische Deckung“ gehört jetzt zu 51b (nicht mehr 51a). Beide Paare hat der Behandler
+am 2026-09-25 bestätigt (`review.status` „confirmed“). Pla1 (51a) und Nbl1 (36)
+bleiben draußen und erscheinen nur in Hinweisen. Schwere Osteotomie („schwere Ost“, Angabe des Behandlers
+2026-09-25) ist GOÄ Ä2650 (740 Punkte, amtlicher Titel in `rules`): BEMA hat über Ost2 (48) nichts, beim
+Kassenpatienten deshalb Analogposition (`analog`). Beim Privatpatienten gibt es keinen Vorschlag, nur den
+Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“ (kein `equivalent`; über GOZ 3045 entscheidet der Behandler). Ä2650 übernimmt eine
+Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide, und gilt für Ä1/Zst, Pla0 und Nbl2
+als Osteotomie.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche`, `halbjahr`, `jahr` – oder `unbegrenzt` ohne `count`, wo
@@ -115,7 +121,7 @@ nach der BEMA-Definition (einwurzelig: Frontzähne, OK 5er, UK 4er und 5er; mehr
 - BEMA: KZBV, Gesamt- und Kurzfassung, Stand 1. Januar 2026 (13a–d bereits mit den Werten nach dem
   Amalgam-Beschluss; 13e–h existieren nicht mehr).
 - GOZ: GOZ 2012, Anlage 1, amtlicher Text auf gesetze-im-internet.de, gegengeprüft mit dem BZÄK-PDF.
-- GOÄ: Anlage Gebührenverzeichnis auf gesetze-im-internet.de (Ä1, Ä5, Ä5000, Ä5002, Ä5004); Steigerungsfaktoren § 5 GOÄ (`go__1982/__5.html`).
+- GOÄ: Anlage Gebührenverzeichnis auf gesetze-im-internet.de (Ä1, Ä5, Ä5000, Ä5002, Ä5004, Ä2428, Ä2430, Ä2650); Steigerungsfaktoren § 5 GOÄ (`go__1982/__5.html`).
 - Punktwerte (§ 5): GOZ 5,62421 Cent, GOÄ 5,82873 Cent (in `meta.punktwert_cent`).
   BEMA-Punktwerte sind regional und stehen nicht im Katalog.
 
