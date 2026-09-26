@@ -142,6 +142,7 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 | ☐ | nein | GOZ 3020 **(neu, bitte prüfen)** | Extraktion, tief frakturierter/zerstörter Zahn | 45 | Kassenleistung BEMA 45 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3030 | Osteotomie (Zahn/Implantat) | 47a | Kassenleistung BEMA 47a – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3040 | Osteotomie, retinierter/verlagerter Zahn | 48 | Kassenleistung BEMA 48 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
+| ☐ | nein | GOZ 3045 **(bestätigt: Angabe des Behandlers 2026-09-26)** | Osteotomie, extrem verlagerter/retinierter Zahn (umfangreich) | – | Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler die schwere Osteotomie als GOÄ Ä2650 (Analogposition), nicht als Privatleistung neben BEMA 48. | [Q1] |
 | ☐ | nein | GOZ 3060 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Blutstillung durch Umstechen/Abbinden/Knochenbolzung | 37 | Kassenleistung BEMA 37 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3090 **(bestätigt: Angabe des Behandlers 2026-09-25)** | Plastischer Verschluss einer eröffneten Kieferhöhle | 51b | Kassenleistung BEMA 51a/51b – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3290 | Kontrolle nach chirurgischem Eingriff | 38 | Umstritten: Kontrolle ohne Nachbehandlung hat kein BEMA-Pendant, ist aber medizinisch notwendig; keine Quelle für private Vereinbarung gefunden. | [Q3] [Q1] |
@@ -260,7 +261,6 @@ Erzeugt aus `catalog_v1.json` und `catalog_extended.json` mit `make catalog-revi
 
 | ☐ | Zuzahlung | Ziffer | Kurztext | BEMA-Bezug | übliche Grundlage | Quelle |
 |---|---|---|---|---|---|---|
-| ☐ | nein | GOZ 3045 | Osteotomie, extrem verlagert/retiniert (umfangreich) | 48 | Extrem verlagerter Zahn ist beim Kassenpatienten BEMA 48; keine private Zuzahlung. | [Q3] [Q5] |
 | ☐ | nein | GOZ 3050 | Blutstillung, als selbstständige Leistung | 36 | Kassenleistung BEMA 36 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 | ☐ | nein | GOZ 3070 | Exzision Schleimhaut/Granulationsgewebe | 49 | Kassenleistung BEMA 49 – privat nicht zusätzlich berechenbar (Zuzahlungsverbot). | [Q3] [Q5] |
 

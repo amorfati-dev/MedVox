@@ -88,10 +88,12 @@ erweiterten Katalog, „plastische Deckung“ gehört jetzt zu 51b (nicht mehr 5
 am 2026-09-25 bestätigt (`review.status` „confirmed“). Pla1 (51a) und Nbl1 (36)
 bleiben draußen und erscheinen nur in Hinweisen. Schwere Osteotomie („schwere Ost“, Angabe des Behandlers
 2026-09-25) ist GOÄ Ä2650 (740 Punkte, amtlicher Titel in `rules`): BEMA hat über Ost2 (48) nichts, beim
-Kassenpatienten deshalb Analogposition (`analog`). Beim Privatpatienten gibt es keinen Vorschlag, nur den
-Hinweis „GOZ 3045 prüfen – noch nicht hinterlegt“ (kein `equivalent`; über GOZ 3045 entscheidet der Behandler). Ä2650 übernimmt eine
-Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide, und gilt für Ä1/Zst, Pla0 und Nbl2
-als Osteotomie.
+Kassenpatienten deshalb Analogposition (`analog`). Beim Privatpatienten ist sie GOZ 3045 (767 Punkte, amtlicher
+Titel in `rules`, Angabe des Behandlers 2026-09-26, aus dem erweiterten Katalog geholt): dieselbe Leistung steht in
+der GOZ, § 6 Abs. 2 GOZ öffnet nur GOÄ-Leistungen außerhalb der GOZ. Beide tragen dieselben Wörter, aber kein
+`equivalent` (Paare gibt es nur BEMA ↔ GOZ/GOÄ); der Patiententyp wählt in `extract_surgery.severe_entry`. Die
+schwere Ost übernimmt eine Ost1/Ost2 am selben Zahn (`extract_surgery.severe_osteotomy`), nie beide, gilt für
+Ä1/Zst, Pla0 und Nbl2 als Osteotomie, und 3045 bestimmt privat den Zuschlag 0500–0530 wie jede GOZ-Chirurgie.
 
 Höchstzahl (`max_per`): `count`-mal je `unit` – `sitzung` (ein Diktat ist eine Sitzung), `kieferhaelfte`
 (je Kieferhälfte oder Frontzahnbereich), `zahn`, `kanal`, `flaeche`, `halbjahr`, `jahr` – oder `unbegrenzt` ohne `count`, wo

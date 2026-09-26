@@ -3604,6 +3604,51 @@
       }
     },
     {
+      "code": "3045",
+      "system": "GOZ",
+      "area": "Chirurgie",
+      "title": "Osteotomie, extrem verlagerter/retinierter Zahn (umfangreich)",
+      "points": 767,
+      "keywords": [
+        "schwere ost",
+        "schwere os",
+        "schwere ost2",
+        "schwere ost 2",
+        "schwere osteotomie",
+        "3045",
+        "drei null vier fünf"
+      ],
+      "rules": [
+        "amtlich: „Entfernen eines extrem verlagerten und/oder extrem retinierten Zahnes durch umfangreiche Osteotomie bei gefährdeten anatomischen Nachbarstrukturen“ (GOZ Anlage 1, gesetze-im-internet.de, 767 Punkte)",
+        "je Zahn (Entfernen eines extrem verlagerten und/oder extrem retinierten Zahnes)",
+        "schwere Osteotomie („schwere Ost“) beim Privatpatienten statt Ost2 (GOZ 3040) am selben Zahn, nie beide – Angabe des Behandlers 2026-09-26",
+        "Kassenpatient: GOÄ Ä2650 als Analogposition (BEMA hat über Ost2 nichts) – Angabe des Behandlers 2026-09-25",
+        "Privatpatient: GOZ 3045, nicht GOÄ Ä2650 – § 6 Abs. 2 GOZ öffnet nur GOÄ-Leistungen, die nicht in der GOZ stehen",
+        "Zuschlag nach Punktzahl wie bei 3040 (767 Punkte: 0510)"
+      ],
+      "max_per": {
+        "unit": "unbegrenzt"
+      },
+      "zuzahlung": {
+        "allowed": false,
+        "basis": [],
+        "note": "Keine Zuzahlung: beim Kassenpatienten berechnet der Behandler die schwere Osteotomie als GOÄ Ä2650 (Analogposition), nicht als Privatleistung neben BEMA 48.",
+        "sources": [
+          "https://www.kzbv.de/wp-content/uploads/KZBV_BEMA_2026-01-01.pdf"
+        ]
+      },
+      "sources": [
+        "https://www.gesetze-im-internet.de/goz_1987/anlage_1.html",
+        "https://www.bzaek.de/fileadmin/PDFs/GOZ/gebuehrenordnung_fuer_zahnaerzte_2012.pdf",
+        "https://www.gesetze-im-internet.de/goz_1987/__6.html"
+      ],
+      "review": {
+        "status": "confirmed",
+        "date": "2026-09-26",
+        "note": "bestätigt: Angabe des Behandlers 2026-09-26"
+      }
+    },
+    {
       "code": "3060",
       "system": "GOZ",
       "area": "Chirurgie",
@@ -4851,7 +4896,7 @@
         "GOÄ Abschnitt L IX (Mund-, Kiefer- und Gesichtschirurgie), für Zahnärzte über § 6 Abs. 2 GOZ",
         "schwere Osteotomie („schwere Ost“) statt Ost2 (BEMA 48 / GOZ 3040) am selben Zahn, nie beide – Angabe des Behandlers 2026-09-25",
         "Kassenpatient: als Analogposition berechnet, BEMA hat über Ost2 (48) keine Ziffer – Angabe des Behandlers 2026-09-25",
-        "Privatpatient: kein Vorschlag, nur Hinweis „GOZ 3045 prüfen“ – GOZ 3045 (extrem verlagerter Zahn) entscheidet der Behandler, nicht hinterlegt; Ä2650 privat war nur abgeleitet, nicht Angabe des Behandlers",
+        "Privatpatient: nicht Ä2650, sondern GOZ 3045 (dieselbe Leistung steht in der GOZ, § 6 Abs. 2 GOZ öffnet nur GOÄ-Leistungen außerhalb der GOZ) – Angabe des Behandlers 2026-09-26",
         "kein Zuschlag 0500–0530 (keine GOZ-Leistung); GOÄ-Zuschlag 443 (500–799 Punkte, Abschnitt C VIII) – nicht im Katalog v1"
       ],
       "max_per": {
